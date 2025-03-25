@@ -1,0 +1,32 @@
+{{define "navigation"}}
+<button
+  onclick="toggleNav()"
+  class="lg:hidden p-4 bg-bgSecondary text-textPrimary"
+>
+  <svg
+    class="w-6 h-6"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M4 6h16M4 12h16m-7 6h7"
+    />
+  </svg>
+</button>
+
+<nav
+  id="navbar"
+  class="hidden lg:flex flex-col lg:flex-row w-full lg:w-auto bg-bgSecondary lg:bg-transparent"
+>
+  <ul
+    class="flex flex-col lg:flex-row justify-center lg:space-x-12 space-y-4 lg:space-y-0 px-4 lg:px-0"
+  >
+    {{template "nav-other" .}}
+  </ul>
+</nav>
+{{end}}

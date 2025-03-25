@@ -1,0 +1,26 @@
+{{define "header"}}
+
+<header class="p-4 bg-bgSecondary rounded-b-md">
+  <div class="relative flex items-center justify-between mb-4 bg-bgSecondary">
+    <!-- Left: Logo -->
+    {{template "app-name"}}
+
+    <!-- Center: Navigation -->
+    {{template "navigation"}}
+
+    <!-- Right: Settings -->
+    {{template "theme-swap"}}
+  </div>
+</header>
+<script>
+  function toggleNav() {
+    const navbar = document.getElementById("navbar");
+    navbar.classList.toggle("hidden");
+  }
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    dropdown.classList.toggle("hidden");
+  }
+</script>
+<script src="/static/js/theme.js"></script>
+{{end}}

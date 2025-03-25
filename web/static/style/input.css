@@ -1,0 +1,110 @@
+@config "tailwind.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bgPrimary: rgb(16, 16, 16);
+    --color-bgSecondary: rgb(40, 40, 40);
+    --color-bgTertiary: rgb(30, 30, 30);
+    --color-bgInverted: rgb(225, 225, 225);
+    --color-textPrimary: rgb(255, 255, 255);
+    --color-textSecondary: rgb(235, 235, 235);
+    --color-textMuted: rgb(200, 200, 200);
+    --color-textInverted: rgb(16, 16, 16);
+    --color-textHighlighted: rgb(149, 40, 244);
+  }
+  :root[data-theme="light"] {
+    --color-bgPrimary: rgb(230, 230, 230);
+    --color-bgSecondary: rgb(200, 200, 200);
+    --color-bgTertiary: rgb(60, 60, 60);
+    --color-bgInverted: rgb(80, 80, 80);
+    --color-textPrimary: rgb(0, 0, 0);
+    --color-textSecondary: rgb(20, 20, 20);
+    --color-textMuted: rgb(100, 100, 100);
+    --color-textInverted: rgb(255, 255, 255);
+    --color-textHighlighted: rgb(149, 40, 244);
+  }
+  :root[data-theme="midnight"] {
+    --color-bgPrimary: rgb(25, 24, 48);
+    --color-bgSecondary: rgb(31, 31, 65);
+    --color-bgTertiary: rgb(250, 208, 0);
+    --color-bgInverted: rgb(103, 241, 243);
+    --color-textPrimary: rgb(177, 174, 255);
+    --color-textMuted: rgb(59, 72, 143);
+    --color-textInverted: rgb(236, 208, 0);
+    --color-textHighlighted: rgb(250, 208, 0);
+  }
+  :root[data-theme="lava"] {
+    --color-bgPrimary: rgb(57, 0, 0);
+    --color-bgSecondary: rgb(97, 0, 0);
+    --color-bgTertiary: rgb(255, 114, 154);
+    --color-bgInverted: rgb(0, 0, 0);
+    --color-textPrimary: rgb(241, 39, 39);
+    --color-textMuted: rgb(76, 76, 76);
+    --color-textInverted: rgb(236, 208, 0);
+    --color-textHighlighted: rgb(255, 114, 154);
+  }
+  :root[data-theme="solar"] {
+    --color-bgPrimary: rgb(0, 43, 54);
+    --color-bgSecondary: rgb(7, 54, 56);
+    --color-bgTertiary: rgb(60, 60, 60);
+    --color-bgInverted: rgb(115, 174, 99);
+    --color-textPrimary: rgb(55, 148, 255);
+    --color-textMuted: rgb(102, 241, 255);
+    --color-textInverted: rgb(236, 208, 0);
+    --color-textHighlighted: rgb(149, 40, 244);
+  }
+
+  /* Webkit scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent rounded-md;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-transparent rounded-md;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-bgPrimary bg-opacity-30;
+  }
+
+  /* Firefox scrollbar styles */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  *:hover {
+    scrollbar-color: theme("colors.bgPrimary / 30%") transparent;
+  }
+
+  /* Ensure that hover effects and responsive layouts are smooth */
+  .group:hover .group-hover\:block {
+    display: block;
+  }
+
+  /* Optional: Transition for dropdowns */
+  .transition-dropdown {
+    transition: all 0.3s ease-in-out;
+  }
+}
+/* Custom CSS for mobile dropdown alignment */
+@media (max-width: 1024px) {
+  #navbar {
+    position: absolute; /* Ensure dropdown is relative to the header */
+    top: 100%; /* Position it below the header */
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background-color: var(--color-bgSecondary); /* Matches your theme */
+    padding: 1rem;
+    border-top: 1px solid var(--color-bgInverted);
+  }
+}

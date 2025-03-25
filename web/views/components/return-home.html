@@ -1,0 +1,12 @@
+{{define "returnHome"}}
+<button
+  href="/"
+  hx-get="/"
+  hx-push-url="/"
+  hx-swap="outerHTML"
+  hx-target="body"
+  class="inline-block border-bgInverted border-2 p-4 my-4 mt-4 text-sm font-bold align-baseline rounded-md bg-bgSecondary hover:bg-bgTertiary hover:text-textMuted"
+>
+  Return Home
+</button>
+{{end}}

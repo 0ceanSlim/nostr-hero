@@ -1,0 +1,58 @@
+{{define "nav-other"}}
+<li class="relative rounded-md group bg-bgSecondary text-textPrimary">
+  <a
+    href="#"
+    onclick="toggleDropdown('otherDropdown')"
+    class="flex items-center justify-between p-2 space-x-2 hover:rounded-md hover:text-textHighlighted"
+  >
+    <div class="w-12 h-12 md:w-14 md:h-14">
+      <img
+        class="object-contain w-full h-full"
+        src="/static/img/otherstuff.png"
+        alt="otherstuff icon"
+      />
+    </div>
+    <span class="text-sm md:text-base">Other Stuff</span>
+    <svg
+      class="w-4 h-4 ml-2"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  </a>
+
+  <!-- Dropdown container -->
+  <div
+    id="otherDropdown"
+    class="absolute left-0 hidden mt-2 border rounded-md shadow-lg lg:left-auto lg:group-hover:block lg:m-2 border-bgInverted bg-bgSecondary"
+    style="min-width: 12rem; z-index: 10"
+  >
+    <!-- Pseudo-element for hover gap -->
+    <div class="absolute w-full h-3 -top-3"></div>
+
+    <ul class="py-2">
+      <li>
+        <a
+          href="/"
+          hx-push-url="/"
+          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          hx-trigger="click"
+          hx-get="/"
+          hx-swap="outerHTML"
+          hx-target="body"
+          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
+          Registry
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>
+{{end}}
