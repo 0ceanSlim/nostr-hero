@@ -1,0 +1,32 @@
+{{define "view"}}
+<h1 class="mt-4 text-2xl font-bold text-center">Character Registry</h1>
+<div class="container p-4 mx-auto">
+  {{ range .CustomData.registry }}
+  <div class="p-4 mb-4 text-white bg-gray-800 rounded shadow-md">
+    <h2 class="text-xl font-bold">npub: {{ .npub }}</h2>
+    <p><strong>Public Key:</strong> {{ .pubkey }}</p>
+    <p><strong>Race:</strong> {{ .character.race }}</p>
+    <p><strong>Class:</strong> {{ .character.class }}</p>
+    <p><strong>Background:</strong> {{ .character.background }}</p>
+    <p><strong>Alignment:</strong> {{ .character.alignment }}</p>
+    <h3 class="mt-2 font-bold">Stats:</h3>
+    <table class="w-full mt-2 border border-yellow-500">
+      <thead>
+        <tr class="text-gray-900 bg-yellow-500">
+          <th class="px-4 py-2">Stat</th>
+          <th class="px-4 py-2">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $key, $value := .character.stats }}
+        <tr>
+          <td class="px-4 py-2 border">{{ $key }}</td>
+          <td class="px-4 py-2 border">{{ $value }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+  {{ end }}
+</div>
+{{end}}

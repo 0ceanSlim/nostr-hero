@@ -1,15 +1,12 @@
 {{define "header"}}
 
-<header class="p-4 bg-bgSecondary rounded-b-md">
-  <div class="relative flex items-center justify-between mb-4 bg-bgSecondary">
+<header class="p-4 bg-gray-700 rounded-b-md">
+  <div class="relative flex items-center justify-between mb-4 bg-gray-700">
     <!-- Left: Logo -->
     {{template "app-name"}}
 
     <!-- Center: Navigation -->
     {{template "navigation"}}
-
-    <!-- Right: Settings -->
-    {{template "theme-swap"}}
   </div>
 </header>
 <script>
@@ -22,5 +19,5 @@
     dropdown.classList.toggle("hidden");
   }
 </script>
-<script src="/static/js/theme.js"></script>
+
 {{end}}

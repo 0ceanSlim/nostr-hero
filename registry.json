@@ -1,0 +1,38 @@
+[
+  {
+    "npub": "npub1zmc6qyqdfnllhnzzxr5wpepfpnzcf8q6m3jdveflmgruqvd3qa9sjv7f60",
+    "pubkey": "16f1a0100d4cfffbcc4230e8e0e4290cc5849c1adc64d6653fda07c031b1074b",
+    "character": {
+      "race": "Elf",
+      "class": "Bard",
+      "background": "Hermit",
+      "alignment": "Lawful Neutral",
+      "stats": {
+        "Charisma": 9,
+        "Constitution": 8,
+        "Dexterity": 8,
+        "Intelligence": 14,
+        "Strength": 13,
+        "Wisdom": 14
+      }
+    }
+  },
+  {
+    "npub": "npub1utx00neqgqln72j22kej3ux7803c2k986henvvha4thuwfkper4s7r50e8",
+    "pubkey": "e2ccf7cf20403f3f2a4a55b328f0de3be38558a7d5f33632fdaaefc726c1c8eb",
+    "character": {
+      "race": "Human",
+      "class": "Wizard",
+      "background": "Noble",
+      "alignment": "Chaotic Evil",
+      "stats": {
+        "Charisma": 9,
+        "Constitution": 16,
+        "Dexterity": 11,
+        "Intelligence": 14,
+        "Strength": 10,
+        "Wisdom": 9
+      }
+    }
+  }
+]

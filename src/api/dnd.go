@@ -5,9 +5,14 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
+	"strings"
+
+	"github.com/btcsuite/btcutil/bech32"
 )
 
 type RaceClassWeight struct {
@@ -154,19 +159,110 @@ func GenerateCharacter(hexKey string) (Character, error) {
 }
 
 
+const registryFile = "registry.json"
+
+type RegistryEntry struct {
+	Npub    string    `json:"npub"`
+	PubKey  string    `json:"pubkey"`
+	Character Character `json:"character"`
+}
+
+func DecodeNpub(npub string) (string, error) {
+	hrp, data, err := bech32.Decode(npub)
+	if err != nil {
+		return "", err
+	}
+	if hrp != "npub" {
+		return "", errors.New("invalid hrp")
+	}
+
+	decodedData, err := bech32.ConvertBits(data, 5, 8, false)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ToLower(fmt.Sprintf("%x", decodedData)), nil
+}
+
+func ReadRegistry() ([]RegistryEntry, error) {
+	var registry []RegistryEntry
+
+	file, err := os.ReadFile(registryFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []RegistryEntry{}, nil // Return empty list if file doesn't exist
+		}
+		return nil, err
+	}
+
+	err = json.Unmarshal(file, &registry)
+	if err != nil {
+		return nil, err
+	}
+
+	return registry, nil
+}
+
+func WriteRegistry(registry []RegistryEntry) error {
+	data, err := json.MarshalIndent(registry, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(registryFile, data, 0644)
+}
+
+func IsNpubInRegistry(npub string, registry []RegistryEntry) bool {
+	for _, entry := range registry {
+		if entry.Npub == npub {
+			return true
+		}
+	}
+	return false
+}
+
 func CharacterHandler(w http.ResponseWriter, r *http.Request) {
-	key := r.URL.Query().Get("key")
-	if key == "" {
-		http.Error(w, "Missing key parameter", http.StatusBadRequest)
+	npub := r.URL.Query().Get("npub")
+	if npub == "" {
+		http.Error(w, "Missing npub parameter", http.StatusBadRequest)
 		return
 	}
 
-	character, err := GenerateCharacter(key)
+	pubKey, err := DecodeNpub(npub)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid npub", http.StatusBadRequest)
 		return
+	}
+
+	character, err := GenerateCharacter(pubKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	registry, err := ReadRegistry()
+	if err != nil {
+		http.Error(w, "Error reading registry", http.StatusInternalServerError)
+		return
+	}
+
+	if !IsNpubInRegistry(npub, registry) {
+		newEntry := RegistryEntry{
+			Npub:    npub,
+			PubKey:  pubKey,
+			Character: character,
+		}
+		registry = append(registry, newEntry)
+		if err := WriteRegistry(registry); err != nil {
+			fmt.Println("Error writing to registry:", err)
+		}
+		fmt.Println("Logged new entry for npub:", npub)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(character)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"npub":      npub,
+		"pubkey":    pubKey,
+		"character": character,
+	})
 }

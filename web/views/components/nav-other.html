@@ -1,5 +1,5 @@
 {{define "nav-other"}}
-<li class="relative rounded-md group bg-bgSecondary text-textPrimary">
+<li class="relative rounded-md group text-textPrimary">
   <a
     href="#"
     onclick="toggleDropdown('otherDropdown')"
@@ -32,12 +32,27 @@
   <!-- Dropdown container -->
   <div
     id="otherDropdown"
-    class="absolute left-0 hidden mt-2 border rounded-md shadow-lg lg:left-auto lg:group-hover:block lg:m-2 border-bgInverted bg-bgSecondary"
+    class="absolute left-0 hidden mt-2 bg-gray-700 border rounded-md shadow-lg lg:left-auto lg:group-hover:block lg:m-2 border-bgInverted"
     style="min-width: 12rem; z-index: 10"
   >
     <!-- Pseudo-element for hover gap -->
     <div class="absolute w-full h-3 -top-3"></div>
 
+    <ul class="py-2">
+      <li>
+        <a
+          href="/registry"
+          hx-push-url="/registry"
+          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          hx-trigger="click"
+          hx-get="/registry"
+          hx-swap="outerHTML"
+          hx-target="body"
+          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
+          📜 Registry
+        </a>
+      </li>
+    </ul>
     <ul class="py-2">
       <li>
         <a
@@ -49,7 +64,7 @@
           hx-swap="outerHTML"
           hx-target="body"
           ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
-          Registry
+          ⚔️ Discover
         </a>
       </li>
     </ul>

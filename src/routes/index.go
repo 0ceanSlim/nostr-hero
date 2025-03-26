@@ -13,7 +13,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := utils.PageData{
-		Title: "🏠",
+		Title: "discover",
 	}
 
 	utils.RenderTemplate(w, data, "index.html", false)
