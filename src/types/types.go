@@ -34,3 +34,9 @@ type WeightData struct {
 	Alignments               []string                  `json:"Alignments"`
 	AlignmentWeights         []int                     `json:"AlignmentWeights"`
 }
+
+// Weighted option structure
+type WeightedOption struct {
+	Name   string
+	Weight int
+}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/btcsuite/btcutil/bech32"
@@ -58,4 +59,27 @@ func LoadWeights(filename string) (*types.WeightData, error) {
 	}
 
 	return &data, nil
+}
+
+// Sorts JSON input deterministically
+func SortJSONInput(data map[string][]types.WeightedOption) map[string][]types.WeightedOption {
+	sortedData := make(map[string][]types.WeightedOption)
+	
+	// Extract keys and sort them
+	keys := make([]string, 0, len(data))
+	for key := range data {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	// Sort values within each key
+	for _, key := range keys {
+		options := data[key]
+		sort.Slice(options, func(i, j int) bool {
+			return options[i].Name < options[j].Name
+		})
+		sortedData[key] = options
+	}
+
+	return sortedData
 }
