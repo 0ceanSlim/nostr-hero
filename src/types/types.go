@@ -27,10 +27,10 @@ type Character struct {
 }
 
 type WeightData struct {
-	Races                   []string                  `json:"Races"`
-	RaceWeights             []int                     `json:"RaceWeights"`
-	ClassWeightsByRace      map[string]map[string]int `json:"classWeightsByRace"`
-	BackgroundWeightsByRace map[string]map[string]int `json:"backgroundWeightsByRace"`
-	Alignments              []string                  `json:"Alignments"`
-	AlignmentWeights        []int                     `json:"AlignmentWeights"`
+	Races                    []string                  `json:"Races"`
+	RaceWeights              []int                     `json:"RaceWeights"`
+	ClassWeightsByRace       map[string]map[string]int `json:"classWeightsByRace"`
+	BackgroundWeightsByClass map[string]map[string]int `json:"backgroundWeightsByClass"`
+	Alignments               []string                  `json:"Alignments"`
+	AlignmentWeights         []int                     `json:"AlignmentWeights"`
 }
