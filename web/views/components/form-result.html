@@ -1,6 +1,8 @@
 {{define "form-result"}}
 <template id="result-template">
-  <div class="p-4 text-lg bg-gray-700 border-2 border-yellow-500 rounded">
+  <div
+    class="p-4 text-lg max-w-xl w-full md:max-w-xl bg-gray-700 border-2 border-yellow-500 rounded"
+  >
     <p class="text-xl font-bold text-yellow-400">Your Nostr Hero</p>
 
     <p><strong>Race:</strong> <span id="char-race"></span></p>
@@ -24,9 +26,9 @@
     </div>
 
     <a
-      href="/"
-      hx-push-url="/"
-      hx-get="/"
+      href="/discover"
+      hx-push-url="/discover"
+      hx-get="/discover"
       hx-swap="outerHTML"
       hx-target="body"
       class="px-4 py-2 mt-4 font-bold text-gray-900 transition bg-yellow-500 border-2 border-yellow-700 rounded hover:bg-yellow-400"

@@ -1,40 +1,51 @@
 {{define "form-input"}}
 <!-- Form Wrapper -->
 <div id="form-container">
-  <label for="npub" class="block mb-2 text-lg">Enter npub:</label>
-  <input
-    id="npub"
-    type="text"
-    maxlength="64"
-    class="w-full px-4 py-2 text-gray-900 placeholder-gray-700 bg-yellow-300 border-2 border-yellow-500 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-    placeholder="Enter npub..."
-  />
-  <button
-    id="generate"
-    hx-get="/api/character"
-    hx-target="#hidden-data"
-    hx-swap="innerHTML"
-    hx-trigger="click"
-    hx-vals='js:{ npub: document.getElementById("npub").value }'
-    _="on htmx:afterRequest 
-      set jsonData to JSON.parse(#hidden-data.innerText).character
-      set newContent to #result-template.content.cloneNode(true) 
-      set newContent.querySelector('#char-race').innerText to jsonData.race
-      set newContent.querySelector('#char-class').innerText to jsonData.class
-      set newContent.querySelector('#char-background').innerText to jsonData.background
-      set newContent.querySelector('#char-alignment').innerText to jsonData.alignment
+  <div id="npub-container">
+    <input
+      id="npub"
+      type="text"
+      maxlength="64"
+      class="w-full px-4 py-2 text-gray-900 placeholder-gray-700 bg-yellow-300 border-2 border-yellow-500 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+      placeholder="npub..."
+      oninput="validateNpub()"
+    />
+    <div id="feedback">
+      <div id="empty-message" class="text-gray-500">
+        Enter an npub to continue
+      </div>
+      <div id="invalid-message" class="hidden text-red-500">
+        ❌ Invalid npub format
+      </div>
+      <div id="valid-message" class="hidden">{{template "discover"}}</div>
+    </div>
+  </div>
 
-      set statsTable to newContent.querySelector('#char-stats') 
-      for statName in Object.keys(jsonData.stats) 
-          set statRow to document.createElement('tr')
-          set statRow.innerHTML to `<td class='px-4 py-2'>` + statName + `</td><td class='px-4 py-2'>` + jsonData.stats[statName] + `</td>`
-          statsTable.appendChild(statRow)
-      end
+  <script>
+    function validateNpub() {
+      const input = document.getElementById("npub");
+      const value = input.value.trim();
+      const emptyDiv = document.getElementById("empty-message");
+      const invalidDiv = document.getElementById("invalid-message");
+      const validDiv = document.getElementById("valid-message");
 
-      put newContent into #form-container"
-    class="px-6 py-2 mt-4 font-bold text-gray-900 transition bg-yellow-500 border-2 border-yellow-700 rounded hover:bg-yellow-400"
-  >
-    Discover
-  </button>
+      // Hide all feedback initially
+      emptyDiv.classList.add("hidden");
+      invalidDiv.classList.add("hidden");
+      validDiv.classList.add("hidden");
+
+      if (value === "") {
+        emptyDiv.classList.remove("hidden");
+        return;
+      }
+
+      // Basic npub validation (starts with npub1 and is ~60 chars)
+      if (/^npub1[ac-hj-np-z02-9]{58,64}$/.test(value)) {
+        validDiv.classList.remove("hidden");
+      } else {
+        invalidDiv.classList.remove("hidden");
+      }
+    }
+  </script>
 </div>
 {{end}}
