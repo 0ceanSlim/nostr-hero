@@ -7,7 +7,7 @@ import (
 	"nostr-hero/src/types"
 )
 
-const registryFile = "web/alpha-registry.json"
+const registryFile = "web/data/alpha-registry.json"
 
 func ReadRegistry() ([]types.RegistryEntry, error) {
 	var registry []types.RegistryEntry
