@@ -1,7 +1,7 @@
 {{define "view"}}
-<h1 class="mt-4 text-2xl font-bold text-center">Character Registry</h1>
+<h1 class="mt-4 text-4xl font-bold text-center">Legacy Characters</h1>
 <div class="container p-4 mx-auto">
-  {{ range .CustomData.registry }}
+  {{ range .CustomData.legacyRegistry }}
   <div class="p-4 mb-4 text-white bg-gray-800 rounded shadow-md">
     <h2 class="text-xl font-bold">npub: {{ .npub }}</h2>
     <p><strong>Public Key:</strong> {{ .pubkey }}</p>

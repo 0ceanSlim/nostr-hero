@@ -1,3 +1,4 @@
 /tmp
 config.yml
-registry.json
+alpha-registry.json
+legacy-registry.json

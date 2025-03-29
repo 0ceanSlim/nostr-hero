@@ -1,0 +1,67 @@
+{{define "nav-discover"}}
+<button
+  class="relative group rounded-lg px-6 py-3 border-2 border-transparent bg-gray-950 text-white font-bold text-lg tracking-wider transition-all duration-500 overflow-hidden hover:shadow-[0_0_12px_2px] hover:shadow-rose-600/50"
+  href="/discover"
+  hx-push-url="/discover"
+  class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+  hx-trigger="click"
+  hx-get="/discover"
+  hx-swap="outerHTML"
+  hx-target="body"
+>
+  <span class="relative z-10 flex items-center gap-2"> ⛏️ Discover </span>
+
+  <!-- Dark base layer -->
+  <span class="absolute inset-0 bg-gray-900/80"></span>
+
+  <!-- Animated blood/energy flow -->
+  <span
+    class="absolute inset-0 opacity-60 group-hover:opacity-40 transition-opacity duration-700 animate-liquid-flow bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/70 via-transparent to-rose-900/50"
+  ></span>
+
+  <!-- Pulsing outline element -->
+  <span
+    class="absolute -inset-[2px] rounded-lg border-2 border-rose-600 opacity-50 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow"
+  ></span>
+</button>
+
+<style>
+  @keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+      border-width: 2px;
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(225, 29, 72, 0);
+      border-width: 1px;
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
+      border-width: 2px;
+    }
+  }
+
+  @keyframes liquid-flow {
+    0% {
+      background-position: 0% 50%;
+      background-size: 400% 400%;
+    }
+    50% {
+      background-position: 100% 50%;
+      background-size: 500% 500%;
+    }
+    100% {
+      background-position: 0% 50%;
+      background-size: 400% 400%;
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  .animate-liquid-flow {
+    animation: liquid-flow 6s ease infinite;
+  }
+</style>
+{{end}}

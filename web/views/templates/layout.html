@@ -52,11 +52,20 @@
           transform: rotate(360deg);
         }
       }
+      body {
+        font-family: "Pixelify Sans";
+      }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
     <title>{{template "title"}} - {{.Title}}</title>
   </head>
   <body
-    class="max-w-screen-lg px-4 mx-auto font-mono text-center bg-gray-900 md:px-8 text-textPrimary custom-scrollbar"
+    class="max-w-screen-lg px-4 mx-auto text-center bg-gray-900 md:px-8 text-textPrimary custom-scrollbar"
   >
     {{template "header" .}}
     <div

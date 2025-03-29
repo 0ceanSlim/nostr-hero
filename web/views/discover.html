@@ -1,0 +1,22 @@
+{{define "view"}}
+
+<div
+  class="flex flex-col items-center justify-center min-h-screen font-mono text-gray-100 bg-gray-900"
+>
+  <div
+    class="max-w-md p-6 text-center bg-gray-800 border-4 border-yellow-500 rounded-lg shadow-lg"
+  >
+    <h1 class="mb-4 text-3xl font-bold text-yellow-400">
+      Discover your Nostr Hero
+    </h1>
+
+    {{template "form-input"}}
+
+    <!-- Hidden div to store JSON response -->
+    <div id="hidden-data" class="hidden"></div>
+
+    {{template "form-result"}}
+  </div>
+</div>
+
+{{end}}

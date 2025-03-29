@@ -1,20 +1,151 @@
 {{define "view"}}
-<div
-  class="flex flex-col items-center justify-center min-h-screen font-mono text-gray-100 bg-gray-900"
->
-  <div
-    class="max-w-md p-6 text-center bg-gray-800 border-4 border-yellow-500 rounded-lg shadow-lg"
-  >
-    <h1 class="mb-4 text-3xl font-bold text-yellow-400">
-      Discover your Nostr Hero
+<div class="rounded-xl bg-gray-800 shadow-xl overflow-hidden mt-4">
+  <div class="bg-gradient-to-r from-purple-900 to-indigo-800 text-white p-6">
+    <h1 class="text-3xl font-bold mb-2">
+      Unveiling Your Digital Identity's Champion
     </h1>
+  </div>
+  <div class="md:max-w-screen-md mx-auto">
+    <div class="p-6">
+      <p class="mb-4 leading-relaxed">
+        Your Nostr public key, a unique string of characters identifying you in
+        the decentralized Nostr network, is more than just an address. It's the
+        seed for a personalized hero, a character whose fate is woven from the
+        very fabric of your digital identity. This discovery transforms your key
+        into a consistent and reproducible champion, allowing you to explore the
+        possibilities hidden within your Nostr persona.
+      </p>
 
-    {{template "form-input"}}
+      <h3 class="text-2xl font-bold mt-8 mb-4">
+        The Interconnected Steps of Hero Creation:
+      </h3>
 
-    <!-- Hidden div to store JSON response -->
-    <div id="hidden-data" class="hidden"></div>
+      <div class="space-y-6">
+        <div class="border-l-4 border-purple-500 pl-4">
+          <h4 class="text-xl font-semibold text-purple-800">
+            1. The Seed: Your Nostr Public Key
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              Your key is the foundation. It's fed into a deterministic
+              algorithm, ensuring that every time you use the same key, you get
+              the exact same hero.
+            </li>
+          </ul>
+        </div>
 
-    {{template "form-result"}}
+        <div class="border-l-4 border-indigo-500 pl-4">
+          <h4 class="text-xl font-semibold text-indigo-800">
+            2. Race: The Heritage of Your Identity
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              Your key determines your hero's race. This choice isn't arbitrary.
+              Different races (Elves, Dwarves, Humans, etc.) have varying
+              probabilities of being selected, reflecting inherent population
+              distributions.
+            </li>
+            <li>The selected race then influences the class weights.</li>
+          </ul>
+        </div>
+
+        <div class="border-l-4 border-blue-500 pl-4">
+          <h4 class="text-xl font-semibold text-blue-800">
+            3. Class: The Path Chosen by Fate
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              The class of your hero (Wizard, Fighter, Rogue, etc.) is chosen
+              based on your key, and the available classes are weighted.
+            </li>
+            <li>
+              The race of your character effects the likely hood of a character
+              being a certain class. Elves are more likely to be rangers for
+              example.
+            </li>
+            <li>
+              The chosen class then impacts the available background options and
+              the some minimum stat requirements.
+            </li>
+          </ul>
+        </div>
+
+        <div class="border-l-4 border-teal-500 pl-4">
+          <h4 class="text-xl font-semibold text-teal-800">
+            4. Background: The Story Forged in the Past
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              Your hero's background (Noble, Criminal, Sage, etc.) adds depth to
+              their story.
+            </li>
+            <li>
+              The possible backgrounds are based on the characters class. A
+              criminal background is more likely for a rogue than a paladin.
+            </li>
+            <li>
+              This background provides context for your hero's skills and
+              motivations.
+            </li>
+          </ul>
+        </div>
+
+        <div class="border-l-4 border-green-500 pl-4">
+          <h4 class="text-xl font-semibold text-green-800">
+            5. Alignment: The Moral Compass
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              Your hero's alignment (Lawful Good, Chaotic Neutral, etc.) defines
+              their moral stance.
+            </li>
+            <li>
+              This is an independent choice, but it helps shape your hero's
+              personality and interactions.
+            </li>
+          </ul>
+        </div>
+
+        <div class="border-l-4 border-amber-500 pl-4">
+          <h4 class="text-xl font-semibold text-amber-800">
+            6. Stats: The Physical and Mental Attributes
+          </h4>
+          <ul class="list-disc ml-6 mt-2">
+            <li>
+              Your hero's stats (Strength, Dexterity, Constitution,
+              Intelligence, Wisdom, Charisma) are rolled using a virtual dice
+              system, mimicking traditional tabletop role-playing games.
+            </li>
+            <li>
+              To maintain balance, stats are capped at 16 and floored at 8.
+            </li>
+            <li>
+              Your chosen class imposes minimum stat requirements. For example,
+              Wizards need at least 12 in Intelligence and Wisdom. These
+              minimums ensure your hero is capable in their chosen profession.
+            </li>
+            <li>
+              These stats determine your hero's strengths and weaknesses,
+              influencing their abilities in combat, social interactions, and
+              other challenges.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 p-5 rounded-lg border border-gray-200">
+        <h3 class="text-2xl font-bold mb-3">
+          The Result: A Hero Born of Your Identity
+        </h3>
+        <p class="leading-relaxed">
+          By connecting these steps, the generator creates a coherent and
+          consistent hero, all derived from your Nostr public key. This hero is
+          a reflection of your digital identity, a unique character with their
+          own story and destiny.
+        </p>
+      </div>
+      <div class="mt-4">{{template "nav-discover" .}}</div>
+    </div>
   </div>
 </div>
 {{end}}
