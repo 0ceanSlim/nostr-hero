@@ -4,7 +4,7 @@
     "pubkey": "<32-bytes lowercase hex-encoded public key of the event creator>",
     "created_at": "<unix timestamp in seconds>",
     "kind": 34263,
-    "tags": [["d", "name of save file"]],
+    "tags": [["d", "name of save file"],["title","tile of the game"],["v","version"]]
     "content": "<arbitrary string>",
     "sig": "<64-bytes lowercase hex of the signature of the sha256 hash of the serialized event data, which is the same as the 'id' field>"
   },
@@ -13,7 +13,7 @@
     "pubkey": "<32-bytes lowercase hex-encoded public key of the event creator>",
     "created_at": "<unix timestamp in seconds>",
     "kind": 34263,
-    "tags": [["d", "some input on new game"]],
+    "tags": [["d", "some input on new game"],["title","nostr-hero"],["v","alphs-0.1"]],
     "content": "the character below represent the data. It goes in the content section",
     "sig": "<64-bytes lowercase hex of the signature of the sha256 hash of the serialized event data, which is the same as the 'id' field>"
   },
