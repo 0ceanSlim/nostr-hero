@@ -8,48 +8,44 @@
       ["Torch", 10],
       ["Waterskin", 1],
       ["Mess kit", 1],
-      ["Hempen rope", 50]
+      ["Hempen rope", 1],
+      ["Clothes, Common", 1]
     ],
     "Entertainer's Pack": [
       ["Bedroll", 1],
       ["Bell", 1],
       ["Bullseye lantern", 1],
-      ["Costume", 3],
+      ["Clothes, Costume", 2],
       ["Mirror", 1],
       ["Oil", 8],
       ["Rations", 9],
       ["Tinderbox", 1],
-      ["Waterskin", 1],
-      ["Costume", 2],
-      ["Candle", 5],
-      ["Rations", 5],
-      ["Disguise kit", 1]
+      ["Waterskin", 1]
     ],
     "Diplomat's Pack": [
-      ["Case for maps/scrolls", 2],
-      ["Fine clothes", 1],
+      ["Document Case", 2],
+      ["Clothes, Fine", 1],
+      ["Rations", 2],
       ["Ink", 1],
-      ["Ink pen", 1],
+      ["Ink pen", 5],
       ["Lamp", 1],
-      ["Oil", 2],
+      ["Oil", 4],
       ["Paper", 5],
+      ["Parchment", 5],
       ["Perfume", 1],
-      ["Sealing wax", 1],
-      ["Soap", 1]
+      ["Tinderbox", 1]
     ],
     "Priest's Pack": [
       ["Blanket", 1],
+      ["Robes", 1],
       ["Holy water", 1],
-      ["Lamp", 1],
-      ["Rations", 7],
-      ["Robe", 1],
+      ["Rations", 2],
       ["Tinderbox", 1],
       ["Candle", 10],
       ["Alms box", 1],
       ["Incense", 2],
       ["Censer", 1],
       ["Vestments", 1],
-      ["Rations", 2],
       ["Waterskin", 1]
     ],
     "Dungeoneer's Pack": [
@@ -61,36 +57,34 @@
       ["Tinderbox", 1],
       ["Torch", 10],
       ["Waterskin", 1],
-      ["Hammer", 1],
-      ["Piton", 10],
-      ["Hempen rope", 50]
+      ["Clothes, Traveler's", 1]
     ],
     "Burglar's Pack": [
-      ["Ball bearings", 1000],
-      ["String", 10],
+      ["Ball bearings", 100],
+      ["Rope", 1],
       ["Bell", 1],
       ["Candle", 5],
       ["Crowbar", 1],
       ["Hammer", 1],
       ["Piton", 10],
       ["Hooded lantern", 1],
-      ["Oil", 2],
+      ["Oil", 5],
       ["Rations", 5],
       ["Tinderbox", 1],
       ["Waterskin", 1],
-      ["Hempen rope", 50]
+      ["Clothes, Traveler's", 1]
     ],
     "Scholar's Pack": [
+      ["Robes", 1],
       ["Book", 1],
       ["Ink", 1],
       ["Ink pen", 1],
       ["Lamp", 1],
-      ["Oil", 10],
       ["Parchment", 10],
       ["Tinderbox", 1],
-      ["Book of lore", 1],
       ["Sand", 1],
-      ["Small knife", 1]
+      ["Dagger", 1],
+      ["Hempen rope", 1]
     ]
   }
 }

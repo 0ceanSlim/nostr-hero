@@ -26,8 +26,15 @@ magic items to be added one at a time after base game is done
 
 at character start
 determine hp
-pick skills
-distribute starting equipment per class and let character pick from options
+determine carry weight
+pick skills (available skills meet 12 minimum in the ability for the skill)
+your ancenstors have left you some equipment, but you can't carry it all. 
+You take your necessary items
+distribute starting equipment per class 
+what additional gear will you bring?
+and let character pick from options
+as a <background> you start your jouney with <x gp> 
+Distribute gold to inventory based on background
 
 plan demo to gain xp until 299 cap and warn that the demo doesn't have a level system yet
 
@@ -40,5 +47,4 @@ for leveling system player add a skill point to any skill at level
 tavern in town has a vip section with 1 free ale a day if the pubkey has a happytavern nip5
 
 if they generated a legacy character add an easter egg
-
 

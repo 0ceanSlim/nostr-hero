@@ -166,17 +166,19 @@
       "Wayfarer": 13
     },
     "Sorcerer": {
-      "Charlatan": 15,
-      "Entertainer": 14,
-      "Hermit": 14,
-      "Noble": 14,
+      "Charlatan": 16,
+      "Entertainer": 12,
+      "Hermit": 11,
+      "Noble": 12,
       "Sage": 14,
-      "Urchin": 14,
-      "Wayfarer": 15
+      "Urchin": 11,
+      "Wayfarer": 11,
+      "Scribe": 13
     },
     "Warlock": {
       "Charlatan": 17,
-      "Criminal": 17,
+      "Criminal": 9,
+      "Spy": 8,
       "Hermit": 17,
       "Outlander": 16,
       "Sage": 16,
@@ -186,7 +188,8 @@
     "Bard": {
       "Charlatan": 13,
       "Entertainer": 13,
-      "Guild Artisan/Guild Merchant": 13,
+      "Artisan": 6,
+      "Merchant": 7,
       "Noble": 13,
       "Sage": 12,
       "Sailor": 12,
@@ -196,12 +199,12 @@
     "Fighter": {
       "Folk Hero": 15,
       "Gladiator": 15,
-      "Guard": 16,
       "Knight": 16,
-      "Outlander": 11,
-      "Pirate": 8,
-      "Sailor": 7,
-      "Soldier": 12
+      "Outlander": 12,
+      "Pirate": 7,
+      "Sailor": 6,
+      "Soldier": 15,
+      "Farmer": 13
     },
     "Barbarian": {
       "Folk Hero": 20,
@@ -211,26 +214,29 @@
       "Urchin": 16
     },
     "Monk": {
-      "Acolyte": 18,
-      "Hermit": 27,
-      "Outlander": 18,
-      "Sage": 22,
-      "Wayfarer": 15
+      "Acolyte": 16,
+      "Hermit": 25,
+      "Outlander": 13,
+      "Sage": 18,
+      "Wayfarer": 10,
+      "Scribe": 18
     },
     "Rogue": {
       "Charlatan": 17,
       "Criminal": 17,
-      "Guild Artisan/Guild Merchant": 17,
+      "Artisan": 8,
+      "Merchant": 9,
       "Pirate": 16,
       "Sailor": 16,
       "Urchin": 17
     },
     "Cleric": {
-      "Acolyte": 20,
-      "Folk Hero": 20,
-      "Hermit": 20,
-      "Sage": 20,
-      "Wayfarer": 20
+      "Acolyte": 21,
+      "Folk Hero": 16,
+      "Hermit": 21,
+      "Sage": 13,
+      "Wayfarer": 18,
+      "Scribe": 13
     },
     "Druid": {
       "Farmer": 20,
@@ -249,9 +255,10 @@
     },
     "Wizard": {
       "Acolyte": 16,
-      "Guild Artisan/Guild Merchant": 17,
-      "Hermit": 16,
-      "Noble": 17,
+      "Artisan": 10,
+      "Merchant": 10,
+      "Hermit": 10,
+      "Noble": 20,
       "Sage": 17,
       "Scribe": 17
     }

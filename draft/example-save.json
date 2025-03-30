@@ -39,6 +39,10 @@
         "strength": 8,
         "wisdom": 15
       },
+      "weight": {
+        "current": 10,
+        "max": 10
+      },
       "hp": {
         "current": 10,
         "max": 10
