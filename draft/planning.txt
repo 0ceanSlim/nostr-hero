@@ -13,7 +13,7 @@
 # https://www.dndbeyond.com/feats?filter-name=&filter-source-category=24&filter-source-category=26&filter-prereq-subtype=&filter-partnered-content=f
 
 # monsters
-# https://www.dndbeyond.com/monsters?filter-type=0&filter-search=&filter-cr-min=&filter-cr-max=&filter-armor-class-min=&filter-armor-class-max=&filter-average-hp-min=&filter-average-hp-max=&filter-is-legendary=&filter-is-mythic=&filter-has-lair=&filter-source-category=24&filter-source-category=26&filter-source=3&filter-source=146&filter-source=5&filter-source=147&filter-partnered-content=f
+# https://www.dndbeyond.com/monsters?filter-type=0&filter-search=&filter-cr-min=&filter-cr-max=&filter-environment=1&filter-environment=2&filter-environment=3&filter-environment=4&filter-environment=5&filter-environment=6&filter-environment=7&filter-environment=8&filter-environment=10&filter-environment=11&filter-armor-class-min=&filter-armor-class-max=&filter-average-hp-min=&filter-average-hp-max=&filter-is-legendary=&filter-is-mythic=&filter-has-lair=&filter-source-category=24&filter-source=3&filter-source=146&filter-source=5&filter-source=147&filter-partnered-content=f&sort=cr
 
 # Backgrounds
 # https://www.dndbeyond.com/backgrounds?filter-name=&filter-source-category=24&filter-source-category=26&filter-source=2&filter-source=145&filter-partnered-content=f
@@ -28,23 +28,62 @@ at character start
 determine hp
 determine carry weight
 pick skills (available skills meet 12 minimum in the ability for the skill)
-your ancenstors have left you some equipment, but you can't carry it all. 
+You are an orphan and at the age of 18 after doing your background task for a fiew years you have no destiny other than your background
+ and decide to discover your inner hero. 
+someone from the cuty helped look after you while you grew up and they passed away promtpting this innitiative.
+they Leave left you some items but you can't take it all. 
+despese items and give choices
 You take your necessary items
 distribute starting equipment per class 
 what additional gear will you bring?
 and let character pick from options
+from your time as a <background> you have <gp saved> 
 as a <background> you start your jouney with <x gp> 
 Distribute gold to inventory based on background
+The local carriage agrees to take you to the inner kingdom to begin your journey
+
+one ration to leave the kingdom and start exploring
+after 4-10 activities (fights, exploratin, etc) you are prompted to keep going (a different enviornment) or return to the city
+every time you return to the city you also have to pay some amount of gold to stay at the inn
+
+different enviornment are different monsters
+
+after a few enviornments you may reach another city with different NPCs. 
+
+Expand the world through new locations. 
 
 plan demo to gain xp until 299 cap and warn that the demo doesn't have a level system yet
 
-for leveling system player add a skill point to any skill at level
+for leveling system player add 1 skill point to any skill at level
+3
 5
+7
 9
+11
 13
+15
 17
+19
+20
 
 tavern in town has a vip section with 1 free ale a day if the pubkey has a happytavern nip5
 
 if they generated a legacy character add an easter egg
+
+ranged weapon get str mod, mele wep gets dex mod. mod scales with level
+
+{
+  "damage_modifier": {
+    "base_stat": <character stat>,
+    "formula": "(stat - 10) // 2",
+  }
+}
+
+greatclub does 1d8 damage for instance so a character with 12 str would do 1d8+((12-10)/2)
+
+so rolling a 4 would do 5 damage
+
+can't sleep unless you have a bedroll on you, sleeping regens 1/2 health
+sleeping also takes 1 rations
+
 

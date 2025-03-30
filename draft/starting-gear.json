@@ -549,8 +549,11 @@
       },
       {
         "option": [
-          ["component pouch", 1],
-          ["arcane focus", 1]
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
         ]
       },
       {
@@ -609,8 +612,11 @@
       },
       {
         "option": [
-          ["component pouch", 1],
-          ["arcane focus", 1]
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
         ]
       },
       {
@@ -638,8 +644,11 @@
       },
       {
         "option": [
-          ["component pouch", 1],
-          ["arcane focus", 1]
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
         ]
       },
       {
