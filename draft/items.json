@@ -1,0 +1,133 @@
+{
+  "simple_melee": [
+    "club",
+    "dagger",
+    "greatclub",
+    "handaxe",
+    "javelin",
+    "light hammer",
+    "mace",
+    "quarterstaff",
+    "sickle",
+    "spear"
+  ],
+  "simple_ranged": ["crossbow, light", "dart", "shortbow", "sling"],
+  "martial_melee": [
+    "battleaxe",
+    "flail",
+    "glaive",
+    "greataxe",
+    "greatsword",
+    "halberd",
+    "lance",
+    "longsword",
+    "maul",
+    "morningstar",
+    "pike",
+    "rapier",
+    "scimitar",
+    "shortsword",
+    "trident",
+    "war pick",
+    "warhammer",
+    "whip"
+  ],
+  "martial_ranged": [
+    "blowgun",
+    "crossbow, hand",
+    "crossbow, heavy",
+    "longbow",
+    "net"
+  ],
+  "ammunition": ["bolt", "arrow"],
+
+  "armor": [
+    "leather armor",
+    "scale mail",
+    "chain mail",
+    "shield",
+    "wooden shield"
+  ],
+  "tools": ["thieves' tools", "disguise kit"],
+  "kits": [
+    "explorer's pack",
+    "entertainer's pack",
+    "diplomat's pack",
+    "priest's pack",
+    "dungeoneer's pack",
+    "burglar's pack",
+    "scholar's pack"
+  ],
+  "focus_items": [
+    "holy symbol",
+    "druidic focus",
+    "component pouch",
+    "arcane focus",
+    "spellbook"
+  ],
+  "instruments": [
+    "bagpipe",
+    "drum",
+    "dulcimer",
+    "flute",
+    "lute",
+    "lyre",
+    "horn",
+    "pan flute",
+    "shawm",
+    "viol"
+  ],
+  "pack_items": {
+    "bedding": ["bedroll", "blanket"],
+    "lighting": [
+      "bullseye lantern",
+      "lamp",
+      "torch",
+      "candle",
+      "hooded lantern"
+    ],
+    "containers": [
+      "waterskin",
+      "map case",
+      "scroll case",
+      "alms box",
+      "censer",
+      "vial"
+    ],
+    "tools": [
+      "tinderbox",
+      "crowbar",
+      "hammer",
+      "piton",
+      "mess kit",
+      "sealing wax",
+      "ink pen",
+      "small knife"
+    ],
+    "miscellaneous": [
+      "oil",
+      "rations",
+      "rope",
+      "hempen rope",
+      "bell",
+      "mirror",
+      "costume",
+      "fine clothes",
+      "ink",
+      "paper",
+      "perfume",
+      "soap",
+      "holy water",
+      "robe",
+      "incense",
+      "vestments",
+      "caltrops",
+      "ball bearings",
+      "string",
+      "parchment",
+      "book",
+      "book of lore",
+      "sand"
+    ]
+  }
+}

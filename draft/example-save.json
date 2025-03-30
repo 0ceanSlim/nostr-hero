@@ -1,0 +1,55 @@
+[
+  {
+    "id": "<32-bytes lowercase hex-encoded sha256 of the serialized event data>",
+    "pubkey": "<32-bytes lowercase hex-encoded public key of the event creator>",
+    "created_at": "<unix timestamp in seconds>",
+    "kind": 34263,
+    "tags": [["d", "name of save file"]],
+    "content": "<arbitrary string>",
+    "sig": "<64-bytes lowercase hex of the signature of the sha256 hash of the serialized event data, which is the same as the 'id' field>"
+  },
+  {
+    "id": "<32-bytes lowercase hex-encoded sha256 of the serialized event data>",
+    "pubkey": "<32-bytes lowercase hex-encoded public key of the event creator>",
+    "created_at": "<unix timestamp in seconds>",
+    "kind": 34263,
+    "tags": [["d", "some input on new game"]],
+    "content": "the character below represent the data. It goes in the content section",
+    "sig": "<64-bytes lowercase hex of the signature of the sha256 hash of the serialized event data, which is the same as the 'id' field>"
+  },
+  {
+    "character": {
+      "race": "Human",
+      "class": "Cleric",
+      "background": "Acolyte",
+      "alignment": "Neutral Good",
+      "stats": {
+        "charisma": 15,
+        "constitution": 14,
+        "dexterity": 12,
+        "intelligence": 13,
+        "strength": 8,
+        "wisdom": 15
+      },
+      "hp": {
+        "current": 10,
+        "max": 10
+      },
+      "xp": 0,
+      "inventory": [
+        ["Healing Potion", 3],
+        ["Rations", 5],
+        ["Torch", 2],
+        ["Gold Pieces", 25]
+      ],
+      "equipment": {
+        "armor": "Chain Mail",
+        "weapon_right": "Mace",
+        "weapon_left": "Shield",
+        "ring": null,
+        "necklace": "Holy Symbol",
+        "ammunition": null
+      }
+    }
+  }
+]

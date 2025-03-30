@@ -1,0 +1,102 @@
+[
+  {
+    "ExperiencePoints": 0,
+    "Level": 1,
+    "ProficiencyBonus": "+2"
+  },
+  {
+    "ExperiencePoints": 300,
+    "Level": 2,
+    "ProficiencyBonus": "+2"
+  },
+  {
+    "ExperiencePoints": 900,
+    "Level": 3,
+    "ProficiencyBonus": "+2"
+  },
+  {
+    "ExperiencePoints": 2700,
+    "Level": 4,
+    "ProficiencyBonus": "+2"
+  },
+  {
+    "ExperiencePoints": 6500,
+    "Level": 5,
+    "ProficiencyBonus": "+3"
+  },
+  {
+    "ExperiencePoints": 14000,
+    "Level": 6,
+    "ProficiencyBonus": "+3"
+  },
+  {
+    "ExperiencePoints": 23000,
+    "Level": 7,
+    "ProficiencyBonus": "+3"
+  },
+  {
+    "ExperiencePoints": 34000,
+    "Level": 8,
+    "ProficiencyBonus": "+3"
+  },
+  {
+    "ExperiencePoints": 48000,
+    "Level": 9,
+    "ProficiencyBonus": "+4"
+  },
+  {
+    "ExperiencePoints": 64000,
+    "Level": 10,
+    "ProficiencyBonus": "+4"
+  },
+  {
+    "ExperiencePoints": 85000,
+    "Level": 11,
+    "ProficiencyBonus": "+4"
+  },
+  {
+    "ExperiencePoints": 100000,
+    "Level": 12,
+    "ProficiencyBonus": "+4"
+  },
+  {
+    "ExperiencePoints": 120000,
+    "Level": 13,
+    "ProficiencyBonus": "+5"
+  },
+  {
+    "ExperiencePoints": 140000,
+    "Level": 14,
+    "ProficiencyBonus": "+5"
+  },
+  {
+    "ExperiencePoints": 165000,
+    "Level": 15,
+    "ProficiencyBonus": "+5"
+  },
+  {
+    "ExperiencePoints": 195000,
+    "Level": 16,
+    "ProficiencyBonus": "+5"
+  },
+  {
+    "ExperiencePoints": 225000,
+    "Level": 17,
+    "ProficiencyBonus": "+6"
+  },
+  {
+    "ExperiencePoints": 265000,
+    "Level": 18,
+    "ProficiencyBonus": "+6"
+  },
+  {
+    "ExperiencePoints": 305000,
+    "Level": 19,
+    "ProficiencyBonus": "+6"
+  },
+  {
+    "ExperiencePoints": 355000,
+    "Level": 20,
+    "ProficiencyBonus": "+6"
+  }
+]

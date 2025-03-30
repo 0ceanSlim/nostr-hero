@@ -7,7 +7,7 @@
 # https://www.dndbeyond.com/spells?filter-search=&filter-verbal=&filter-somatic=&filter-material=&filter-concentration=&filter-ritual=&filter-source-category=24&filter-source-category=26&filter-source=2&filter-source=145&filter-partnered-content=f
 
 # equipment
-# https://www.dndbeyond.com/equipment?filter-search=&filter-cost-min=&filter-cost-max=&filter-weight-min=&filter-weight-max=&filter-source-category=24&filter-source-category=26&filter-source=2&filter-source=145
+# https://www.dndbeyond.com/equipment?filter-search=&filter-cost-min=&filter-cost-max=&filter-weight-min=&filter-weight-max=&filter-source-category=24&filter-source-category=26&filter-source=148&filter-source=2&filter-source=145
 
 # feats core rules
 # https://www.dndbeyond.com/feats?filter-name=&filter-source-category=24&filter-source-category=26&filter-prereq-subtype=&filter-partnered-content=f
@@ -19,4 +19,26 @@
 # https://www.dndbeyond.com/backgrounds?filter-name=&filter-source-category=24&filter-source-category=26&filter-source=2&filter-source=145&filter-partnered-content=f
 
 https://docs.google.com/spreadsheets/d/1qBW8-WhEJ_xMJE5cb9IfUcGaIZXq4wmizkVc6lHWPxk/edit?gid=684641850#gid=684641850
+
+packs still needs work 
+
+magic items to be added one at a time after base game is done
+
+at character start
+determine hp
+pick skills
+distribute starting equipment per class and let character pick from options
+
+plan demo to gain xp until 299 cap and warn that the demo doesn't have a level system yet
+
+for leveling system player add a skill point to any skill at level
+5
+9
+13
+17
+
+tavern in town has a vip section with 1 free ale a day if the pubkey has a happytavern nip5
+
+if they generated a legacy character add an easter egg
+
 
