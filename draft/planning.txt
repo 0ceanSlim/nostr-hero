@@ -82,7 +82,7 @@ tavern in town has a vip section with 1 free ale a day if the pubkey has a happy
 
 if they generated a legacy character add an easter egg
 
-ranged weapon get str mod, mele wep gets dex mod. mod scales with level
+ranged weapon get str mod, mele wep gets dex mod. unless weapon is fenese then it usess dex. mod scales with level
 
 {
   "damage_modifier": {
