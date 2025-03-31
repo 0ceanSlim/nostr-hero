@@ -41,13 +41,15 @@
       },
       "weight": {
         "current": 10,
-        "max": 10
+        "max": 10,
+        "temporary": 0
       },
       "hp": {
         "current": 10,
         "max": 10
       },
       "xp": 0,
+      "spendable-skill-points": 0,
       "inventory": [
         ["Healing Potion", 3],
         ["Rations", 5],

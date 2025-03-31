@@ -24,9 +24,15 @@ packs still needs work
 
 magic items to be added one at a time after base game is done
 
+skills will be in the game but just cosmetic at demo
+
 at character start
 determine hp
+hit die max + con modifier ((con-10)/3)
+on level up you gain half your max hit die
+so a  lv1 ranger has a base hp of 10 if he has con 12 then he gets 10+1 hp at lv1. At level 2 He would get 10+5+1
 determine carry weight
+(15 x str)
 pick skills (available skills meet 12 minimum in the ability for the skill)
 You are an orphan and at the age of 18 after doing your background task for a fiew years you have no destiny other than your background
  and decide to discover your inner hero. 
@@ -44,7 +50,13 @@ The local carriage agrees to take you to the inner kingdom to begin your journey
 
 one ration to leave the kingdom and start exploring
 after 4-10 activities (fights, exploratin, etc) you are prompted to keep going (a different enviornment) or return to the city
-every time you return to the city you also have to pay some amount of gold to stay at the inn
+every time you return to the city you also have to pay some amount of gold to get in. 
+(the player can always get into their starting city regardless of their wealth but not into other cities)
+some ceties cost more to enter than others. 
+
+can also take cart directly to a city for an amount of ration and gold
+
+city entry fee can deduct from mint (bank)
 
 different enviornment are different monsters
 
