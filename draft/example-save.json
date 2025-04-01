@@ -39,11 +39,6 @@
         "strength": 8,
         "wisdom": 15
       },
-      "weight": {
-        "current": 10,
-        "max": 10,
-        "temporary": 0
-      },
       "hp": {
         "current": 10,
         "max": 10
@@ -62,7 +57,8 @@
         "weapon_left": "Shield",
         "ring": null,
         "necklace": "Holy Symbol",
-        "ammunition": null
+        "ammunition": null,
+        "backpack": "Backpack"
       }
     }
   }

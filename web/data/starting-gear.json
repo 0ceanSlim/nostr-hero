@@ -148,10 +148,14 @@
         ]
       },
       {
-        "given": [
-          ["shield", 1],
-          ["holy symbol", 1]
+        "option": [
+          ["amulet", 1],
+          ["emblem", 1],
+          ["reliquary", 1]
         ]
+      },
+      {
+        "given": [["shield", 1]]
       }
     ]
   },
@@ -160,7 +164,7 @@
     "starting_gear": [
       {
         "option": [
-          ["wooden shield", 1],
+          ["shield", 1],
           ["club", 1],
           ["dagger", 1],
           ["greatclub", 1],
@@ -193,10 +197,17 @@
         ]
       },
       {
+        "option": [
+          ["Sprig of Mistletoe", 1],
+          ["Totem", 1],
+          ["Wooden Staff", 1],
+          ["Yew Wand", 1]
+        ]
+      },
+      {
         "given": [
           ["leather armor", 1],
-          ["explorer's pack", 1],
-          ["druidic focus", 1]
+          ["explorer's pack", 1]
         ]
       }
     ]
@@ -422,15 +433,19 @@
       },
       {
         "option": [
+          ["amulet", 1],
+          ["emblem", 1],
+          ["reliquary", 1]
+        ]
+      },
+      {
+        "option": [
           ["priest's pack", 1],
           ["explorer's pack", 1]
         ]
       },
       {
-        "given": [
-          ["chain mail", 1],
-          ["holy symbol", 1]
-        ]
+        "given": [["chain mail", 1]]
       }
     ]
   },

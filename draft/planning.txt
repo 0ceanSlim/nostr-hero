@@ -13,7 +13,11 @@
 # https://www.dndbeyond.com/feats?filter-name=&filter-source-category=24&filter-source-category=26&filter-prereq-subtype=&filter-partnered-content=f
 
 # monsters
-# https://www.dndbeyond.com/monsters?filter-type=0&filter-search=&filter-cr-min=&filter-cr-max=&filter-environment=1&filter-environment=2&filter-environment=3&filter-environment=4&filter-environment=5&filter-environment=6&filter-environment=7&filter-environment=8&filter-environment=10&filter-environment=11&filter-armor-class-min=&filter-armor-class-max=&filter-average-hp-min=&filter-average-hp-max=&filter-is-legendary=&filter-is-mythic=&filter-has-lair=&filter-source-category=24&filter-source=3&filter-source=146&filter-source=5&filter-source=147&filter-partnered-content=f&sort=cr
+to implement completely at a future date
+https://www.dndbeyond.com/monsters?filter-type=0&filter-search=&filter-cr-min=&filter-cr-max=&filter-environment=1&filter-environment=2&filter-environment=3&filter-environment=4&filter-environment=5&filter-environment=6&filter-environment=7&filter-environment=8&filter-environment=10&filter-environment=11&filter-armor-class-min=&filter-armor-class-max=&filter-average-hp-min=&filter-average-hp-max=&filter-is-legendary=f&filter-is-mythic=f&filter-has-lair=f&filter-source-category=24&filter-source=3&filter-source=146&filter-source=5&filter-source=147&filter-partnered-content=f
+add special monters with lairs at specific loacions later
+demo to only include monster up to 5 cr
+
 
 # Backgrounds
 # https://www.dndbeyond.com/backgrounds?filter-name=&filter-source-category=24&filter-source-category=26&filter-source=2&filter-source=145&filter-partnered-content=f
@@ -28,7 +32,7 @@ skills will be in the game but just cosmetic at demo
 
 at character start
 determine hp
-hit die max + con modifier ((con-10)/3)
+hit die max + con modifier ((con-10)/2)
 on level up you gain half your max hit die
 so a  lv1 ranger has a base hp of 10 if he has con 12 then he gets 10+1 hp at lv1. At level 2 He would get 10+5+1
 determine carry weight
@@ -98,4 +102,78 @@ so rolling a 4 would do 5 damage
 can't sleep unless you have a bedroll on you, sleeping regens 1/2 health
 sleeping also takes 1 rations
 
+World Map 
+                    town----------artic---------town
+                      |                           |
+                      |                           |
+                    swamp                      mountain 
+                      |                           |
+                      |                           |
+village---hill-----KINGDOM---------urban---------city----desert---village
+                      |
+                      |
+                    forest
+                      |
+                      |                          
+                    city---------swamp---------village
+                      |
+                      |
+                   coastal
+                      |
+                      |
+                   village
 
+kigdom at center
+city has 3 links
+town has 2 links
+village has one link
+
+inbetween locations are predetermined enviornments that determine the monster you may run into
+
+In the locations, there are centers and external parts of the city by their direction if they connect to another location
+
+                    north x
+                      |
+                      |
+                      |
+west x---------kingdom town center---------east x
+                      |
+                      |
+                      |
+                    south x
+
+If you are in the center, you can maove to one of the available parts of the city. From the available part of the city you can exit the city and start adventuring that direction
+
+enviornments:
+artic
+coastal
+desert
+forest
+grassland
+hill
+mountain
+swamp
+underwater
+urban
+
+
+give eveyone backpack 
+
+carry weight is strx5. backpack is a x10 modifier and give 20 storage slots
+
+without a backpack, you only have 4 storaege slots
+
+1 gold piece weighs .0006 lbs
+
+fight music
+https://www.youtube.com/watch?v=t3B802PIuB0
+
+opening
+https://www.youtube.com/watch?v=YX4_s1ZbBa8
+
+
+future idea
+crafting
+resources for crafting... gathering ore, plants, etc...
+coud give pay dirt and hae to was att certain place to get ore.. 
+need to be smelted and then crafted all requiring items and gold
