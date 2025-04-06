@@ -1,0 +1,30 @@
+<header class="p-4 bg-gray-800 rounded-b-md">
+  <div class="relative flex items-center justify-between mb-4 bg-gray-800">
+    <!-- Left: Logo -->
+    <div class="flex-shrink-0">
+      <a
+        href="/"
+        hx-push-url="/"
+        hx-get="/"
+        hx-swap="outerHTML"
+        hx-target="body"
+        class="flex items-center text-2xl font-bold md:text-4xl"
+      >
+        <span class="ml-2">⚔️ nostr hero</span>
+      </a>
+    </div>
+
+    <!-- Center: Navigation -->
+    <div id="navigation" hx-get="navigation/base.html" hx-trigger="load"></div>
+  </div>
+</header>
+<script>
+  function toggleNav() {
+    const navbar = document.getElementById("navbar");
+    navbar.classList.toggle("hidden");
+  }
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    dropdown.classList.toggle("hidden");
+  }
+</script>

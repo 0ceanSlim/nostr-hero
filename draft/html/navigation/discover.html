@@ -1,0 +1,99 @@
+<div class="relative group">
+  <button
+    id="generate"
+    hx-get="/api/character"
+    hx-target="#hidden-data"
+    hx-swap="innerHTML"
+    hx-trigger="click"
+    hx-vals='js:{ npub: document.getElementById("npub").value }'
+    _="on htmx:afterRequest 
+  set jsonData to JSON.parse(#hidden-data.innerText).character
+  set newContent to #result-template.content.cloneNode(true) 
+  set newContent.querySelector('#char-race').innerText to jsonData.race
+  set newContent.querySelector('#char-class').innerText to jsonData.class
+  set newContent.querySelector('#char-background').innerText to jsonData.background
+  set newContent.querySelector('#char-alignment').innerText to jsonData.alignment
+  
+  set statsTable to newContent.querySelector('#char-stats') 
+  for statName in Object.keys(jsonData.stats) 
+    set statRow to document.createElement('tr')
+    set statRow.innerHTML to `<td class='px-4 py-2'>` + statName + `</td><td class='font-mono px-4 py-2'>` + jsonData.stats[statName] + `</td>`
+    statsTable.appendChild(statRow)
+  end
+  
+  put newContent into #discover-container"
+    class="relative overflow-hidden px-8 py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white text-lg shadow-lg group-hover:shadow-xl group-hover:shadow-purple-500/50 transition-all duration-300"
+  >
+    <span class="relative z-10">⛏️ Discover !</span>
+
+    <!-- Sparkle elements -->
+    <span
+      class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+    >
+      <span
+        class="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full animate-sparkle-1"
+      ></span>
+      <span
+        class="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-white rounded-full animate-sparkle-2"
+      ></span>
+      <span
+        class="absolute bottom-1/4 left-2/4 w-3 h-3 bg-white rounded-full animate-sparkle-3"
+      ></span>
+    </span>
+
+    <!-- Shine effect -->
+    <span
+      class="absolute inset-0 bg-[radial-gradient(circle_at_center,_white_0%,_transparent_70%)] opacity-0 group-hover:opacity-30 transition-opacity duration-700"
+    ></span>
+  </button>
+
+  <!-- Glow effect -->
+  <span
+    class="absolute -inset-2 bg-purple-500 rounded-full blur-lg opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10"
+  ></span>
+</div>
+
+<style>
+  @keyframes sparkle-1 {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.8;
+    }
+  }
+  @keyframes sparkle-2 {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(2);
+      opacity: 0.6;
+    }
+  }
+  @keyframes sparkle-3 {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.8);
+      opacity: 0.7;
+    }
+  }
+  .animate-sparkle-1 {
+    animation: sparkle-1 2s infinite;
+  }
+  .animate-sparkle-2 {
+    animation: sparkle-2 2.5s infinite 0.5s;
+  }
+  .animate-sparkle-3 {
+    animation: sparkle-3 3s infinite 1s;
+  }
+</style>
