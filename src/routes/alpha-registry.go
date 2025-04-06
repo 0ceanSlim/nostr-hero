@@ -9,7 +9,7 @@ import (
 
 func AlphaRegistry(w http.ResponseWriter, r *http.Request) {
 	// Read registry.json file
-	file, err := os.ReadFile("web/data/alpha-registry.json")
+	file, err := os.ReadFile("www/data/alpha-registry.json")
 	if err != nil {
 		http.Error(w, "Error reading registry", http.StatusInternalServerError)
 		return

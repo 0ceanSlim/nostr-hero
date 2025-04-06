@@ -15,8 +15,8 @@ type PageData struct {
 
 // Define the base directories for views and templates
 const (
-	viewsDir     = "web/views/"
-	templatesDir = "web/views/templates/"
+	viewsDir     = "www/views/"
+	templatesDir = "www/views/templates/"
 )
 
 // Define the common layout templates filenames
