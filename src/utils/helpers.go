@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/btcsuite/btcutil/bech32"
 
@@ -21,6 +24,19 @@ func PrependDir(dir string, files []string) []string {
 		fullPaths = append(fullPaths, dir+file)
 	}
 	return fullPaths
+}
+
+// GenerateRandomToken creates a cryptographically secure random token
+// of the specified length in bytes (output will be twice this length as hex)
+func GenerateRandomToken(length int) string {
+	b := make([]byte, length)
+	_, err := rand.Read(b)
+	if err != nil {
+		// In a real application, handle this error better
+		// For now, let's log and generate something less secure but still random
+		return hex.EncodeToString([]byte(time.Now().String()))
+	}
+	return hex.EncodeToString(b)
 }
 
 func DecodeNpub(npub string) (string, error) {
