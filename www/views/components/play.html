@@ -1,0 +1,20 @@
+{{define "play"}}
+<button
+  id="login-button"
+  class="text-2xl p-2 font-bold bg-yellow-400 rounded-md text-textInverted"
+>
+  Play!
+</button>
+<div
+  id="spinner"
+  class="hidden w-8 h-8 border-yellow-500 rounded-full border-5 border-t-yellow-700 animate-spin"
+></div>
+
+<!-- Hidden input to store the public key -->
+<input type="hidden" id="public-key" name="publicKey" />
+
+<script src="/static/js/login.js"></script>
+
+<!-- This button will redirect to the screen for a player to load a save slot and it will show their profile and seed character-->
+
+{{end}}

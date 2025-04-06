@@ -1,21 +1,5 @@
 {{define "view"}}
-<main class="flex flex-col items-center justify-center p-8">
-  <button
-    id="login-button"
-    class="p-2 text-2xl font-bold bg-purple-400 rounded-md text-textInverted"
-  >
-    Sign In with Nostr
-  </button>
-  <div
-    id="spinner"
-    class="hidden w-8 h-8 border-purple-500 rounded-full border-5 border-t-purple-700 animate-spin"
-  ></div>
 
-  <!-- Hidden input to store the public key -->
-  <input type="hidden" id="public-key" name="publicKey" />
-
-  <script src="/static/js/login.js"></script>
-</main>
 <div class="rounded-xl bg-gray-800 shadow-xl overflow-hidden mt-4">
   <div class="bg-gradient-to-r from-purple-900 to-indigo-800 text-white p-6">
     <h1 class="text-3xl font-bold mb-2">

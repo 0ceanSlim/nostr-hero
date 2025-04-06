@@ -24,7 +24,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Load weight data from JSON file
-	weightData, err := utils.LoadWeights("w/data/weights.json")
+	weightData, err := utils.LoadWeights("www/data/weights.json")
 	if err != nil {
 		http.Error(w, "Error loading weight data", http.StatusInternalServerError)
 		return
