@@ -1,0 +1,19 @@
+here is a drop table for gems and a multiplier for sizes
+
+gem, value, drop rate
+
+diamond 500000 1%
+sapphire, emerald, ruby 100000 3%
+topaz, garnet, alexandrite 50000  6%
+pearl, amber, amethyst 10000  8%
+onyx, moonstone, citrine, jasper, bloodstone 5000    10%
+turquoise, quartz, azurite, obsidian, malachite 1000 22%
+nothing 50%
+
+
+multipliers
+tiny x.01 42%
+small x.1 32%
+medium x1 18%
+large x10 6%
+huge x100 2%
