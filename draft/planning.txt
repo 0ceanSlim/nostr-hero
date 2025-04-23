@@ -200,3 +200,23 @@ Two-Handed	This weapon requires two hands to use. This property is relevant only
 Versatile	This weapon can be used with one or two hands. A damage value in parentheses appears with the property—the damage when the weapon is used with two hands to make a melee attack.
 
 https://www.dndbeyond.com/spells?filter-class=2190876&filter-class=2190877&filter-class=2190878&filter-class=2190881&filter-class=2190882&filter-class=2190884&filter-class=2190885&filter-class=2190886&filter-search=&filter-level=0&filter-level=1&filter-level=2&filter-level=3&filter-level=4&filter-tags=5&filter-casting-time=1&filter-casting-time=2&filter-casting-time=3&filter-verbal=&filter-somatic=&filter-material=&filter-concentration=2&filter-ritual=f&filter-partnered-content=f&sort=level
+
+
+artic
+https://youtu.be/ZGOYchPtWtk?si=nhKo9IXbWILEH37c
+
+coastal
+https://youtu.be/C4IWt4VAd1o?si=LGcvQ_JuLtMiZQCR
+
+desert
+https://youtu.be/GxpxKOmRkAA?si=QMD2swHLKeVjmB1k
+
+forest:
+https://www.youtube.com/watch?v=aLwI_zKHPn4
+
+grassland
+https://www.youtube.com/watch?v=w1TZgHpwKdc
+
+hill
+https://www.youtube.com/watch?v=4MP0b8mR-Mo
+
