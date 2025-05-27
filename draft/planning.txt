@@ -29,7 +29,7 @@ packs still needs work
 magic items to be added one at a time after base game is done
 
 skills will be in the game but just cosmetic at demo
-
+✨💪🏻💡🤸🏻💫🩸
 at character start
 determine hp
 hit die max + con modifier ((con-10)/2)
