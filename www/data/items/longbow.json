@@ -1,0 +1,20 @@
+{
+  "name": "Longbow",
+  "description": "",
+  "price": 5000,
+  "type": "Martial Ranged Weapons",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Ammunition (150/600)",
+    "Heavy",
+    "Two-handed",
+    "piercing"
+  ],
+  "notes": []
+}

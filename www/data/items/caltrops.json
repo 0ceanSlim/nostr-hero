@@ -1,0 +1,21 @@
+{
+  "name": "Caltrops",
+  "description": "Sharp metal spikes designed to slow down pursuers by damaging feet and hooves.",
+  "price": 5,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 20,
+  "weight": 0.1,
+  "type": "Adventuring Gear",
+  "notes": [
+    "Can be scattered to create difficult terrain",
+    "A bag holds 20 caltrops"
+  ],
+  "tags": [
+    "ammunition",
+    "area-denial"
+  ],
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg"
+}

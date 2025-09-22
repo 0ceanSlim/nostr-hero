@@ -1,0 +1,12 @@
+{
+  "name": "Shield",
+  "price": 1000,
+  "ac": "+2",
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 6,
+  "type": "Heavy Armor",
+  "rarity": "common",
+  "img": "equipment/armor.jpg"
+}

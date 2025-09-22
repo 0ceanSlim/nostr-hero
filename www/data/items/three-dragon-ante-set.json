@@ -1,0 +1,15 @@
+{
+  "name": "Three-Dragon Ante set",
+  "description": "A popular card game involving bluffing and betting, played with a special deck featuring dragons. The goal is to control the most powerful flight of dragons. Proficiency with Three-Dragon Ante allows you to add your proficiency bonus to ability checks made to play the game.",
+  "price": 100,
+  "type": "Gaming Set",
+  "weight": 0.5,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

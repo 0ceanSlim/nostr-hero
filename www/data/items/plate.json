@@ -1,0 +1,17 @@
+{
+  "name": "Plate",
+  "description": "",
+  "price": 150000,
+  "type": "Heavy Armor",
+  "weight": 65.0,
+  "stack": 1,
+  "ac": "18",
+  "damage": null,
+  "heal": null,
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Disadvantage on Stealth - Strength 15"
+  ],
+  "img": "equipment/armor.jpg"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Longsword",
+  "description": "A well-balanced blade with a long, straight edge. The signature weapon of knights and warriors.",
+  "price": 1500,
+  "type": "Martial Melee Weapons",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "versatile",
+    "slashing"
+  ],
+  "notes": [
+    "Can be wielded with two hands for increased damage"
+  ]
+}

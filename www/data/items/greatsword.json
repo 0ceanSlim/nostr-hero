@@ -1,0 +1,19 @@
+{
+  "name": "Greatsword",
+  "description": "",
+  "price": 5000,
+  "type": "Martial Melee Weapons",
+  "weight": 6.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "2d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Heavy",
+    "Two-handed",
+    "slashing"
+  ],
+  "notes": []
+}

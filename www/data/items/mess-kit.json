@@ -1,0 +1,17 @@
+{
+  "name": "Mess kit",
+  "description": "A tin box containing a cup, fork, knife, spoon, and plate for eating meals.",
+  "price": 20,
+  "type": "Adventuring Gear",
+  "weight": 1.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Contains basic eating utensils"
+  ]
+}

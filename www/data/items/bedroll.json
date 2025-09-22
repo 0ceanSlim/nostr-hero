@@ -1,0 +1,12 @@
+{
+  "name": "Bedroll",
+  "price": 100,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 7,
+  "type": "Adventuring Gear",
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg"
+}

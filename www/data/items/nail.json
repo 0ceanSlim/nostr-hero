@@ -1,0 +1,15 @@
+{
+  "name": "Nail",
+  "description": "Small iron spikes used for construction and carpentry. Can be hammered into wood to join pieces together or used for hanging items. Sold individually but typically purchased in bulk.",
+  "price": 1,
+  "type": "Adventuring Gear",
+  "weight": 0.01,
+  "stack": 100,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

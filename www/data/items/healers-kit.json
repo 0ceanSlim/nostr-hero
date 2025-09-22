@@ -1,0 +1,22 @@
+{
+  "name": "Healer's kit",
+  "description": "A collection of bandages, salves, and medical supplies for treating wounds.",
+  "price": 500,
+  "type": "Adventuring Gear",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "healing",
+    "limited-use"
+  ],
+  "notes": [
+    "Can be used to stabilize dying creatures",
+    "Contains 10 uses",
+    "Each use heals 2 hitpoints"
+  ]
+}

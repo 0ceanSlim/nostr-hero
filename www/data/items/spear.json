@@ -1,0 +1,19 @@
+{
+  "name": "Spear",
+  "description": "",
+  "price": 100,
+  "type": "Simple Melee Weapons",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Thrown (20/60)",
+    "Versatile (1d8)",
+    "piercing"
+  ],
+  "notes": []
+}

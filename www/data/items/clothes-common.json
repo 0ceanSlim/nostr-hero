@@ -1,0 +1,17 @@
+{
+  "name": "Clothes Common",
+  "description": "Simple everyday clothing made from rough cloth, suitable for common folk.",
+  "price": 50,
+  "type": "Clothes",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Basic clothing for daily wear"
+  ]
+}

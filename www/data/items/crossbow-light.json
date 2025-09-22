@@ -1,0 +1,23 @@
+{
+  "name": "Crossbow light",
+  "description": "A compact crossbow that can be operated with one hand.",
+  "price": 2500,
+  "type": "Simple Ranged Weapons",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "loading",
+    "two-handed",
+    "piercing"
+  ],
+  "notes": [
+    "Requires bolts to fire",
+    "Loading property requires action to reload"
+  ]
+}

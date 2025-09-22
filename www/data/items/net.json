@@ -1,0 +1,20 @@
+{
+  "name": "Net",
+  "description": "",
+  "price": 100,
+  "type": "Martial Ranged Weapons",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "rarity": "common",
+  "tags": [
+    "Special",
+    "Thrown"
+  ],
+  "notes": [
+    "retrains target"
+  ],
+  "img": "equipment/weapon.jpg"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Sling Bullets (5)",
+  "description": "A pouch containing 5 sling bullets made of lead or stone.",
+  "price": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 20,
+  "weight": 0.015,
+  "type": "Ammunition",
+  "notes": [],
+  "tags": [
+    "ammunition"
+  ],
+  "rarity": "common",
+  "img": "equipment/ammunition.jpg"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Crowbar",
+  "description": "A heavy iron bar with a flattened end, useful for prying open doors and containers.",
+  "price": 200,
+  "type": "Adventuring Gear",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Provides advantage when forcing open objects"
+  ]
+}

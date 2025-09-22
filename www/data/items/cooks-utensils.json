@@ -1,0 +1,12 @@
+{
+  "name": "Cook's utensils",
+  "price": 100,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 8,
+  "type": "Artisan's Tools",
+  "rarity": "common",
+  "img": "equipment/tool.jpg"
+}

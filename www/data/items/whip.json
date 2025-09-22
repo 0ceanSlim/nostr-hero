@@ -1,0 +1,19 @@
+{
+  "name": "Whip",
+  "description": "",
+  "price": 200,
+  "type": "Martial Melee Weapons",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Finesse",
+    "Reach",
+    "slashing"
+  ],
+  "notes": []
+}

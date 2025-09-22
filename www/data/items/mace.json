@@ -1,0 +1,17 @@
+{
+  "name": "Mace",
+  "description": "",
+  "price": 500,
+  "type": "Simple Melee Weapons",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "bludgeon"
+  ],
+  "notes": []
+}

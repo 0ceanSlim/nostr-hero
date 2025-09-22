@@ -1,0 +1,18 @@
+{
+  "name": "Mirror steel",
+  "description": "A polished steel mirror that can be used for signaling or viewing around corners.",
+  "price": 500,
+  "type": "Adventuring Gear",
+  "weight": 0.25,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be used for signaling with sunlight",
+    "Useful for looking around corners"
+  ]
+}

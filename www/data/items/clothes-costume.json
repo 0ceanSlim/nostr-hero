@@ -1,0 +1,17 @@
+{
+  "name": "Clothes Costume",
+  "description": "Elaborate costume clothing for disguises, performances, or special occasions.",
+  "price": 500,
+  "type": "Clothes",
+  "weight": 4.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be used for disguises or performances"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Studded Leather",
+  "price": 4500,
+  "ac": "12 + Dex",
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 13,
+  "type": "Light Armor",
+  "rarity": "common",
+  "img": "equipment/armor.jpg"
+}

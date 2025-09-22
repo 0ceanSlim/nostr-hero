@@ -1,0 +1,22 @@
+{
+  "name": "Shortbow",
+  "description": "A compact recurved bow made for mobility and quick shots in combat.",
+  "price": 2500,
+  "type": "Simple Ranged Weapons",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "two-handed",
+    "piercing"
+  ],
+  "notes": [
+    "Requires arrows to fire",
+    "Effective range up to 320 feet"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Shortsword",
+  "description": "",
+  "price": 1000,
+  "type": "Martial Melee Weapons",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Finesse",
+    "Light",
+    "slashing"
+  ],
+  "notes": []
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Hide",
+  "price": 1000,
+  "ac": "12 + Dex(max2)",
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 12,
+  "type": "Medium Armor",
+  "rarity": "common",
+  "img": "equipment/armor.jpg"
+}

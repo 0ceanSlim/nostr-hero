@@ -1,0 +1,21 @@
+{
+  "name": "Superior healing",
+  "description": "A superior healing potion that glows with intense magical energy.",
+  "price": 20000,
+  "ac": null,
+  "damage": null,
+  "heal": "8d4 + 8",
+  "stack": 1,
+  "weight": 0.5,
+  "type": "Potion",
+  "notes": [
+    "Single use item",
+    "Takes an action to drink"
+  ],
+  "tags": [
+    "consumable",
+    "healing"
+  ],
+  "rarity": "common",
+  "img": "equipment/potion.jpg"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "War pick",
+  "description": "",
+  "price": 500,
+  "type": "Martial Melee Weapons",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "piercing"
+  ],
+  "notes": []
+}

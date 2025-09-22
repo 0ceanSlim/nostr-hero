@@ -1,0 +1,15 @@
+{
+  "name": "Leatherworker's tools",
+  "description": "These special tools include a knife, small mallet, edging tool, leather punch, an awl, and thread. Proficiency with leatherworker's tools lets you add your proficiency bonus to any ability checks you make to craft leather objects.",
+  "price": 500,
+  "type": "Artisan's Tools",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

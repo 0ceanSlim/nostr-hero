@@ -1,0 +1,20 @@
+{
+  "name": "Component Pouch",
+  "description": "A small leather pouch containing various material components needed for spellcasting.",
+  "price": 2500,
+  "type": "Adventuring Gear",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "container (8)",
+    "Special"
+  ],
+  "notes": [
+    "Can be used as a spellcasting focus for material components"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Bell",
+  "price": 100,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 0.2,
+  "type": "Adventuring Gear",
+  "rarity": "",
+  "img": "equipment/adventuring-gear.jpg"
+}

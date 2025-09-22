@@ -1,0 +1,19 @@
+{
+  "name": "Maul",
+  "description": "",
+  "price": 1000,
+  "type": "Martial Melee Weapons",
+  "weight": 10.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "2d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Heavy",
+    "Two-handed",
+    "bludgeon"
+  ],
+  "notes": []
+}

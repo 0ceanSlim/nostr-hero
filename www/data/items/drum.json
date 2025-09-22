@@ -1,0 +1,12 @@
+{
+  "name": "Drum",
+  "price": 600,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 3,
+  "type": "Musical instrument",
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg"
+}

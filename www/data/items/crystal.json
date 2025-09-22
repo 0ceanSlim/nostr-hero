@@ -1,0 +1,17 @@
+{
+  "name": "Crystal",
+  "description": "A perfectly cut crystal that resonates with magical energy, allowing spellcasters to focus their power.",
+  "price": 1000,
+  "type": "Arcane Focus",
+  "weight": 1.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/arcane-focus.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic"
+  ]
+}

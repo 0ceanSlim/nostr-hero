@@ -1,0 +1,19 @@
+{
+  "name": "Lance",
+  "description": "",
+  "price": 1000,
+  "type": "Martial Melee Weapons",
+  "weight": 6.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d12",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Reach",
+    "Special",
+    "piercing"
+  ],
+  "notes": []
+}

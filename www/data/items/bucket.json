@@ -1,0 +1,19 @@
+{
+  "name": "Bucket",
+  "description": "A sturdy wooden bucket with an iron handle, useful for carrying water or other liquids.",
+  "price": 5,
+  "type": "Adventuring Gear",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "container (2)"
+  ],
+  "notes": [
+    "Can hold liquids and small objects"
+  ]
+}

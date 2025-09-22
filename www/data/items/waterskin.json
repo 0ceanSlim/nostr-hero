@@ -1,0 +1,15 @@
+{
+  "name": "Waterskin",
+  "description": "",
+  "price": 20,
+  "type": "Adventuring Gear",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "img": "equipment/adventuring-gear.jpg"
+}

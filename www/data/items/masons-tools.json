@@ -1,0 +1,15 @@
+{
+  "name": "Mason's tools",
+  "description": "These special tools include a trowel, hammer, chisel, brushes, and a square. Proficiency with mason's tools lets you add your proficiency bonus to any ability checks you make to craft stone structures.",
+  "price": 1000,
+  "type": "Artisan's Tools",
+  "weight": 8.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

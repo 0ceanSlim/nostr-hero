@@ -1,0 +1,17 @@
+{
+  "name": "Hammer",
+  "description": "A standard hammer with a wooden handle, useful for construction and repairs.",
+  "price": 100,
+  "type": "Tools",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Useful for construction and basic repairs"
+  ]
+}

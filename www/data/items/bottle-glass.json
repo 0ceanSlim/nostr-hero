@@ -1,0 +1,12 @@
+{
+  "name": "Bottle Glass",
+  "price": 200,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 2,
+  "type": "Adventuring Gear",
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg"
+}

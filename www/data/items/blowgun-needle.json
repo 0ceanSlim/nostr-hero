@@ -1,0 +1,12 @@
+{
+  "name": "Blowgun Needle",
+  "price": 2,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 50,
+  "weight": 0.01,
+  "type": "Ammunition",
+  "rarity": "common",
+  "img": "equipment/ammunition.jpg"
+}

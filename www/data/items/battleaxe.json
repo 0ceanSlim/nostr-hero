@@ -1,0 +1,18 @@
+{
+  "name": "Battleaxe",
+  "description": "",
+  "price": 1000,
+  "type": "Martial Melee Weapons",
+  "weight": 4.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Versatile (1d10)",
+    "slashing"
+  ],
+  "notes": []
+}

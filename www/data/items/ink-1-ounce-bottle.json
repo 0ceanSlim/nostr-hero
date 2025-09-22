@@ -1,0 +1,15 @@
+{
+  "name": "Ink (1 ounce bottle)",
+  "description": "Black ink in a small glass bottle, used for writing with a quill or pen.",
+  "price": 1000,
+  "type": "Adventuring Gear",
+  "weight": 0.1,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

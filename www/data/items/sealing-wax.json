@@ -1,0 +1,15 @@
+{
+  "name": "Sealing wax",
+  "description": "A wax compound used to seal letters and documents. When heated and applied with a signet ring or seal, it creates an official mark that shows if a document has been tampered with.",
+  "price": 50,
+  "type": "Adventuring Gear",
+  "weight": 0.1,
+  "stack": 20,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

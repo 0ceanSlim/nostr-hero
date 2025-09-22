@@ -1,0 +1,15 @@
+{
+  "name": "Calligrapher's supplies",
+  "description": "These special tools include ink, a variety of parchments and papers, several quills, seals and sealing wax, gold and silver leaf, and small tools for preparing fine writing. Proficiency with these supplies lets you add your proficiency bonus to any ability checks you make to create a piece of writing or to determine a written work's authenticity.",
+  "price": 1000,
+  "type": "Artisan's Tools",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

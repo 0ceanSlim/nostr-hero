@@ -1,0 +1,21 @@
+{
+  "name": "Chest",
+  "description": "A large wooden chest reinforced with iron bands, perfect for storing valuables and equipment.",
+  "price": 500,
+  "type": "Adventuring Gear",
+  "weight": 25.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "container (96)",
+    "furniture"
+  ],
+  "notes": [
+    "Can only be placed in owned buildings",
+    "Provides secure storage for large quantities of items"
+  ]
+}

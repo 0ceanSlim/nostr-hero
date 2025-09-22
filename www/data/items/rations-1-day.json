@@ -1,0 +1,15 @@
+{
+  "name": "Rations (1 day)",
+  "description": "Dried food packed in a waterproof bag, providing one day's sustenance for one person.",
+  "price": 50,
+  "type": "Adventuring Gear",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
+}

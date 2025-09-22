@@ -1,0 +1,19 @@
+{
+  "name": "Scimitar",
+  "description": "",
+  "price": 2500,
+  "type": "Martial Melee Weapons",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "Finesse",
+    "Light",
+    "slashing"
+  ],
+  "notes": []
+}

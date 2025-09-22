@@ -1,0 +1,22 @@
+{
+  "name": "Dagger",
+  "description": "A short, sharp blade perfect for close quarters combat or throwing at enemies.",
+  "price": 200,
+  "type": "Simple Melee Weapons",
+  "weight": 1.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "img": "equipment/weapon.jpg",
+  "rarity": "common",
+  "tags": [
+    "finesse",
+    "light",
+    "thrown",
+    "piercing"
+  ],
+  "notes": [
+    "Can be thrown at targets within 60 feet"
+  ]
+}

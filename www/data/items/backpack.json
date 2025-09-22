@@ -1,0 +1,22 @@
+{
+  "name": "Backpack",
+  "description": "A sturdy leather backpack with multiple compartments for organizing gear and supplies.",
+  "price": 200,
+  "type": "Adventuring Gear",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "container (20)",
+    "inventory-expansion"
+  ],
+  "notes": [
+    "Expands carrying capacity for adventuring",
+    "adds 20 slots to inventory",
+    "Cannot be placed inside of another container"
+  ]
+}
