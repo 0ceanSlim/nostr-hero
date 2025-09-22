@@ -2,7 +2,7 @@
 config.yml
 alpha-registry.json
 legacy-registry.json
-/www/*
+
 !/www/static/js/
 !/www/static/img/
 !/www/static/style/readme.md
