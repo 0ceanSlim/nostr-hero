@@ -4,6 +4,7 @@ alpha-registry.json
 legacy-registry.json
 /www/*
 !/www/static/js/
+!/www/static/img/
 !/www/static/style/readme.md
 !/www/static/style/input.css
 !/www/static/style/tailwind.config.js
