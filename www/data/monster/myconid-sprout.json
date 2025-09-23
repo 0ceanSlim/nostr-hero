@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "name": "Myconid Sprout",
+  "challenge_rating": 0.0,
+  "type": "Plant",
+  "size": "Small",
+  "armor_class": 10,
+  "hit_points": 7,
+  "alignment": "lawful neutral",
+  "img": "/static/img/monster/myconid-sprout.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

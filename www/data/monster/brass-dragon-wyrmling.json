@@ -1,0 +1,21 @@
+{
+  "id": 61,
+  "name": "Brass Dragon Wyrmling",
+  "challenge_rating": 1.0,
+  "type": "Dragon",
+  "size": "Medium",
+  "armor_class": 16,
+  "hit_points": 16,
+  "alignment": "chaotic good",
+  "tags": [
+    "Metallic",
+    "fly"
+  ],
+  "img": "/static/img/monster/brass-dragon-wyrmling.svg",
+  "enviornment": [
+    "desert",
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": 172,
+  "name": "Cambion",
+  "challenge_rating": 5.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 19,
+  "hit_points": 82,
+  "alignment": "any evil alignment",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/cambion.svg",
+  "enviornment": [
+    "desert",
+    "hill",
+    "mountain",
+    "urban"
+  ]
+}

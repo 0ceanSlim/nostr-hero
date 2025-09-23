@@ -1,0 +1,15 @@
+{
+  "id": 76,
+  "name": "Quaggoth Spore Servant",
+  "challenge_rating": 1.0,
+  "type": "Plant",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 45,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/quaggoth-spore-servant.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

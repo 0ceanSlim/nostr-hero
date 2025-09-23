@@ -1,0 +1,20 @@
+{
+  "id": 251,
+  "name": "Dao",
+  "challenge_rating": 11.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 187,
+  "alignment": "neutral evil",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/dao.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "hill",
+    "mountain"
+  ]
+}

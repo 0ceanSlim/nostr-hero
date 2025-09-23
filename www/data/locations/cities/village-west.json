@@ -1,0 +1,89 @@
+{
+  "id": "village-west",
+  "name": "Millhaven Village",
+  "type": "village",
+  "description": "A peaceful farming village nestled in rolling hills, where windmills turn lazily in the breeze and fields of grain stretch to the horizon.",
+  "connections": {
+    "east": "village-west-east"
+  },
+  "starting_races": ["Halfling", "Gnome"],
+  "racial_entry_fees": {
+    "Human": 2,
+    "Half-Elf": 2,
+    "Half-Orc": 4,
+    "Tiefling": 5,
+    "Elf": 2,
+    "Dwarf": 2,
+    "Halfling": 0,
+    "Gnome": 0,
+    "Orc": 5,
+    "Dragonborn": 4
+  },
+  "districts": {
+    "center": {
+      "id": "village-west-center",
+      "name": "Village Center",
+      "description": "The small village square centers around an ancient well. Farmers and their families go about their daily business with unhurried contentment.",
+      "connections": {
+        "east": "village-west-east"
+      },
+      "buildings": [
+        {
+          "id": "village_inn",
+          "name": "The Grain & Grape Inn",
+          "type": "inn",
+          "description": "A humble but comfortable inn that serves hearty farm meals and locally brewed ale.",
+          "accessible": true,
+          "actions": ["rent_room", "buy_food", "talk_to_locals", "hear_gossip"]
+        },
+        {
+          "id": "general_store",
+          "name": "Haversham's General Store",
+          "type": "shop",
+          "description": "A small shop selling farming tools, basic supplies, and simple provisions.",
+          "accessible": true,
+          "shop_type": "general",
+          "actions": ["buy_supplies", "sell_goods", "talk_to_shopkeeper"]
+        },
+        {
+          "id": "village_shrine",
+          "name": "Shrine of the Harvest",
+          "type": "shrine",
+          "description": "A modest shrine dedicated to the gods of harvest and fertility.",
+          "accessible": true,
+          "actions": ["pray", "leave_offering", "talk_to_priest"]
+        }
+      ],
+      "npcs": ["village_elder", "innkeeper", "shopkeeper", "local_priest"]
+    },
+    "east": {
+      "id": "village-west-east",
+      "name": "Eastern Farms",
+      "description": "The eastern edge of the village gives way to rolling farmland. A well-traveled road leads toward the distant hills.",
+      "connections": {
+        "center": "village-west-center",
+        "east": "hill-kingdom"
+      },
+      "buildings": [
+        {
+          "id": "farmhouse",
+          "name": "Millwright's Farm",
+          "type": "farm",
+          "description": "A prosperous farm with a large windmill that grinds grain for the village.",
+          "accessible": true,
+          "actions": ["buy_grain", "talk_to_farmer", "help_with_chores"]
+        },
+        {
+          "id": "crossroads_marker",
+          "name": "Crossroads Stone",
+          "type": "landmark",
+          "description": "An old milestone marking the distance to various cities and towns.",
+          "accessible": true,
+          "actions": ["read_directions", "rest", "leave_message"]
+        }
+      ],
+      "npcs": ["village_farmer", "traveling_merchant"],
+      "exit_to_environment": "hill-kingdom"
+    }
+  }
+}

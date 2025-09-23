@@ -1,0 +1,20 @@
+{
+  "id": 253,
+  "name": "Efreeti",
+  "challenge_rating": 11.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 17,
+  "hit_points": 200,
+  "alignment": "lawful evil",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/efreeti.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "hill",
+    "mountain"
+  ]
+}

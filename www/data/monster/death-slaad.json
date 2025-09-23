@@ -1,0 +1,20 @@
+{
+  "id": 244,
+  "name": "Death Slaad",
+  "challenge_rating": 10.0,
+  "type": "Aberration",
+  "size": "Medium",
+  "armor_class": 18,
+  "hit_points": 170,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/death-slaad.svg",
+  "enviornment": [
+    "forest",
+    "swamp",
+    "underwater",
+    "urban"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": 58,
+  "name": "Imp",
+  "challenge_rating": 1.0,
+  "type": "Fiend",
+  "size": "Tiny",
+  "armor_class": 13,
+  "hit_points": 10,
+  "alignment": "lawful evil",
+  "tags": [
+    "Devil",
+    "Shapechanger",
+    "fly"
+  ],
+  "img": "/static/img/monster/imp.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain",
+    "urban"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": 179,
+  "name": "Umber Hulk",
+  "challenge_rating": 5.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 93,
+  "alignment": "chaotic evil",
+  "img": "/static/img/monster/umber-hulk.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

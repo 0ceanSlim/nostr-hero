@@ -1,0 +1,21 @@
+{
+  "id": 154,
+  "name": "Wereboar",
+  "challenge_rating": 4.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 10,
+  "hit_points": 78,
+  "alignment": "neutral evil",
+  "tags": [
+    "Human",
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/wereboar.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

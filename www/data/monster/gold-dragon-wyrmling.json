@@ -1,0 +1,20 @@
+{
+  "id": 135,
+  "name": "Gold Dragon Wyrmling",
+  "challenge_rating": 3.0,
+  "type": "Dragon",
+  "size": "Medium",
+  "armor_class": 17,
+  "hit_points": 60,
+  "alignment": "lawful good",
+  "tags": [
+    "Metallic",
+    "fly"
+  ],
+  "img": "/static/img/monster/gold-dragon-wyrmling.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

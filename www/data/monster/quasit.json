@@ -1,0 +1,21 @@
+{
+  "id": 57,
+  "name": "Quasit",
+  "challenge_rating": 1.0,
+  "type": "Fiend",
+  "size": "Tiny",
+  "armor_class": 13,
+  "hit_points": 7,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Demon",
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/quasit.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

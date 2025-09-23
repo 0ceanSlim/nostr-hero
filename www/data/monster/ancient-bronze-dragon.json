@@ -1,0 +1,22 @@
+{
+  "id": 296,
+  "name": "Ancient Bronze Dragon",
+  "challenge_rating": 22.0,
+  "type": "Dragon",
+  "size": "Gargantuan",
+  "armor_class": 22,
+  "hit_points": 444,
+  "alignment": "lawful good",
+  "tags": [
+    "Metallic",
+    "Legendary",
+    "fly"
+  ],
+  "img": "/static/img/monster/ancient-bronze-dragon.svg",
+  "enviornment": [
+    "coastal",
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

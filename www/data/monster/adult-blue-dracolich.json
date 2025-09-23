@@ -1,0 +1,21 @@
+{
+  "id": 281,
+  "name": "Adult Blue Dracolich",
+  "challenge_rating": 17.0,
+  "type": "Undead",
+  "size": "Huge",
+  "armor_class": 19,
+  "hit_points": 225,
+  "alignment": "lawful evil",
+  "tags": [
+    "Legendary",
+    "fly"
+  ],
+  "img": "/static/img/monster/adult-blue-dracolich.svg",
+  "enviornment": [
+    "hill",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

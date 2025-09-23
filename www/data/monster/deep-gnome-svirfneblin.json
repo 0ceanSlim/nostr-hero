@@ -1,0 +1,20 @@
+{
+  "id": 39,
+  "name": "Deep Gnome (Svirfneblin)",
+  "challenge_rating": 0.5,
+  "type": "Humanoid",
+  "size": "Small",
+  "armor_class": 15,
+  "hit_points": 16,
+  "alignment": "neutral good",
+  "tags": [
+    "Gnome"
+  ],
+  "img": "/static/img/monster/deep-gnome-svirfneblin.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "mountain",
+    "urban"
+  ]
+}

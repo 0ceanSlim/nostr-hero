@@ -1,0 +1,15 @@
+{
+  "id": 239,
+  "name": "Cloud Giant",
+  "challenge_rating": 9.0,
+  "type": "Giant",
+  "size": "Huge",
+  "armor_class": 14,
+  "hit_points": 200,
+  "alignment": "neutral good",
+  "img": "/static/img/monster/cloud-giant.svg",
+  "enviornment": [
+    "hill",
+    "mountain"
+  ]
+}

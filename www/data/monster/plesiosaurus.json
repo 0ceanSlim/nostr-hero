@@ -1,0 +1,17 @@
+{
+  "id": 116,
+  "name": "Plesiosaurus",
+  "challenge_rating": 2.0,
+  "type": "Beast",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 68,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/plesiosaurus.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "mountain"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": 100,
+  "name": "Nothic",
+  "challenge_rating": 2.0,
+  "type": "Aberration",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 45,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/nothic.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

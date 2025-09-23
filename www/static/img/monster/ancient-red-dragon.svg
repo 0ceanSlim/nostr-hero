@@ -1,0 +1,67 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated;">
+  <!-- Dragon body (chunky pixel style) -->
+  <rect x="20" y="32" width="24" height="16" fill="#8B0000"/>
+  <rect x="16" y="36" width="8" height="8" fill="#8B0000"/>
+  <rect x="40" y="36" width="8" height="8" fill="#8B0000"/>
+
+  <!-- Dragon head -->
+  <rect x="24" y="20" width="16" height="12" fill="#DC143C"/>
+  <rect x="28" y="16" width="8" height="4" fill="#DC143C"/>
+
+  <!-- Snout -->
+  <rect x="32" y="12" width="4" height="4" fill="#B22222"/>
+
+  <!-- Eyes (glowing) -->
+  <rect x="28" y="20" width="4" height="4" fill="#FFD700"/>
+  <rect x="32" y="20" width="4" height="4" fill="#FFD700"/>
+  <rect x="30" y="22" width="2" height="2" fill="#FF0000"/>
+  <rect x="34" y="22" width="2" height="2" fill="#FF0000"/>
+
+  <!-- Horns -->
+  <rect x="26" y="16" width="2" height="4" fill="#4B0000"/>
+  <rect x="36" y="16" width="2" height="4" fill="#4B0000"/>
+  <rect x="28" y="12" width="2" height="4" fill="#4B0000"/>
+  <rect x="34" y="12" width="2" height="4" fill="#4B0000"/>
+
+  <!-- Wings -->
+  <rect x="8" y="24" width="12" height="16" fill="#B22222"/>
+  <rect x="44" y="24" width="12" height="16" fill="#B22222"/>
+  <rect x="4" y="28" width="8" height="8" fill="#8B0000"/>
+  <rect x="52" y="28" width="8" height="8" fill="#8B0000"/>
+
+  <!-- Wing details -->
+  <rect x="10" y="26" width="2" height="2" fill="#4B0000"/>
+  <rect x="14" y="30" width="2" height="2" fill="#4B0000"/>
+  <rect x="48" y="26" width="2" height="2" fill="#4B0000"/>
+  <rect x="50" y="30" width="2" height="2" fill="#4B0000"/>
+
+  <!-- Tail -->
+  <rect x="48" y="40" width="8" height="4" fill="#8B0000"/>
+  <rect x="56" y="36" width="4" height="4" fill="#8B0000"/>
+  <rect x="60" y="32" width="2" height="4" fill="#8B0000"/>
+
+  <!-- Tail spikes -->
+  <rect x="58" y="34" width="2" height="2" fill="#4B0000"/>
+  <rect x="54" y="38" width="2" height="2" fill="#4B0000"/>
+
+  <!-- Legs/Claws -->
+  <rect x="24" y="48" width="4" height="8" fill="#4B0000"/>
+  <rect x="36" y="48" width="4" height="8" fill="#4B0000"/>
+  <rect x="22" y="56" width="2" height="2" fill="#2F2F2F"/>
+  <rect x="26" y="56" width="2" height="2" fill="#2F2F2F"/>
+  <rect x="30" y="56" width="2" height="2" fill="#2F2F2F"/>
+  <rect x="38" y="56" width="2" height="2" fill="#2F2F2F"/>
+  <rect x="42" y="56" width="2" height="2" fill="#2F2F2F"/>
+
+  <!-- Breath weapon (pixelated fire) -->
+  <rect x="36" y="8" width="4" height="4" fill="#FFD700"/>
+  <rect x="40" y="4" width="4" height="4" fill="#FF4500"/>
+  <rect x="44" y="0" width="4" height="4" fill="#FF6347"/>
+  <rect x="38" y="12" width="2" height="2" fill="#FFA500"/>
+  <rect x="42" y="8" width="2" height="2" fill="#FF8C00"/>
+
+  <!-- Back spikes -->
+  <rect x="28" y="32" width="2" height="4" fill="#4B0000"/>
+  <rect x="32" y="30" width="2" height="4" fill="#4B0000"/>
+  <rect x="36" y="32" width="2" height="4" fill="#4B0000"/>
+</svg>

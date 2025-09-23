@@ -1,0 +1,17 @@
+{
+  "id": 188,
+  "name": "Water Elemental",
+  "challenge_rating": 5.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 14,
+  "hit_points": 114,
+  "alignment": "neutral",
+  "img": "/static/img/monster/water-elemental.svg",
+  "enviornment": [
+    "coastal",
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

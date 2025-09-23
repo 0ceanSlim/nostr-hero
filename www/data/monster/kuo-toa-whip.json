@@ -1,0 +1,20 @@
+{
+  "id": 77,
+  "name": "Kuo-toa Whip",
+  "challenge_rating": 1.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 11,
+  "hit_points": 65,
+  "alignment": "neutral evil",
+  "tags": [
+    "Kuo-toa"
+  ],
+  "img": "/static/img/monster/kuo-toa-whip.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

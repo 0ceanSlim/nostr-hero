@@ -1,0 +1,18 @@
+{
+  "id": 243,
+  "name": "Deva",
+  "challenge_rating": 10.0,
+  "type": "Celestial",
+  "size": "Medium",
+  "armor_class": 17,
+  "hit_points": 136,
+  "alignment": "lawful good",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/deva.svg",
+  "enviornment": [
+    "hill",
+    "mountain"
+  ]
+}
