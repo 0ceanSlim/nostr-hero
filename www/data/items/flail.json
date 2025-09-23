@@ -1,17 +1,18 @@
 {
   "name": "Flail",
   "description": "",
-  "price": 1000,
+  "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
   "heal": null,
+  "damage-type": "bludgeon",
   "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
-  "tags": [
-    "bludgeon"
-  ],
+  "tags": [],
   "notes": []
 }

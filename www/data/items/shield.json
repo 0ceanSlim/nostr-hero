@@ -8,5 +8,7 @@
   "weight": 6,
   "type": "Heavy Armor",
   "rarity": "common",
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null"
 }

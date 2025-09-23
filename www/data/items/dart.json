@@ -1,19 +1,21 @@
 {
   "name": "Dart",
   "description": "",
-  "price": 5,
+  "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 0.25,
   "stack": 1,
   "ac": null,
   "damage": "1d4",
   "heal": null,
+  "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "2",
   "rarity": "common",
   "tags": [
-    "Finesse",
-    "Thrown (20/60)",
-    "piercing"
+    "finesse",
+    "thrown"
   ],
   "notes": []
 }

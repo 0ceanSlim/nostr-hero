@@ -1,17 +1,18 @@
 {
   "name": "Morningstar",
   "description": "",
-  "price": 1500,
+  "price": 15,
   "type": "Martial Melee Weapons",
   "weight": 4.0,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
   "heal": null,
+  "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
-  "tags": [
-    "piercing"
-  ],
+  "tags": [],
   "notes": []
 }

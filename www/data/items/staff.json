@@ -11,5 +11,7 @@
   "img": "equipment/arcane-focus.jpg",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
 }

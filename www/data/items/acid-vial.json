@@ -8,5 +8,7 @@
   "weight": 1,
   "type": "Adventuring Gear",
   "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg"
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
 }

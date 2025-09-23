@@ -8,5 +8,7 @@
   "weight": 8,
   "type": "Artisan's Tools",
   "rarity": "common",
-  "img": "equipment/tool.jpg"
+  "img": "equipment/tool.jpg",
+  "range": "null",
+  "range-long": "null"
 }

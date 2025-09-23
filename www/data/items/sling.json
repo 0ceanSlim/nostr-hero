@@ -1,18 +1,20 @@
 {
   "name": "Sling",
   "description": "",
-  "price": 10,
+  "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 0.1,
   "stack": 1,
   "ac": null,
   "damage": "1d4",
   "heal": null,
+  "damage-type": "bludgeon",
   "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "3",
   "rarity": "common",
   "tags": [
-    "Ammunition (30/120)",
-    "bludgeon"
+    "ammunition"
   ],
   "notes": []
 }

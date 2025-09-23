@@ -13,5 +13,9 @@
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "str": 15,
+  "stealth": -1
 }

@@ -1,22 +1,24 @@
 {
   "name": "Chain Mail",
   "description": "Interlocking metal rings that provide excellent protection at the cost of mobility and stealth.",
-  "price": 7500,
+  "price": 0,
+  "type": "Heavy Armor",
+  "weight": 55.0,
+  "stack": 1,
   "ac": "16",
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 55,
-  "type": "Heavy Armor",
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "stealth": "-1",
+  "str": "13",
+  "tags": [
+    "heavy-armor"
+  ],
   "notes": [
     "Requires Strength 13 to wear effectively",
     "Makes stealth more difficult"
-  ],
-  "tags": [
-    "heavy-armor",
-    "stealth-disadvantage",
-    "strength-requirement"
-  ],
-  "rarity": "common",
-  "img": "equipment/armor.jpg"
+  ]
 }

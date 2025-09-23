@@ -6,12 +6,11 @@
   "weight": 8.0,
   "stack": 1,
   "ac": "11 + Dex",
-  "damage": null,
-  "heal": null,
   "rarity": "common",
   "tags": [],
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "stealth": -1
 }

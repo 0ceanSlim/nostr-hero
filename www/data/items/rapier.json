@@ -1,18 +1,20 @@
 {
   "name": "Rapier",
   "description": "",
-  "price": 2500,
+  "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
   "heal": null,
+  "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "Finesse",
-    "piercing"
+    "finesse"
   ],
   "notes": []
 }

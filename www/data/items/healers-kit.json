@@ -18,5 +18,7 @@
     "Can be used to stabilize dying creatures",
     "Contains 10 uses",
     "Each use heals 2 hitpoints"
-  ]
+  ],
+  "range": "null",
+  "range-long": "null"
 }

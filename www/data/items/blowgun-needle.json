@@ -8,5 +8,7 @@
   "weight": 0.01,
   "type": "Ammunition",
   "rarity": "common",
-  "img": "equipment/ammunition.jpg"
+  "img": "equipment/ammunition.jpg",
+  "range": "null",
+  "range-long": "null"
 }

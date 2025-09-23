@@ -13,5 +13,7 @@
   "tags": [],
   "notes": [
     "Can be used to summon a monster to fight."
-  ]
+  ],
+  "range": "null",
+  "range-long": "null"
 }

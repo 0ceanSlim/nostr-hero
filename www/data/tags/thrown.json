@@ -1,0 +1,10 @@
+{
+  "name": "Thrown",
+  "description": "If a weapon has the Thrown property, you can throw the weapon to make a ranged attack, and you can draw that weapon as part of the attack. If the weapon is a Melee weapon, use the same ability modifier for the attack and damage rolls that you use for a melee attack with that weapon.",
+  "mechanics": {
+    "enables_ranged_attack": true,
+    "can_draw_as_part_of_attack": true,
+    "uses_melee_ability_modifier": true,
+    "applies_to_melee_weapons": true
+  }
+}

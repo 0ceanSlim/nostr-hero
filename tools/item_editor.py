@@ -75,15 +75,15 @@ class AdvancedItemEditor:
         """Convert copper pieces to gold pieces"""
         try:
             cp = int(cp_value) if cp_value else 0
-            return cp / 100.0
+            return cp 
         except (ValueError, TypeError):
             return 0.0
     
     def gp_to_cp(self, gp_value):
         """Convert gold pieces to copper pieces"""
         try:
-            gp = float(gp_value) if gp_value else 0.0
-            return int(gp * 100)
+            gp = int(gp_value) if gp_value else 0.0
+            return int(gp * 1)
         except (ValueError, TypeError):
             return 0
     
@@ -195,11 +195,24 @@ class AdvancedItemEditor:
         right_frame = ttk.Frame(main_frame)
         right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
-        # Header with save button
+        # Header with save button and per-item field controls
         header_frame = ttk.Frame(right_frame)
         header_frame.pack(fill=tk.X, pady=(0, 10))
-        
+
         ttk.Label(header_frame, text="Item Editor:", font=('TkDefaultFont', 12, 'bold')).pack(side=tk.LEFT)
+
+        # Per-item field management buttons
+        field_buttons_frame = ttk.Frame(header_frame)
+        field_buttons_frame.pack(side=tk.RIGHT, padx=(0, 10))
+
+        self.add_field_button = ttk.Button(field_buttons_frame, text="Add Field", command=self.add_field_to_item_dialog)
+        self.add_field_button.pack(side=tk.LEFT, padx=(0, 5))
+        self.add_field_button.configure(state='disabled')
+
+        self.remove_field_button = ttk.Button(field_buttons_frame, text="Remove Field", command=self.remove_field_from_item_dialog)
+        self.remove_field_button.pack(side=tk.LEFT, padx=(0, 5))
+        self.remove_field_button.configure(state='disabled')
+
         self.save_button = ttk.Button(header_frame, text="Save Changes", command=self.save_current_item)
         self.save_button.pack(side=tk.RIGHT)
         self.save_button.configure(state='disabled')
@@ -277,30 +290,53 @@ class AdvancedItemEditor:
         # Clear existing widgets
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
-        
+
         self.field_widgets = {}
-        
-        # Get all possible fields from all items
-        all_fields = set()
-        for item in self.items.values():
-            all_fields.update(item.keys())
-        
-        # Standard field order (including tags and notes)
-        standard_fields = ['name', 'description', 'price', 'type', 'weight', 'stack', 'ac', 'damage', 'heal']
-        other_fields = sorted(all_fields - set(standard_fields) - {'tags', 'notes'})
-        
+
+        # If no current item, show all possible fields
+        if not self.current_item_key or self.current_item_key not in self.items:
+            # Get all possible fields from all items
+            all_fields = set()
+            for item in self.items.values():
+                all_fields.update(item.keys())
+
+            # Standard field order (including tags and notes)
+            standard_fields = ['name', 'description', 'price', 'type', 'weight', 'stack', 'ac', 'damage', 'heal']
+            other_fields = sorted(all_fields - set(standard_fields) - {'tags', 'notes'})
+            current_item_fields = standard_fields + other_fields
+        else:
+            # Show only fields that the current item actually has
+            current_item = self.items[self.current_item_key]
+            current_item_fields = list(current_item.keys())
+
+            # Remove tags and notes from the list as they have special handling
+            current_item_fields = [f for f in current_item_fields if f not in ['tags', 'notes']]
+
+            # Sort fields with standard ones first, then alphabetically
+            standard_fields = ['name', 'description', 'price', 'type', 'weight', 'stack', 'ac', 'damage', 'heal']
+            ordered_fields = []
+
+            # Add standard fields that exist in the item
+            for field in standard_fields:
+                if field in current_item_fields:
+                    ordered_fields.append(field)
+
+            # Add other fields alphabetically
+            other_fields = sorted([f for f in current_item_fields if f not in standard_fields])
+            current_item_fields = ordered_fields + other_fields
+
         row = 0
         # Basic fields
-        for field in standard_fields + other_fields:
+        for field in current_item_fields:
             ttk.Label(self.scrollable_frame, text=f"{field.title()}:").grid(row=row, column=0, sticky='nw', padx=5, pady=2)
-            
+
             if field == 'description':
                 widget = tk.Text(self.scrollable_frame, height=4, width=40, wrap=tk.WORD)
                 widget.bind('<KeyRelease>', self.on_field_change)
             else:
                 widget = ttk.Entry(self.scrollable_frame, width=40)
                 widget.bind('<KeyRelease>', self.on_field_change)
-            
+
             widget.grid(row=row, column=1, sticky='ew', padx=5, pady=2)
             self.field_widgets[field] = widget
             row += 1
@@ -436,13 +472,12 @@ class AdvancedItemEditor:
         all_fields = set()
         for item in self.items.values():
             all_fields.update(item.keys())
-        
-        # Core fields that shouldn't be removed
-        core_fields = {'name', 'description', 'price', 'type', 'weight', 'stack', 'ac', 'damage', 'heal', 'tags', 'notes'}
-        removable_fields = sorted(all_fields - core_fields)
-        
-        if not removable_fields:
-            messagebox.showinfo("No Fields", "No removable fields found. Core fields (name, description, etc.) cannot be removed.")
+
+        # Show all fields (user can decide what to remove)
+        available_fields = sorted(all_fields)
+
+        if not available_fields:
+            messagebox.showinfo("No Fields", "No fields found in items.")
             return
         
         dialog = tk.Toplevel(self.root)
@@ -474,7 +509,7 @@ class AdvancedItemEditor:
         scrollbar.config(command=field_listbox.yview)
         
         # Populate listbox
-        for field in removable_fields:
+        for field in available_fields:
             # Show field name and how many items have it
             count = sum(1 for item in self.items.values() if field in item)
             field_listbox.insert(tk.END, f"{field} (in {count}/{len(self.items)} items)")
@@ -485,7 +520,7 @@ class AdvancedItemEditor:
                 messagebox.showerror("No Selection", "Please select at least one field to remove")
                 return
             
-            selected_fields = [removable_fields[i] for i in selected_indices]
+            selected_fields = [available_fields[i] for i in selected_indices]
             
             # Confirm removal
             field_list = ", ".join(selected_fields)
@@ -493,25 +528,272 @@ class AdvancedItemEditor:
                                      f"Are you sure you want to remove these fields from ALL items?\n\n{field_list}\n\nThis action cannot be undone!"):
                 return
             
-            # Remove fields from all items
+            # Remove fields from all items and save to disk
             removed_count = 0
+            modified_items = []
+
             for field in selected_fields:
-                for item in self.items.values():
+                for key, item in self.items.items():
                     if field in item:
                         del item[field]
                         removed_count += 1
-            
-            # Rebuild UI
-            self.rebuild_basic_fields()
+                        if key not in modified_items:
+                            modified_items.append(key)
+
+            # Save all modified items to disk
+            save_count = 0
+            for key in modified_items:
+                if self.save_item(key, self.items[key]):
+                    save_count += 1
+
+            # Update current item data if it was modified
+            if self.current_item_key in modified_items:
+                self.current_item_data = self.items[self.current_item_key].copy()
+                # Rebuild UI only if current item was modified
+                self.rebuild_basic_fields()
+                self.load_item_for_editing(self.current_item_key, self.items[self.current_item_key])
+
             self.refresh_item_list()
-            
-            messagebox.showinfo("Success", f"Removed {len(selected_fields)} field(s) from items")
+
+            messagebox.showinfo("Success", f"Removed {len(selected_fields)} field(s) from {len(modified_items)} items and saved {save_count} files")
             dialog.destroy()
         
         # Buttons
         button_frame = ttk.Frame(dialog)
         button_frame.pack(pady=10)
         
+        ttk.Button(button_frame, text="Remove Selected Fields", command=remove_fields).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=dialog.destroy).pack(side=tk.LEFT, padx=5)
+
+    def add_field_to_item_dialog(self):
+        """Dialog to add a field to current item or selected items"""
+        selected_keys = self.get_selected_item_keys()
+
+        # Determine target: current item or selected items
+        if len(selected_keys) > 1:
+            target_text = f"{len(selected_keys)} selected items"
+            target_items = selected_keys
+        elif self.current_item_key:
+            target_text = f"current item ({self.current_item_key})"
+            target_items = [self.current_item_key]
+        else:
+            messagebox.showwarning("No Selection", "Please select an item or items to add a field to")
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Add Field to {target_text}")
+        dialog.geometry("400x350")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text=f"Adding field to: {target_text}", font=('TkDefaultFont', 10, 'bold')).pack(pady=10)
+
+        # Field name
+        ttk.Label(dialog, text="Field Name:").pack(pady=5)
+        name_entry = ttk.Entry(dialog, width=30)
+        name_entry.pack(pady=5)
+
+        # Default value
+        ttk.Label(dialog, text="Default Value:").pack(pady=(10, 5))
+        value_text = tk.Text(dialog, height=4, width=40)
+        value_text.pack(pady=5, padx=10, fill=tk.X)
+
+        # Value type
+        ttk.Label(dialog, text="Value Type:").pack(pady=(10, 5))
+        type_var = tk.StringVar(value="string")
+        type_frame = ttk.Frame(dialog)
+        type_frame.pack(pady=5)
+
+        ttk.Radiobutton(type_frame, text="String", variable=type_var, value="string").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(type_frame, text="Number", variable=type_var, value="number").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(type_frame, text="Boolean", variable=type_var, value="boolean").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(type_frame, text="List", variable=type_var, value="list").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(type_frame, text="Null", variable=type_var, value="null").pack(side=tk.LEFT, padx=5)
+
+        def add_field():
+            field_name = name_entry.get().strip()
+            if not field_name:
+                messagebox.showerror("Error", "Field name is required")
+                return
+
+            # Check if field already exists in target items
+            existing_items = [key for key in target_items if field_name in self.items[key]]
+            if existing_items:
+                existing_names = [self.items[key].get('name', key) for key in existing_items[:3]]
+                if len(existing_items) > 3:
+                    existing_names.append(f"... and {len(existing_items) - 3} more")
+                if not messagebox.askyesno("Field Exists",
+                                         f"Field '{field_name}' already exists in: {', '.join(existing_names)}. Continue?"):
+                    return
+
+            # Get default value
+            value_str = value_text.get(1.0, tk.END).strip()
+            value_type = type_var.get()
+
+            # Convert value based on type
+            try:
+                if value_type == "string":
+                    default_value = value_str
+                elif value_type == "number":
+                    default_value = float(value_str) if '.' in value_str else int(value_str) if value_str else 0
+                elif value_type == "boolean":
+                    default_value = value_str.lower() in ('true', '1', 'yes', 'on')
+                elif value_type == "list":
+                    default_value = [item.strip() for item in value_str.split(',') if item.strip()] if value_str else []
+                elif value_type == "null":
+                    default_value = None
+                else:
+                    default_value = value_str
+            except ValueError:
+                messagebox.showerror("Error", f"Invalid value for type {value_type}")
+                return
+
+            # Add field to target items and save to disk
+            added_count = 0
+            modified_items = []
+
+            for key in target_items:
+                if field_name not in self.items[key] or existing_items:
+                    self.items[key][field_name] = default_value
+                    added_count += 1
+                    modified_items.append(key)
+
+            # Save all modified items to disk
+            save_count = 0
+            for key in modified_items:
+                if self.save_item(key, self.items[key]):
+                    save_count += 1
+
+            # Update current item data if it was modified
+            if self.current_item_key in target_items:
+                self.current_item_data = self.items[self.current_item_key].copy()
+
+            # Rebuild UI if current item was modified
+            if self.current_item_key in target_items:
+                self.rebuild_basic_fields()
+                self.load_item_for_editing(self.current_item_key, self.items[self.current_item_key])
+
+            self.refresh_item_list()
+
+            messagebox.showinfo("Success", f"Added field '{field_name}' to {added_count} item(s) and saved {save_count} files")
+            dialog.destroy()
+
+        # Buttons
+        button_frame = ttk.Frame(dialog)
+        button_frame.pack(pady=15)
+
+        ttk.Button(button_frame, text="Add Field", command=add_field).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=dialog.destroy).pack(side=tk.LEFT, padx=5)
+
+    def remove_field_from_item_dialog(self):
+        """Dialog to remove a field from current item or selected items"""
+        selected_keys = self.get_selected_item_keys()
+
+        # Determine target: current item or selected items
+        if len(selected_keys) > 1:
+            target_text = f"{len(selected_keys)} selected items"
+            target_items = selected_keys
+        elif self.current_item_key:
+            target_text = f"current item ({self.current_item_key})"
+            target_items = [self.current_item_key]
+        else:
+            messagebox.showwarning("No Selection", "Please select an item or items to remove a field from")
+            return
+
+        # Get all fields from target items
+        all_fields = set()
+        for key in target_items:
+            all_fields.update(self.items[key].keys())
+
+        # Show all fields (user can decide what to remove)
+        available_fields = sorted(all_fields)
+
+        if not available_fields:
+            messagebox.showinfo("No Fields", "No fields found in target items.")
+            return
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Remove Field from {target_text}")
+        dialog.geometry("450x400")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text=f"Removing field from: {target_text}", font=('TkDefaultFont', 10, 'bold')).pack(pady=10)
+
+        # Warning label
+        warning_label = ttk.Label(dialog, text="⚠️ This action cannot be undone!",
+                                 font=('TkDefaultFont', 9), foreground='red')
+        warning_label.pack(pady=5)
+
+        # Field selection
+        field_frame = ttk.Frame(dialog)
+        field_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+
+        # Scrollable listbox for fields
+        listbox_frame = ttk.Frame(field_frame)
+        listbox_frame.pack(fill=tk.BOTH, expand=True)
+
+        scrollbar = ttk.Scrollbar(listbox_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        field_listbox = tk.Listbox(listbox_frame, yscrollcommand=scrollbar.set, selectmode=tk.MULTIPLE)
+        field_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=field_listbox.yview)
+
+        # Populate listbox with field info
+        for field in available_fields:
+            # Count how many target items have this field
+            count = sum(1 for key in target_items if field in self.items[key])
+            field_listbox.insert(tk.END, f"{field} (in {count}/{len(target_items)} target items)")
+
+        def remove_fields():
+            selected_indices = field_listbox.curselection()
+            if not selected_indices:
+                messagebox.showerror("No Selection", "Please select at least one field to remove")
+                return
+
+            selected_fields = [available_fields[i] for i in selected_indices]
+
+            # Confirm removal
+            field_list = ", ".join(selected_fields)
+            if not messagebox.askyesno("Confirm Removal",
+                                     f"Remove these fields from {target_text}?\\n\\n{field_list}\\n\\nThis cannot be undone!"):
+                return
+
+            # Remove fields from target items and save to disk
+            removed_count = 0
+            saved_items = []
+
+            for field in selected_fields:
+                for key in target_items:
+                    if field in self.items[key]:
+                        del self.items[key][field]
+                        removed_count += 1
+                        if key not in saved_items:
+                            saved_items.append(key)
+
+            # Save all modified items to disk
+            save_count = 0
+            for key in saved_items:
+                if self.save_item(key, self.items[key]):
+                    save_count += 1
+
+            # Update current item data and UI if current item was modified
+            if self.current_item_key in target_items:
+                self.current_item_data = self.items[self.current_item_key].copy()
+                # Rebuild UI only if current item was modified
+                self.rebuild_basic_fields()
+                self.load_item_for_editing(self.current_item_key, self.items[self.current_item_key])
+
+            self.refresh_item_list()
+
+            messagebox.showinfo("Success", f"Removed {len(selected_fields)} field(s) from {len(saved_items)} items and saved {save_count} files")
+            dialog.destroy()
+
+        # Buttons
+        button_frame = ttk.Frame(dialog)
+        button_frame.pack(pady=10)
+
         ttk.Button(button_frame, text="Remove Selected Fields", command=remove_fields).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Cancel", command=dialog.destroy).pack(side=tk.LEFT, padx=5)
     
@@ -779,19 +1061,34 @@ class AdvancedItemEditor:
     def on_item_select(self, event):
         """Handle item selection"""
         self.update_selection_label()
-        
+
         selection = self.item_tree.selection()
+
+        # Enable field buttons if any items are selected
+        if len(selection) > 0:
+            self.add_field_button.configure(state='normal')
+            self.remove_field_button.configure(state='normal')
+        else:
+            self.add_field_button.configure(state='disabled')
+            self.remove_field_button.configure(state='disabled')
+
         if len(selection) == 1:  # Only load for single selection
             item_id = selection[0]
             tags = self.item_tree.item(item_id, 'tags')
             if tags:
                 key = tags[0]
                 if key in self.items:
+                    # Always rebuild fields for the newly selected item
+                    self.current_item_key = key
+                    self.rebuild_basic_fields()
                     self.load_item_for_editing(key, self.items[key])
+        else:
+            # Multiple selection or no selection - disable save button
+            self.save_button.configure(state='disabled')
+            self.current_item_key = None
     
     def load_item_for_editing(self, key, item):
         """Load item data into editor fields"""
-        self.current_item_key = key
         self.current_item_data = item.copy()
         
         # Load basic fields
@@ -829,8 +1126,10 @@ class AdvancedItemEditor:
         # Load raw JSON
         self.json_text.delete(1.0, tk.END)
         self.json_text.insert(1.0, json.dumps(item, indent=2))
-        
+
         self.save_button.configure(state='normal')
+        self.add_field_button.configure(state='normal')
+        self.remove_field_button.configure(state='normal')
     
     def load_item_image(self, img_path):
         """Load and display item image"""

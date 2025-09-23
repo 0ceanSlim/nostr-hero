@@ -14,5 +14,7 @@
   "notes": [
     "Can be set to catch creatures",
     "Deals damage when triggered"
-  ]
+  ],
+  "range": "null",
+  "range-long": "null"
 }

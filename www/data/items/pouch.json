@@ -1,7 +1,7 @@
 {
   "name": "Pouch",
   "description": "",
-  "price": 50,
+  "price": 0,
   "type": "Adventuring Gear",
   "weight": 1.0,
   "stack": 1,
@@ -9,10 +9,14 @@
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "container (4)",
-    "inventory-expansion"
+    "container",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "slots": 4,
+  "contains": "any"
 }

@@ -1,20 +1,24 @@
 {
   "name": "Net",
   "description": "",
-  "price": 100,
+  "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 3.0,
   "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
+  "damage-type": "",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "null",
   "rarity": "common",
+  "restrain": "1d3",
   "tags": [
-    "Special",
-    "Thrown"
+    "thrown",
+    "restraint"
   ],
   "notes": [
     "retrains target"
-  ],
-  "img": "equipment/weapon.jpg"
+  ]
 }

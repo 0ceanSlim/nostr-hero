@@ -13,5 +13,8 @@
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "stealth": -1
 }

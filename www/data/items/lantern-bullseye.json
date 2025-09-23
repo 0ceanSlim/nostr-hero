@@ -18,5 +18,7 @@
     "oil-burning"
   ],
   "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg"
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
 }

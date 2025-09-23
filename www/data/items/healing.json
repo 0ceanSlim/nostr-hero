@@ -17,5 +17,7 @@
     "healing"
   ],
   "rarity": "common",
-  "img": "equipment/potion.jpg"
+  "img": "equipment/potion.jpg",
+  "range": "null",
+  "range-long": "null"
 }

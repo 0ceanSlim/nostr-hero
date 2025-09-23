@@ -11,5 +11,7 @@
   "img": "equipment/tool.jpg",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
 }

@@ -1,18 +1,20 @@
 {
   "name": "Sickle",
   "description": "",
-  "price": 100,
+  "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 2.0,
   "stack": 1,
   "ac": null,
   "damage": "1d4",
   "heal": null,
+  "damage-type": "slashing",
   "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "Light",
-    "slashing"
+    "light"
   ],
   "notes": []
 }

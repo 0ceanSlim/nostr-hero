@@ -15,5 +15,7 @@
     "light-armor"
   ],
   "rarity": "common",
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null"
 }

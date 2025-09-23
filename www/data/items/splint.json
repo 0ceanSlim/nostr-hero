@@ -6,12 +6,12 @@
   "weight": 60.0,
   "stack": 1,
   "ac": "17",
-  "damage": null,
-  "heal": null,
   "rarity": "common",
   "tags": [],
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "stealth": -1,
+  "str": 15
 }

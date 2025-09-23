@@ -1,7 +1,7 @@
 {
   "name": "Ball Bearings (bag of 1000)",
   "description": "A bag containing 1,000 small metal ball bearings that can be scattered to create difficult terrain.",
-  "price": 100,
+  "price": 1,
   "type": "Adventuring Gear",
   "weight": 2.0,
   "stack": 1,
@@ -9,12 +9,15 @@
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "area-denial"
+    "restraint"
   ],
   "notes": [
     "Can cover a 10-foot square area",
     "Creates difficult terrain"
-  ]
+  ],
+  "restrain": "1d4"
 }

@@ -1,20 +1,22 @@
 {
   "name": "Halberd",
   "description": "",
-  "price": 2000,
+  "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,
   "stack": 1,
   "ac": null,
   "damage": "1d10",
   "heal": null,
+  "damage-type": "slashing",
   "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "Heavy",
-    "Reach",
-    "Two-handed",
-    "slashing"
+    "heavy",
+    "reach",
+    "two-handed"
   ],
   "notes": []
 }

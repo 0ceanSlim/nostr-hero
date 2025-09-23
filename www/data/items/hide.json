@@ -8,5 +8,7 @@
   "weight": 12,
   "type": "Medium Armor",
   "rarity": "common",
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null"
 }

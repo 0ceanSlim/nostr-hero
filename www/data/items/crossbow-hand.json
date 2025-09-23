@@ -1,20 +1,22 @@
 {
   "name": "Crossbow hand",
   "description": "A small hand-held crossbow that can be fired with one hand.",
-  "price": 7500,
+  "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 3.0,
   "stack": 1,
   "ac": null,
   "damage": "1d6",
   "heal": null,
+  "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "3",
   "rarity": "common",
   "tags": [
     "ammunition",
     "loading",
-    "light",
-    "piercing"
+    "light"
   ],
   "notes": [
     "Requires bolts to fire",

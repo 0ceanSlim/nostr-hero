@@ -1,19 +1,21 @@
 {
   "name": "Blowgun",
   "description": "",
-  "price": 1000,
+  "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 1.0,
   "stack": 1,
   "ac": null,
   "damage": "1",
   "heal": null,
+  "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "3",
   "rarity": "common",
   "tags": [
-    "Ammunition (25/100)",
-    "Loading",
-    "piercing"
+    "ammunition",
+    "loading"
   ],
   "notes": []
 }

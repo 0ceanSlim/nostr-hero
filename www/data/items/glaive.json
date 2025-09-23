@@ -1,19 +1,22 @@
 {
   "name": "Glaive",
   "description": "",
-  "price": 2000,
+  "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,
   "stack": 1,
   "ac": null,
   "damage": "1d10",
   "heal": null,
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "null",
   "rarity": "common",
   "tags": [
-    "Heavy",
-    "Reach",
-    "Two-handed"
+    "heavy",
+    "reach",
+    "two-handed"
   ],
   "notes": [],
-  "img": "equipment/weapon.jpg"
+  "damage-type": ""
 }

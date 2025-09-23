@@ -1,7 +1,7 @@
 {
   "name": "Chain (10ft)",
   "description": "A heavy iron chain useful for binding, climbing, or securing objects.",
-  "price": 500,
+  "price": 5,
   "type": "Adventuring Gear",
   "weight": 10.0,
   "stack": 1,
@@ -9,7 +9,10 @@
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
+  "restrain": "1d2",
   "tags": [
     "restraint"
   ],
