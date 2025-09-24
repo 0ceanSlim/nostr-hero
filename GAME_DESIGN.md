@@ -103,8 +103,35 @@ Village---Hill-----KINGDOM---------Urban---------City----Desert---Village
 - **Movement**: Step forward (-1 distance) or step back (+1 distance)
 - **Melee Attack**: Effective at range 0-1, uses STR modifier
 - **Ranged Attack**: Uses weapon range (1-6), uses DEX modifier, requires ammunition
+- **Cast Spell**: Use prepared spells with varying ranges and effects
 - **Defend**: +2 AC for one turn
+- **Use Item**: Consume potions, activate magic items
 - **Flee**: Escape chance based on speed, adds 1 fatigue
+
+#### Spell Casting in Combat
+
+- **Spell Ranges**: Each spell has specific range limitations
+  - **Touch Spells** (range 0): Cure Wounds, Shocking Grasp
+  - **Close Range** (1-2): Fire Bolt, Ray of Frost
+  - **Medium Range** (3-4): Magic Missile (automatic hit)
+  - **Long Range** (5-6): Some high-level spells
+- **Mana Cost**: Each spell consumes mana points
+  - **Cantrips**: 0 mana (unlimited use)
+  - **Level 1 Spells**: 1 mana each
+  - **Higher Levels**: Increasing mana costs
+- **Material Components**: Some spells require specific items
+  - **Fireball**: Requires "bat-guano-and-sulfur" (consumed on use)
+  - **Cure Wounds**: Requires "blessed-water" (consumed on use)
+  - **Component Pouch**: Provides materials for spells without specific requirements
+- **Spell Effects**: Different spell types affect combat differently
+  - **Damage Spells**: Magic Missile (automatic hit), Fire Bolt (ranged attack)
+  - **Defensive Spells**: Shield (+5 AC for one turn)
+  - **Healing Spells**: Cure Wounds (restore HP)
+  - **Utility Spells**: Various battlefield effects
+- **Spell Preparation**: Only prepared spells can be cast
+  - **Wizards**: Must prepare spells from spellbook each day
+  - **Clerics**: Can prepare any spell from their domain list
+  - **Sorcerers**: Know limited spells, always available
 
 #### Range Effectiveness
 
@@ -300,15 +327,23 @@ Distance: 3 (Normal encounter)
 
 Goblin: ████████░░ (8/10 HP)
 You:    ██████████ (15/15 HP) [Tired: -1 to rolls]
+Mana:   ████░░░░░░ (4/10 MP)
 
 Your Turn:
 → Advance (distance 2)
 → Retreat (distance 4)
 → Attack with Sword (range 0-1, need to close distance)
 → Attack with Shortbow (range 2-4, effective at current distance)
+→ Cast Fire Bolt (1-2 range, need to close distance, 0 mana)
+→ Cast Magic Missile (3-4 range, effective, 1 mana, auto-hit)
+→ Cast Shield (defensive, +5 AC this turn, 1 mana)
 → Defend (+2 AC this turn)
-→ Use Item
+→ Use Health Potion
 → Attempt to Flee (cannot flee at this distance)
+
+Spell Components:
+- Component Pouch: Available for general spells
+- Bat Guano & Sulfur: 2 remaining (for Fireball)
 ```
 
 ## Content Progression
@@ -375,12 +410,69 @@ Your Turn:
   - PvP Combat: Player vs player encounters in certain zones
   - Guild System: Player organizations with shared goals
 
-### Save System
+### Magic & Spell System
 
+#### Current Implementation
+- **17 Implemented Spells**: From cantrips to high-level spells
+  - Cantrips: Fire Bolt, Ray of Frost, Shocking Grasp, etc.
+  - Level 1: Magic Missile, Shield, Cure Wounds, etc.
+  - Higher Levels: Fireball, Thunderwave, etc.
+- **Material Components**: Custom system using specific items
+  - Replaced traditional V/S/M with material-only requirements
+  - "bat-guano-and-sulfur" for explosive spells
+  - "blessed-water" for divine magic
+  - "cursed-bone-dust" for necromancy
+  - Component pouches for spells without specific materials
+- **Class Integration**: Spell lists integrated with character classes
+  - Wizards: Spellbook system with learnable spells
+  - Clerics: Domain-based spell access
+  - Sorcerers: Known spells system
+  - Each class has appropriate starting spells
+- **Mana System**: Custom mana costs instead of spell slots
+  - Cantrips: 0 mana
+  - Level 1: 1 mana
+  - Scaling costs for higher levels
+- **Spell Properties**: Damage, range, school, casting time all defined
+
+#### Spell Data Structure
+```json
+{
+  "name": "Magic Missile",
+  "level": 1,
+  "school": "evocation",
+  "mana_cost": 1,
+  "damage": "3d4 + 3",
+  "spell_attack": "automatic",
+  "material_component": null,
+  "classes": ["sorcerer", "wizard"]
+}
+```
+
+### Save System & Architecture
+
+#### Current Implementation
+- **DOM State Management**: All game state stored in hidden DOM elements during play
+- **Manual Save System**: Players click "Save Game" to persist state to Nostr relays
 - **Nostr Integration**: Character data stored as addressable Nostr events
-- **JSON Format**: Save state includes character stats, inventory, progress, location
-- **Cross-Device**: Access your character from any device with your Nostr keys
-- **Backup & Recovery**: Distributed nature provides automatic backup
-- **Event Addressability**: Save states are addressable events that can be retrieved by key
+- **JSON Format**: Complete save state with character, inventory, spells, location
+- **Cross-Device**: Access character from any device with Nostr keys
+- **Working Character Creation**: Full HTMX-based character creation with gear selection
 
-This design provides a foundation for a rich, text-based RPG experience while maintaining the simplicity needed for HTMX implementation. The modular location system allows for easy world expansion and the turn-based mechanics ensure smooth server-side state management.
+#### Current Tech Stack
+- **Backend**: Go server with minimal APIs for data serving
+- **Database**: DuckDB for static game data (items, spells, monsters, locations)
+- **Frontend**: HTMX + Hyperscript + JavaScript for DOM state management
+- **Save Storage**: Nostr relays for persistent character saves
+- **File Structure**: Organized data folders (character/, systems/, equipment/, content/)
+
+#### Implementation Status
+- ✅ **Character Discovery & Generation**: Working deterministic character creation
+- ✅ **Spell System**: 17 spells with material components integrated
+- ✅ **Item System**: 184+ items with full properties and tags
+- ✅ **Character Creation UI**: Dynamic HTMX interface with gear selection
+- 🚧 **Database Migration**: Moving from JSON files to DuckDB
+- 📋 **Game Interface**: Planning DOM-based gameplay mechanics
+- ⏸️ **Combat System**: Designed but awaiting implementation
+- ⏸️ **Location System**: Designed but awaiting implementation
+
+This design provides a foundation for a rich, text-based RPG experience using modern web technologies. The DOM-based state management with manual saves to Nostr relays creates a unique hybrid of client-side responsiveness and decentralized persistence, perfect for the HTMX/Hyperscript approach.

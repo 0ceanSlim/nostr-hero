@@ -6,7 +6,8 @@
       "Bash(find:*)",
       "Bash(rm:*)",
       "Bash(mv:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebSearch"
     ],
     "deny": []
   }

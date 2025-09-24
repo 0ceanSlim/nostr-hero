@@ -74,7 +74,7 @@
               document.addEventListener("DOMContentLoaded", async () => {
                 try {
                   // Fetch the weights.json file
-                  const response = await fetch("/data/weights.json");
+                  const response = await fetch("/data/systems/weights.json");
                   if (!response.ok) throw new Error("Failed to load race data");
                   const raceData = await response.json();
 
@@ -133,7 +133,7 @@
               class="text-blue-400 hover:text-blue-300 transition-colors duration-200"
             >
               <a
-                href="/data/weights.json"
+                href="/data/systems/weights.json"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="gap-2 cursor-pointer"
