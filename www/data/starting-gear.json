@@ -96,9 +96,16 @@
         ]
       },
       {
+        "option": [
+          ["cursed-bone-dust", 2],
+          ["component-pouch", 1]
+        ]
+      },
+      {
         "given": [
           ["leather armor", 1],
-          ["dagger", 1]
+          ["dagger", 1],
+          ["cursed-bone-dust", 1]
         ]
       }
     ]
@@ -155,7 +162,16 @@
         ]
       },
       {
-        "given": [["shield", 1]]
+        "option": [
+          ["blessed-water", 2],
+          ["component-pouch", 1]
+        ]
+      },
+      {
+        "given": [
+          ["shield", 1],
+          ["blessed-water", 1]
+        ]
       }
     ]
   },
@@ -202,6 +218,12 @@
           ["Totem", 1],
           ["Wooden Staff", 1],
           ["Yew Wand", 1]
+        ]
+      },
+      {
+        "option": [
+          ["component-pouch", 1],
+          ["blessed-water", 1]
         ]
       },
       {
@@ -578,7 +600,16 @@
         ]
       },
       {
-        "given": [["dagger", 2]]
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 2]
+        ]
+      },
+      {
+        "given": [
+          ["dagger", 2],
+          ["bat-guano-and-sulfur", 1]
+        ]
       }
     ]
   },
@@ -641,6 +672,12 @@
         ]
       },
       {
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 1]
+        ]
+      },
+      {
         "given": [
           ["leather armor", 1],
           ["dagger", 2]
@@ -673,7 +710,16 @@
         ]
       },
       {
-        "given": ["spellbook", 1]
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 2]
+        ]
+      },
+      {
+        "given": [
+          ["spellbook", 1],
+          ["bat-guano-and-sulfur", 1]
+        ]
       }
     ]
   }

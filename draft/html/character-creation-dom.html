@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostr Hero - Character Creation</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .creation-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(42, 42, 42, 0.95);
+            border: 2px solid #4a6fa5;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .character-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6fa5;
+        }
+
+        .character-header h1 {
+            color: #ffd700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .character-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #555;
+        }
+
+        .stat-name {
+            color: #87ceeb;
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            color: #ffd700;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .choice-window {
+            margin: 30px 0;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .choice-title {
+            color: #ffd700;
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            background: linear-gradient(145deg, #333, #2a2a2a);
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            border-color: #4a6fa5;
+            box-shadow: 0 5px 20px rgba(74, 111, 165, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .option-name {
+            color: #ffd700;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .option-description {
+            color: #ccc;
+            line-height: 1.5;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        .selected-gear {
+            background: rgba(0, 50, 0, 0.3);
+            border: 2px solid #4a6fa5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .gear-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .gear-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #4a6fa5;
+        }
+
+        .final-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .start-game-btn {
+            background: linear-gradient(145deg, #4a6fa5, #3a5f95);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3);
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 111, 165, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Store character and gear state in hidden elements */
+        #character-data, #gear-data, #choice-data {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="creation-container">
+        <!-- Hidden data storage -->
+        <div id="character-data"></div>
+        <div id="gear-data"></div>
+        <div id="choice-data"></div>
+
+        <!-- Character Header -->
+        <div class="character-header">
+            <h1 id="character-title">Generating Character...</h1>
+            <div class="character-info" id="character-stats"></div>
+        </div>
+
+        <!-- Choice Window Container -->
+        <div id="choice-container"></div>
+
+        <!-- Selected Gear Display -->
+        <div id="selected-gear" class="selected-gear hidden">
+            <h3 style="color: #ffd700; margin-bottom: 15px;">Your Selected Equipment</h3>
+            <div class="gear-list" id="selected-gear-list"></div>
+        </div>
+
+        <!-- Final Summary -->
+        <div id="final-summary" class="hidden">
+            <div class="final-summary">
+                <div>
+                    <h4 style="color: #ffd700; margin-bottom: 15px;">Selected Equipment</h4>
+                    <div id="final-selected-list"></div>
+                </div>
+                <div>
+                    <h4 style="color: #90ee90; margin-bottom: 15px;">Guaranteed Equipment</h4>
+                    <div id="final-guaranteed-list"></div>
+                </div>
+            </div>
+
+            <div id="starting-spells" class="hidden" style="margin: 20px 0;">
+                <h4 style="color: #87ceeb; margin-bottom: 15px;">Your Starting Spells</h4>
+                <div id="spells-list"></div>
+            </div>
+
+            <button class="start-game-btn"
+                    _="on click call generateSaveFile() then set window.location to '/game'">
+                Begin Your Adventure
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Character derivation from pubkey (client-side)
+        function deriveCharacterFromPubkey(pubkey) {
+            // Simple hash function for deterministic generation
+            let hash = 0;
+            for (let i = 0; i < pubkey.length; i++) {
+                hash = ((hash << 5) - hash + pubkey.charCodeAt(i)) & 0xffffffff;
+            }
+
+            // Use hash as seed
+            const seed = Math.abs(hash);
+            const rng = seedRandom(seed);
+
+            const races = ['human', 'elf', 'dwarf', 'halfling', 'dragonborn', 'gnome', 'half-elf', 'half-orc', 'tiefling'];
+            const classes = ['wizard', 'sorcerer', 'cleric', 'druid', 'bard', 'warlock', 'paladin', 'ranger', 'fighter', 'rogue', 'barbarian', 'monk'];
+
+            const race = races[Math.floor(rng() * races.length)];
+            const charClass = classes[Math.floor(rng() * classes.length)];
+
+            // Generate stats (4d6 drop lowest)
+            const stats = {};
+            const statNames = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+
+            for (const stat of statNames) {
+                const rolls = [rollDie(6, rng), rollDie(6, rng), rollDie(6, rng), rollDie(6, rng)];
+                rolls.sort((a, b) => b - a);
+                stats[stat] = rolls.slice(0, 3).reduce((sum, val) => sum + val, 0);
+            }
+
+            // Apply racial bonuses (simplified)
+            const racialBonuses = {
+                'human': { strength: 1, dexterity: 1, constitution: 1, intelligence: 1, wisdom: 1, charisma: 1 },
+                'elf': { dexterity: 2 },
+                'dwarf': { constitution: 2 },
+                'halfling': { dexterity: 2 },
+                'dragonborn': { strength: 2, charisma: 1 },
+                'gnome': { intelligence: 2 },
+                'half-elf': { charisma: 2, dexterity: 1 },
+                'half-orc': { strength: 2, constitution: 1 },
+                'tiefling': { intelligence: 1, charisma: 2 }
+            };
+
+            if (racialBonuses[race]) {
+                for (const [stat, bonus] of Object.entries(racialBonuses[race])) {
+                    stats[stat] += bonus;
+                }
+            }
+
+            // Calculate HP and Mana
+            const conMod = Math.floor((stats.constitution - 10) / 2);
+            const hitDice = {
+                'barbarian': 12, 'fighter': 10, 'paladin': 10, 'ranger': 10,
+                'bard': 8, 'cleric': 8, 'druid': 8, 'monk': 8, 'rogue': 8, 'warlock': 8,
+                'sorcerer': 6, 'wizard': 6
+            };
+            const hp = (hitDice[charClass] || 8) + conMod;
+
+            const spellcasters = ['wizard', 'sorcerer', 'cleric', 'druid', 'bard', 'warlock', 'paladin', 'ranger'];
+            const manaByClass = {
+                'wizard': 4, 'sorcerer': 4, 'cleric': 3, 'druid': 3,
+                'bard': 3, 'warlock': 2, 'paladin': 2, 'ranger': 1
+            };
+            const mana = spellcasters.includes(charClass) ? (manaByClass[charClass] || 0) : 0;
+
+            return {
+                pubkey: pubkey,
+                race: race,
+                class: charClass,
+                stats: stats,
+                hp: hp,
+                mana: mana,
+                level: 1
+            };
+        }
+
+        // Simple seeded random number generator
+        function seedRandom(seed) {
+            return function() {
+                seed = (seed * 9301 + 49297) % 233280;
+                return seed / 233280;
+            };
+        }
+
+        function rollDie(sides, rng) {
+            return Math.floor(rng() * sides) + 1;
+        }
+
+        // Embedded starting gear data (fallback for local file testing)
+        function getEmbeddedStartingGear() {
+            // Complete starting gear data embedded for local testing
+            // This matches the data in www/data/starting-gear.json
+            return JSON.parse(`[
+  {
+    "class": "Barbarian",
+    "starting_gear": [
+      {
+        "option": [
+          ["greataxe", 1],
+          ["battleaxe", 1],
+          ["flail", 1],
+          ["glaive", 1],
+          ["greatsword", 1],
+          ["halberd", 1],
+          ["lance", 1],
+          ["longsword", 1],
+          ["maul", 1],
+          ["morningstar", 1],
+          ["pike", 1],
+          ["rapier", 1],
+          ["scimitar", 1],
+          ["shortsword", 1],
+          ["trident", 1],
+          ["war pick", 1],
+          ["warhammer", 1],
+          ["whip", 1]
+        ]
+      },
+      {
+        "option": [
+          ["handaxe", 2],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "given": [
+          ["explorer's pack", 1],
+          ["javelin", 4]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Bard",
+    "starting_gear": [
+      {
+        "option": [
+          ["rapier", 1],
+          ["longsword", 1],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["diplomat's pack", 1],
+          ["entertainer's pack", 1]
+        ]
+      },
+      {
+        "option": [
+          ["lute", 1],
+          ["bagpipe", 1],
+          ["drum", 1],
+          ["dulcimer", 1],
+          ["flute", 1],
+          ["lyre", 1],
+          ["horn", 1],
+          ["pan flute", 1],
+          ["shawm", 1],
+          ["viol", 1]
+        ]
+      },
+      {
+        "option": [
+          ["cursed-bone-dust", 2],
+          ["component-pouch", 1]
+        ]
+      },
+      {
+        "given": [
+          ["leather armor", 1],
+          ["dagger", 1],
+          ["cursed-bone-dust", 1]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Cleric",
+    "starting_gear": [
+      {
+        "option": [
+          ["mace", 1],
+          ["warhammer", 1]
+        ]
+      },
+      {
+        "option": [
+          ["scale mail", 1],
+          ["leather armor", 1],
+          ["chain mail", 1]
+        ]
+      },
+      {
+        "option": [
+          [
+            ["light crossbow", 1],
+            ["bolt", 20]
+          ],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["priest's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "option": [
+          ["amulet", 1],
+          ["emblem", 1],
+          ["reliquary", 1]
+        ]
+      },
+      {
+        "option": [
+          ["blessed-water", 2],
+          ["component-pouch", 1]
+        ]
+      },
+      {
+        "given": [
+          ["shield", 1],
+          ["blessed-water", 1]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Druid",
+    "starting_gear": [
+      {
+        "option": [
+          ["shield", 1],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["scimitar", 1],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1]
+        ]
+      },
+      {
+        "option": [
+          ["Sprig of Mistletoe", 1],
+          ["Totem", 1],
+          ["Wooden Staff", 1],
+          ["Yew Wand", 1]
+        ]
+      },
+      {
+        "option": [
+          ["component-pouch", 1],
+          ["blessed-water", 1]
+        ]
+      },
+      {
+        "given": [
+          ["leather armor", 1],
+          ["explorer's pack", 1]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Fighter",
+    "starting_gear": [
+      {
+        "option": [
+          ["chain mail", 1],
+          [
+            ["leather armor", 1],
+            ["longbow", 1],
+            ["arrow", 20]
+          ]
+        ]
+      },
+      {
+        "option": [
+          [
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ],
+            ["shield", 1]
+          ],
+          [
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ],
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ]
+          ]
+        ]
+      },
+      {
+        "option": [
+          [
+            ["light crossbow", 1],
+            ["bolt", 20]
+          ],
+          ["handaxe", 2]
+        ]
+      },
+      {
+        "option": [
+          ["dungeoneer's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Monk",
+    "starting_gear": [
+      {
+        "option": [
+          ["shortsword", 1],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["dungeoneer's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "given": ["dart", 10]
+      }
+    ]
+  },
+  {
+    "class": "Paladin",
+    "starting_gear": [
+      {
+        "option": [
+          [
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ],
+            ["shield", 1]
+          ],
+          [
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ],
+            [
+              ["battleaxe", 1],
+              ["flail", 1],
+              ["glaive", 1],
+              ["greataxe", 1],
+              ["greatsword", 1],
+              ["halberd", 1],
+              ["lance", 1],
+              ["longsword", 1],
+              ["maul", 1],
+              ["morningstar", 1],
+              ["pike", 1],
+              ["rapier", 1],
+              ["scimitar", 1],
+              ["shortsword", 1],
+              ["trident", 1],
+              ["war pick", 1],
+              ["warhammer", 1],
+              ["whip", 1]
+            ]
+          ]
+        ]
+      },
+      {
+        "option": [
+          ["javelin", 5],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1]
+        ]
+      },
+      {
+        "option": [
+          ["amulet", 1],
+          ["emblem", 1],
+          ["reliquary", 1]
+        ]
+      },
+      {
+        "option": [
+          ["priest's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "given": [["chain mail", 1]]
+      }
+    ]
+  },
+  {
+    "class": "Ranger",
+    "starting_gear": [
+      {
+        "option": [
+          ["scale mail", 1],
+          ["leather armor", 1]
+        ]
+      },
+      {
+        "option": [
+          ["shortsword", 2],
+          [
+            [
+              ["club", 1],
+              ["dagger", 1],
+              ["greatclub", 1],
+              ["handaxe", 1],
+              ["javelin", 1],
+              ["light hammer", 1],
+              ["mace", 1],
+              ["quarterstaff", 1],
+              ["sickle", 1],
+              ["spear", 1]
+            ],
+            [
+              ["club", 1],
+              ["dagger", 1],
+              ["greatclub", 1],
+              ["handaxe", 1],
+              ["javelin", 1],
+              ["light hammer", 1],
+              ["mace", 1],
+              ["quarterstaff", 1],
+              ["sickle", 1],
+              ["spear", 1]
+            ]
+          ]
+        ]
+      },
+      {
+        "option": [
+          ["dungeoneer's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "given": [
+          ["longbow", 1],
+          ["arrow", 20]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Rogue",
+    "starting_gear": [
+      {
+        "option": [
+          ["rapier", 1],
+          ["shortsword", 1]
+        ]
+      },
+      {
+        "option": [
+          [
+            ["shortbow", 1],
+            ["arrow", 20]
+          ],
+          ["shortsword", 1]
+        ]
+      },
+      {
+        "option": [
+          ["burglar's pack", 1],
+          ["dungeoneer's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "given": [
+          ["leather armor", 1],
+          ["thieves' tools", 1],
+          ["dagger", 2]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Sorcerer",
+    "starting_gear": [
+      {
+        "option": [
+          [
+            ["light crossbow", 1],
+            ["bolt", 20]
+          ],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
+        ]
+      },
+      {
+        "option": [
+          ["dungeoneer's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 2]
+        ]
+      },
+      {
+        "given": [
+          ["dagger", 2],
+          ["bat-guano-and-sulfur", 1]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Warlock",
+    "starting_gear": [
+      {
+        "option": [
+          [
+            ["light crossbow", 1],
+            ["bolt", 20]
+          ],
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["club", 1],
+          ["dagger", 1],
+          ["greatclub", 1],
+          ["handaxe", 1],
+          ["javelin", 1],
+          ["light hammer", 1],
+          ["mace", 1],
+          ["quarterstaff", 1],
+          ["sickle", 1],
+          ["spear", 1],
+          ["crossbow, light", 1],
+          ["dart", 1],
+          ["shortbow", 1],
+          ["sling", 1]
+        ]
+      },
+      {
+        "option": [
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
+        ]
+      },
+      {
+        "option": [
+          ["scholar's pack", 1],
+          ["dungeoneer's pack", 1]
+        ]
+      },
+      {
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 1]
+        ]
+      },
+      {
+        "given": [
+          ["leather armor", 1],
+          ["dagger", 2]
+        ]
+      }
+    ]
+  },
+  {
+    "class": "Wizard",
+    "starting_gear": [
+      {
+        "option": [
+          ["quarterstaff", 1],
+          ["dagger", 1]
+        ]
+      },
+      {
+        "option": [
+          ["wand", 1],
+          ["orb", 1],
+          ["rod", 1],
+          ["staff", 1],
+          ["crystal", 1]
+        ]
+      },
+      {
+        "option": [
+          ["scholar's pack", 1],
+          ["explorer's pack", 1]
+        ]
+      },
+      {
+        "option": [
+          ["component-pouch", 1],
+          ["bat-guano-and-sulfur", 2]
+        ]
+      },
+      {
+        "given": [
+          ["spellbook", 1],
+          ["bat-guano-and-sulfur", 1]
+        ]
+      }
+    ]
+  }
+]`);
+        }
+
+        // Load starting gear choices for a class
+        async function loadClassGearChoices(className) {
+            try {
+                console.log('Loading gear choices for class:', className);
+
+                let startingGear;
+
+                // Try to fetch from file first
+                try {
+                    const response = await fetch('../../www/data/starting-gear.json');
+                    console.log('Fetch response:', response.status);
+
+                    if (response.ok) {
+                        startingGear = await response.json();
+                        console.log('Loaded starting gear data from file, entries:', startingGear.length);
+                    } else {
+                        throw new Error('Fetch failed: ' + response.status);
+                    }
+                } catch (fetchError) {
+                    console.log('Fetch failed, using embedded data:', fetchError.message);
+                    // Fallback to embedded data for local file testing
+                    startingGear = getEmbeddedStartingGear();
+                    console.log('Using embedded starting gear data, entries:', startingGear.length);
+                }
+
+                const classData = startingGear.find(item => item.class.toLowerCase() === className.toLowerCase());
+                console.log('Found class data:', classData ? 'yes' : 'no');
+                if (!classData) return { choices: [], guaranteed: [] };
+
+                const choices = [];
+                const guaranteed = [];
+
+                classData.starting_gear.forEach((gearGroup, index) => {
+                    if (gearGroup.option) {
+                        choices.push({
+                            id: index,
+                            title: deriveChoiceTitle(gearGroup.option),
+                            options: gearGroup.option
+                        });
+                    } else if (gearGroup.given) {
+                        guaranteed.push(...gearGroup.given);
+                    }
+                });
+
+                console.log('Processed choices:', choices.length, 'guaranteed:', guaranteed.length);
+                return { choices, guaranteed };
+            } catch (error) {
+                console.error('Could not load starting gear:', error);
+                return { choices: [], guaranteed: [] };
+            }
+        }
+
+        function deriveChoiceTitle(options) {
+            const firstOption = Array.isArray(options[0]) ? options[0][0] : options[0];
+            const optionStr = firstOption.toLowerCase();
+
+            if (optionStr.includes('sword') || optionStr.includes('axe') || optionStr.includes('mace') || optionStr.includes('dagger')) {
+                return 'Choose Your Starting Weapon';
+            } else if (optionStr.includes('armor') || optionStr.includes('mail') || optionStr.includes('leather')) {
+                return 'Choose Your Armor';
+            } else if (optionStr.includes('wand') || optionStr.includes('orb') || optionStr.includes('rod') || optionStr.includes('crystal')) {
+                return 'Choose Your Spellcasting Focus';
+            } else if (optionStr.includes('component') || optionStr.includes('pouch') || optionStr.includes('water') || optionStr.includes('guano')) {
+                return 'Choose Your Spell Components';
+            } else if (optionStr.includes('pack')) {
+                return 'Choose Your Equipment Pack';
+            } else {
+                return 'Choose Your Equipment';
+            }
+        }
+
+        // Display current choice
+        function displayChoice(choiceData, choiceIndex) {
+            const container = document.getElementById('choice-container');
+            const choice = choiceData.choices[choiceIndex];
+
+            container.innerHTML = `
+                <div class="choice-window">
+                    <div class="choice-title">${choice.title}</div>
+                    <div class="options-grid">
+                        ${choice.options.map((option, index) => {
+                            const optionName = Array.isArray(option) ? option[0] : option;
+                            const optionKey = Array.isArray(option) ? option.join('-') : option;
+
+                            return `
+                                <div class="option-card"
+                                     onclick="selectOption(${choiceIndex}, '${optionKey.replace(/'/g, "\\'")}', '${optionName.replace(/'/g, "\\'")}'); nextChoice();">
+                                    <div class="option-name">${optionName}</div>
+                                    <div class="option-description">
+                                        ${getItemDescription(optionName)}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getItemDescription(itemName) {
+            // Simple descriptions - would load from items/*.json in real implementation
+            const descriptions = {
+                'quarterstaff': 'Versatile simple weapon, can be used one or two handed.',
+                'dagger': 'Light, finesse weapon that can be thrown.',
+                'wand': 'Elegant spellcasting focus for precise magic.',
+                'orb': 'Powerful focus that channels raw magical energy.',
+                'component-pouch': 'Universal pouch for most spell components.',
+                'bat-guano-and-sulfur': 'Specific materials for explosive spells like Fireball.'
+            };
+            return descriptions[itemName.toLowerCase().replace(' ', '-')] || 'A useful piece of equipment.';
+        }
+
+        // Handle option selection
+        function selectOption(choiceIndex, optionKey, optionName) {
+            console.log('selectOption called:', choiceIndex, optionKey, optionName);
+            // Store selection in DOM
+            const gearData = document.getElementById('gear-data');
+            const currentSelections = JSON.parse(gearData.textContent || '{}');
+            currentSelections[choiceIndex] = { key: optionKey, name: optionName };
+            gearData.textContent = JSON.stringify(currentSelections);
+
+            // Update selected gear display
+            updateSelectedGearDisplay();
+        }
+
+        function updateSelectedGearDisplay() {
+            const gearData = JSON.parse(document.getElementById('gear-data').textContent || '{}');
+            const selectedGear = document.getElementById('selected-gear');
+            const gearList = document.getElementById('selected-gear-list');
+
+            if (Object.keys(gearData).length > 0) {
+                selectedGear.classList.remove('hidden');
+                gearList.innerHTML = Object.values(gearData).map(item =>
+                    `<div class="gear-item"><strong>${item.name}</strong></div>`
+                ).join('');
+            }
+        }
+
+        // Move to next choice or finish
+        function nextChoice() {
+            console.log('nextChoice called');
+            const choiceData = JSON.parse(document.getElementById('choice-data').textContent || '{}');
+            const currentChoice = parseInt(choiceData.currentChoice || 0);
+            const totalChoices = choiceData.choices.length;
+            console.log('Current choice:', currentChoice, 'Total choices:', totalChoices);
+
+            if (currentChoice + 1 < totalChoices) {
+                // Next choice
+                choiceData.currentChoice = currentChoice + 1;
+                document.getElementById('choice-data').textContent = JSON.stringify(choiceData);
+                displayChoice(choiceData, currentChoice + 1);
+            } else {
+                // Finish - show final summary
+                showFinalSummary();
+            }
+        }
+
+        function showFinalSummary() {
+            document.getElementById('choice-container').style.display = 'none';
+            document.getElementById('selected-gear').style.display = 'none';
+            document.getElementById('final-summary').classList.remove('hidden');
+
+            // Populate final lists
+            const gearData = JSON.parse(document.getElementById('gear-data').textContent || '{}');
+            const choiceData = JSON.parse(document.getElementById('choice-data').textContent || '{}');
+            const characterData = JSON.parse(document.getElementById('character-data').textContent || '{}');
+
+            // Selected gear
+            document.getElementById('final-selected-list').innerHTML =
+                Object.values(gearData).map(item =>
+                    `<div class="gear-item"><strong>${item.name}</strong></div>`
+                ).join('');
+
+            // Guaranteed gear
+            document.getElementById('final-guaranteed-list').innerHTML =
+                choiceData.guaranteed.map(item => {
+                    const itemName = Array.isArray(item) ? item[0] : item;
+                    const quantity = Array.isArray(item) && item[1] ? item[1] : 1;
+                    return `<div class="gear-item"><strong>${itemName}</strong> (${quantity}x)</div>`;
+                }).join('');
+
+            // Show spells if spellcaster
+            if (characterData.mana > 0) {
+                document.getElementById('starting-spells').classList.remove('hidden');
+                // Would load actual spells from starting-spells.json
+                document.getElementById('spells-list').innerHTML =
+                    '<div class="gear-item">Starting spells would be loaded here</div>';
+            }
+        }
+
+        // Generate final save file
+        function generateSaveFile() {
+            const characterData = JSON.parse(document.getElementById('character-data').textContent || '{}');
+            const gearData = JSON.parse(document.getElementById('gear-data').textContent || '{}');
+            const choiceData = JSON.parse(document.getElementById('choice-data').textContent || '{}');
+
+            const inventory = [];
+
+            // Add selected items
+            Object.values(gearData).forEach(item => {
+                inventory.push({
+                    item_id: item.key.toLowerCase().replace(' ', '-'),
+                    item_name: item.name,
+                    quantity: 1,
+                    source: 'selected'
+                });
+            });
+
+            // Add guaranteed items
+            choiceData.guaranteed.forEach(item => {
+                const itemName = Array.isArray(item) ? item[0] : item;
+                const quantity = Array.isArray(item) && item[1] ? item[1] : 1;
+                inventory.push({
+                    item_id: itemName.toLowerCase().replace(' ', '-'),
+                    item_name: itemName,
+                    quantity: quantity,
+                    source: 'guaranteed'
+                });
+            });
+
+            const saveFile = {
+                character: {
+                    pubkey: characterData.pubkey,
+                    race: characterData.race,
+                    class: characterData.class,
+                    level: characterData.level,
+                    stats: characterData.stats,
+                    hp: {
+                        current: characterData.hp,
+                        maximum: characterData.hp
+                    },
+                    mana: characterData.mana > 0 ? {
+                        current: characterData.mana,
+                        maximum: characterData.mana
+                    } : null
+                },
+                inventory: inventory,
+                location: {
+                    current: getStartingLocation(characterData.race),
+                    district: 'center'
+                },
+                game_state: {
+                    fatigue: 'fresh',
+                    time_of_day: 'morning',
+                    days_played: 0
+                },
+                meta: {
+                    created_at: new Date().toISOString(),
+                    version: '1.0',
+                    character_creation_complete: true
+                }
+            };
+
+            // Send save file to server
+            fetch('/api/create-character', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(saveFile)
+            });
+
+            console.log('Generated save file:', saveFile);
+            return saveFile;
+        }
+
+        function getStartingLocation(race) {
+            const locations = {
+                'human': 'waterdeep',
+                'elf': 'silverymoon',
+                'dwarf': 'citadel-adbar',
+                'halfling': 'loudwater',
+                'dragonborn': 'neverwinter',
+                'gnome': 'silverymoon',
+                'half-elf': 'waterdeep',
+                'half-orc': 'luskan',
+                'tiefling': 'baldurs-gate'
+            };
+            return locations[race] || 'waterdeep';
+        }
+
+        // Initialize character creation
+        async function initCharacterCreation() {
+            // Get pubkey from URL or prompt
+            const urlParams = new URLSearchParams(window.location.search);
+            const pubkey = urlParams.get('pubkey') || prompt('Enter your pubkey:') || 'npub1test123456789';
+
+            // Derive character
+            const character = deriveCharacterFromPubkey(pubkey);
+            document.getElementById('character-data').textContent = JSON.stringify(character);
+
+            // Update UI
+            document.getElementById('character-title').textContent =
+                `${character.race.charAt(0).toUpperCase() + character.race.slice(1)} ${character.class.charAt(0).toUpperCase() + character.class.slice(1)}`;
+
+            document.getElementById('character-stats').innerHTML =
+                Object.entries(character.stats).map(([stat, value]) => {
+                    const modifier = Math.floor((value - 10) / 2);
+                    const modStr = modifier >= 0 ? `+${modifier}` : `${modifier}`;
+                    return `
+                        <div class="stat-block">
+                            <div class="stat-name">${stat.slice(0, 3)}</div>
+                            <div class="stat-value">${value} (${modStr})</div>
+                        </div>
+                    `;
+                }).join('') +
+                `<div class="stat-block">
+                    <div class="stat-name">HP</div>
+                    <div class="stat-value">${character.hp}</div>
+                </div>` +
+                (character.mana > 0 ? `
+                    <div class="stat-block">
+                        <div class="stat-name">Mana</div>
+                        <div class="stat-value">${character.mana}</div>
+                    </div>
+                ` : '');
+
+            // Load gear choices
+            const gearChoices = await loadClassGearChoices(character.class);
+            console.log('Received gear choices:', gearChoices);
+            const choiceData = {
+                choices: gearChoices.choices,
+                guaranteed: gearChoices.guaranteed,
+                currentChoice: 0
+            };
+            document.getElementById('choice-data').textContent = JSON.stringify(choiceData);
+
+            // Show first choice
+            console.log('Showing choices, count:', gearChoices.choices.length);
+            if (gearChoices.choices.length > 0) {
+                console.log('Displaying first choice');
+                displayChoice(choiceData, 0);
+            } else {
+                console.log('No choices available, going to final summary');
+                showFinalSummary();
+            }
+        }
+
+        // Start character creation when page loads
+        document.addEventListener('DOMContentLoaded', initCharacterCreation);
+    </script>
+</body>
+</html>

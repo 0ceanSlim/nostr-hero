@@ -1,0 +1,26 @@
+{
+  "name": "Bat Guano and Sulfur",
+  "description": "A small vial containing bat guano mixed with sulfur powder. The mixture smells terrible but creates spectacular explosions when used in fire magic. Required for casting Fireball.",
+  "price": 500,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/spell-component.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "consumable",
+    "fire_magic"
+  ],
+  "notes": [
+    "Required to cast Fireball spell",
+    "Consumed on use",
+    "Can be found in caves or purchased from alchemists"
+  ],
+  "spell_required_for": "fireball"
+}

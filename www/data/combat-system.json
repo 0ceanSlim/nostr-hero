@@ -98,6 +98,32 @@
           "description": "Use a consumable item",
           "examples": ["healing_potion", "throwing_knife", "oil_flask"],
           "action_cost": "action"
+        },
+        "cast_spell": {
+          "description": "Cast a spell if character has spellcasting ability",
+          "requirements": ["spellcasting_class", "sufficient_mana", "spell_known"],
+          "action_cost": "varies_by_spell",
+          "spell_types": {
+            "action_spells": "Use main combat action",
+            "bonus_action_spells": "Use bonus action if available",
+            "reaction_spells": "Cast in response to triggers"
+          },
+          "spell_attacks": {
+            "ranged_spell_attack": {
+              "description": "Roll 1d20 + spellcasting modifier + proficiency",
+              "range_mechanics": "Uses spell range like weapons",
+              "damage": "Spell damage + spellcasting modifier (if applicable)"
+            },
+            "automatic_hits": {
+              "description": "Spells like Magic Missile automatically hit",
+              "examples": ["magic_missile"]
+            },
+            "saving_throws": {
+              "description": "Target rolls save vs spell save DC",
+              "spell_save_dc": "8 + proficiency + spellcasting modifier",
+              "common_saves": ["dexterity", "constitution", "wisdom"]
+            }
+          }
         }
       }
     },

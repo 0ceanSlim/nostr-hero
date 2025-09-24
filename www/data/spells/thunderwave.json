@@ -1,0 +1,37 @@
+{
+  "name": "Thunderwave",
+  "description": "A wave of thunderous force sweeps out from you. Each creature within range must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn't pushed.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "1",
+  "range_long": "1",
+  "duration": "instantaneous",
+  "damage": "2d8",
+  "damage_type": "thunder",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "constitution",
+  "tags": [
+    "combat",
+    "damage",
+    "thunder",
+    "area_effect",
+    "push"
+  ],
+  "classes": [
+    "bard",
+    "druid",
+    "sorcerer",
+    "wizard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Area effect around caster",
+    "Constitution save for half damage",
+    "Pushes enemies away on failed save"
+  ],
+  "material_component": null
+}
