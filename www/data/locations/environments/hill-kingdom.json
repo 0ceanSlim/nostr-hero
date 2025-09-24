@@ -135,5 +135,27 @@
       "safety_level": "moderate",
       "shelter": false
     }
-  ]
+  ],
+  "encounter_table": {
+    "daily_encounter_chance": 0.25,
+    "encounter_types": {
+      "monster": 0.6,
+      "event": 0.3,
+      "discovery": 0.1
+    },
+    "monster_tiers": {
+      "common": {
+        "weight": 70,
+        "monsters": ["goblin", "wolf", "centaur"]
+      },
+      "uncommon": {
+        "weight": 25,
+        "monsters": ["ogre", "griffon", "manticore"]
+      },
+      "rare": {
+        "weight": 5,
+        "monsters": ["stone-giant", "hill-giant"]
+      }
+    }
+  }
 }

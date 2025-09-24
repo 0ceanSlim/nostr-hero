@@ -1,0 +1,183 @@
+{
+  "gem_system": {
+    "description": "Simplified gem drops from monsters with size multipliers",
+    "drop_mechanics": {
+      "base_drop_chance": "50% nothing, 50% roll for gem type",
+      "cr_scaling": "Higher CR monsters have better gem drop rates",
+      "size_scaling": "All gems roll for size with value multipliers"
+    },
+    "gem_types": {
+      "diamond": {
+        "base_value": 500000,
+        "drop_rate": 0.01,
+        "tier": "legendary",
+        "description": "The most precious of gems, crystal clear and brilliant"
+      },
+      "sapphire": {
+        "base_value": 100000,
+        "drop_rate": 0.03,
+        "tier": "rare",
+        "description": "Deep blue gemstone prized by nobility"
+      },
+      "emerald": {
+        "base_value": 100000,
+        "drop_rate": 0.03,
+        "tier": "rare",
+        "description": "Vibrant green gem associated with nature magic"
+      },
+      "ruby": {
+        "base_value": 100000,
+        "drop_rate": 0.03,
+        "tier": "rare",
+        "description": "Blood-red stone that gleams like fire"
+      },
+      "topaz": {
+        "base_value": 50000,
+        "drop_rate": 0.06,
+        "tier": "uncommon",
+        "description": "Golden gemstone that catches light beautifully"
+      },
+      "garnet": {
+        "base_value": 50000,
+        "drop_rate": 0.06,
+        "tier": "uncommon",
+        "description": "Dark red stone often used in jewelry"
+      },
+      "alexandrite": {
+        "base_value": 50000,
+        "drop_rate": 0.06,
+        "tier": "uncommon",
+        "description": "Color-changing gem that shifts in different light"
+      },
+      "pearl": {
+        "base_value": 10000,
+        "drop_rate": 0.08,
+        "tier": "common",
+        "description": "Lustrous sphere formed in oysters and mussels"
+      },
+      "amber": {
+        "base_value": 10000,
+        "drop_rate": 0.08,
+        "tier": "common",
+        "description": "Fossilized tree resin, sometimes containing ancient insects"
+      },
+      "amethyst": {
+        "base_value": 10000,
+        "drop_rate": 0.08,
+        "tier": "common",
+        "description": "Purple quartz crystal with mystical properties"
+      },
+      "onyx": {
+        "base_value": 5000,
+        "drop_rate": 0.10,
+        "tier": "common",
+        "description": "Black stone with white bands"
+      },
+      "moonstone": {
+        "base_value": 5000,
+        "drop_rate": 0.10,
+        "tier": "common",
+        "description": "Pale gem that shimmers like moonlight"
+      },
+      "citrine": {
+        "base_value": 5000,
+        "drop_rate": 0.10,
+        "tier": "common",
+        "description": "Yellow quartz that sparkles like sunlight"
+      },
+      "jasper": {
+        "base_value": 5000,
+        "drop_rate": 0.10,
+        "tier": "common",
+        "description": "Colorful stone with interesting patterns"
+      },
+      "bloodstone": {
+        "base_value": 5000,
+        "drop_rate": 0.10,
+        "tier": "common",
+        "description": "Dark green stone flecked with red spots"
+      },
+      "turquoise": {
+        "base_value": 1000,
+        "drop_rate": 0.22,
+        "tier": "basic",
+        "description": "Blue-green stone often carved into trinkets"
+      },
+      "quartz": {
+        "base_value": 1000,
+        "drop_rate": 0.22,
+        "tier": "basic",
+        "description": "Clear crystal common in many regions"
+      },
+      "azurite": {
+        "base_value": 1000,
+        "drop_rate": 0.22,
+        "tier": "basic",
+        "description": "Bright blue mineral used in paint and decoration"
+      },
+      "obsidian": {
+        "base_value": 1000,
+        "drop_rate": 0.22,
+        "tier": "basic",
+        "description": "Volcanic glass, sharp and dark"
+      },
+      "malachite": {
+        "base_value": 1000,
+        "drop_rate": 0.22,
+        "tier": "basic",
+        "description": "Bright green stone with swirling patterns"
+      }
+    },
+    "size_multipliers": {
+      "tiny": {
+        "multiplier": 0.01,
+        "drop_rate": 0.42,
+        "description": "A tiny chip or fragment"
+      },
+      "small": {
+        "multiplier": 0.1,
+        "drop_rate": 0.32,
+        "description": "A small but noticeable piece"
+      },
+      "medium": {
+        "multiplier": 1.0,
+        "drop_rate": 0.18,
+        "description": "A standard-sized gem"
+      },
+      "large": {
+        "multiplier": 10.0,
+        "drop_rate": 0.06,
+        "description": "An impressively large specimen"
+      },
+      "huge": {
+        "multiplier": 100.0,
+        "drop_rate": 0.02,
+        "description": "A massive, museum-quality gem"
+      }
+    },
+    "cr_scaling": {
+      "description": "How monster CR affects gem drops",
+      "scaling_rules": {
+        "0-0.5": "Base drop rates",
+        "1-2": "1.2x better gem chances",
+        "3-5": "1.5x better gem chances",
+        "6-10": "2x better gem chances",
+        "11-15": "3x better gem chances",
+        "16+": "5x better gem chances"
+      }
+    },
+    "drop_calculation": {
+      "step_1": "Roll for gem drop (50% nothing, 50% continue)",
+      "step_2": "Apply CR modifier to improve chances",
+      "step_3": "Roll for gem type based on adjusted rates",
+      "step_4": "Roll for gem size",
+      "step_5": "Calculate final value: base_value × size_multiplier"
+    },
+    "usage": {
+      "currency": "Gems can be sold to merchants for their GP value",
+      "trading": "High-value gems may be required for special purchases",
+      "crafting": "Future system may allow gem enhancement of equipment",
+      "collection": "Rare gems could unlock special content or achievements"
+    }
+  }
+}

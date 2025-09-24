@@ -136,5 +136,27 @@
       "safety_level": "moderate",
       "shelter": true
     }
-  ]
+  ],
+  "encounter_table": {
+    "daily_encounter_chance": 0.35,
+    "encounter_types": {
+      "monster": 0.7,
+      "event": 0.2,
+      "discovery": 0.1
+    },
+    "monster_tiers": {
+      "common": {
+        "weight": 60,
+        "monsters": ["goblin", "winter-wolf", "owlbear", "bugbear"]
+      },
+      "uncommon": {
+        "weight": 30,
+        "monsters": ["dryad", "displacer-beast", "treant"]
+      },
+      "rare": {
+        "weight": 10,
+        "monsters": ["green-dragon-wyrmling", "unicorn"]
+      }
+    }
+  }
 }
