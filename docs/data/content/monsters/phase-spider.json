@@ -1,0 +1,16 @@
+{
+  "id": 119,
+  "name": "Phase Spider",
+  "challenge_rating": 3.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 32,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/phase-spider.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

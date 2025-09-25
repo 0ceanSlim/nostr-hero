@@ -1,0 +1,16 @@
+{
+  "id": 95,
+  "name": "Ettercap",
+  "challenge_rating": 2.0,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 44,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/ettercap.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

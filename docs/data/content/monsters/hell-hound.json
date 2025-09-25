@@ -1,0 +1,16 @@
+{
+  "id": 123,
+  "name": "Hell Hound",
+  "challenge_rating": 3.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 45,
+  "alignment": "lawful evil",
+  "img": "/static/img/monster/hell-hound.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "urban"
+  ]
+}

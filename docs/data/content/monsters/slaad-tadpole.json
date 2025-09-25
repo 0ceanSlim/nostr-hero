@@ -1,0 +1,16 @@
+{
+  "id": 11,
+  "name": "Slaad Tadpole",
+  "challenge_rating": 0.125,
+  "type": "Aberration",
+  "size": "Tiny",
+  "armor_class": 12,
+  "hit_points": 10,
+  "alignment": "chaotic neutral",
+  "img": "/static/img/monster/slaad-tadpole.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

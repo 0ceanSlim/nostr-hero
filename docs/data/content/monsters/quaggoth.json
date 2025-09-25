@@ -1,0 +1,20 @@
+{
+  "id": 99,
+  "name": "Quaggoth",
+  "challenge_rating": 2.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 45,
+  "alignment": "chaotic neutral",
+  "tags": [
+    "Quaggoth"
+  ],
+  "img": "/static/img/monster/quaggoth.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

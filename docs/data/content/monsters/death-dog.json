@@ -1,0 +1,16 @@
+{
+  "id": 74,
+  "name": "Death Dog",
+  "challenge_rating": 1.0,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 12,
+  "hit_points": 39,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/death-dog.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": 47,
+  "name": "Sahuagin",
+  "challenge_rating": 0.5,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 12,
+  "hit_points": 22,
+  "alignment": "lawful evil",
+  "tags": [
+    "Sahuagin"
+  ],
+  "img": "/static/img/monster/sahuagin.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "underwater",
+    "urban"
+  ]
+}

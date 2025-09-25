@@ -1,0 +1,17 @@
+{
+  "name": "Painter's supplies",
+  "description": "These special tools include easel, canvas, paints, brushes, charcoal, and everything needed to create paintings and other works of art. Proficiency with painter's supplies lets you add your proficiency bonus to any ability checks you make to create a painting or determine a work's authenticity.",
+  "price": 1000,
+  "type": "Artisan's Tools",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

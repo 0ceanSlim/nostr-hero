@@ -1,0 +1,19 @@
+{
+  "name": "Smith's tools",
+  "description": "Heavy hammers, tongs, and anvil accessories needed for working metal and forging weapons or armor.",
+  "price": 2000,
+  "type": "Artisan's Tools",
+  "weight": 8.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Required for metalworking and equipment repair"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

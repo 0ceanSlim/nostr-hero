@@ -42,6 +42,9 @@ func main() {
 	// Serve resource files
 	mux.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("www/res/"))))
 
+	// Serve data files
+	mux.Handle("/data/", http.StripPrefix("/data/", http.FileServer(http.Dir("data/"))))
+
 	// Initialize Routes
 	routes.InitializeRoutes(mux)
 
@@ -61,8 +64,7 @@ func main() {
 	mux.HandleFunc("/api/auth/amber-callback", authHandler.HandleAmberCallback)
 
 	// Save/load API endpoints
-	mux.HandleFunc("/api/save-game", api.SaveGameHandler)
-	mux.HandleFunc("/api/load-save/", api.LoadSaveHandler)
+	mux.HandleFunc("/api/saves/", api.SavesHandler)
 
 	// Existing API endpoints
 	mux.HandleFunc("/api/character", api.CharacterHandler)

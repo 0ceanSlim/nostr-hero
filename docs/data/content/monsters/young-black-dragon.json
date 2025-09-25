@@ -1,0 +1,21 @@
+{
+  "id": 216,
+  "name": "Young Black Dragon",
+  "challenge_rating": 7.0,
+  "type": "Dragon",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 127,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Chromatic",
+    "fly"
+  ],
+  "img": "/static/img/monster/young-black-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain",
+    "swamp"
+  ]
+}

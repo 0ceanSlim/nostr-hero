@@ -1,0 +1,16 @@
+{
+  "id": 229,
+  "name": "Hydra",
+  "challenge_rating": 8.0,
+  "type": "Monstrosity",
+  "size": "Huge",
+  "armor_class": 15,
+  "hit_points": 172,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/hydra.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

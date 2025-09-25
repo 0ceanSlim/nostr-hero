@@ -1,9 +1,0 @@
-{
-  "name": "Two-Handed",
-  "description": "A Two-Handed weapon requires two hands when you attack with it.",
-  "mechanics": {
-    "requires_two_hands": true,
-    "cannot_use_shield": true,
-    "cannot_dual_wield": true
-  }
-}

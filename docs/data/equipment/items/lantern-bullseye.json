@@ -1,0 +1,24 @@
+{
+  "name": "Lantern Bullseye",
+  "description": "A focused lantern that casts a bright cone of light in one direction.",
+  "price": 1000,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 2,
+  "type": "Adventuring Gear",
+  "notes": [
+    "Casts bright light in a 60-foot cone",
+    "Burns for 6 hours on one flask of oil"
+  ],
+  "tags": [
+    "light-source",
+    "directional",
+    "oil-burning"
+  ],
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
+}

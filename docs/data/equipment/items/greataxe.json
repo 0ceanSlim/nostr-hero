@@ -1,0 +1,21 @@
+{
+  "name": "Greataxe",
+  "description": "",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 7.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d12",
+  "heal": null,
+  "damage-type": "slashing",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "heavy",
+    "two-handed"
+  ],
+  "notes": []
+}

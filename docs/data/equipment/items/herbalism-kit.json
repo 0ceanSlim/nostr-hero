@@ -1,0 +1,17 @@
+{
+  "name": "Herbalism kit",
+  "description": "This kit contains a variety of instruments such as clippers, mortar and pestle, and pouches and vials used by herbalists to create remedies and potions. Proficiency with this kit lets you add your proficiency bonus to any ability checks you make to identify or apply herbs.",
+  "price": 500,
+  "type": "Tools",
+  "weight": 3.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

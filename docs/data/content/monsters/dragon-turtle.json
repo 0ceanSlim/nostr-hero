@@ -1,0 +1,16 @@
+{
+  "id": 285,
+  "name": "Dragon Turtle",
+  "challenge_rating": 17.0,
+  "type": "Dragon",
+  "size": "Gargantuan",
+  "armor_class": 20,
+  "hit_points": 341,
+  "alignment": "neutral",
+  "img": "/static/img/monster/dragon-turtle.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

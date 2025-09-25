@@ -1,0 +1,248 @@
+{{define "title"}}Nostr Hero - Select Save{{end}}
+
+{{define "view"}}
+<div class="max-w-4xl mx-auto p-6">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-yellow-400 mb-2">⚔️ Choose Your Adventure ⚔️</h1>
+    <p class="text-gray-300">Select a save file or start a new journey</p>
+  </div>
+
+  <!-- User Info Display -->
+  <div id="user-info" class="bg-gray-800 rounded-lg p-4 mb-6 text-center">
+    <div class="flex items-center justify-center space-x-4">
+      <div id="user-avatar" class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
+        <span class="text-gray-300">👤</span>
+      </div>
+      <div>
+        <h2 id="user-name" class="text-xl font-bold text-green-400">Loading...</h2>
+        <p id="user-npub" class="text-sm text-gray-400">npub...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Files Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- New Game Card -->
+    <div class="bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-6 border-2 border-green-600 hover:border-green-400 transition-colors cursor-pointer group"
+         onclick="startNewGame()">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">✨</div>
+        <h3 class="text-xl font-bold text-green-400 mb-2">New Adventure</h3>
+        <p class="text-gray-300 text-sm">Begin a fresh journey with a newly generated character</p>
+      </div>
+    </div>
+
+    <!-- Loading Placeholder for Save Files -->
+    <div id="saves-loading" class="col-span-2 text-center py-8">
+      <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+        <span class="visually-hidden"></span>
+      </div>
+      <p class="text-gray-400 mt-4">Loading save files...</p>
+    </div>
+
+    <!-- Save files will be populated here -->
+    <div id="save-files-container" class="col-span-2 hidden">
+      <!-- Save files will be inserted here by JavaScript -->
+    </div>
+
+    <!-- No saves message -->
+    <div id="no-saves" class="col-span-2 text-center py-8 hidden">
+      <div class="text-6xl mb-4">📜</div>
+      <h3 class="text-xl font-bold text-gray-400 mb-2">No Save Files Found</h3>
+      <p class="text-gray-500">Start a new adventure to create your first save!</p>
+    </div>
+  </div>
+
+  <!-- Back to Home -->
+  <div class="text-center">
+    <button onclick="goHome()"
+            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors">
+      🏠 Back to Home
+    </button>
+  </div>
+</div>
+
+<!-- Save File Template (Hidden) -->
+<template id="save-file-template">
+  <div class="bg-gray-800 rounded-lg p-4 border border-gray-600 hover:border-yellow-400 transition-colors cursor-pointer group"
+       onclick="loadSave('{SAVE_ID}')">
+    <div class="flex items-center space-x-4">
+      <div class="flex-shrink-0">
+        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+          <span class="text-2xl">{CHARACTER_ICON}</span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-lg font-bold text-yellow-400 truncate">{CHARACTER_NAME}</h3>
+        <p class="text-sm text-gray-300">{CHARACTER_RACE} {CHARACTER_CLASS}</p>
+        <p class="text-xs text-gray-400">Level {CHARACTER_LEVEL} • {LOCATION_NAME}</p>
+        <p class="text-xs text-gray-500">Last played: {LAST_PLAYED}</p>
+      </div>
+      <div class="flex-shrink-0 text-right">
+        <div class="text-sm text-green-400">HP: {CURRENT_HP}/{MAX_HP}</div>
+        <div class="text-xs text-gray-400">Fatigue: {FATIGUE}/10</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+// Initialize save selection page
+document.addEventListener('DOMContentLoaded', async function() {
+  console.log('🎮 Initializing save selection page...');
+
+  // Wait for session manager
+  if (!window.sessionManager) {
+    console.error('❌ SessionManager not available');
+    showMessage('❌ Session manager not available', 'error');
+    return;
+  }
+
+  try {
+    await window.sessionManager.init();
+
+    if (!window.sessionManager.isAuthenticated()) {
+      console.log('❌ User not authenticated, redirecting to home');
+      goHome();
+      return;
+    }
+
+    const session = window.sessionManager.getSession();
+    console.log('✅ User authenticated:', session.npub);
+
+    displayUserInfo(session);
+    await loadSaveFiles(session.npub);
+
+  } catch (error) {
+    console.error('❌ Failed to initialize save selection:', error);
+    showMessage('❌ Failed to load saves: ' + error.message, 'error');
+  }
+});
+
+function displayUserInfo(session) {
+  document.getElementById('user-npub').textContent = session.npub;
+
+  // For now, use a simple display name from the npub
+  const shortNpub = session.npub.slice(0, 12) + '...';
+  document.getElementById('user-name').textContent = shortNpub;
+}
+
+async function loadSaveFiles(npub) {
+  console.log('📂 Loading save files for:', npub);
+
+  try {
+    const response = await fetch(`/api/saves/${npub}`);
+
+    const loadingEl = document.getElementById('saves-loading');
+    const containerEl = document.getElementById('save-files-container');
+    const noSavesEl = document.getElementById('no-saves');
+
+    loadingEl.classList.add('hidden');
+
+    if (response.ok) {
+      const saves = await response.json();
+
+      if (saves && saves.length > 0) {
+        console.log(`✅ Found ${saves.length} save files`);
+        displaySaveFiles(saves);
+        containerEl.classList.remove('hidden');
+      } else {
+        console.log('📭 No save files found');
+        noSavesEl.classList.remove('hidden');
+      }
+    } else {
+      console.log('📭 No save files found (404)');
+      noSavesEl.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('❌ Error loading save files:', error);
+    const loadingEl = document.getElementById('saves-loading');
+    loadingEl.innerHTML = `
+      <div class="text-center py-8">
+        <div class="text-red-400 text-xl mb-2">❌</div>
+        <p class="text-red-400">Failed to load save files</p>
+        <p class="text-gray-500 text-sm">${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+function displaySaveFiles(saves) {
+  const container = document.getElementById('save-files-container');
+  const template = document.getElementById('save-file-template');
+
+  container.innerHTML = '';
+
+  saves.forEach(save => {
+    const saveEl = template.content.cloneNode(true);
+    const html = saveEl.firstElementChild.outerHTML
+      .replace('{SAVE_ID}', save.id)
+      .replace('{CHARACTER_ICON}', getCharacterIcon(save.character.race, save.character.class))
+      .replace('{CHARACTER_NAME}', save.character.name || 'Unnamed Hero')
+      .replace('{CHARACTER_RACE}', save.character.race || 'Unknown')
+      .replace('{CHARACTER_CLASS}', save.character.class || 'Adventurer')
+      .replace('{CHARACTER_LEVEL}', save.character.level || 1)
+      .replace('{LOCATION_NAME}', save.location || 'Unknown Location')
+      .replace('{CURRENT_HP}', save.character.hp || 0)
+      .replace('{MAX_HP}', save.character.max_hp || 0)
+      .replace('{FATIGUE}', save.character.fatigue || 0)
+      .replace('{LAST_PLAYED}', formatDate(save.last_played));
+
+    container.innerHTML += html;
+  });
+}
+
+function getCharacterIcon(race, characterClass) {
+  const icons = {
+    'Human': '👤',
+    'Elf': '🧝',
+    'Dwarf': '🧔',
+    'Halfling': '🧒',
+    'Dragonborn': '🐲',
+    'Gnome': '🧙',
+    'Half-Elf': '👨‍🎤',
+    'Half-Orc': '👹',
+    'Tiefling': '😈'
+  };
+
+  return icons[race] || '⚔️';
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'Never';
+
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays < 7) return `${diffDays} days ago`;
+
+  return date.toLocaleDateString();
+}
+
+function startNewGame() {
+  console.log('🎮 Starting new game...');
+  showMessage('🎮 Starting new adventure...', 'info');
+
+  // Navigate to game with new character flag
+  window.location.href = '/game?new=true';
+}
+
+function loadSave(saveId) {
+  console.log('📂 Loading save:', saveId);
+  showMessage('📂 Loading save file...', 'info');
+
+  // Navigate to game with save ID
+  window.location.href = `/game?save=${saveId}`;
+}
+
+function goHome() {
+  window.location.href = '/';
+}
+</script>
+{{end}}

@@ -1,0 +1,22 @@
+{
+  "id": 273,
+  "name": "Adult Bronze Dragon",
+  "challenge_rating": 15.0,
+  "type": "Dragon",
+  "size": "Huge",
+  "armor_class": 19,
+  "hit_points": 212,
+  "alignment": "lawful good",
+  "tags": [
+    "Metallic",
+    "Legendary",
+    "fly"
+  ],
+  "img": "/static/img/monster/adult-bronze-dragon.svg",
+  "enviornment": [
+    "coastal",
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

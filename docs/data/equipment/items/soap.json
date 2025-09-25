@@ -1,0 +1,17 @@
+{
+  "name": "Soap",
+  "description": "A cleansing agent made from fats and oils. Essential for personal hygiene and can be used to clean equipment, remove stains, or create slippery surfaces. Each bar provides multiple uses.",
+  "price": 2,
+  "type": "Adventuring Gear",
+  "weight": 0.1,
+  "stack": 50,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

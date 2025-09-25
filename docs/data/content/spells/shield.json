@@ -1,0 +1,35 @@
+{
+  "name": "Shield",
+  "description": "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack.",
+  "level": 1,
+  "school": "abjuration",
+  "casting_time": "reaction",
+  "range": "self",
+  "range_long": "self",
+  "duration": "1_turn",
+  "damage": null,
+  "damage_type": null,
+  "heal": null,
+  "effect": "+5 AC until next turn",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "defense",
+    "reaction",
+    "ac_bonus"
+  ],
+  "classes": [
+    "sorcerer",
+    "wizard"
+  ],
+  "rarity": "common",
+  "action_cost": "reaction",
+  "mana_cost": 1,
+  "notes": [
+    "Cast as reaction when hit by attack",
+    "+5 AC includes the triggering attack",
+    "Lasts until start of your next turn"
+  ],
+  "material_component": null
+}

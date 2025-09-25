@@ -1,0 +1,21 @@
+{
+  "name": "Leather",
+  "description": "Supple leather armor that provides basic protection while maintaining flexibility and stealth.",
+  "price": 1000,
+  "ac": "11 + Dex",
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 10,
+  "type": "Light Armor",
+  "notes": [
+    "Light armor allows full dexterity bonus"
+  ],
+  "tags": [
+    "light-armor"
+  ],
+  "rarity": "common",
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null"
+}

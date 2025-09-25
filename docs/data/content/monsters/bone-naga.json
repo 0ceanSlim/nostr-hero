@@ -1,0 +1,16 @@
+{
+  "id": 149,
+  "name": "Bone Naga",
+  "challenge_rating": 4.0,
+  "type": "Undead",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 58,
+  "alignment": "lawful evil",
+  "img": "/static/img/monster/bone-naga.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

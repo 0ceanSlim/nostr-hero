@@ -1,0 +1,17 @@
+{
+  "name": "Splint",
+  "description": "",
+  "price": 20000,
+  "type": "Heavy Armor",
+  "weight": 60.0,
+  "stack": 1,
+  "ac": "17",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Disadvantage on Stealth - Strength 15"
+  ],
+  "img": "equipment/armor.jpg",
+  "stealth": -1,
+  "str": 15
+}

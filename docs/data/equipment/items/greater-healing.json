@@ -1,0 +1,23 @@
+{
+  "name": "Greater healing",
+  "description": "A more potent healing potion with a deeper red color and stronger magical aura.",
+  "price": 10000,
+  "ac": null,
+  "damage": null,
+  "heal": "4d4 + 4",
+  "stack": 1,
+  "weight": 0.5,
+  "type": "Potion",
+  "notes": [
+    "Single use item",
+    "Takes an action to drink"
+  ],
+  "tags": [
+    "consumable",
+    "healing"
+  ],
+  "rarity": "common",
+  "img": "equipment/potion.jpg",
+  "range": "null",
+  "range-long": "null"
+}

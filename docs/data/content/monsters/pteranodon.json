@@ -1,0 +1,20 @@
+{
+  "id": 23,
+  "name": "Pteranodon",
+  "challenge_rating": 0.25,
+  "type": "Beast",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 13,
+  "alignment": "unaligned",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/pteranodon.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "mountain"
+  ]
+}

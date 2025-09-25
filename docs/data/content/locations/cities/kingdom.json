@@ -1,0 +1,218 @@
+{
+  "id": "kingdom",
+  "name": "The Royal Kingdom",
+  "type": "kingdom",
+  "description": "The grand capital city stands as the heart of the realm, its towering spires and bustling streets a testament to prosperity and order.",
+  "connections": {
+    "north": "kingdom-north",
+    "south": "kingdom-south",
+    "east": "kingdom-east",
+    "west": "kingdom-west"
+  },
+  "starting_races": ["Human", "Half-Elf", "Half-Orc", "Tiefling"],
+  "racial_entry_fees": {
+    "Human": 0,
+    "Half-Elf": 0,
+    "Half-Orc": 0,
+    "Tiefling": 0,
+    "Elf": 1,
+    "Dwarf": 1,
+    "Halfling": 1,
+    "Gnome": 1,
+    "Orc": 2,
+    "Dragonborn": 3
+  },
+  "districts": {
+    "center": {
+      "id": "kingdom-center",
+      "name": "Kingdom Center",
+      "description": "The magnificent city center buzzes with activity. Noble carriages roll past vendors hawking exotic wares, while the Royal Palace looms majestically overhead.",
+      "connections": {
+        "north": "kingdom-north",
+        "south": "kingdom-south",
+        "east": "kingdom-east",
+        "west": "kingdom-west"
+      },
+      "buildings": [
+        {
+          "id": "royal_palace",
+          "name": "Royal Palace",
+          "type": "landmark",
+          "description": "The seat of royal power, its golden spires reaching toward the heavens.",
+          "accessible": false,
+          "actions": ["observe", "approach_guards"]
+        },
+        {
+          "id": "grand_market",
+          "name": "Grand Market",
+          "type": "shop",
+          "description": "The largest marketplace in the kingdom, filled with merchants from distant lands.",
+          "accessible": true,
+          "shop_type": "general",
+          "actions": ["browse", "buy", "sell", "talk_to_merchants"]
+        },
+        {
+          "id": "adventurers_guild",
+          "name": "Adventurers Guild",
+          "type": "guild",
+          "description": "A sturdy stone building where heroes gather to share tales and seek employment.",
+          "accessible": true,
+          "actions": ["register", "check_contracts", "talk_to_adventurers"]
+        }
+      ],
+      "npcs": ["royal_guard", "merchant_leader", "guild_master"]
+    },
+    "north": {
+      "id": "kingdom-north",
+      "name": "Northern District",
+      "description": "The northern district houses the city's scholars and nobility, with well-maintained gardens and elegant architecture.",
+      "connections": {
+        "center": "kingdom-center",
+        "north": "swamp-kingdom"
+      },
+      "buildings": [
+        {
+          "id": "royal_library",
+          "name": "Royal Library",
+          "type": "library",
+          "description": "A towering repository of knowledge containing tomes from across the realm.",
+          "accessible": true,
+          "actions": ["research", "read", "talk_to_scholars"]
+        },
+        {
+          "id": "noble_quarter",
+          "name": "Noble Quarter",
+          "type": "residential",
+          "description": "Elegant mansions line tree-shaded streets where the wealthy reside.",
+          "accessible": false,
+          "actions": ["observe", "walk_streets"]
+        },
+        {
+          "id": "mage_tower",
+          "name": "Mage Tower",
+          "type": "magic_shop",
+          "description": "A crystalline spire where court wizards study the arcane arts.",
+          "accessible": true,
+          "shop_type": "magic",
+          "actions": ["buy_spells", "identify_items", "talk_to_mages"]
+        }
+      ],
+      "npcs": ["court_wizard", "librarian", "noble_messenger"],
+      "exit_to_environment": "swamp-kingdom"
+    },
+    "south": {
+      "id": "kingdom-south",
+      "name": "Southern District",
+      "description": "The southern district serves as the main gate to the kingdom, bustling with travelers, merchants, and guards.",
+      "connections": {
+        "center": "kingdom-center",
+        "south": "forest-kingdom"
+      },
+      "buildings": [
+        {
+          "id": "main_gate",
+          "name": "Main Gate",
+          "type": "gate",
+          "description": "The grand entrance to the kingdom, flanked by imposing guard towers.",
+          "accessible": true,
+          "actions": ["exit_city", "talk_to_guards", "observe_travelers"]
+        },
+        {
+          "id": "travelers_inn",
+          "name": "The Wayward Traveler Inn",
+          "type": "inn",
+          "description": "A cozy inn catering to merchants and adventurers from distant lands.",
+          "accessible": true,
+          "actions": ["rent_room", "buy_food", "talk_to_patrons", "listen_to_rumors"]
+        },
+        {
+          "id": "stable",
+          "name": "Royal Stables",
+          "type": "transport",
+          "description": "Well-maintained stables offering cart services to other cities.",
+          "accessible": true,
+          "actions": ["hire_cart", "check_routes", "talk_to_drivers"]
+        }
+      ],
+      "npcs": ["gate_captain", "innkeeper", "cart_driver"],
+      "exit_to_environment": "forest-kingdom"
+    },
+    "east": {
+      "id": "kingdom-east",
+      "name": "Eastern District",
+      "description": "The industrial heart of the kingdom, filled with workshops, forges, and the organized chaos of craftsmen.",
+      "connections": {
+        "center": "kingdom-center",
+        "east": "urban-kingdom"
+      },
+      "buildings": [
+        {
+          "id": "grand_forge",
+          "name": "Grand Forge",
+          "type": "blacksmith",
+          "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
+          "accessible": true,
+          "shop_type": "weapons_armor",
+          "actions": ["buy_weapons", "buy_armor", "repair_equipment", "commission_items"]
+        },
+        {
+          "id": "artisan_quarter",
+          "name": "Artisan Quarter",
+          "type": "crafting",
+          "description": "Workshops and studios where skilled craftsmen ply their trades.",
+          "accessible": true,
+          "actions": ["browse_crafts", "learn_techniques", "buy_supplies"]
+        },
+        {
+          "id": "merchants_bank",
+          "name": "Royal Mint",
+          "type": "bank",
+          "description": "The kingdom's financial center where merchants store wealth and exchange currency.",
+          "accessible": true,
+          "actions": ["deposit_gold", "withdraw_gold", "exchange_currency", "check_balance"]
+        }
+      ],
+      "npcs": ["master_smith", "bank_clerk", "artisan_leader"],
+      "exit_to_environment": "urban-kingdom"
+    },
+    "west": {
+      "id": "kingdom-west",
+      "name": "Western District",
+      "description": "The market district thrums with commercial activity as traders from across the realm conduct business.",
+      "connections": {
+        "center": "kingdom-center",
+        "west": "hill-kingdom"
+      },
+      "buildings": [
+        {
+          "id": "trading_post",
+          "name": "Western Trading Post",
+          "type": "shop",
+          "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
+          "accessible": true,
+          "shop_type": "exotic",
+          "actions": ["buy_rare_items", "sell_valuables", "trade_goods"]
+        },
+        {
+          "id": "tavern_golden_griffin",
+          "name": "The Golden Griffin Tavern",
+          "type": "tavern",
+          "description": "A popular tavern where merchants, adventurers, and locals gather to drink and share news.",
+          "accessible": true,
+          "actions": ["buy_drinks", "talk_to_patrons", "listen_to_music", "gather_information"],
+          "special_features": ["vip_section_for_happytavern_nip5"]
+        },
+        {
+          "id": "caravan_office",
+          "name": "Caravan Guild Office",
+          "type": "transport",
+          "description": "The headquarters for organizing merchant caravans and long-distance travel.",
+          "accessible": true,
+          "actions": ["join_caravan", "hire_guards", "check_trade_routes"]
+        }
+      ],
+      "npcs": ["caravan_master", "tavern_keeper", "exotic_trader"],
+      "exit_to_environment": "hill-kingdom"
+    }
+  }
+}

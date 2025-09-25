@@ -1,0 +1,16 @@
+{
+  "id": 249,
+  "name": "Behir",
+  "challenge_rating": 11.0,
+  "type": "Monstrosity",
+  "size": "Huge",
+  "armor_class": 17,
+  "hit_points": 168,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/behir.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

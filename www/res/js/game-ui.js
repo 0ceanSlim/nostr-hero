@@ -1,9 +1,30 @@
 // Game UI Functions
 // Handles all user interface updates and interactions
 
-// Message system
+// Message system - resilient version that works during initialization
 function showMessage(text, type = 'info', duration = 5000) {
-    const messageArea = document.getElementById('message-area');
+    console.log(`📝 ${type.toUpperCase()}: ${text}`);
+
+    // Try to find message area, if not found, create a temporary one or use console
+    let messageArea = document.getElementById('message-area');
+
+    if (!messageArea) {
+        // Try to find or create a temporary message container
+        messageArea = document.getElementById('temp-message-area');
+        if (!messageArea) {
+            // Create temporary message area if we're in the middle of initialization
+            messageArea = document.createElement('div');
+            messageArea.id = 'temp-message-area';
+            messageArea.className = 'fixed top-4 right-4 max-w-sm space-y-2 z-50';
+            document.body.appendChild(messageArea);
+        }
+    }
+
+    if (!messageArea) {
+        // Fallback to console if no DOM element can be created
+        console.warn('No message area available, using console:', text);
+        return;
+    }
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `p-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;

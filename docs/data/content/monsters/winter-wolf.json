@@ -1,0 +1,17 @@
+{
+  "id": 141,
+  "name": "Winter Wolf",
+  "challenge_rating": 3.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 75,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/winter-wolf.svg",
+  "enviornment": [
+    "arctic",
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

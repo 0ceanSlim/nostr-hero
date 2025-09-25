@@ -1,0 +1,20 @@
+{
+  "id": 163,
+  "name": "Half-Red Dragon Veteran",
+  "challenge_rating": 5.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 18,
+  "hit_points": 65,
+  "alignment": "any alignment",
+  "tags": [
+    "Human"
+  ],
+  "img": "/static/img/monster/half-red-dragon-veteran.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "mountain",
+    "urban"
+  ]
+}

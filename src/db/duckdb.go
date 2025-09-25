@@ -14,13 +14,13 @@ var db *sql.DB
 
 // InitDatabase initializes the DuckDB database connection
 func InitDatabase() error {
-	// Ensure data directory exists
-	dataDir := "./data"
+	// Ensure www directory exists
+	dataDir := "./www"
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
-		return fmt.Errorf("failed to create data directory: %v", err)
+		return fmt.Errorf("failed to create www directory: %v", err)
 	}
 
-	dbPath := filepath.Join(dataDir, "nostr_hero.db")
+	dbPath := filepath.Join(dataDir, "game.db")
 
 	var err error
 	db, err = sql.Open("sqlite", dbPath)

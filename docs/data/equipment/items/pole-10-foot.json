@@ -1,0 +1,20 @@
+{
+  "name": "Pole (10-foot)",
+  "description": "A simple wooden pole, 10 feet in length. Useful for testing for traps, checking depths, pushing buttons from a distance, or as an improvised weapon. Can also be used to vault over obstacles.",
+  "price": 0,
+  "type": "Adventuring Gear",
+  "weight": 7.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "1",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "reach",
+    "improvised-weapon"
+  ],
+  "notes": []
+}

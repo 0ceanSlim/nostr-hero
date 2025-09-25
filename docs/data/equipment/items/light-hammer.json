@@ -1,0 +1,21 @@
+{
+  "name": "Light hammer",
+  "description": "",
+  "price": 0,
+  "type": "Simple Melee Weapons",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "damage-type": "bludgeon",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "2",
+  "rarity": "common",
+  "tags": [
+    "light",
+    "thrown"
+  ],
+  "notes": []
+}

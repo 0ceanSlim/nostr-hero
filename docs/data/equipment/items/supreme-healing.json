@@ -1,0 +1,23 @@
+{
+  "name": "Supreme healing",
+  "description": "The most powerful healing potion, radiating with divine energy.",
+  "price": 50000,
+  "ac": null,
+  "damage": null,
+  "heal": "10d4 + 20",
+  "stack": 1,
+  "weight": 0.5,
+  "type": "Potion",
+  "notes": [
+    "Single use item",
+    "Takes an action to drink"
+  ],
+  "tags": [
+    "consumable",
+    "healing"
+  ],
+  "rarity": "common",
+  "img": "equipment/potion.jpg",
+  "range": "null",
+  "range-long": "null"
+}

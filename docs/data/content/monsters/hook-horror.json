@@ -1,0 +1,16 @@
+{
+  "id": 142,
+  "name": "Hook Horror",
+  "challenge_rating": 3.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 75,
+  "alignment": "neutral",
+  "img": "/static/img/monster/hook-horror.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

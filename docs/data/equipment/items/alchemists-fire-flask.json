@@ -1,0 +1,24 @@
+{
+  "name": "Alchemist's Fire (flask)",
+  "description": "A sticky, adhesive fluid that ignites when exposed to air, creating persistent flames.",
+  "price": 5000,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 1,
+  "type": "Adventuring Gear",
+  "notes": [
+    "Can be thrown as an improvised weapon",
+    "Creates fire damage over time"
+  ],
+  "tags": [
+    "fire",
+    "thrown",
+    "consumable"
+  ],
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
+}

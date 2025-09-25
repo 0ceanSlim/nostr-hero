@@ -1,0 +1,17 @@
+{
+  "name": "Gold Piece",
+  "description": "",
+  "price": 1,
+  "type": "Gold",
+  "weight": 0.006,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

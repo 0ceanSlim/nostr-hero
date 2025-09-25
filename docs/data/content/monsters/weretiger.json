@@ -1,0 +1,21 @@
+{
+  "id": 162,
+  "name": "Weretiger",
+  "challenge_rating": 4.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 12,
+  "hit_points": 120,
+  "alignment": "neutral",
+  "tags": [
+    "Human",
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/weretiger.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

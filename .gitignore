@@ -3,6 +3,11 @@ config.yml
 alpha-registry.json
 legacy-registry.json
 
+# Database files
+*.db
+*.duckdb
+game.db
+
 !/www/static/js/
 !/www/static/img/
 !/www/static/style/readme.md

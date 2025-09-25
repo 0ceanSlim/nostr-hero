@@ -1,0 +1,21 @@
+{
+  "name": "Sledge Hammer",
+  "description": "A heavy two-handed hammer designed for breaking through walls and large objects.",
+  "price": 200,
+  "type": "Adventuring Gear",
+  "weight": 10.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "two-handed"
+  ],
+  "notes": [
+    "Effective for breaking down barriers"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

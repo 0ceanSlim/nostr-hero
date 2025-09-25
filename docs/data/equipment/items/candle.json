@@ -1,0 +1,23 @@
+{
+  "name": "Candle",
+  "description": "A small wax candle that provides a modest amount of light when lit.",
+  "price": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 0.1,
+  "type": "Adventuring Gear",
+  "notes": [
+    "Burns for 1 hour when lit",
+    "Provides dim light in a 5-foot radius"
+  ],
+  "tags": [
+    "light-source",
+    "consumable"
+  ],
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
+}

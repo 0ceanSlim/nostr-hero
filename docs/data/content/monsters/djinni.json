@@ -1,0 +1,20 @@
+{
+  "id": 248,
+  "name": "Djinni",
+  "challenge_rating": 11.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 17,
+  "hit_points": 161,
+  "alignment": "chaotic good",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/djinni.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "hill",
+    "mountain"
+  ]
+}

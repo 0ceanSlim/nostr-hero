@@ -1,0 +1,21 @@
+{
+  "id": 215,
+  "name": "Yuan-ti Abomination",
+  "challenge_rating": 7.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 127,
+  "alignment": "neutral evil",
+  "tags": [
+    "Shapechanger",
+    "Yuan-ti"
+  ],
+  "img": "/static/img/monster/yuan-ti-abomination.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

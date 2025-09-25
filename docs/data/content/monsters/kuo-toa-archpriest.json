@@ -1,0 +1,20 @@
+{
+  "id": 197,
+  "name": "Kuo-toa Archpriest",
+  "challenge_rating": 6.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 97,
+  "alignment": "neutral evil",
+  "tags": [
+    "Kuo-toa"
+  ],
+  "img": "/static/img/monster/kuo-toa-archpriest.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

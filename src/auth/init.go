@@ -1,18 +1,74 @@
 package auth
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/0ceanslim/grain/client"
+	cfgType "github.com/0ceanslim/grain/config/types"
+	"github.com/0ceanslim/grain/client/session"
 	"nostr-hero/src/utils"
 )
 
-// InitializeGrainClient initializes only the session manager for Nostr Hero
+// InitializeGrainClient initializes grain client for Nostr Hero
 func InitializeGrainClient(config *utils.Config) error {
-	log.Println("🎮 Initializing Grain session manager for Nostr Hero...")
+	log.Println("🎮 Initializing Grain client for Nostr Hero...")
 
-	// For now, we only need the session manager from grain
-	// We can initialize full client later if needed for relay connections
-	log.Println("✅ Grain session manager ready for Nostr Hero")
+	// Create minimal grain server config for session management only
+	grainConfig := &cfgType.ServerConfig{
+		Server: struct {
+			Port                      string `yaml:"port"`
+			ReadTimeout               int    `yaml:"read_timeout"`
+			WriteTimeout              int    `yaml:"write_timeout"`
+			IdleTimeout               int    `yaml:"idle_timeout"`
+			MaxSubscriptionsPerClient int    `yaml:"max_subscriptions_per_client"`
+			ImplicitReqLimit          int    `yaml:"implicit_req_limit"`
+		}{
+			Port:                      fmt.Sprintf("%d", config.Server.Port),
+			ReadTimeout:               30,
+			WriteTimeout:              30,
+			IdleTimeout:               60,
+			MaxSubscriptionsPerClient: 10,
+			ImplicitReqLimit:          10,
+		},
+		// Initialize other required fields with defaults
+		Client: cfgType.ClientConfig{
+			// Default client config
+		},
+		RateLimit: cfgType.RateLimitConfig{
+			// Default rate limit config
+		},
+		Blacklist: cfgType.BlacklistConfig{
+			// Default blacklist config
+		},
+		ResourceLimits: cfgType.ResourceLimits{
+			// Default resource limits
+		},
+		Auth: cfgType.AuthConfig{
+			// Default auth config
+		},
+		EventPurge: cfgType.EventPurgeConfig{
+			// Default event purge config
+		},
+		EventTimeConstraints: cfgType.EventTimeConstraints{
+			// Default event time constraints
+		},
+	}
+
+	// Initialize the grain client
+	if err := client.InitializeClient(grainConfig); err != nil {
+		log.Printf("❌ Failed to initialize Grain client: %v", err)
+		return fmt.Errorf("failed to initialize grain client: %w", err)
+	}
+
+	// Initialize the session manager
+	session.SessionMgr = session.NewSessionManager()
+	if session.SessionMgr == nil {
+		log.Printf("❌ Failed to create session manager")
+		return fmt.Errorf("failed to create session manager")
+	}
+
+	log.Println("✅ Grain client ready for Nostr Hero")
 	return nil
 }
 

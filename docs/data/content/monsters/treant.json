@@ -1,0 +1,15 @@
+{
+  "id": 233,
+  "name": "Treant",
+  "challenge_rating": 9.0,
+  "type": "Plant",
+  "size": "Huge",
+  "armor_class": 16,
+  "hit_points": 138,
+  "alignment": "chaotic good",
+  "img": "/static/img/monster/treant.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

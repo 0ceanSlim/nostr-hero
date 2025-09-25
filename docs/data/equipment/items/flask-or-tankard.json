@@ -1,0 +1,19 @@
+{
+  "name": "Flask or Tankard",
+  "description": "A metal drinking vessel that can hold ale, wine, or other beverages.",
+  "price": 2,
+  "type": "Adventuring Gear",
+  "weight": 1.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can hold liquids for drinking"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

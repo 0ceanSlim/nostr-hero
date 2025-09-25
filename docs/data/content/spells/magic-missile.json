@@ -1,0 +1,34 @@
+{
+  "name": "Magic Missile",
+  "description": "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "4",
+  "range_long": "6",
+  "duration": "instantaneous",
+  "damage": "3d4 + 3",
+  "damage_type": "force",
+  "type": "Spell",
+  "spell_attack": "automatic",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "ranged",
+    "force"
+  ],
+  "classes": [
+    "sorcerer",
+    "wizard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Always hits target - no attack roll needed",
+    "Can split damage among multiple targets if desired",
+    "Requires spellcasting focus or component pouch"
+  ],
+  "material_component": null
+}

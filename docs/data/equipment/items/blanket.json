@@ -1,0 +1,14 @@
+{
+  "name": "Blanket",
+  "price": 50,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 3,
+  "type": "Adventuring Gear",
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null"
+}

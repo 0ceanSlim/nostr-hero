@@ -1,0 +1,16 @@
+{
+  "id": 160,
+  "name": "Lamia",
+  "challenge_rating": 4.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 97,
+  "alignment": "chaotic evil",
+  "img": "/static/img/monster/lamia.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Grappling Hook",
+  "description": "A three-pronged metal hook attached to a length of rope, used for climbing.",
+  "price": 200,
+  "type": "Adventuring Gear",
+  "weight": 4.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be thrown to catch onto ledges for climbing"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

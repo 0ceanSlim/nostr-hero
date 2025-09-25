@@ -1,0 +1,19 @@
+{
+  "name": "Jug or pitcher",
+  "description": "A ceramic vessel with a handle and spout for storing and pouring liquids.",
+  "price": 2,
+  "type": "Adventuring Gear",
+  "weight": 4.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can hold up to 1 gallon of liquid"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

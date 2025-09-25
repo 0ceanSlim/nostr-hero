@@ -1,0 +1,17 @@
+{
+  "id": 48,
+  "name": "Warhorse Skeleton",
+  "challenge_rating": 0.5,
+  "type": "Undead",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 22,
+  "alignment": "lawful evil",
+  "img": "/static/img/monster/warhorse-skeleton.svg",
+  "enviornment": [
+    "grassland",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

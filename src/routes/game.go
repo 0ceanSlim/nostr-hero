@@ -7,14 +7,17 @@ import (
 
 // GameHandler serves the main game interface
 func GameHandler(w http.ResponseWriter, r *http.Request) {
-	// Check if user is logged in (you may want to implement proper session checking)
-	// For now, we'll serve the game interface directly
+	// Extract query parameters
+	saveID := r.URL.Query().Get("save")
+	newGame := r.URL.Query().Get("new")
 
 	data := utils.PageData{
 		Title: "Nostr Hero - Game",
 		Theme: "dark",
 		CustomData: map[string]interface{}{
 			"GameMode": true,
+			"SaveID":   saveID,
+			"NewGame":  newGame == "true",
 		},
 	}
 

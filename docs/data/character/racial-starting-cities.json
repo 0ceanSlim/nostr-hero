@@ -1,0 +1,193 @@
+{
+  "racial_starting_cities": {
+    "Human": "kingdom",
+    "Half-Elf": "kingdom",
+    "Half-Orc": "kingdom",
+    "Tiefling": "kingdom",
+    "Elf": "city-south",
+    "Dwarf": "town-northeast",
+    "Halfling": "village-west",
+    "Gnome": "village-west",
+    "Orc": "village-southwest",
+    "Dragonborn": "city-east"
+  },
+  "entry_fees_by_race": {
+    "kingdom": {
+      "base_fee": 0,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 1,
+        "Tiefling": 2,
+        "Elf": 1,
+        "Dwarf": 1,
+        "Halfling": 0,
+        "Gnome": 0,
+        "Orc": 5,
+        "Dragonborn": 2
+      }
+    },
+    "city-east": {
+      "base_fee": 5,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 2,
+        "Tiefling": -1,
+        "Elf": 0,
+        "Dwarf": 0,
+        "Halfling": 1,
+        "Gnome": 1,
+        "Orc": 5,
+        "Dragonborn": 0
+      }
+    },
+    "city-south": {
+      "base_fee": 3,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": -1,
+        "Half-Orc": 3,
+        "Tiefling": 2,
+        "Elf": 0,
+        "Dwarf": 1,
+        "Halfling": -1,
+        "Gnome": -1,
+        "Orc": 7,
+        "Dragonborn": 1
+      }
+    },
+    "town-north": {
+      "base_fee": 3,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 1,
+        "Tiefling": 2,
+        "Elf": 1,
+        "Dwarf": -1,
+        "Halfling": 1,
+        "Gnome": 1,
+        "Orc": 4,
+        "Dragonborn": 0
+      }
+    },
+    "town-northeast": {
+      "base_fee": 4,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 0,
+        "Tiefling": 2,
+        "Elf": 2,
+        "Dwarf": 0,
+        "Halfling": 1,
+        "Gnome": -1,
+        "Orc": 3,
+        "Dragonborn": 1
+      }
+    },
+    "village-west": {
+      "base_fee": 2,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 2,
+        "Tiefling": 3,
+        "Elf": 0,
+        "Dwarf": 0,
+        "Halfling": 0,
+        "Gnome": 0,
+        "Orc": 5,
+        "Dragonborn": 1
+      }
+    },
+    "village-southeast": {
+      "base_fee": 2,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 1,
+        "Tiefling": -1,
+        "Elf": 1,
+        "Dwarf": 1,
+        "Halfling": 0,
+        "Gnome": 0,
+        "Orc": 3,
+        "Dragonborn": -1
+      }
+    },
+    "village-southwest": {
+      "base_fee": 1,
+      "racial_modifiers": {
+        "Human": 1,
+        "Half-Elf": 0,
+        "Half-Orc": -1,
+        "Tiefling": -1,
+        "Elf": 2,
+        "Dwarf": 2,
+        "Halfling": 1,
+        "Gnome": 1,
+        "Orc": 0,
+        "Dragonborn": 0
+      }
+    },
+    "village-south": {
+      "base_fee": 1,
+      "racial_modifiers": {
+        "Human": 0,
+        "Half-Elf": 0,
+        "Half-Orc": 1,
+        "Tiefling": 1,
+        "Elf": 0,
+        "Dwarf": 0,
+        "Halfling": 0,
+        "Gnome": 0,
+        "Orc": 3,
+        "Dragonborn": 0
+      }
+    }
+  },
+  "racial_descriptions": {
+    "Human": {
+      "starting_city": "kingdom",
+      "description": "Humans are the most common and adaptable race, making their home in the grand kingdom that serves as the realm's political and economic center."
+    },
+    "Half-Elf": {
+      "starting_city": "kingdom",
+      "description": "Half-elves often find acceptance in the cosmopolitan kingdom where their mixed heritage is less of a concern among the diverse population."
+    },
+    "Half-Orc": {
+      "starting_city": "kingdom",
+      "description": "Half-orcs start in the kingdom where they can find work as guards or laborers, though they face some discrimination and higher entry fees elsewhere."
+    },
+    "Tiefling": {
+      "starting_city": "kingdom",
+      "description": "Tieflings begin in the kingdom where the rule of law provides some protection, despite facing suspicion and prejudice throughout the realm."
+    },
+    "Elf": {
+      "starting_city": "city-south",
+      "description": "Elves start in Verdant City, a center of learning and nature magic that aligns with their long lives and connection to the natural world."
+    },
+    "Dwarf": {
+      "starting_city": "town-northeast",
+      "description": "Dwarves begin in Ironpeak Town, a mining community built into the mountains where their skills with stone and metal are highly valued."
+    },
+    "Halfling": {
+      "starting_city": "village-west",
+      "description": "Halflings start in Millhaven Village, a peaceful farming community in the hills that matches their love of comfort, good food, and simple pleasures."
+    },
+    "Gnome": {
+      "starting_city": "village-west",
+      "description": "Gnomes begin in Millhaven Village where their curiosity and inventiveness are welcomed by the farming community that appreciates practical innovations."
+    },
+    "Orc": {
+      "starting_city": "village-southwest",
+      "description": "Orcs start in Marshlight Village, a remote swamp settlement where their strength is valued and their tribal nature is better understood."
+    },
+    "Dragonborn": {
+      "starting_city": "city-east",
+      "description": "Dragonborn begin in Goldenhaven City, a wealthy trading hub where exotic travelers are more common and their draconic heritage is seen as prestigious rather than threatening."
+    }
+  }
+}

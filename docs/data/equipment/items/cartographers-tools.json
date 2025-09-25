@@ -1,0 +1,17 @@
+{
+  "name": "Cartographer's tools",
+  "description": "These tools consist of a quill, ink, parchment, a pair of compasses, calipers, and a ruler. Proficiency with cartographer's tools lets you add your proficiency bonus to any ability checks you make to create maps or determine your location on a map.",
+  "price": 1500,
+  "type": "Artisan's Tools",
+  "weight": 6.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

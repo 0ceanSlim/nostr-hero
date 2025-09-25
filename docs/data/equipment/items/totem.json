@@ -1,0 +1,14 @@
+{
+  "name": "Totem",
+  "price": 100,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 0.5,
+  "type": "Druidic Focus",
+  "rarity": "common",
+  "img": "equipment/druidic-focus.jpg",
+  "range": "null",
+  "range-long": "null"
+}

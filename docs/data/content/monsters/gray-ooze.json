@@ -1,0 +1,15 @@
+{
+  "id": 43,
+  "name": "Gray Ooze",
+  "challenge_rating": 0.5,
+  "type": "Ooze",
+  "size": "Medium",
+  "armor_class": 8,
+  "hit_points": 22,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/gray-ooze.svg",
+  "enviornment": [
+    "swamp",
+    "underground"
+  ]
+}

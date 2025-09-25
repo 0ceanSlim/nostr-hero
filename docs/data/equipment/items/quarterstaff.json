@@ -1,0 +1,20 @@
+{
+  "name": "Quarterstaff",
+  "description": "",
+  "price": 0,
+  "type": "Simple Melee Weapons",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6,1d8",
+  "heal": null,
+  "damage-type": "bludgeon",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "versatile"
+  ],
+  "notes": []
+}

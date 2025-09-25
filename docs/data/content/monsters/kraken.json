@@ -1,0 +1,21 @@
+{
+  "id": 298,
+  "name": "Kraken",
+  "challenge_rating": 23.0,
+  "type": "Monstrosity",
+  "size": "Gargantuan",
+  "armor_class": 18,
+  "hit_points": 472,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Titan",
+    "Legendary"
+  ],
+  "img": "/static/img/monster/kraken.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

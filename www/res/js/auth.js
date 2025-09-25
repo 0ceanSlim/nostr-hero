@@ -1,28 +1,74 @@
 // Authentication functions for Nostr Hero using grain client
 
-// Redirect to login interface if no user session
-function redirectToLogin() {
+// Initialize authentication with session manager integration
+function initializeAuthentication() {
+    if (!window.sessionManager) {
+        console.error('❌ SessionManager not available for authentication');
+        return;
+    }
+
+    // Set up session manager event listeners
+    window.sessionManager.on('sessionReady', (sessionData) => {
+        console.log('✅ Session ready, redirecting to saves');
+        // For existing sessions, redirect to saves page
+        window.location.href = '/saves';
+    });
+
+    window.sessionManager.on('authenticationRequired', () => {
+        console.log('🔐 Authentication required, showing login interface');
+        showLoginInterface();
+    });
+
+    window.sessionManager.on('sessionExpired', () => {
+        console.log('⏰ Session expired, showing login interface');
+        showMessage('⏰ Your session has expired. Please log in again.', 'warning');
+        showLoginInterface();
+    });
+
+    window.sessionManager.on('authenticationSuccess', (method) => {
+        console.log(`✅ Authentication successful via ${method}`);
+        showMessage(`✅ Successfully logged in via ${method}!`, 'success');
+        setTimeout(() => {
+            // Redirect to saves page after successful login
+            window.location.href = '/saves';
+        }, 1000);
+    });
+
+    window.sessionManager.on('authenticationFailed', ({ method, error }) => {
+        console.error(`❌ Authentication failed via ${method}:`, error);
+        showMessage(`❌ Login failed via ${method}: ${error}`, 'error');
+    });
+
+    window.sessionManager.on('sessionError', (error) => {
+        console.error('❌ Session error:', error);
+        showMessage('❌ Session error: ' + error.message, 'error');
+        showLoginInterface();
+    });
+}
+
+// Show login interface
+function showLoginInterface() {
     const gameContainer = document.getElementById('game-app');
     if (gameContainer) {
         gameContainer.innerHTML = `
             <div class="text-center py-12">
-                <h2 class="text-2xl font-bold mb-6 text-yellow-400">Welcome to Nostr Hero!</h2>
-                <p class="text-gray-300 mb-8">Please log in with your Nostr identity to start playing.</p>
+                <h2 class="text-3xl font-bold mb-6 text-yellow-400">⚔️ Nostr Hero ⚔️</h2>
+                <p class="text-gray-300 mb-8">A text-based RPG powered by Nostr</p>
                 <div class="space-y-4 max-w-md mx-auto">
                     <button onclick="loginWithExtension()"
-                            class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                         🔗 Login with Browser Extension
                     </button>
                     <button onclick="loginWithAmber()"
-                            class="w-full bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium">
+                            class="w-full bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                         📱 Login with Amber
                     </button>
                     <button onclick="showKeyLogin()"
-                            class="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium">
+                            class="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                         🗝️ Login with Private Key
                     </button>
                     <button onclick="generateNewKeys()"
-                            class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
+                            class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                         ✨ Generate New Keys
                     </button>
                 </div>
@@ -34,102 +80,55 @@ function redirectToLogin() {
     }
 }
 
-// Login with browser extension (like Alby, nos2x)
+// Hide login interface and show game
+function hideLoginInterface() {
+    const gameContainer = document.getElementById('game-app');
+    if (gameContainer) {
+        // The game interface will be populated by initializeGame()
+        gameContainer.innerHTML = `
+            <div class="text-center py-12">
+                <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+                    <span class="visually-hidden"></span>
+                </div>
+                <p class="text-gray-300 mt-4">🎮 Loading game...</p>
+            </div>
+        `;
+    }
+}
+
+// Legacy function for backward compatibility
+function redirectToLogin() {
+    showLoginInterface();
+}
+
+// Login with browser extension using SessionManager
 async function loginWithExtension() {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     try {
         showMessage('🔗 Connecting to browser extension...', 'info');
-
-        // Check if nostr extension is available
-        if (!window.nostr) {
-            showMessage('❌ No Nostr extension found. Please install Alby or nos2x.', 'error');
-            return;
-        }
-
-        // Get public key from extension
-        const publicKey = await window.nostr.getPublicKey();
-        if (!publicKey) {
-            showMessage('❌ Failed to get public key from extension', 'error');
-            return;
-        }
-
-        // Create login request
-        const loginRequest = {
-            public_key: publicKey,
-            signing_method: 'browser_extension',
-            mode: 'write'
-        };
-
-        // Send login request to server
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginRequest)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showMessage('✅ Successfully logged in with browser extension!', 'success');
-            // Reload the game interface
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            showMessage('❌ Login failed: ' + (result.error || result.message), 'error');
-        }
-
+        await window.sessionManager.loginWithExtension();
+        // Success handling is done by event listeners
     } catch (error) {
         console.error('Extension login error:', error);
         showMessage('❌ Extension login failed: ' + error.message, 'error');
     }
 }
 
-// Login with Amber (Android app)
+// Login with Amber using SessionManager
 async function loginWithAmber() {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     try {
         showMessage('📱 Connecting to Amber...', 'info');
-
-        const amberUrl = createAmberLoginURL();
-
-        // Open Amber in a new window
-        const amberWindow = window.open(amberUrl, 'amber_login', 'width=400,height=600');
-
-        // Listen for the callback
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'amber_success') {
-                showMessage('✅ Successfully logged in with Amber!', 'success');
-                amberWindow.close();
-                // Reload the game interface
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else if (event.data && event.data.type === 'amber_error') {
-                showMessage('❌ Amber login failed: ' + event.data.error, 'error');
-                amberWindow.close();
-            }
-        });
-
-        // Check if window was closed without completing login
-        const checkClosed = setInterval(() => {
-            if (amberWindow.closed) {
-                clearInterval(checkClosed);
-                // Check localStorage for result
-                const result = localStorage.getItem('amber_callback_result');
-                if (result) {
-                    const amberResult = JSON.parse(result);
-                    if (amberResult.success) {
-                        showMessage('✅ Successfully logged in with Amber!', 'success');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    }
-                    localStorage.removeItem('amber_callback_result');
-                }
-            }
-        }, 1000);
-
+        await window.sessionManager.loginWithAmber();
+        // Success handling is done by event listeners
     } catch (error) {
         console.error('Amber login error:', error);
         showMessage('❌ Amber login failed: ' + error.message, 'error');
@@ -181,8 +180,13 @@ function hideKeyLogin() {
     loginDetails.innerHTML = '';
 }
 
-// Login with private key
+// Login with private key using SessionManager
 async function loginWithPrivateKey() {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     const privateKeyInput = document.getElementById('private-key-input');
     const privateKey = privateKeyInput.value.trim();
 
@@ -193,59 +197,32 @@ async function loginWithPrivateKey() {
 
     try {
         showMessage('🗝️ Logging in with private key...', 'info');
+        await window.sessionManager.loginWithPrivateKey(privateKey);
 
-        const loginRequest = {
-            private_key: privateKey,
-            signing_method: 'encrypted_key',
-            mode: 'write'
-        };
-
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginRequest)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showMessage('✅ Successfully logged in!', 'success');
-            // Clear the input for security
-            privateKeyInput.value = '';
-            // Reload the game interface
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            showMessage('❌ Login failed: ' + (result.error || result.message), 'error');
-        }
-
+        // Clear the input for security
+        privateKeyInput.value = '';
+        // Success handling is done by event listeners
     } catch (error) {
         console.error('Private key login error:', error);
         showMessage('❌ Private key login failed: ' + error.message, 'error');
     }
 }
 
-// Generate new keys
+// Generate new keys using SessionManager
 async function generateNewKeys() {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     try {
         showMessage('✨ Generating new key pair...', 'info');
+        const keyPair = await window.sessionManager.generateKeys();
 
-        const response = await fetch('/api/auth/generate-keys', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const result = await response.json();
-
-        if (result.success && result.key_pair) {
-            showGeneratedKeys(result.key_pair);
+        if (keyPair) {
+            showGeneratedKeys(keyPair);
         } else {
-            showMessage('❌ Failed to generate keys: ' + (result.error || 'Unknown error'), 'error');
+            showMessage('❌ Failed to generate keys', 'error');
         }
 
     } catch (error) {
@@ -292,69 +269,59 @@ function showGeneratedKeys(keyPair) {
     loginDetails.classList.remove('hidden');
 }
 
-// Use the generated keys to login
+// Use the generated keys to login using SessionManager
 async function useGeneratedKeys(nsec) {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     try {
         showMessage('🔐 Logging in with new keys...', 'info');
-
-        const loginRequest = {
-            private_key: nsec,
-            signing_method: 'encrypted_key',
-            mode: 'write'
-        };
-
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginRequest)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showMessage('✅ Successfully logged in with new keys!', 'success');
-            // Reload the game interface
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            showMessage('❌ Login failed: ' + (result.error || result.message), 'error');
-        }
-
+        await window.sessionManager.loginWithPrivateKey(nsec);
+        // Success handling is done by event listeners
     } catch (error) {
         console.error('Generated key login error:', error);
         showMessage('❌ Login failed: ' + error.message, 'error');
     }
 }
 
-// Logout function
+// Logout function using SessionManager
 async function logout() {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
+        return;
+    }
+
     try {
-        const response = await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showMessage('✅ Successfully logged out', 'success');
-            // Redirect to login
-            setTimeout(() => {
-                redirectToLogin();
-            }, 1000);
-        } else {
-            showMessage('❌ Logout failed: ' + (result.error || result.message), 'error');
-        }
-
+        showMessage('🚪 Logging out...', 'info');
+        await window.sessionManager.logout();
+        showMessage('✅ Successfully logged out', 'success');
+        setTimeout(() => {
+            showLoginInterface();
+        }, 1000);
     } catch (error) {
         console.error('Logout error:', error);
         showMessage('❌ Logout failed: ' + error.message, 'error');
     }
 }
 
-console.log('Authentication system loaded');
+// Initialize authentication system when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎮 Authentication system loading...');
+
+    // Wait for session manager to be available
+    const checkSessionManager = () => {
+        if (window.sessionManager) {
+            console.log('✅ SessionManager found, initializing authentication');
+            initializeAuthentication();
+        } else {
+            console.log('⏳ Waiting for SessionManager...');
+            setTimeout(checkSessionManager, 100);
+        }
+    };
+
+    checkSessionManager();
+});
+
+console.log('🔐 Authentication system loaded');

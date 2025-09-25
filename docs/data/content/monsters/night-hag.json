@@ -1,0 +1,17 @@
+{
+  "id": 186,
+  "name": "Night Hag",
+  "challenge_rating": 5.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 17,
+  "hit_points": 112,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/night-hag.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

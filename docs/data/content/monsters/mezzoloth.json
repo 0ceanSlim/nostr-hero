@@ -1,0 +1,19 @@
+{
+  "id": 169,
+  "name": "Mezzoloth",
+  "challenge_rating": 5.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 18,
+  "hit_points": 75,
+  "alignment": "neutral evil",
+  "tags": [
+    "Yugoloth"
+  ],
+  "img": "/static/img/monster/mezzoloth.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "urban"
+  ]
+}

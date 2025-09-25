@@ -1,0 +1,20 @@
+{
+  "name": "Half Plate",
+  "description": "",
+  "price": 75000,
+  "type": "Medium Armor",
+  "weight": 40.0,
+  "stack": 1,
+  "ac": "15 + Dex(max2)",
+  "damage": null,
+  "heal": null,
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "stealth": -1
+}

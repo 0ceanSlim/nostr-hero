@@ -1,0 +1,16 @@
+{
+  "name": "Padded",
+  "description": "",
+  "price": 500,
+  "type": "Light Armor",
+  "weight": 8.0,
+  "stack": 1,
+  "ac": "11 + Dex",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "img": "equipment/armor.jpg",
+  "stealth": -1
+}

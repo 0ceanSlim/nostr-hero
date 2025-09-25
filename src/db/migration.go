@@ -37,7 +37,7 @@ func MigrateFromJSON() error {
 func migrateEquipmentPacks() error {
 	log.Println("Migrating equipment packs...")
 
-	packsPath := filepath.Join("www", "data", "equipment", "packs.json")
+	packsPath := filepath.Join("docs", "data", "equipment", "packs.json")
 	data, err := os.ReadFile(packsPath)
 	if err != nil {
 		return fmt.Errorf("failed to read packs.json: %v", err)
@@ -80,7 +80,7 @@ func migrateEquipmentPacks() error {
 func migrateCharacterData() error {
 	log.Println("Migrating character data...")
 
-	characterDataPath := filepath.Join("www", "data", "character")
+	characterDataPath := filepath.Join("docs", "data", "character")
 
 	// Define the files we want to migrate for character data
 	characterFiles := map[string]string{
@@ -122,7 +122,7 @@ func migrateContentData() error {
 
 // migrateMonsters migrates all monster JSON files
 func migrateMonsters() error {
-	monstersPath := filepath.Join("www", "data", "content", "monsters")
+	monstersPath := filepath.Join("docs", "data", "content", "monsters")
 
 	// Clear existing monsters
 	if _, err := db.Exec("DELETE FROM monsters"); err != nil {
@@ -183,7 +183,7 @@ func migrateMonsterFile(filePath string) error {
 
 // migrateLocations migrates location data
 func migrateLocations() error {
-	locationsPath := filepath.Join("www", "data", "content", "locations")
+	locationsPath := filepath.Join("docs", "data", "content", "locations")
 
 	// Clear existing locations
 	if _, err := db.Exec("DELETE FROM locations"); err != nil {

@@ -1,0 +1,21 @@
+{
+  "id": 278,
+  "name": "Adult Silver Dragon",
+  "challenge_rating": 16.0,
+  "type": "Dragon",
+  "size": "Huge",
+  "armor_class": 19,
+  "hit_points": 243,
+  "alignment": "lawful good",
+  "tags": [
+    "Metallic",
+    "Legendary",
+    "fly"
+  ],
+  "img": "/static/img/monster/adult-silver-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

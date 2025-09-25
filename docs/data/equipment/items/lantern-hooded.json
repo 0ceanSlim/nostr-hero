@@ -1,0 +1,23 @@
+{
+  "name": "Lantern hooded",
+  "description": "A lantern with shutters that can be opened or closed to control the light.",
+  "price": 500,
+  "type": "Adventuring Gear",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [
+    "light-source",
+    "oil-burning"
+  ],
+  "notes": [
+    "Light can be dimmed or blocked by closing shutters",
+    "Burns for 6 hours on one flask of oil"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

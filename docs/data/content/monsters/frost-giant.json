@@ -1,0 +1,16 @@
+{
+  "id": 226,
+  "name": "Frost Giant",
+  "challenge_rating": 8.0,
+  "type": "Giant",
+  "size": "Huge",
+  "armor_class": 15,
+  "hit_points": 138,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/frost-giant.svg",
+  "enviornment": [
+    "arctic",
+    "hill",
+    "mountain"
+  ]
+}

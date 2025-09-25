@@ -1,0 +1,16 @@
+{
+  "id": 175,
+  "name": "Salamander",
+  "challenge_rating": 5.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 90,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/salamander.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "mountain"
+  ]
+}

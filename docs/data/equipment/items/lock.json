@@ -1,0 +1,20 @@
+{
+  "name": "Lock",
+  "description": "A sturdy padlock with a key, used to secure doors, chests, and containers.",
+  "price": 1000,
+  "type": "Adventuring Gear",
+  "weight": 1.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Comes with a key",
+    "Can be picked with thieves' tools"
+  ],
+  "range": "null",
+  "range-long": "null"
+}

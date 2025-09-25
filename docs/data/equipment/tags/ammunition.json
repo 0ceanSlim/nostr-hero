@@ -1,0 +1,10 @@
+{
+  "name": "Ammunition",
+  "description": "You can use a weapon that has the Ammunition property to make a ranged attack only if you have ammunition to fire from it. The type of ammunition required is specified with the weapon's ammo field. Each attack expends one piece of ammunition. Drawing the ammunition is part of the attack (you need a free hand to load a one-handed weapon). After a fight, you can recover half the ammunition (round down) you used in the fight; the rest is lost.",
+  "mechanics": {
+    "requires_ammo": true,
+    "ammo_per_attack": 1,
+    "requires_free_hand": true,
+    "recovery_rate": 0.5
+  }
+}

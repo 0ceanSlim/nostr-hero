@@ -1,0 +1,27 @@
+{
+  "name": "Crossbow heavy",
+  "description": "A large, powerful crossbow that requires two hands to operate effectively.",
+  "price": 0,
+  "type": "Martial Ranged Weapons",
+  "weight": 18.0,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d10",
+  "heal": null,
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "3",
+  "range-long": "5",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "loading",
+    "two-handed",
+    "heavy"
+  ],
+  "notes": [
+    "Requires bolts to fire",
+    "Loading property requires action to reload",
+    "Heavy weapon"
+  ]
+}

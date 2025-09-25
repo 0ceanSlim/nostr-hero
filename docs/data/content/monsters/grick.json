@@ -1,0 +1,16 @@
+{
+  "id": 82,
+  "name": "Grick",
+  "challenge_rating": 2.0,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 14,
+  "hit_points": 27,
+  "alignment": "neutral",
+  "img": "/static/img/monster/grick.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

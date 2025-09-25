@@ -1,0 +1,14 @@
+{
+  "name": "Yew Wand",
+  "price": 1000,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 1,
+  "type": "Druidic Focus",
+  "rarity": "common",
+  "img": "equipment/druidic-focus.jpg",
+  "range": "null",
+  "range-long": "null"
+}

@@ -1,0 +1,20 @@
+{
+  "id": 27,
+  "name": "Dretch",
+  "challenge_rating": 0.25,
+  "type": "Fiend",
+  "size": "Small",
+  "armor_class": 11,
+  "hit_points": 18,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Demon"
+  ],
+  "img": "/static/img/monster/dretch.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Glassblower's tools",
+  "description": "These special tools include a blowpipe, a small furnace, and various molds and forms. Proficiency with glassblower's tools lets you add your proficiency bonus to any ability checks you make to craft glass objects.",
+  "price": 3000,
+  "type": "Artisan's Tools",
+  "weight": 5.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

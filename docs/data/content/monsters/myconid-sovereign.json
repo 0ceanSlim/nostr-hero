@@ -1,0 +1,15 @@
+{
+  "id": 113,
+  "name": "Myconid Sovereign",
+  "challenge_rating": 2.0,
+  "type": "Plant",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 60,
+  "alignment": "lawful neutral",
+  "img": "/static/img/monster/myconid-sovereign.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Reliquary",
+  "price": 500,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 2,
+  "type": "Holy Symbol",
+  "rarity": "common",
+  "img": "equipment/holy-symbol.jpg",
+  "range": "null",
+  "range-long": "null"
+}

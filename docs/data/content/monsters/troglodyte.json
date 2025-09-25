@@ -1,0 +1,20 @@
+{
+  "id": 20,
+  "name": "Troglodyte",
+  "challenge_rating": 0.25,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 11,
+  "hit_points": 13,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Troglodyte"
+  ],
+  "img": "/static/img/monster/troglodyte.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Dulcimer",
+  "description": "A stringed musical instrument consisting of a sound box over which strings are stretched, played by plucking or striking. Proficiency with this instrument allows you to add your proficiency bonus to any ability checks you make to play music with it.",
+  "price": 2500,
+  "type": "Musical Instrument",
+  "weight": 10.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null"
+}

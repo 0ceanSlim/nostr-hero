@@ -30,16 +30,24 @@
     </div>
 
     <!-- Main Game Container -->
-    <div id="game-app" class="container mx-auto p-4" _="on load call initializeGame()">
+    <div id="game-app" class="container mx-auto p-4">
         <!-- Game Header -->
         <div class="bg-gray-800 rounded-lg p-4 mb-4">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-yellow-400">Nostr Hero</h1>
                 <div class="flex space-x-2">
                     <button id="save-btn"
-                            _="on click call saveGameToRelay()"
+                            onclick="saveGameToLocal()"
                             class="bg-yellow-600 hover:bg-yellow-700 text-gray-900 px-4 py-2 rounded font-bold">
                         💾 Save Game
+                    </button>
+                    <button onclick="exportSave()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold">
+                        📦 Export
+                    </button>
+                    <button onclick="window.location.href='/saves'"
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-bold">
+                        📂 Saves
                     </button>
                     <button onclick="logout()"
                             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold">
@@ -51,7 +59,7 @@
 
         <!-- Character Panel -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div id="character-panel" class="bg-gray-800 rounded-lg p-4" _="on load call updateCharacterDisplay()">
+            <div id="character-panel" class="bg-gray-800 rounded-lg p-4">
                 <h2 class="text-xl font-bold mb-3 text-green-400">Character</h2>
                 <div class="space-y-2">
                     <div class="flex justify-between">
@@ -95,7 +103,7 @@
         <!-- Main Game Area -->
         <div class="bg-gray-800 rounded-lg p-6">
             <!-- Location Display -->
-            <div id="location-panel" _="on load call displayCurrentLocation()">
+            <div id="location-panel">
                 <h2 id="location-name" class="text-2xl font-bold mb-4 text-yellow-400"></h2>
                 <p id="location-description" class="text-gray-300 mb-6 leading-relaxed"></p>
 
@@ -118,14 +126,17 @@
         </div>
 
         <!-- Message Area -->
-        <div id="message-area" class="fixed bottom-4 right-4 max-w-sm space-y-2">
+        <div id="message-area" class="fixed bottom-4 right-4 max-w-sm space-y-2 z-50">
             <!-- Messages will appear here -->
         </div>
     </div>
 
-    <!-- Game Logic Scripts -->
+    <!-- Game Logic Scripts - Load in correct order -->
+    <script src="/res/js/session-manager.js"></script>
+    <script src="/res/js/game-ui.js"></script>
     <script src="/res/js/auth.js"></script>
     <script src="/res/js/game-state.js"></script>
     <script src="/res/js/game-logic.js"></script>
-    <script src="/res/js/game-ui.js"></script>
+    <script src="/res/js/save-system.js"></script>
+    <script src="/res/js/startup.js"></script>
 {{end}}

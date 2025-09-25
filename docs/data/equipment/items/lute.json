@@ -1,0 +1,19 @@
+{
+  "name": "Lute",
+  "description": "A stringed instrument with a rounded body and graceful neck, favored by bards and traveling musicians.",
+  "price": 3500,
+  "type": "Musical instrument",
+  "weight": 2.0,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be used to perform music and entertain crowds"
+  ],
+  "range": "null",
+  "range-long": "null"
+}
