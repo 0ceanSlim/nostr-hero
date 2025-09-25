@@ -7,7 +7,14 @@
       "Bash(rm:*)",
       "Bash(mv:*)",
       "Bash(git checkout:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(go mod:*)",
+      "Bash(go get:*)",
+      "Bash(go build:*)",
+      "Bash(./nostr-hero)",
+      "Bash(curl:*)",
+      "Read(//c/code//**)",
+      "Bash(./nostr-hero.exe)"
     ],
     "deny": []
   }

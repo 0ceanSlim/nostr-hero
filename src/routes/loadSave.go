@@ -5,60 +5,37 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"nostr-hero/src/cache"
-	"nostr-hero/src/handlers"
+	"nostr-hero/src/auth"
 	"nostr-hero/src/utils"
+
+	"github.com/0ceanslim/grain/client/core/tools"
 )
 
 func LoadSave(w http.ResponseWriter, r *http.Request) {
-	// Get current user session
-	session := handlers.GetCurrentUser(r)
+	// Get current user session using grain
+	session := auth.GetCurrentUser(r)
 	if session == nil {
 		http.Error(w, "No active session found", http.StatusUnauthorized)
 		log.Println("❌ LoadSave: No active session found")
 		return
 	}
 
-	// Get user data from cache using public key
-	userData, exists := cache.GetUserData(session.PublicKey)
-	if !exists {
-		http.Error(w, "User data not found in cache", http.StatusNotFound)
-		log.Printf("❌ LoadSave: User data not found for %s", session.PublicKey)
-		return
-	}
-
-	// Parse metadata
-	var metadata map[string]interface{}
-	err := json.Unmarshal([]byte(userData.Metadata), &metadata)
+	// Generate npub from public key using grain tools
+	npub, err := tools.EncodePubkey(session.PublicKey)
 	if err != nil {
-		http.Error(w, "Invalid metadata format", http.StatusInternalServerError)
-		log.Printf("❌ LoadSave: Failed to parse metadata: %v", err)
+		http.Error(w, "Failed to encode npub", http.StatusInternalServerError)
+		log.Printf("❌ LoadSave: Failed to encode npub: %v", err)
 		return
 	}
 
-	// Parse content field from metadata
-	contentJSON, ok := metadata["content"].(string)
-	if !ok {
-		http.Error(w, "Content not found in metadata", http.StatusInternalServerError)
-		log.Printf("❌ LoadSave: Content field not found in metadata")
-		return
+	// For now, create a basic profile from the session
+	// In the future, this could fetch from Nostr relays
+	content := map[string]interface{}{
+		"name":         "Nostr Hero Player",
+		"display_name": "Player",
+		"about":        "A brave adventurer in the Nostr Hero realm",
+		"npub":         npub,
 	}
-
-	var content map[string]interface{}
-	err = json.Unmarshal([]byte(contentJSON), &content)
-	if err != nil {
-		http.Error(w, "Invalid content format", http.StatusInternalServerError)
-		log.Printf("❌ LoadSave: Failed to parse content: %v", err)
-		return
-	}
-
-	// Generate npub from public key using the same utility function as GetCacheHandler
-    npub, err := utils.EncodeNpub(session.PublicKey)
-    if err != nil {
-        http.Error(w, "Failed to encode npub", http.StatusInternalServerError)
-        log.Printf("❌ LoadSave: Failed to encode npub: %v", err)
-        return
-    }
 
 	// Fetch character data using the public key
 	characterData, err := fetchCharacterData(npub)
