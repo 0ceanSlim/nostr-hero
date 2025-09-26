@@ -192,8 +192,11 @@ class NostrCharacterGenerator {
                         if (typeof opt[0] === 'string') {
                             return { item: opt[0], quantity: opt[1] };
                         } else {
-                            // TODO: Handle nested options
-                            return { item: opt[0][0], quantity: opt[0][1] };
+                            // This is a choice between multiple items, e.g., [["leather armor", 1], ["longbow", 1]]
+                            // For now, we will join the item names and treat it as a single choice.
+                            // TODO: Handle this more gracefully in the UI.
+                            const items = opt.map(item => `${item[0]} (x${item[1]})`).join(', ');
+                            return { item: items, quantity: 1, isBundle: true, bundle: opt };
                         }
                     })
                 };

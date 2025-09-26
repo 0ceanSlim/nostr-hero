@@ -302,14 +302,14 @@ function showEquipmentSelection() {
         const input = document.createElement('input');
         input.type = 'radio';
         input.name = 'choice_' + index;
-        input.value = option;
+        input.value = option.item; // Use option.item for the value
         input.id = 'choice_' + index + '_' + optionIndex;
         input.onchange = function() { selectEquipment(index, option); };
         label.appendChild(input);
 
         const span = document.createElement('span');
         span.className = 'text-white';
-        span.textContent = option;
+        span.textContent = option.item; // Display option.item as the label
         label.appendChild(span);
 
         optionsDiv.appendChild(label);
@@ -351,13 +351,24 @@ async function startAdventure() {
     let finalInventory = [...startingEquipment.inventory];
 
     // Add selected equipment to inventory
-    Object.values(selectedEquipment).forEach(item => {
-      const existingItem = finalInventory.find(i => i.item === item);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        finalInventory.push({ item: item, quantity: 1 });
-      }
+    Object.values(selectedEquipment).forEach(option => {
+        if (option.isBundle) {
+            option.bundle.forEach(bundleItem => {
+                const existingItem = finalInventory.find(i => i.item === bundleItem[0]);
+                if (existingItem) {
+                    existingItem.quantity += bundleItem[1];
+                } else {
+                    finalInventory.push({ item: bundleItem[0], quantity: bundleItem[1] });
+                }
+            });
+        } else {
+            const existingItem = finalInventory.find(i => i.item === option.item);
+            if (existingItem) {
+                existingItem.quantity += option.quantity;
+            } else {
+                finalInventory.push({ item: option.item, quantity: option.quantity });
+            }
+        }
     });
 
     finalCharacter.inventory = finalInventory;
