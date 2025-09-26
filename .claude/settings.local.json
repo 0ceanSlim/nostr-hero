@@ -14,7 +14,11 @@
       "Bash(./nostr-hero)",
       "Bash(curl:*)",
       "Read(//c/code//**)",
-      "Bash(./nostr-hero.exe)"
+      "Bash(./nostr-hero.exe)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": []
   }

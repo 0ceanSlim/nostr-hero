@@ -9,9 +9,12 @@ function initializeAuthentication() {
 
     // Set up session manager event listeners
     window.sessionManager.on('sessionReady', (sessionData) => {
-        console.log('✅ Session ready, redirecting to saves');
-        // For existing sessions, redirect to saves page
-        window.location.href = '/saves';
+        console.log('✅ Session ready');
+        // Only redirect to saves if not already on saves page
+        if (window.location.pathname !== '/saves') {
+            console.log('Redirecting to saves page');
+            window.location.href = '/saves';
+        }
     });
 
     window.sessionManager.on('authenticationRequired', () => {
@@ -29,8 +32,11 @@ function initializeAuthentication() {
         console.log(`✅ Authentication successful via ${method}`);
         showMessage(`✅ Successfully logged in via ${method}!`, 'success');
         setTimeout(() => {
-            // Redirect to saves page after successful login
-            window.location.href = '/saves';
+            // Only redirect to saves if not already on saves page
+            if (window.location.pathname !== '/saves') {
+                console.log('Redirecting to saves page after login');
+                window.location.href = '/saves';
+            }
         }, 1000);
     });
 

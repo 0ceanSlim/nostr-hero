@@ -9,5 +9,6 @@ func InitializeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/discover", Discover)
 	mux.HandleFunc("/load-save", LoadSave)
 	mux.HandleFunc("/saves", SavesHandler)
+	mux.HandleFunc("/new-game", NewGameHandler)
 	mux.HandleFunc("/game", GameHandler)
 }

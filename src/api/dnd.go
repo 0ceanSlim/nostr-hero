@@ -23,15 +23,28 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Load weight data from JSON file
-	weightData, err := utils.LoadWeights("data/systems/weights.json")
+	// Load weight data from DuckDB (same as weights API endpoint)
+	weightDataMap, err := getWeightsFromDB()
 	if err != nil {
-		http.Error(w, "Error loading weight data", http.StatusInternalServerError)
+		http.Error(w, "Error loading weight data: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert map to WeightData struct
+	weightDataJSON, err := json.Marshal(weightDataMap)
+	if err != nil {
+		http.Error(w, "Error marshaling weight data", http.StatusInternalServerError)
+		return
+	}
+
+	var weightData types.WeightData
+	if err := json.Unmarshal(weightDataJSON, &weightData); err != nil {
+		http.Error(w, "Error unmarshaling weight data", http.StatusInternalServerError)
 		return
 	}
 
 	// Generate character using the loaded weight data
-	character := functions.GenerateCharacter(pubKey, weightData)
+	character := functions.GenerateCharacter(pubKey, &weightData)
 
 	registry, err := utils.ReadRegistry()
 	if err != nil {

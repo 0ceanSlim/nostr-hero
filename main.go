@@ -43,7 +43,7 @@ func main() {
 	mux.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("www/res/"))))
 
 	// Serve data files
-	mux.Handle("/data/", http.StripPrefix("/data/", http.FileServer(http.Dir("data/"))))
+	mux.Handle("/data/", http.StripPrefix("/data/", http.FileServer(http.Dir("docs/data/"))))
 
 	// Initialize Routes
 	routes.InitializeRoutes(mux)
@@ -54,6 +54,11 @@ func main() {
 	mux.HandleFunc("/api/spells", api.SpellsHandler)
 	mux.HandleFunc("/api/monsters", api.MonstersHandler)
 	mux.HandleFunc("/api/locations", api.LocationsHandler)
+
+	// Character generation API endpoints
+	mux.HandleFunc("/api/weights", api.WeightsHandler)
+	mux.HandleFunc("/api/introductions", api.IntroductionsHandler)
+	mux.HandleFunc("/api/starting-gear", api.StartingGearHandler)
 
 	// Authentication endpoints (using grain client)
 	authHandler := auth.NewAuthHandler(&utils.AppConfig)
@@ -71,5 +76,7 @@ func main() {
 
 	port := utils.AppConfig.Server.Port
 	fmt.Printf("Server is running on http://localhost:%d\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }

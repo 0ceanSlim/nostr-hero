@@ -1,6 +1,8 @@
 {{define "title"}}Nostr Hero - Select Save{{end}}
 
 {{define "view"}}
+<script src="/res/js/session-manager.js"></script>
+<script src="/res/js/game-ui.js"></script>
 <div class="max-w-4xl mx-auto p-6">
   <div class="text-center mb-8">
     <h1 class="text-4xl font-bold text-yellow-400 mb-2">⚔️ Choose Your Adventure ⚔️</h1>
@@ -229,8 +231,8 @@ function startNewGame() {
   console.log('🎮 Starting new game...');
   showMessage('🎮 Starting new adventure...', 'info');
 
-  // Navigate to game with new character flag
-  window.location.href = '/game?new=true';
+  // Navigate to character generation page
+  window.location.href = '/new-game';
 }
 
 function loadSave(saveId) {
