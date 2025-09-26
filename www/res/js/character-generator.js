@@ -6,28 +6,52 @@ class NostrCharacterGenerator {
         this.weights = null;
         this.introductions = null;
         this.startingGear = null;
+        this.startingGold = null;
+        this.startingSpells = null;
+        this.spellProgression = null;
+        this.racialStartingCities = null;
     }
 
     // Load all necessary data files from API endpoints
     async initialize() {
         try {
-            console.log('📊 Loading character generation data from API...');
+            console.log('📊 Loading character generation data...');
 
-            const [weightsResponse, introsResponse, gearResponse] = await Promise.all([
-                fetch('/api/weights'),
-                fetch('/api/introductions'),
-                fetch('/api/starting-gear')
+            const [
+                weightsResponse,
+                introsResponse,
+                gearResponse,
+                goldResponse,
+                spellsResponse,
+                progressionResponse,
+                citiesResponse
+            ] = await Promise.all([
+                fetch('/data/systems/weights.json'),
+                fetch('/data/character/introductions.json'),
+                fetch('/data/character/starting-gear.json'),
+                fetch('/data/character/starting-gold.json'),
+                fetch('/data/character/starting-spells.json'),
+                fetch('/data/character/spell-progression.json'),
+                fetch('/data/character/racial-starting-cities.json')
             ]);
 
-            if (!weightsResponse.ok) throw new Error('Failed to load weights data from API');
-            if (!introsResponse.ok) throw new Error('Failed to load introductions data from API');
-            if (!gearResponse.ok) throw new Error('Failed to load starting gear data from API');
+            if (!weightsResponse.ok) throw new Error('Failed to load weights data');
+            if (!introsResponse.ok) throw new Error('Failed to load introductions data');
+            if (!gearResponse.ok) throw new Error('Failed to load starting gear data');
+            if (!goldResponse.ok) throw new Error('Failed to load starting gold data');
+            if (!spellsResponse.ok) throw new Error('Failed to load starting spells data');
+            if (!progressionResponse.ok) throw new Error('Failed to load spell progression data');
+            if (!citiesResponse.ok) throw new Error('Failed to load racial starting cities data');
 
             this.weights = await weightsResponse.json();
             this.introductions = await introsResponse.json();
             this.startingGear = await gearResponse.json();
+            this.startingGold = await goldResponse.json();
+            this.startingSpells = await spellsResponse.json();
+            this.spellProgression = await progressionResponse.json();
+            this.racialStartingCities = await citiesResponse.json();
 
-            console.log('✅ Character generation data loaded from API');
+            console.log('✅ Character generation data loaded');
             return true;
         } catch (error) {
             console.error('❌ Failed to load character generation data:', error);
@@ -87,9 +111,18 @@ class NostrCharacterGenerator {
                 charisma: goCharacter.stats.Charisma
             }, goCharacter.class),
             fatigue: 0,
-            gold: this.rollDice('3d6', this.createSeededRNG(54321)) * 10, // Use simple seed for gold
+            gold: this.generateStartingGold(goCharacter.background),
             experience: 0
         };
+
+        // Add equipment, spells, and city
+        const equipmentResult = this.generateStartingEquipment(character);
+        character.inventory = equipmentResult.inventory;
+        character.equipment = equipmentResult.equipment;
+        character.choices = equipmentResult.choices;
+
+        character.spells = this.generateStartingSpells(character);
+        character.city = this.generateStartingCity(character);
 
         console.log('✅ Generated character from API:', character);
         return character;
@@ -136,35 +169,134 @@ class NostrCharacterGenerator {
     // Generate starting equipment based on class
     generateStartingEquipment(character) {
         const characterClass = character.class;
-        const classGear = this.startingGear.equipment_packs[characterClass];
+        const classGearData = this.startingGear.find(g => g.class === characterClass);
 
-        if (!classGear) {
+        if (!classGearData) {
             console.warn('No starting gear found for class:', characterClass);
-            return { inventory: [], equipment: {} };
+            return { inventory: [], equipment: {}, choices: [] };
         }
 
         const inventory = [];
         const equipment = {};
+        const choices = [];
 
-        // Add given items (automatic)
-        if (classGear.given) {
-            classGear.given.forEach(item => {
-                if (typeof item === 'string') {
-                    inventory.push({ item: item, quantity: 1 });
-                } else if (typeof item === 'object') {
-                    inventory.push({ item: item.item, quantity: item.quantity || 1 });
-                    if (item.equipped) {
-                        equipment[item.slot || 'weapon'] = item.item;
-                    }
-                }
-            });
-        }
+        classGearData.starting_gear.forEach((gearItem, index) => {
+            if (gearItem.given) {
+                gearItem.given.forEach(item => {
+                    inventory.push({ item: item[0], quantity: item[1] });
+                });
+            } else if (gearItem.option) {
+                const choice = {
+                    id: `choice-${index}`,
+                    options: gearItem.option.map(opt => {
+                        if (typeof opt[0] === 'string') {
+                            return { item: opt[0], quantity: opt[1] };
+                        } else {
+                            // TODO: Handle nested options
+                            return { item: opt[0][0], quantity: opt[0][1] };
+                        }
+                    })
+                };
+                choices.push(choice);
+            }
+        });
 
         return {
             inventory: inventory,
-            equipment: equipment,
-            choices: classGear.choice || [] // Equipment choices to be made by player
+            equipment: equipment, // TODO: Handle default equipped items
+            choices: choices
         };
+    }
+
+    // Generate starting gold based on background
+    generateStartingGold(background) {
+        if (!this.startingGold || !this.startingGold['starting-gold']) {
+            console.warn('Starting gold data not loaded');
+            return 0;
+        }
+
+        const goldData = this.startingGold['starting-gold'];
+        const entry = goldData.find(item => item[0] === background);
+
+        if (entry) {
+            return entry[1];
+        } else {
+            console.warn('No starting gold found for background:', background);
+            return 1000; // Default gold
+        }
+    }
+
+    // Generate starting city based on race
+    generateStartingCity(character) {
+        if (!this.racialStartingCities) {
+            console.warn('Racial starting cities data not loaded');
+            return 'Nexus'; // Default city
+        }
+
+        const cities = this.racialStartingCities[character.race];
+        if (cities && cities.length > 0) {
+            // Deterministically select a city
+            const seed = this.createDeterministicSeed(this.npubToHex(character.npub), 'starting-city');
+            const rng = this.createSeededRNG(seed);
+            const index = rng.intn(cities.length);
+            return cities[index];
+        } else {
+            console.warn('No starting city found for race:', character.race);
+            return 'Nexus'; // Default city
+        }
+    }
+
+    // Generate starting spells based on class
+    generateStartingSpells(character) {
+        if (!this.spellProgression || !this.startingSpells) {
+            console.warn('Spell data not loaded');
+            return {};
+        }
+
+        const classProgression = this.spellProgression[character.class];
+        if (!classProgression) {
+            return {}; // Not a spellcasting class
+        }
+
+        const spells = {
+            cantrips: [],
+            level1: []
+        };
+
+        const cantripsKnown = classProgression.cantrips_known[0]; // Level 1
+        const level1SpellsKnown = classProgression.spells_known[0]; // Level 1
+
+        const classSpells = this.startingSpells[character.class.toLowerCase()];
+        if (!classSpells) {
+            console.warn('No starting spell list found for class:', character.class);
+            return {};
+        }
+
+        // Deterministically select cantrips
+        if (classSpells.cantrips && classSpells.cantrips.length > 0) {
+            const cantripSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'cantrips');
+            const cantripRNG = this.createSeededRNG(cantripSeed);
+            const availableCantrips = [...classSpells.cantrips];
+
+            for (let i = 0; i < cantripsKnown && availableCantrips.length > 0; i++) {
+                const index = cantripRNG.intn(availableCantrips.length);
+                spells.cantrips.push(availableCantrips.splice(index, 1)[0]);
+            }
+        }
+
+        // Deterministically select level 1 spells
+        if (classSpells.level1 && classSpells.level1.length > 0) {
+            const spellSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'level1-spells');
+            const spellRNG = this.createSeededRNG(spellSeed);
+            const availableSpells = [...classSpells.level1];
+
+            for (let i = 0; i < level1SpellsKnown && availableSpells.length > 0; i++) {
+                const index = spellRNG.intn(availableSpells.length);
+                spells.level1.push(availableSpells.splice(index, 1)[0]);
+            }
+        }
+
+        return spells;
     }
 
     // Convert npub to hex key (matching Go backend format)
