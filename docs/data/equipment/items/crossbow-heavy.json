@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d10",
   "heal": null,
+  "ammunition": "bolts",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "3",
@@ -17,11 +18,13 @@
     "ammunition",
     "loading",
     "two-handed",
-    "heavy"
+    "heavy",
+    "equipment"
   ],
   "notes": [
     "Requires bolts to fire",
     "Loading property requires action to reload",
     "Heavy weapon"
-  ]
+  ],
+  "gear_slot": "hands"
 }

@@ -1,14 +1,20 @@
 {
   "name": "Hide",
   "price": 1000,
+  "type": "Medium Armor",
+  "weight": 12.0,
+  "stack": 1,
   "ac": "12 + Dex(max2)",
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 12,
-  "type": "Medium Armor",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "armor"
 }

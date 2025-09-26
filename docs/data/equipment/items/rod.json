@@ -1,14 +1,22 @@
 {
   "name": "Rod",
   "price": 1000,
+  "type": "Arcane Focus",
+  "weight": 2.0,
+  "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 2,
-  "type": "Arcane Focus",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/arcane-focus.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "substitues": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "notes": [],
+  "Gear_Slot": "hands"
 }

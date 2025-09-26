@@ -1,14 +1,20 @@
 {
   "name": "Reliquary",
   "price": 500,
+  "type": "Holy Symbol",
+  "weight": 2.0,
+  "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 2,
-  "type": "Holy Symbol",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/holy-symbol.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "necklace"
 }

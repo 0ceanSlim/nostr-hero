@@ -1,14 +1,17 @@
 {
   "name": "Flute",
   "price": 200,
+  "type": "Musical Instrument",
+  "weight": 1.0,
+  "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 1,
-  "type": "Musical instrument",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [],
+  "notes": []
 }

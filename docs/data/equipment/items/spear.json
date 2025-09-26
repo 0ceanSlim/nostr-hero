@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d4,1d8",
   "heal": null,
+  "ammunition": "",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -15,7 +16,9 @@
   "rarity": "common",
   "tags": [
     "thrown",
-    "versatile"
+    "versatile",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

@@ -23,5 +23,6 @@
     "Consumed on use",
     "Can be found on undead creatures or purchased from dark magic vendors"
   ],
-  "spell_required_for": "bane"
+  "spell_required_for": "bane",
+  "ammunition": ""
 }

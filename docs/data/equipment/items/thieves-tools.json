@@ -15,5 +15,6 @@
     "Required for picking locks and disarming traps"
   ],
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "ammunition": ""
 }

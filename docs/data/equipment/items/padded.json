@@ -6,11 +6,15 @@
   "weight": 8.0,
   "stack": 1,
   "ac": "11 + Dex",
+  "ammunition": "",
+  "img": "equipment/armor.jpg",
   "rarity": "common",
-  "tags": [],
+  "stealth": "-1",
+  "tags": [
+    "equipment"
+  ],
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "img": "equipment/armor.jpg",
-  "stealth": -1
+  "gear_slot": "armor"
 }

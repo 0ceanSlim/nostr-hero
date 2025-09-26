@@ -19,5 +19,6 @@
     "Can hold liquids and small objects"
   ],
   "slots": 2,
-  "contains": "any"
+  "contains": "any",
+  "ammunition": ""
 }

@@ -8,15 +8,18 @@
   "ac": null,
   "damage": "1d8,1d10",
   "heal": null,
+  "ammunition": "",
   "damage-type": "slashing",
   "img": "equipment/weapon.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
   "tags": [
-    "versatile"
+    "versatile",
+    "equipment"
   ],
   "notes": [
     "Can be wielded with two hands for increased damage"
-  ]
+  ],
+  "gear_slot": "hands"
 }

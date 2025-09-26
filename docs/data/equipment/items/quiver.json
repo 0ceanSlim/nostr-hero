@@ -18,5 +18,7 @@
     "container",
     "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "ammunition": "",
+  "gear_slot": ""
 }

@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d10",
   "heal": null,
+  "ammunition": "",
   "damage-type": "slashing",
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -16,7 +17,9 @@
   "tags": [
     "heavy",
     "reach",
-    "two-handed"
+    "two-handed",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

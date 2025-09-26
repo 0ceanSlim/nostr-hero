@@ -19,5 +19,6 @@
     "Can be used as a spellcasting focus for material components"
   ],
   "contains": "",
-  "slots": 4
+  "slots": 4,
+  "ammunition": ""
 }

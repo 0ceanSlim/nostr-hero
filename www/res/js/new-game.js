@@ -377,14 +377,28 @@ async function startAdventure() {
 
     // Create new save file
     const session = window.sessionManager.getSession();
+    // Create complete game state matching our game-state.js structure
+    const gameState = {
+      character: finalCharacter,
+      inventory: finalCharacter.inventory || [],
+      equipment: finalCharacter.equipment || {},
+      spells: finalCharacter.spells || [],
+      location: {
+        current: finalCharacter.city || 'kingdom',
+        discovered: [finalCharacter.city || 'kingdom']
+      },
+      combat: null
+    };
+
     const saveData = {
       character: finalCharacter,
-      location: 'village-center', // Starting location
+      gameState: gameState,
+      location: finalCharacter.city || 'kingdom', // Use character's starting city
       npub: session.npub,
       created_at: new Date().toISOString()
     };
 
-    const response = await fetch('/api/saves', {
+    const response = await fetch(`/api/saves/${session.npub}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -8,10 +8,16 @@
   "ac": null,
   "damage": null,
   "heal": null,
+  "ammunition": "",
   "img": "equipment/arcane-focus.jpg",
-  "rarity": "common",
-  "tags": [],
-  "notes": [],
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "substitues": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "notes": [],
+  "Gear_Slot": "hands"
 }

@@ -17,5 +17,7 @@
     "Expands carrying capacity for adventuring",
     "adds 20 slots to inventory",
     "Cannot be placed inside of another container"
-  ]
+  ],
+  "ammunition": "",
+  "gear_slot": ""
 }

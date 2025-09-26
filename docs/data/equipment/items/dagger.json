@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d4",
   "heal": null,
+  "ammunition": "",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -16,9 +17,11 @@
   "tags": [
     "finesse",
     "light",
-    "thrown"
+    "thrown",
+    "equipment"
   ],
   "notes": [
     "Can be thrown at targets within 60 feet"
-  ]
+  ],
+  "gear_slot": "hands"
 }

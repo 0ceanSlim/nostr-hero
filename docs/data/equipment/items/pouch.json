@@ -18,5 +18,7 @@
   ],
   "notes": [],
   "slots": 4,
-  "contains": "any"
+  "contains": "any",
+  "ammunition": "",
+  "gear_slot": ""
 }

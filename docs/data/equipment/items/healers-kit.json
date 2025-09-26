@@ -20,5 +20,6 @@
     "Each use heals 2 hitpoints"
   ],
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "ammunition": ""
 }

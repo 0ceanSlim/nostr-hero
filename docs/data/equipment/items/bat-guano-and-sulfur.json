@@ -22,5 +22,6 @@
     "Consumed on use",
     "Can be found in caves or purchased from alchemists"
   ],
-  "spell_required_for": "fireball"
+  "spell_required_for": "fireball",
+  "ammunition": ""
 }

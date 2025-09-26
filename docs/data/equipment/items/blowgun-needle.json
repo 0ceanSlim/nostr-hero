@@ -10,5 +10,6 @@
   "rarity": "common",
   "img": "equipment/ammunition.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "ammunition": ""
 }

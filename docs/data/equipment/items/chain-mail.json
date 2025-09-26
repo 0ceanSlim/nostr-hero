@@ -8,6 +8,7 @@
   "ac": "16",
   "damage": null,
   "heal": null,
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
   "range-long": "null",
@@ -15,10 +16,12 @@
   "stealth": "-1",
   "str": "13",
   "tags": [
-    "heavy-armor"
+    "heavy-armor",
+    "equipment"
   ],
   "notes": [
     "Requires Strength 13 to wear effectively",
     "Makes stealth more difficult"
-  ]
+  ],
+  "gear_slot": "armor"
 }

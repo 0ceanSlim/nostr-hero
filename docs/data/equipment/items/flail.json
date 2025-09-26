@@ -8,11 +8,15 @@
   "ac": null,
   "damage": "1d8",
   "heal": null,
+  "ammunition": "",
   "damage-type": "bludgeon",
   "img": "equipment/weapon.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
-  "tags": [],
-  "notes": []
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands"
 }

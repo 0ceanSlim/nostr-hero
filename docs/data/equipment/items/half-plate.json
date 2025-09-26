@@ -8,13 +8,17 @@
   "ac": "15 + Dex(max2)",
   "damage": null,
   "heal": null,
-  "rarity": "common",
-  "tags": [],
-  "notes": [
-    "Disadvantage on Stealth"
-  ],
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
   "range-long": "null",
-  "stealth": -1
+  "rarity": "common",
+  "stealth": "-1",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "gear_slot": "armor"
 }

@@ -19,5 +19,6 @@
   "rarity": "common",
   "img": "equipment/potion.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "ammunition": ""
 }

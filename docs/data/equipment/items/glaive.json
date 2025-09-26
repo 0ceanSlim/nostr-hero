@@ -8,6 +8,8 @@
   "ac": null,
   "damage": "1d10",
   "heal": null,
+  "ammunition": "",
+  "damage-type": "",
   "img": "equipment/weapon.jpg",
   "range": "1",
   "range-long": "null",
@@ -15,8 +17,9 @@
   "tags": [
     "heavy",
     "reach",
-    "two-handed"
+    "two-handed",
+    "equipment"
   ],
   "notes": [],
-  "damage-type": ""
+  "gear_slot": "hands"
 }

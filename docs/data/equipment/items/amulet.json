@@ -1,14 +1,20 @@
 {
   "name": "Amulet",
   "price": 500,
+  "type": "Holy Symbol",
+  "weight": 1.0,
+  "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 1,
-  "type": "Holy Symbol",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/holy-symbol.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "necklace"
 }

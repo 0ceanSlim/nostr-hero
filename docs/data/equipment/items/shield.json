@@ -1,14 +1,20 @@
 {
   "name": "Shield",
   "price": 1000,
+  "type": "Heavy Armor",
+  "weight": 6.0,
+  "stack": 1,
   "ac": "+2",
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 6,
-  "type": "Heavy Armor",
-  "rarity": "common",
+  "ammunition": "",
+  "gear_slot": "armor",
   "img": "equipment/armor.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": []
 }

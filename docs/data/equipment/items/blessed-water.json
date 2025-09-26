@@ -23,5 +23,6 @@
     "Consumed on use",
     "Can be blessed by clerics or purchased from temples"
   ],
-  "spell_required_for": "bless"
+  "spell_required_for": "bless",
+  "ammunition": ""
 }

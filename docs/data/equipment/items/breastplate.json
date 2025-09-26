@@ -1,14 +1,20 @@
 {
   "name": "Breastplate",
   "price": 40000,
+  "type": "Medium Armor",
+  "weight": 20.0,
+  "stack": 1,
   "ac": "14 + Dex(max2)",
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 20,
-  "type": "Medium Armor",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "armor"
 }

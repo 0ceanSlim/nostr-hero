@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d6",
   "heal": null,
+  "ammunition": "arrows",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "2",
@@ -15,9 +16,11 @@
   "rarity": "common",
   "tags": [
     "ammunition",
-    "two-handed"
+    "two-handed",
+    "equipment"
   ],
   "notes": [
     "Requires arrows to fire"
-  ]
+  ],
+  "gear_slot": "hands"
 }

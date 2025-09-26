@@ -8,14 +8,18 @@
   "ac": "18",
   "damage": null,
   "heal": null,
-  "rarity": "common",
-  "tags": [],
-  "notes": [
-    "Disadvantage on Stealth - Strength 15"
-  ],
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
   "range-long": "null",
-  "str": 15,
-  "stealth": -1
+  "rarity": "common",
+  "stealth": "-1",
+  "str": "15",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [
+    "Disadvantage on Stealth - Strength 15"
+  ],
+  "gear_slot": "armor"
 }

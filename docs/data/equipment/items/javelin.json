@@ -8,13 +8,16 @@
   "ac": null,
   "damage": "1d6",
   "heal": null,
+  "ammunition": "",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "1",
   "range-long": "3",
   "rarity": "common",
   "tags": [
-    "thrown"
+    "thrown",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

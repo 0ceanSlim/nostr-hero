@@ -15,5 +15,6 @@
     "Can be thrown to catch onto ledges for climbing"
   ],
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "ammunition": ""
 }

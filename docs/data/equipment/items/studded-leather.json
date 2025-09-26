@@ -1,14 +1,20 @@
 {
   "name": "Studded Leather",
   "price": 4500,
+  "type": "Light Armor",
+  "weight": 13.0,
+  "stack": 1,
   "ac": "12 + Dex",
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 13,
-  "type": "Light Armor",
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/armor.jpg",
   "range": "null",
-  "range-long": "null"
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "armor"
 }

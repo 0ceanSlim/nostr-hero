@@ -8,13 +8,16 @@
   "ac": null,
   "damage": "1d4",
   "heal": null,
+  "ammunition": "sling bullets",
   "damage-type": "bludgeon",
   "img": "equipment/weapon.jpg",
   "range": "1",
   "range-long": "3",
   "rarity": "common",
   "tags": [
-    "ammunition"
+    "ammunition",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

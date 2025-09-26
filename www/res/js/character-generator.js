@@ -49,7 +49,8 @@ class NostrCharacterGenerator {
             this.startingGold = await goldResponse.json();
             this.startingSpells = await spellsResponse.json();
             this.spellProgression = await progressionResponse.json();
-            this.racialStartingCities = await citiesResponse.json();
+            const citiesData = await citiesResponse.json();
+            this.racialStartingCities = citiesData.racial_starting_cities;
 
             console.log('✅ Character generation data loaded');
             return true;
@@ -233,19 +234,15 @@ class NostrCharacterGenerator {
     generateStartingCity(character) {
         if (!this.racialStartingCities) {
             console.warn('Racial starting cities data not loaded');
-            return 'Nexus'; // Default city
+            return 'kingdom'; // Default city
         }
 
-        const cities = this.racialStartingCities[character.race];
-        if (cities && cities.length > 0) {
-            // Deterministically select a city
-            const seed = this.createDeterministicSeed(this.npubToHex(character.npub), 'starting-city');
-            const rng = this.createSeededRNG(seed);
-            const index = rng.intn(cities.length);
-            return cities[index];
+        const startingCity = this.racialStartingCities[character.race];
+        if (startingCity) {
+            return startingCity;
         } else {
             console.warn('No starting city found for race:', character.race);
-            return 'Nexus'; // Default city
+            return 'kingdom'; // Default to kingdom instead of 'Nexus'
         }
     }
 

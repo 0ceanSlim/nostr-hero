@@ -20,5 +20,6 @@
   "notes": [
     "Can only be placed in owned buildings",
     "Provides secure storage for large quantities of items"
-  ]
+  ],
+  "ammunition": ""
 }

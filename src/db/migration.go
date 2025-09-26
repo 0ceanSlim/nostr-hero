@@ -24,6 +24,11 @@ func MigrateFromJSON() error {
 		return fmt.Errorf("failed to migrate character data: %v", err)
 	}
 
+	// Migrate items
+	if err := migrateItems(); err != nil {
+		return fmt.Errorf("failed to migrate items: %v", err)
+	}
+
 	// Migrate content data (monsters, locations)
 	if err := migrateContentData(); err != nil {
 		return fmt.Errorf("failed to migrate content data: %v", err)
@@ -101,6 +106,73 @@ func migrateCharacterData() error {
 	}
 
 	return nil
+}
+
+// migrateItems migrates all item JSON files
+func migrateItems() error {
+	log.Println("Migrating items...")
+
+	itemsPath := filepath.Join("docs", "data", "equipment", "items")
+
+	// Clear existing items
+	if _, err := db.Exec("DELETE FROM items"); err != nil {
+		return fmt.Errorf("failed to clear items table: %v", err)
+	}
+
+	count := 0
+	err := filepath.WalkDir(itemsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(path, ".json") {
+			if err := migrateItemFile(path); err != nil {
+				log.Printf("Warning: failed to migrate item file %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk items directory: %v", err)
+	}
+
+	log.Printf("Migrated %d items", count)
+	return nil
+}
+
+// migrateItemFile migrates a single item JSON file
+func migrateItemFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var item map[string]interface{}
+	if err := json.Unmarshal(data, &item); err != nil {
+		return err
+	}
+
+	// Extract base filename as ID
+	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
+
+	// Convert item data to required fields
+	name, _ := item["name"].(string)
+	description, _ := item["description"].(string)
+	itemType, _ := item["type"].(string)
+	rarity, _ := item["rarity"].(string)
+
+	// Extract tags as JSON
+	tagsJSON, _ := json.Marshal(item["tags"])
+
+	// Serialize all properties as JSON for the properties field
+	propertiesJSON, _ := json.Marshal(item)
+
+	stmt := `INSERT INTO items (id, name, description, item_type, properties, tags, rarity) VALUES (?, ?, ?, ?, ?, ?, ?)`
+	_, err = db.Exec(stmt, id, name, description, itemType, string(propertiesJSON), string(tagsJSON), rarity)
+	return err
 }
 
 // migrateContentData migrates monsters, locations, and other content

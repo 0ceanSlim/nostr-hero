@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1",
   "heal": null,
+  "ammunition": "dart",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -15,7 +16,9 @@
   "rarity": "common",
   "tags": [
     "ammunition",
-    "loading"
+    "loading",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

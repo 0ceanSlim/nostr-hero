@@ -8,12 +8,18 @@
   "ac": null,
   "damage": null,
   "heal": null,
+  "ammunition": "",
   "img": "equipment/arcane-focus.jpg",
+  "range": "null",
+  "range-long": "null",
   "rarity": "common",
-  "tags": [],
+  "substitues": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
   "notes": [
     "Can be used as a spellcasting focus for arcane magic"
   ],
-  "range": "null",
-  "range-long": "null"
+  "Gear_Slot": "hands"
 }

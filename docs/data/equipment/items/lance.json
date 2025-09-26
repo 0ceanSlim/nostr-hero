@@ -8,6 +8,7 @@
   "ac": null,
   "damage": "1d12",
   "heal": null,
+  "ammunition": "",
   "damage-type": "piercing",
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -17,7 +18,9 @@
     "reach",
     "topple",
     "heavy",
-    "two-handed"
+    "two-handed",
+    "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "gear_slot": "hands"
 }

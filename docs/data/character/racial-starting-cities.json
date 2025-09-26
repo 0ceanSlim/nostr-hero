@@ -13,7 +13,6 @@
   },
   "entry_fees_by_race": {
     "kingdom": {
-      "base_fee": 0,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -28,7 +27,6 @@
       }
     },
     "city-east": {
-      "base_fee": 5,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -43,7 +41,6 @@
       }
     },
     "city-south": {
-      "base_fee": 3,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": -1,
@@ -58,7 +55,6 @@
       }
     },
     "town-north": {
-      "base_fee": 3,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -73,7 +69,6 @@
       }
     },
     "town-northeast": {
-      "base_fee": 4,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -88,7 +83,6 @@
       }
     },
     "village-west": {
-      "base_fee": 2,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -103,7 +97,6 @@
       }
     },
     "village-southeast": {
-      "base_fee": 2,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -118,7 +111,6 @@
       }
     },
     "village-southwest": {
-      "base_fee": 1,
       "racial_modifiers": {
         "Human": 1,
         "Half-Elf": 0,
@@ -133,7 +125,6 @@
       }
     },
     "village-south": {
-      "base_fee": 1,
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,

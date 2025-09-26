@@ -19,5 +19,6 @@
     "Can cover a 10-foot square area",
     "Creates difficult terrain"
   ],
-  "restrain": "1d4"
+  "restrain": "1d4",
+  "ammunition": ""
 }

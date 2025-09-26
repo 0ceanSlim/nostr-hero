@@ -6,12 +6,16 @@
   "weight": 60.0,
   "stack": 1,
   "ac": "17",
+  "ammunition": "",
+  "img": "equipment/armor.jpg",
   "rarity": "common",
-  "tags": [],
+  "stealth": "-1",
+  "str": "15",
+  "tags": [
+    "equipment"
+  ],
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "img": "equipment/armor.jpg",
-  "stealth": -1,
-  "str": 15
+  "gear_slot": "armor"
 }

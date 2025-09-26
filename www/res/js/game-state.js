@@ -6,6 +6,7 @@ function getGameState() {
     return {
         character: JSON.parse(document.getElementById('character-data').textContent || '{}'),
         inventory: JSON.parse(document.getElementById('inventory-data').textContent || '[]'),
+        equipment: JSON.parse(document.getElementById('equipment-data').textContent || '{}'),
         spells: JSON.parse(document.getElementById('spell-data').textContent || '[]'),
         location: JSON.parse(document.getElementById('location-data').textContent || '{}'),
         combat: JSON.parse(document.getElementById('combat-data').textContent || 'null')
@@ -19,6 +20,9 @@ function updateGameState(newState) {
     }
     if (newState.inventory) {
         document.getElementById('inventory-data').textContent = JSON.stringify(newState.inventory);
+    }
+    if (newState.equipment) {
+        document.getElementById('equipment-data').textContent = JSON.stringify(newState.equipment);
     }
     if (newState.spells) {
         document.getElementById('spell-data').textContent = JSON.stringify(newState.spells);
@@ -226,10 +230,14 @@ async function createNewCharacter(npub) {
             starting_location: startingLocation
         };
 
+        // Generate starting equipment
+        const startingEquipment = generateStartingEquipment(characterData.class);
+
         // Initialize fresh game state
         const initialState = {
             character: fullCharacter,
-            inventory: generateStartingInventory(characterData.class),
+            inventory: startingEquipment.inventory,
+            equipment: startingEquipment.equipped,
             spells: generateStartingSpells(characterData.class),
             location: {
                 current: startingLocation,
@@ -250,10 +258,24 @@ async function createNewCharacter(npub) {
     }
 }
 
-// Generate starting inventory based on class
-function generateStartingInventory(characterClass) {
-    // Base survival items for all characters
-    const baseItems = [
+// Generate starting equipment (equipped vs inventory) based on class
+function generateStartingEquipment(characterClass) {
+    // Define what equipment slots can be equipped
+    const equipmentSlots = {
+        mainHand: null,
+        offHand: null,
+        armor: null,
+        helmet: null,
+        boots: null,
+        gloves: null,
+        ring1: null,
+        ring2: null,
+        necklace: null,
+        cloak: null
+    };
+
+    // Base survival items (always go to inventory)
+    const inventoryItems = [
         { item: 'rations-1-day', quantity: 3 },
         { item: 'bedroll', quantity: 1 },
         { item: 'waterskin', quantity: 1 },
@@ -264,108 +286,97 @@ function generateStartingInventory(characterClass) {
     // Add class-specific starting equipment
     switch (characterClass) {
         case 'Barbarian':
-            baseItems.push(
-                { item: 'greataxe', quantity: 1 },
-                { item: 'handaxe', quantity: 2 },
-                { item: 'hide', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'greataxe', quantity: 1 };
+            equipmentSlots.armor = { item: 'hide', quantity: 1 };
+            inventoryItems.push({ item: 'handaxe', quantity: 2 });
             break;
         case 'Bard':
-            baseItems.push(
-                { item: 'rapier', quantity: 1 },
-                { item: 'leather', quantity: 1 },
+            equipmentSlots.mainHand = { item: 'rapier', quantity: 1 };
+            equipmentSlots.armor = { item: 'leather', quantity: 1 };
+            inventoryItems.push(
                 { item: 'lute', quantity: 1 },
                 { item: 'dagger', quantity: 1 }
             );
             break;
         case 'Cleric':
-            baseItems.push(
-                { item: 'mace', quantity: 1 },
-                { item: 'shield', quantity: 1 },
-                { item: 'chain-mail', quantity: 1 },
-                { item: 'reliquary', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'mace', quantity: 1 };
+            equipmentSlots.offHand = { item: 'shield', quantity: 1 };
+            equipmentSlots.armor = { item: 'chain-mail', quantity: 1 };
+            inventoryItems.push({ item: 'reliquary', quantity: 1 });
             break;
         case 'Druid':
-            baseItems.push(
-                { item: 'quarterstaff', quantity: 1 },
-                { item: 'leather', quantity: 1 },
-                { item: 'shield', quantity: 1 },
-                { item: 'sprig-of-mistletoe', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'quarterstaff', quantity: 1 };
+            equipmentSlots.armor = { item: 'leather', quantity: 1 };
+            equipmentSlots.offHand = { item: 'shield', quantity: 1 };
+            inventoryItems.push({ item: 'sprig-of-mistletoe', quantity: 1 });
             break;
         case 'Fighter':
-            baseItems.push(
-                { item: 'longsword', quantity: 1 },
-                { item: 'shield', quantity: 1 },
-                { item: 'chain-mail', quantity: 1 },
-                { item: 'handaxe', quantity: 2 }
-            );
+            equipmentSlots.mainHand = { item: 'longsword', quantity: 1 };
+            equipmentSlots.offHand = { item: 'shield', quantity: 1 };
+            equipmentSlots.armor = { item: 'chain-mail', quantity: 1 };
+            inventoryItems.push({ item: 'handaxe', quantity: 2 });
             break;
         case 'Monk':
-            baseItems.push(
-                { item: 'quarterstaff', quantity: 1 },
-                { item: 'dagger', quantity: 10 },
-                { item: 'padded', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'quarterstaff', quantity: 1 };
+            equipmentSlots.armor = { item: 'padded', quantity: 1 };
+            inventoryItems.push({ item: 'dagger', quantity: 10 });
             break;
         case 'Paladin':
-            baseItems.push(
-                { item: 'longsword', quantity: 1 },
-                { item: 'shield', quantity: 1 },
-                { item: 'chain-mail', quantity: 1 },
-                { item: 'emblem', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'longsword', quantity: 1 };
+            equipmentSlots.offHand = { item: 'shield', quantity: 1 };
+            equipmentSlots.armor = { item: 'chain-mail', quantity: 1 };
+            inventoryItems.push({ item: 'emblem', quantity: 1 });
             break;
         case 'Ranger':
-            baseItems.push(
-                { item: 'longbow', quantity: 1 },
+            equipmentSlots.mainHand = { item: 'longbow', quantity: 1 };
+            equipmentSlots.armor = { item: 'leather', quantity: 1 };
+            inventoryItems.push(
                 { item: 'arrows', quantity: 20 },
-                { item: 'shortsword', quantity: 1 },
-                { item: 'leather', quantity: 1 }
+                { item: 'shortsword', quantity: 1 }
             );
             break;
         case 'Rogue':
-            baseItems.push(
-                { item: 'rapier', quantity: 1 },
+            equipmentSlots.mainHand = { item: 'rapier', quantity: 1 };
+            equipmentSlots.armor = { item: 'leather', quantity: 1 };
+            inventoryItems.push(
                 { item: 'dagger', quantity: 2 },
-                { item: 'thieves-tools', quantity: 1 },
-                { item: 'leather', quantity: 1 }
+                { item: 'thieves-tools', quantity: 1 }
             );
             break;
         case 'Sorcerer':
-            baseItems.push(
+            equipmentSlots.mainHand = { item: 'crystal', quantity: 1 };
+            equipmentSlots.armor = { item: 'padded', quantity: 1 };
+            inventoryItems.push(
                 { item: 'dagger', quantity: 2 },
-                { item: 'component-pouch', quantity: 1 },
-                { item: 'crystal', quantity: 1 },
-                { item: 'padded', quantity: 1 }
+                { item: 'component-pouch', quantity: 1 }
             );
             break;
         case 'Warlock':
-            baseItems.push(
+            equipmentSlots.armor = { item: 'leather', quantity: 1 };
+            inventoryItems.push(
                 { item: 'dagger', quantity: 2 },
                 { item: 'component-pouch', quantity: 1 },
-                { item: 'leather', quantity: 1 },
                 { item: 'cursed-bone-dust', quantity: 1 }
             );
             break;
         case 'Wizard':
-            baseItems.push(
+            equipmentSlots.mainHand = { item: 'orb', quantity: 1 };
+            inventoryItems.push(
                 { item: 'dagger', quantity: 1 },
                 { item: 'spellbook', quantity: 1 },
-                { item: 'component-pouch', quantity: 1 },
-                { item: 'orb', quantity: 1 }
+                { item: 'component-pouch', quantity: 1 }
             );
             break;
         default:
             // Default adventurer kit
-            baseItems.push(
-                { item: 'club', quantity: 1 },
-                { item: 'dagger', quantity: 1 }
-            );
+            equipmentSlots.mainHand = { item: 'club', quantity: 1 };
+            inventoryItems.push({ item: 'dagger', quantity: 1 });
     }
 
-    return baseItems;
+    return {
+        equipped: equipmentSlots,
+        inventory: inventoryItems
+    };
 }
 
 // Generate starting spells based on class
@@ -492,7 +503,7 @@ function calculateMaxMana(characterClass, stats) {
 function getStartingLocation(race) {
     // Starting locations based on race
     const startingLocations = {
-        'Human': 'kingdom-center',
+        'Human': 'kingdom',
         'Elf': 'forest-kingdom',
         'Dwarf': 'hill-kingdom',
         'Halfling': 'village-south',
@@ -504,7 +515,7 @@ function getStartingLocation(race) {
         'Orc': 'swamp-kingdom'
     };
 
-    return startingLocations[race] || 'kingdom-center';
+    return startingLocations[race] || 'kingdom';
 }
 
 function generateCharacterName(race, background) {
