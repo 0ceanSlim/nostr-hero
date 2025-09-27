@@ -1,4 +1,5 @@
 {
+  "id": "bucket",
   "name": "Bucket",
   "description": "A sturdy wooden bucket with an iron handle, useful for carrying water or other liquids.",
   "price": 0,

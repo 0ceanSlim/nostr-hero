@@ -1,4 +1,5 @@
 {
+  "id": "pouch",
   "name": "Pouch",
   "description": "",
   "price": 0,
@@ -8,17 +9,17 @@
   "ac": null,
   "damage": null,
   "heal": null,
+  "ammunition": "",
+  "contains": "any",
+  "gear_slot": "bag",
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
+  "slots": "4",
   "tags": [
     "container",
     "equipment"
   ],
-  "notes": [],
-  "slots": 4,
-  "contains": "any",
-  "ammunition": "",
-  "gear_slot": ""
+  "notes": []
 }

@@ -72,12 +72,28 @@ Village---Hill-----KINGDOM---------Urban---------City----Desert---Village
 
 ### Inventory & Equipment System
 
-- **Base Capacity**: 4 inventory slots + equipment slots
-- **Equipment Slots**: Armor, Right Hand, Left Hand, Necklace, Ring
-- **Carry Weight**: Base (STR × 5), backpack doubles total capacity
-- **Slot Expansion**: Certain items increase available slots when equipped
-  - Component Pouch: +4 slots (total 8)
-  - Backpack: +20 slots (total 24)
+#### Slot Structure (Actual Implementation)
+- **General Slots**: 4 base inventory slots (slot 0-3)
+- **Equipment Slots**:
+  - `armor`: Armor pieces (leather, chain-mail, plate, etc.)
+  - `right_arm`: Primary weapon or tool
+  - `left_arm`: Secondary weapon, shield, or off-hand item
+  - `bag`: Container items (backpack, component-pouch, quiver, etc.)
+  - `necklace`: Neck accessories (amulet, emblem, reliquary, etc.)
+  - `ring`: Ring slot
+- **Container System**:
+  - `bag` slot contains items with `contents` array
+  - Backpack: 20 slots (slot 0-19)
+  - Component Pouch: 4 slots
+  - Other containers: Variable slot counts based on item properties
+
+#### Item Stacking System
+- **Stack Limits**: Each item has `"stack"` property defining max quantity per slot
+  - Weapons (daggers, handaxes): `stack: 1` (each takes separate slot)
+  - Consumables (rations, potions): `stack: 10+` (multiple in one slot)
+  - Ammunition (arrows, bolts): `stack: 50+` (bundled together)
+- **Automatic Splitting**: If starting gear gives `quantity > stack_limit`, automatically creates multiple slots
+- **Smart Placement**: Equipment auto-equips to appropriate slots, overflow goes to backpack/general slots
 
 #### Weight & Encumbrance System
 
@@ -276,24 +292,78 @@ Village---Hill-----KINGDOM---------Urban---------City----Desert---Village
 }
 ```
 
-#### Character Save Format (Nostr Event)
+#### Character Save Format (Actual Implementation)
 
 ```json
 {
+  "id": "save_1758940814",
+  "npub": "npub18pxpv8cvf2z4x9wqyxxl4hyhhpfz5u5w5279pgw3u6tpdqzd95sspgw8ls",
+  "created_at": "2025-09-27T02:32:41.297Z",
+  "last_played": "2025-09-27T02:32:41Z",
   "character": {
-    "race": "Human",
-    "class": "Cleric",
-    "stats": {"strength": 8, "dexterity": 12, ...},
-    "hp": {"current": 10, "max": 10},
-    "fatigue": 3,
-    "location": "kingdom-center",
-    "inventory": [["Healing Potion", 3], ["Rations", 5]],
-    "equipment": {
-      "armor": "Chain Mail",
-      "weapon_right": "Mace",
-      "weapon_left": "Shield",
-      "ring": null,
-      "necklace": "Holy Symbol"
+    "name": "Lurtz",
+    "race": "Orc",
+    "class": "Fighter",
+    "background": "Farmer",
+    "alignment": "True Neutral",
+    "level": 1,
+    "experience": 0,
+    "stats": {
+      "strength": 10,
+      "dexterity": 13,
+      "constitution": 10,
+      "intelligence": 12,
+      "wisdom": 11,
+      "charisma": 15
+    },
+    "hp": 8,
+    "max_hp": 8,
+    "mana": 0,
+    "max_mana": 0,
+    "fatigue": 0,
+    "gold": 1500,
+    "inventory": {
+      "general_slots": [
+        {"slot": 0, "item": null, "quantity": 0},
+        {"slot": 1, "item": null, "quantity": 0},
+        {"slot": 2, "item": null, "quantity": 0},
+        {"slot": 3, "item": null, "quantity": 0}
+      ],
+      "gear_slots": {
+        "armor": {"item": "leather", "quantity": 1},
+        "right_arm": {"item": "handaxe", "quantity": 1},
+        "left_arm": {"item": "battleaxe", "quantity": 1},
+        "bag": {
+          "item": "backpack",
+          "quantity": 1,
+          "contents": [
+            {"slot": 0, "item": "Backpack", "quantity": 1},
+            {"slot": 1, "item": "Caltrops", "quantity": 1},
+            {"slot": 2, "item": "Crowbar", "quantity": 1},
+            {"slot": 3, "item": "Oil (flask)", "quantity": 2},
+            {"slot": 4, "item": "Rations (1 day)", "quantity": 10},
+            {"slot": 5, "item": "Rope hempen (50 feet)", "quantity": 1},
+            {"slot": 6, "item": "Tinderbox", "quantity": 1},
+            {"slot": 7, "item": "Torch", "quantity": 10},
+            {"slot": 8, "item": "Waterskin", "quantity": 1},
+            {"slot": 9, "item": "Clothes Travelers", "quantity": 1},
+            {"slot": 10, "item": "battleaxe", "quantity": 1},
+            {"slot": 11, "item": "longbow", "quantity": 1},
+            {"slot": 12, "item": "arrows", "quantity": 20},
+            {"slots": 13-19, "item": null}
+          ]
+        },
+        "necklace": {"item": null, "quantity": 0},
+        "ring": {"item": null, "quantity": 0}
+      }
+    },
+    "spells": {}
+  },
+  "gameState": {
+    "location": {
+      "current": "kingdom",
+      "discovered": ["kingdom"],
+      "music_tracks_unlocked": ["character-creation", "kingdom-theme"]
     }
   }
 }
@@ -364,12 +434,62 @@ Spell Components:
 
 ## Content Progression
 
-### Character Generation
+### Character Generation (Implemented System)
 
-- **Deterministic Creation**: Characters generated from hashed Nostr key
-- **Race-Specific Starting Locations**: Each race begins in their appropriate homeland
-- **Background-Based Equipment**: Starting gear determined by character background
-- **Personal Opening Story**: Unique introduction based on background and class combination
+#### Deterministic Generation
+- **Nostr Key Based**: Character traits generated from hashed npub for consistency
+- **API Integration**: Go backend generates character via `/api/character?npub=...`
+- **Attributes**: Race, class, background, alignment, stats generated deterministically
+- **Starting Gold**: 1500 GP for all characters (based on background)
+
+#### Interactive Equipment Selection
+- **Starting Gear**: Class-based equipment choices from `starting-gear.json`
+- **Choice Types**:
+  - **Simple**: Pick one item from list (e.g., "rapier" vs "shortsword")
+  - **Bundle**: Multiple items together (e.g., "leather + longbow + arrows")
+  - **Complex**: Weapon selection with sub-choices
+    - "Choose weapon + shield" → Dropdown menu for weapon selection
+    - "Choose weapon + Choose weapon" → Two weapon dropdown menus
+- **Pack System**: Starting packs (burglars-pack, dungeoneers-pack, etc.) auto-unpack to backpack with contents
+
+#### Character Creation UI Flow
+1. **Generation**: Character traits generated from npub
+2. **Introduction**: Background-specific story with cinematic text
+3. **Equipment Selection**: Interactive choice interface with:
+   - Radio buttons for main choices
+   - Dropdown menus for weapon selection (when applicable)
+   - Preview of selected equipment
+4. **Adventure Start**: Creates save file and begins game
+
+#### Character Data Structure
+```javascript
+{
+  name: "Lurtz",           // Generated name
+  race: "Orc",             // Deterministic from npub
+  class: "Fighter",        // Deterministic from npub
+  background: "Farmer",    // Deterministic from npub
+  alignment: "True Neutral", // Deterministic from npub
+  level: 1,
+  experience: 0,
+  stats: {                 // Generated from npub
+    strength: 10, dexterity: 13, constitution: 10,
+    intelligence: 12, wisdom: 11, charisma: 15
+  },
+  hp: 8, max_hp: 8,
+  mana: 0, max_mana: 0,
+  fatigue: 0,
+  gold: 1500
+}
+```
+
+#### Starting Gear Processing
+- **ID-Based**: All items referenced by database IDs (kebab-case)
+- **Stack Aware**: Items automatically split if quantity exceeds stack limit
+- **Auto-Equip**: Equipment automatically placed in appropriate slots
+  - Armor → armor slot
+  - Weapons → right_arm/left_arm (two-handed weapons block left arm)
+  - Containers → bag slot
+  - Overflow → backpack contents or general slots
 
 ### Starter Experience
 
@@ -482,13 +602,25 @@ Spell Components:
 - **File Structure**: Organized data folders (character/, systems/, equipment/, content/)
 
 #### Implementation Status
-- ✅ **Character Discovery & Generation**: Working deterministic character creation
+- ✅ **Character Discovery & Generation**: Working deterministic character creation from npub
+- ✅ **Interactive Equipment Selection**: Complex weapon choices with dropdown UI
+- ✅ **Inventory System**: Smart auto-equipping with container support and stack limits
+- ✅ **Pack System**: Auto-unpacking of starting packs (burglars, dungeoneers, explorers)
+- ✅ **Item Database**: 191+ items with full properties, tags, and stack limits
 - ✅ **Spell System**: 17 spells with material components integrated
-- ✅ **Item System**: 184+ items with full properties and tags
-- ✅ **Character Creation UI**: Dynamic HTMX interface with gear selection
-- 🚧 **Database Migration**: Moving from JSON files to DuckDB
+- ✅ **Save System**: Complete Nostr-based character persistence
+- ✅ **Character Creation UI**: Full HTMX interface with cinematic introduction
+- 🚧 **Database Migration**: DuckDB integration for game data
 - 📋 **Game Interface**: Planning DOM-based gameplay mechanics
 - ⏸️ **Combat System**: Designed but awaiting implementation
 - ⏸️ **Location System**: Designed but awaiting implementation
+
+#### Current Character Generation Features
+- **14 Character Classes**: All D&D classes with appropriate starting gear
+- **Multiple Races**: Human, Elf, Dwarf, Halfling, Dragonborn, etc.
+- **Smart Stacking**: Automatic item splitting based on stack limits
+- **Complex Choices**: Interactive weapon selection for Fighter/Paladin weapon+shield combinations
+- **Pack Integration**: Starting packs unpack into organized backpack contents
+- **Equipment Auto-Placement**: Weapons, armor, and accessories auto-equip to correct slots
 
 This design provides a foundation for a rich, text-based RPG experience using modern web technologies. The DOM-based state management with manual saves to Nostr relays creates a unique hybrid of client-side responsiveness and decentralized persistence, perfect for the HTMX/Hyperscript approach.

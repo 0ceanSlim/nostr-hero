@@ -1,4 +1,5 @@
 {
+  "id": "weavers-tools",
   "name": "Weaver's tools",
   "description": "These special tools include thread, needles, and scraps of cloth. You know how to work a loom, but such equipment is too large to transport. Proficiency with weaver's tools lets you add your proficiency bonus to any ability checks you make to craft cloth objects.",
   "price": 100,

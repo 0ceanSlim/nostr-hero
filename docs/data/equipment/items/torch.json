@@ -1,4 +1,5 @@
 {
+  "id": "torch",
   "name": "Torch",
   "description": "A wooden stick wrapped with oil-soaked cloth that provides light when lit.",
   "price": 1,

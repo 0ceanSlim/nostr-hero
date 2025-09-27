@@ -1,4 +1,5 @@
 {
+  "id": "chest",
   "name": "Chest",
   "description": "A large wooden chest reinforced with iron bands, perfect for storing valuables and equipment.",
   "price": 5,

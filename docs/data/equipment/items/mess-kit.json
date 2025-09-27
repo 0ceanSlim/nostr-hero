@@ -1,4 +1,5 @@
 {
+  "id": "mess-kit",
   "name": "Mess kit",
   "description": "A tin box containing a cup, fork, knife, spoon, and plate for eating meals.",
   "price": 20,

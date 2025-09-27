@@ -1,0 +1,25 @@
+{
+  "name": "Explorer's Pack",
+  "description": "A complete adventure kit containing essential supplies for exploration and survival in the wilderness. Unpacking equips a backpack and places all contents inside it.",
+  "price": 850,
+  "type": "Pack",
+  "weight": 59.0,
+  "stack": 1,
+  "ammunition": "",
+  "contains": "pack",
+  "contents": [["backpack", 1], ["bedroll", 1], ["rations", 10], ["rope-hempen-50-feet", 1], ["tinderbox", 1], ["torch", 10], ["waterskin", 1], ["mess-kit", 1], ["clothes-common", 1]],
+  "gear_slot": "consumable",
+  "id": "explorers-pack",
+  "img": "equipment/pack.jpg",
+  "rarity": "common",
+  "slots": "1",
+  "tags": [
+    "pack"
+  ],
+  "notes": [
+    "Contains: Backpack, Bedroll, Rations (10 days), Rope (50 feet), Tinderbox, Torch (10), Waterskin, Mess kit, Common Clothes",
+    "Must not be wearing a backpack to unpack",
+    "Unpacking equips backpack and places contents inside",
+    "Single use item - consumed when unpacked"
+  ]
+}

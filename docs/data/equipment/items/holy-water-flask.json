@@ -1,4 +1,5 @@
 {
+  "id": "holy-water-flask",
   "name": "Holy water (flask)",
   "description": "Water blessed by a cleric, effective against undead and fiends.",
   "price": 2500,

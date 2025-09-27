@@ -27,18 +27,19 @@
       },
       {
         "option": [
-          ["handaxe", 2],
+          ["handaxe", 1],
+          ["handaxe", 1],
           ["club", 1],
           ["dagger", 1],
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -46,7 +47,7 @@
       },
       {
         "given": [
-          ["explorer's pack", 1],
+          ["explorers-pack", 1],
           ["javelin", 4]
         ]
       }
@@ -64,12 +65,12 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -77,8 +78,8 @@
       },
       {
         "option": [
-          ["diplomat's pack", 1],
-          ["entertainer's pack", 1]
+          ["diplomats-pack", 1],
+          ["entertainers-pack", 1]
         ]
       },
       {
@@ -90,7 +91,7 @@
           ["flute", 1],
           ["lyre", 1],
           ["horn", 1],
-          ["pan flute", 1],
+          ["pan-flute", 1],
           ["shawm", 1],
           ["viol", 1]
         ]
@@ -103,7 +104,7 @@
       },
       {
         "given": [
-          ["leather armor", 1],
+          ["leather", 1],
           ["dagger", 1],
           ["cursed-bone-dust", 1]
         ]
@@ -121,28 +122,28 @@
       },
       {
         "option": [
-          ["scale mail", 1],
-          ["leather armor", 1],
-          ["chain mail", 1]
+          ["scale-mail", 1],
+          ["leather", 1],
+          ["chain-mail", 1]
         ]
       },
       {
         "option": [
           [
-            ["light crossbow", 1],
-            ["bolt", 20]
+            ["crossbow-light", 1],
+            ["crossbow-bolts", 20]
           ],
           ["club", 1],
           ["dagger", 1],
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -150,8 +151,8 @@
       },
       {
         "option": [
-          ["priest's pack", 1],
-          ["explorer's pack", 1]
+          ["priests-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
@@ -186,12 +187,12 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -205,7 +206,7 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
@@ -214,10 +215,10 @@
       },
       {
         "option": [
-          ["Sprig of Mistletoe", 1],
-          ["Totem", 1],
-          ["Wooden Staff", 1],
-          ["Yew Wand", 1]
+          ["sprig-of-mistletoe", 1],
+          ["totem", 1],
+          ["wooden-staff", 1],
+          ["yew-wand", 1]
         ]
       },
       {
@@ -228,8 +229,8 @@
       },
       {
         "given": [
-          ["leather armor", 1],
-          ["explorer's pack", 1]
+          ["leather", 1],
+          ["explorers-pack", 1]
         ]
       }
     ]
@@ -239,11 +240,11 @@
     "starting_gear": [
       {
         "option": [
-          ["chain mail", 1],
+          ["chain-mail", 1],
           [
-            ["leather armor", 1],
+            ["leather", 1],
             ["longbow", 1],
-            ["arrow", 20]
+            ["arrows", 20]
           ]
         ]
       },
@@ -266,7 +267,7 @@
               ["scimitar", 1],
               ["shortsword", 1],
               ["trident", 1],
-              ["war pick", 1],
+              ["war-pick", 1],
               ["warhammer", 1],
               ["whip", 1]
             ],
@@ -289,7 +290,7 @@
               ["scimitar", 1],
               ["shortsword", 1],
               ["trident", 1],
-              ["war pick", 1],
+              ["war-pick", 1],
               ["warhammer", 1],
               ["whip", 1]
             ],
@@ -309,7 +310,7 @@
               ["scimitar", 1],
               ["shortsword", 1],
               ["trident", 1],
-              ["war pick", 1],
+              ["war-pick", 1],
               ["warhammer", 1],
               ["whip", 1]
             ]
@@ -319,16 +320,16 @@
       {
         "option": [
           [
-            ["light crossbow", 1],
-            ["bolt", 20]
+            ["crossbow-light", 1],
+            ["crossbow-bolts", 20]
           ],
           ["handaxe", 2]
         ]
       },
       {
         "option": [
-          ["dungeoneer's pack", 1],
-          ["explorer's pack", 1]
+          ["dungeoneers-pack", 1],
+          ["explorers-pack", 1]
         ]
       }
     ]
@@ -344,12 +345,12 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -357,8 +358,8 @@
       },
       {
         "option": [
-          ["dungeoneer's pack", 1],
-          ["explorer's pack", 1]
+          ["dungeoneers-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
@@ -388,7 +389,7 @@
               ["scimitar", 1],
               ["shortsword", 1],
               ["trident", 1],
-              ["war pick", 1],
+              ["war-pick", 1],
               ["warhammer", 1],
               ["whip", 1]
             ],
@@ -431,7 +432,7 @@
               ["scimitar", 1],
               ["shortsword", 1],
               ["trident", 1],
-              ["war pick", 1],
+              ["war-pick", 1],
               ["warhammer", 1],
               ["whip", 1]
             ]
@@ -446,7 +447,7 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
@@ -462,12 +463,12 @@
       },
       {
         "option": [
-          ["priest's pack", 1],
-          ["explorer's pack", 1]
+          ["priests-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
-        "given": [["chain mail", 1]]
+        "given": [["chain-mail", 1]]
       }
     ]
   },
@@ -476,8 +477,8 @@
     "starting_gear": [
       {
         "option": [
-          ["scale mail", 1],
-          ["leather armor", 1]
+          ["scale-mail", 1],
+          ["leather", 1]
         ]
       },
       {
@@ -490,7 +491,7 @@
               ["greatclub", 1],
               ["handaxe", 1],
               ["javelin", 1],
-              ["light hammer", 1],
+              ["light-hammer", 1],
               ["mace", 1],
               ["quarterstaff", 1],
               ["sickle", 1],
@@ -502,7 +503,7 @@
               ["greatclub", 1],
               ["handaxe", 1],
               ["javelin", 1],
-              ["light hammer", 1],
+              ["light-hammer", 1],
               ["mace", 1],
               ["quarterstaff", 1],
               ["sickle", 1],
@@ -513,14 +514,14 @@
       },
       {
         "option": [
-          ["dungeoneer's pack", 1],
-          ["explorer's pack", 1]
+          ["dungeoneers-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
         "given": [
           ["longbow", 1],
-          ["arrow", 20]
+          ["arrows", 20]
         ]
       }
     ]
@@ -538,22 +539,22 @@
         "option": [
           [
             ["shortbow", 1],
-            ["arrow", 20]
+            ["arrows", 20]
           ],
           ["shortsword", 1]
         ]
       },
       {
         "option": [
-          ["burglar's pack", 1],
-          ["dungeoneer's pack", 1],
-          ["explorer's pack", 1]
+          ["burglars-pack", 1],
+          ["dungeoneers-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
         "given": [
-          ["leather armor", 1],
-          ["thieves' tools", 1],
+          ["leather", 1],
+          ["thieves-tools", 1],
           ["dagger", 2]
         ]
       }
@@ -565,20 +566,20 @@
       {
         "option": [
           [
-            ["light crossbow", 1],
-            ["bolt", 20]
+            ["crossbow-light", 1],
+            ["crossbow-bolts", 20]
           ],
           ["club", 1],
           ["dagger", 1],
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -595,8 +596,8 @@
       },
       {
         "option": [
-          ["dungeoneer's pack", 1],
-          ["explorer's pack", 1]
+          ["dungeoneers-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {
@@ -619,20 +620,20 @@
       {
         "option": [
           [
-            ["light crossbow", 1],
-            ["bolt", 20]
+            ["crossbow-light", 1],
+            ["crossbow-bolts", 20]
           ],
           ["club", 1],
           ["dagger", 1],
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -645,12 +646,12 @@
           ["greatclub", 1],
           ["handaxe", 1],
           ["javelin", 1],
-          ["light hammer", 1],
+          ["light-hammer", 1],
           ["mace", 1],
           ["quarterstaff", 1],
           ["sickle", 1],
           ["spear", 1],
-          ["crossbow, light", 1],
+          ["crossbow-light", 1],
           ["dart", 1],
           ["shortbow", 1],
           ["sling", 1]
@@ -667,8 +668,8 @@
       },
       {
         "option": [
-          ["scholar's pack", 1],
-          ["dungeoneer's pack", 1]
+          ["scholars-pack", 1],
+          ["dungeoneers-pack", 1]
         ]
       },
       {
@@ -679,7 +680,7 @@
       },
       {
         "given": [
-          ["leather armor", 1],
+          ["leather", 1],
           ["dagger", 2]
         ]
       }
@@ -705,8 +706,8 @@
       },
       {
         "option": [
-          ["scholar's pack", 1],
-          ["explorer's pack", 1]
+          ["scholars-pack", 1],
+          ["explorers-pack", 1]
         ]
       },
       {

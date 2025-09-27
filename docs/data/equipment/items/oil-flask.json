@@ -1,25 +1,22 @@
 {
+  "id": "oil-flask",
   "name": "Oil (flask)",
   "description": "A flask of lamp oil that can fuel lanterns or be used as an improvised weapon.",
   "price": 10,
+  "type": "Adventuring Gear",
+  "weight": 1.0,
+  "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 1,
-  "weight": 1,
-  "type": "Adventuring Gear",
-  "notes": [
-    "Burns for 6 hours in a lantern",
-    "Can be thrown as an improvised incendiary"
-  ],
-  "tags": [
-    "fuel",
-    "flammable",
-    "consumable"
-  ],
-  "rarity": "common",
+  "ammunition": "",
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Burns for 6 hours in a lantern",
+    "Can be thrown as an improvised incendiary"
+  ]
 }

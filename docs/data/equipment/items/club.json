@@ -1,4 +1,5 @@
 {
+  "id": "club",
   "name": "Club",
   "description": "A simple wooden club, rough-hewn and heavy enough to deal damage in close combat.",
   "price": 0,

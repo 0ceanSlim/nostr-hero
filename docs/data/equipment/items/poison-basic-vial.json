@@ -1,4 +1,5 @@
 {
+  "id": "poison-basic-vial",
   "name": "Poison basic (vial)",
   "description": "A vial of basic poison that can coat weapons or be administered directly.",
   "price": 10000,

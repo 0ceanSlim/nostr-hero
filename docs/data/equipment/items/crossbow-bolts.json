@@ -1,15 +1,18 @@
 {
   "name": "Crossbow Bolts",
   "price": 5,
+  "type": "Ammunition",
+  "weight": 0.015,
+  "stack": 20,
   "ac": null,
   "damage": null,
   "heal": null,
-  "stack": 20,
-  "weight": 0.015,
-  "type": "Ammunition",
-  "rarity": "common",
+  "ammunition": "",
+  "id": "crossbow-bolts",
   "img": "equipment/ammunition.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "rarity": "common",
+  "tags": [],
+  "notes": []
 }

@@ -1,4 +1,5 @@
 {
+  "id": "crowbar",
   "name": "Crowbar",
   "description": "A heavy iron bar with a flattened end, useful for prying open doors and containers.",
   "price": 200,

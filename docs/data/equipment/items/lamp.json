@@ -1,4 +1,5 @@
 {
+  "id": "lamp",
   "name": "Lamp",
   "description": "An oil-burning lamp that provides steady light when fueled.",
   "price": 50,

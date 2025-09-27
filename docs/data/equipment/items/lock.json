@@ -1,4 +1,5 @@
 {
+  "id": "lock",
   "name": "Lock",
   "description": "A sturdy padlock with a key, used to secure doors, chests, and containers.",
   "price": 1000,

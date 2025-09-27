@@ -1,4 +1,5 @@
 {
+  "id": "healing",
   "name": "Healing",
   "description": "A crimson liquid that glows faintly when agitated. Drinking it restores vitality and closes minor wounds.",
   "price": 5000,

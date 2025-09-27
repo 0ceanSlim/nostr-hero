@@ -1,4 +1,5 @@
 {
+  "id": "hourglass",
   "name": "Hourglass",
   "description": "A glass timepiece that measures exactly one hour as sand falls from top to bottom.",
   "price": 2500,

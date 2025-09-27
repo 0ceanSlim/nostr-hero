@@ -1,4 +1,5 @@
 {
+  "id": "hammer",
   "name": "Hammer",
   "description": "A standard hammer with a wooden handle, useful for construction and repairs.",
   "price": 100,

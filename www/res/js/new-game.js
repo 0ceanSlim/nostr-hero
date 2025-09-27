@@ -309,8 +309,108 @@ function showEquipmentSelection() {
 
         const span = document.createElement('span');
         span.className = 'text-white';
-        span.textContent = option.item; // Display option.item as the label
+        // Show quantity for simple items when > 1
+        if (option.quantity && option.quantity > 1 && !option.isComplexChoice && !option.isBundle) {
+          span.textContent = `${option.item} x${option.quantity}`;
+        } else {
+          span.textContent = option.item;
+        }
         label.appendChild(span);
+
+        // Add pack contents display for packs
+        if (option.item.includes('pack')) {
+          const packContentsDiv = document.createElement('div');
+          packContentsDiv.className = 'ml-6 mt-1 text-xs text-gray-300';
+          packContentsDiv.id = 'pack_contents_' + index + '_' + optionIndex;
+
+          // Load and display pack contents asynchronously
+          (async () => {
+            try {
+              const packData = await getItemById(option.item);
+              if (packData && packData.contents) {
+                const contents = typeof packData.contents === 'string'
+                  ? JSON.parse(packData.contents)
+                  : packData.contents;
+
+                // Convert item IDs to display names
+                const contentsList = await Promise.all(contents.map(async item => {
+                  if (Array.isArray(item) && item.length === 2) {
+                    const itemId = item[0];
+                    const quantity = item[1];
+
+                    // Skip backpack since it becomes the container
+                    if (itemId === 'backpack') return null;
+
+                    // Get item data to get display name
+                    const itemData = await getItemById(itemId);
+                    const displayName = itemData ? itemData.name : itemId;
+
+                    return quantity > 1 ? `${displayName} x${quantity}` : displayName;
+                  }
+                  return item;
+                }));
+
+                // Filter out null entries (like backpack) and join
+                const filteredList = contentsList.filter(item => item !== null);
+                packContentsDiv.textContent = `Contains: ${filteredList.join(', ')}`;
+              }
+            } catch (error) {
+              console.warn('Failed to load pack contents:', error);
+            }
+          })();
+
+          label.appendChild(packContentsDiv);
+        }
+
+        // Add weapon selection sub-interface for complex choices
+        if (option.isComplexChoice) {
+          const weaponSelector = document.createElement('div');
+          weaponSelector.className = 'ml-6 mt-2 hidden weapon-selector';
+          weaponSelector.id = 'weapon_selector_' + index + '_' + optionIndex;
+
+          option.weaponSlots.forEach((slot, slotIndex) => {
+            if (slot.type === 'weapon_choice') {
+              const weaponDiv = document.createElement('div');
+              weaponDiv.className = 'mb-2';
+
+              const weaponLabel = document.createElement('label');
+              weaponLabel.className = 'block text-sm text-yellow-400 mb-1';
+              weaponLabel.textContent = `Choose weapon ${slotIndex + 1}:`;
+              weaponDiv.appendChild(weaponLabel);
+
+              const weaponSelect = document.createElement('select');
+              weaponSelect.className = 'bg-gray-600 text-white rounded px-2 py-1 text-sm';
+              weaponSelect.name = `weapon_${index}_${optionIndex}_${slotIndex}`;
+
+              slot.options.forEach((weapon, weaponIndex) => {
+                const weaponOption = document.createElement('option');
+                weaponOption.value = weapon[0];
+                weaponOption.textContent = `${weapon[0]} (x${weapon[1]})`;
+                if (weaponIndex === 0) weaponOption.selected = true;
+                weaponSelect.appendChild(weaponOption);
+              });
+
+              weaponDiv.appendChild(weaponSelect);
+              weaponSelector.appendChild(weaponDiv);
+            }
+          });
+
+          label.appendChild(weaponSelector);
+
+          // Show/hide weapon selector when radio button changes
+          input.onchange = function() {
+            // Hide all weapon selectors for this choice
+            const allSelectors = document.querySelectorAll(`[id^="weapon_selector_${index}_"]`);
+            allSelectors.forEach(s => s.classList.add('hidden'));
+
+            // Show this weapon selector if it's a complex choice
+            if (option.isComplexChoice) {
+              weaponSelector.classList.remove('hidden');
+            }
+
+            selectEquipment(index, option);
+          };
+        }
 
         optionsDiv.appendChild(label);
       });
@@ -332,7 +432,31 @@ function showEquipmentSelection() {
 }
 
 function selectEquipment(choiceIndex, option) {
-  selectedEquipment[choiceIndex] = option;
+  if (option.isComplexChoice) {
+    // Store the complex choice structure for processing later
+    selectedEquipment[choiceIndex] = {
+      ...option,
+      getSelectedWeapons: function() {
+        const selectedWeapons = [];
+
+        option.weaponSlots.forEach((slot, slotIndex) => {
+          if (slot.type === 'weapon_choice') {
+            const selectElement = document.querySelector(`select[name="weapon_${choiceIndex}_0_${slotIndex}"]`);
+            if (selectElement) {
+              selectedWeapons.push([selectElement.value, 1]);
+            }
+          } else if (slot.type === 'fixed_item') {
+            selectedWeapons.push(slot.item);
+          }
+        });
+
+        return selectedWeapons;
+      }
+    };
+  } else {
+    selectedEquipment[choiceIndex] = option;
+  }
+
   console.log('Selected equipment:', selectedEquipment);
 }
 
@@ -340,62 +464,76 @@ async function startAdventure() {
   try {
     showMessage('🎮 Starting your adventure...', 'info');
 
-    // Prepare final character data
-    const finalCharacter = {
-      ...generatedCharacter,
-      equipment: startingEquipment.equipment,
-      selectedEquipment: selectedEquipment
-    };
+    // Get the final character name (either edited or generated)
+    const characterNameInput = document.getElementById('character-name-input');
+    const finalName = characterNameInput.style.display === 'none' ?
+      generatedCharacter.name : characterNameInput.value.trim() || generatedCharacter.name;
 
-    // Prepare final inventory (starting items + selected equipment)
-    let finalInventory = [...startingEquipment.inventory];
+    // Collect all items (starting + selected)
+    let allItems = [];
 
-    // Add selected equipment to inventory
-    Object.values(selectedEquipment).forEach(option => {
-        if (option.isBundle) {
-            option.bundle.forEach(bundleItem => {
-                const existingItem = finalInventory.find(i => i.item === bundleItem[0]);
-                if (existingItem) {
-                    existingItem.quantity += bundleItem[1];
-                } else {
-                    finalInventory.push({ item: bundleItem[0], quantity: bundleItem[1] });
-                }
-            });
-        } else {
-            const existingItem = finalInventory.find(i => i.item === option.item);
-            if (existingItem) {
-                existingItem.quantity += option.quantity;
-            } else {
-                finalInventory.push({ item: option.item, quantity: option.quantity });
-            }
+    // Add starting equipment with proper stacking
+    for (const startingItem of startingEquipment.inventory) {
+      await addItemWithStacking(allItems, startingItem.item, startingItem.quantity);
+    }
+
+    // Add selected equipment to items list with proper stacking
+    for (const option of Object.values(selectedEquipment)) {
+      if (option.isComplexChoice) {
+        // Handle complex weapon choices
+        const selectedWeapons = option.getSelectedWeapons();
+        for (const weapon of selectedWeapons) {
+          await addItemWithStacking(allItems, weapon[0], weapon[1]);
         }
-    });
+      } else if (option.isBundle) {
+        for (const bundleItem of option.bundle) {
+          await addItemWithStacking(allItems, bundleItem[0], bundleItem[1]);
+        }
+      } else {
+        await addItemWithStacking(allItems, option.item, option.quantity);
+      }
+    }
 
-    finalCharacter.inventory = finalInventory;
+    // Create proper inventory structure with dynamic equipment placement
+    const inventory = await createInventoryFromItems(allItems);
+
+    // Prepare final character data (remove choices and other unnecessary fields)
+    const finalCharacter = {
+      name: finalName,
+      race: generatedCharacter.race,
+      class: generatedCharacter.class,
+      background: generatedCharacter.background,
+      alignment: generatedCharacter.alignment,
+      level: generatedCharacter.level,
+      experience: generatedCharacter.experience,
+      stats: generatedCharacter.stats,
+      hp: generatedCharacter.hp,
+      max_hp: generatedCharacter.max_hp,
+      mana: generatedCharacter.mana,
+      max_mana: generatedCharacter.max_mana,
+      fatigue: generatedCharacter.fatigue,
+      gold: generatedCharacter.gold,
+      inventory: inventory,
+      spells: generatedCharacter.spells || {}
+    };
 
     console.log('Final character:', finalCharacter);
 
     // Create new save file
     const session = window.sessionManager.getSession();
-    // Create complete game state matching our game-state.js structure
-    const gameState = {
-      character: finalCharacter,
-      inventory: finalCharacter.inventory || [],
-      equipment: finalCharacter.equipment || {},
-      spells: finalCharacter.spells || [],
-      location: {
-        current: finalCharacter.city || 'kingdom',
-        discovered: [finalCharacter.city || 'kingdom']
-      },
-      combat: null
-    };
-
     const saveData = {
-      character: finalCharacter,
-      gameState: gameState,
-      location: finalCharacter.city || 'kingdom', // Use character's starting city
+      id: `save_${Math.floor(Date.now() / 1000)}`,
       npub: session.npub,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      last_played: new Date().toISOString(),
+      character: finalCharacter,
+      gameState: {
+        location: {
+          current: generatedCharacter.city || 'kingdom',
+          discovered: [generatedCharacter.city || 'kingdom'],
+          music_tracks_unlocked: ['character-creation', 'kingdom-theme']
+        }
+      }
     };
 
     const response = await fetch(`/api/saves/${session.npub}`, {
@@ -410,10 +548,11 @@ async function startAdventure() {
       const result = await response.json();
       showMessage('✅ Adventure begins!', 'success');
 
-      // Redirect to game with the new save
-      setTimeout(() => {
-        window.location.href = '/game?save=' + result.id;
-      }, 1500);
+      // DEBUG: Comment out redirect to see console logs
+      // setTimeout(() => {
+      //   window.location.href = '/game?save=' + result.id;
+      // }, 1500);
+      console.log('🎮 Save created successfully, redirect disabled for debugging');
     } else {
       throw new Error('Failed to create save file');
     }
@@ -460,6 +599,405 @@ function addRaceFlavorToScene(scene, race) {
   } else {
     return modifier + scene.charAt(0).toLowerCase() + scene.slice(1);
   }
+}
+
+// Character name editing functionality
+function editCharacterName() {
+  const nameDisplay = document.getElementById('character-name');
+  const nameInput = document.getElementById('character-name-input');
+
+  // Switch to input mode
+  nameDisplay.style.display = 'none';
+  nameInput.style.display = 'block';
+  nameInput.value = nameDisplay.textContent;
+  nameInput.focus();
+  nameInput.select();
+
+  // Handle saving the name
+  function saveName() {
+    const newName = nameInput.value.trim();
+    if (newName && newName.length <= 20) {
+      nameDisplay.textContent = newName;
+    }
+    nameInput.style.display = 'none';
+    nameDisplay.style.display = 'block';
+  }
+
+  // Save on Enter or blur
+  nameInput.onkeydown = function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveName();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      nameInput.style.display = 'none';
+      nameDisplay.style.display = 'block';
+    }
+  };
+
+  nameInput.onblur = saveName;
+}
+
+// Cache for item data from database
+let itemsCache = null;
+
+// Load all items from database once
+async function loadItemsFromDatabase() {
+  if (itemsCache) {
+    return itemsCache;
+  }
+
+  try {
+    const response = await fetch('/api/items');
+    if (response.ok) {
+      itemsCache = await response.json();
+      console.log(`📦 Loaded ${itemsCache.length} items from database`);
+      return itemsCache;
+    }
+  } catch (error) {
+    console.warn('Could not load items from database:', error);
+  }
+  return [];
+}
+
+// Helper function to get item data from database cache by ID
+async function getItemById(itemId) {
+  try {
+    const items = await loadItemsFromDatabase();
+
+    // Find item by ID (exact match)
+    const item = items.find(i => i.id === itemId);
+
+    if (item) {
+      // Convert database format to expected frontend format
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        type: item.item_type,
+        tags: item.tags || [],
+        rarity: item.rarity,
+        gear_slot: item.properties?.gear_slot,
+        slots: item.properties?.slots,
+        contents: item.properties?.contents,
+        ...item.properties // Spread all other properties
+      };
+    } else {
+      console.warn(`❌ Item ID "${itemId}" not found in database`);
+    }
+  } catch (error) {
+    console.warn(`Could not load item data for ID: ${itemId}`, error);
+  }
+  return null;
+}
+
+// Legacy function for backwards compatibility - now uses ID lookup
+async function getItemData(itemName) {
+  console.warn(`⚠️ getItemData(${itemName}) is deprecated, use getItemById() instead`);
+  return await getItemById(itemName);
+}
+
+// Dynamic inventory creation with proper equipment placement
+async function createInventoryFromItems(allItems) {
+  // Initialize empty inventory structure
+  const inventory = {
+    general_slots: [
+      { slot: 0, item: null, quantity: 0 },
+      { slot: 1, item: null, quantity: 0 },
+      { slot: 2, item: null, quantity: 0 },
+      { slot: 3, item: null, quantity: 0 }
+    ],
+    gear_slots: {
+      bag: { item: null, quantity: 0 },
+      left_arm: { item: null, quantity: 0 },
+      right_arm: { item: null, quantity: 0 },
+      armor: { item: null, quantity: 0 },
+      necklace: { item: null, quantity: 0 },
+      ring: { item: null, quantity: 0 }
+    }
+  };
+
+  let remainingItems = [...allItems];
+  let currentGeneralSlot = 0;
+  let twoHandedEquipped = false;
+
+  // 1. First pass - Handle packs (automatically unpack to bag slot)
+  console.log(`🎒 Starting pack detection. Items to check:`, remainingItems.map(i => i.item));
+  for (let i = remainingItems.length - 1; i >= 0; i--) {
+    const item = remainingItems[i];
+    const itemName = item.item.toLowerCase();
+
+    console.log(`🎒 Checking item: "${item.item}" (normalized: "${itemName}") - contains pack? ${itemName.includes('pack')}`);
+    // Check for any pack type
+    if (itemName.includes('pack')) {
+      console.log(`🎒 Found pack: ${item.item}`);
+      // This is a pack - unpack it to bag slot
+      const packContents = await unpackItem(item.item);
+      if (packContents) {
+        console.log(`🎒 Successfully unpacked ${item.item}:`, packContents);
+        // Equip the pack itself as a backpack to bag slot (the pack becomes the backpack)
+        inventory.gear_slots.bag = {
+          item: 'backpack', // All packs become backpacks when equipped
+          quantity: 1,
+          contents: packContents
+        };
+        remainingItems.splice(i, 1);
+        console.log(`🎒 Removed pack from remaining items. Remaining:`, remainingItems.map(i => i.item));
+      } else {
+        console.warn(`🎒 Failed to unpack ${item.item}, will place as regular item`);
+      }
+    }
+  }
+
+  // 2. Second pass - Handle all equipment items based on gear_slot
+  for (let i = remainingItems.length - 1; i >= 0; i--) {
+    const item = remainingItems[i];
+    const itemData = await getItemById(item.item);
+
+    // Check if item has equipment tag and gear_slot
+    if (itemData && itemData.tags && itemData.tags.includes('equipment') && itemData.gear_slot) {
+      const gearSlot = itemData.gear_slot;
+      console.log(`Found equipment: ${item.item} → ${gearSlot}`);
+
+      // Handle different gear slots
+      if (gearSlot === 'armor' && inventory.gear_slots.armor.item === null) {
+        console.log(`Equipping armor: ${item.item}`);
+        inventory.gear_slots.armor = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'hands') {
+        // Handle weapons - check if two-handed
+        const isTwoHanded = itemData.tags && itemData.tags.includes('two-handed');
+
+        if (isTwoHanded) {
+          if (inventory.gear_slots.right_arm.item === null) {
+            console.log(`Equipping two-handed weapon: ${item.item}`);
+            inventory.gear_slots.right_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            twoHandedEquipped = true;
+            remainingItems.splice(i, 1);
+          }
+        } else {
+          // One-handed weapon
+          if (inventory.gear_slots.right_arm.item === null) {
+            console.log(`Equipping weapon in right hand: ${item.item}`);
+            inventory.gear_slots.right_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            remainingItems.splice(i, 1);
+          } else if (inventory.gear_slots.left_arm.item === null && !twoHandedEquipped) {
+            console.log(`Equipping weapon in left hand: ${item.item}`);
+            inventory.gear_slots.left_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            remainingItems.splice(i, 1);
+          }
+        }
+      } else if (gearSlot === 'bag' && inventory.gear_slots.bag.item === null) {
+        // Handle containers like quivers, pouches
+        console.log(`Equipping container: ${item.item}`);
+        inventory.gear_slots.bag = {
+          item: item.item,
+          quantity: item.quantity,
+          contents: createEmptyContainerSlots(parseInt(itemData.slots) || 4)
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'necklace' && inventory.gear_slots.necklace.item === null) {
+        console.log(`Equipping necklace: ${item.item}`);
+        inventory.gear_slots.necklace = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'ring' && inventory.gear_slots.ring.item === null) {
+        console.log(`Equipping ring: ${item.item}`);
+        inventory.gear_slots.ring = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      }
+    }
+  }
+
+  // 3. Handle any remaining equipment items that didn't get equipped (put weapons in overflow)
+  for (let i = remainingItems.length - 1; i >= 0; i--) {
+    const item = remainingItems[i];
+    const itemData = await getItemById(item.item);
+
+    if (itemData && itemData.tags && itemData.tags.includes('equipment')) {
+      console.log(`Equipment item ${item.item} couldn't be equipped, adding to overflow`);
+      addToGeneralSlotOrBag(inventory, item, currentGeneralSlot++, itemData);
+      remainingItems.splice(i, 1);
+    }
+  }
+
+  // 4. Put remaining items in general slots (handle containers with slots)
+  for (let item of remainingItems) {
+    const itemData = await getItemById(item.item);
+    addToGeneralSlotOrBag(inventory, item, currentGeneralSlot++, itemData);
+  }
+
+  return inventory;
+}
+
+// Helper function to add items with proper stacking logic
+async function addItemWithStacking(allItems, itemId, quantity) {
+  // Get item data to check stack limit
+  const itemData = await getItemById(itemId);
+  const stackLimit = itemData ? parseInt(itemData.stack) || 1 : 1;
+
+  let remainingQuantity = quantity;
+
+  // Try to add to existing stacks first
+  for (let existingItem of allItems) {
+    if (existingItem.item === itemId && existingItem.quantity < stackLimit) {
+      const canAdd = Math.min(remainingQuantity, stackLimit - existingItem.quantity);
+      existingItem.quantity += canAdd;
+      remainingQuantity -= canAdd;
+
+      if (remainingQuantity <= 0) break;
+    }
+  }
+
+  // Create new stacks for remaining quantity
+  while (remainingQuantity > 0) {
+    const stackSize = Math.min(remainingQuantity, stackLimit);
+    allItems.push({ item: itemId, quantity: stackSize });
+    remainingQuantity -= stackSize;
+  }
+}
+
+// Helper function to add items to general slots or bag
+function addToGeneralSlotOrBag(inventory, item, slotIndex, itemData = null) {
+  // Debug: Log item data to see what's happening
+  console.log(`🔍 Processing ${item.item}:`, itemData);
+
+  // Check if item is a container or pack
+  const isContainer = itemData && itemData.tags && (itemData.tags.includes('container') || itemData.tags.includes('pack'));
+  const containerSlots = isContainer ? parseInt(itemData.slots) || 4 : 0;
+  const isEquipment = itemData && itemData.tags && itemData.tags.includes('equipment');
+  const hasGearSlot = itemData && itemData.gear_slot;
+
+  console.log(`🔍 ${item.item} - isContainer: ${isContainer}, tags: ${itemData?.tags}, slots: ${itemData?.slots}`);
+
+  // RULE: Containers can only go to:
+  // 1. Bag slot if they are equipment with gear_slot = "bag" AND bag slot is empty
+  // 2. General slots (never inside other containers)
+
+  if (isContainer) {
+    // If container is equipment with bag gear slot and bag slot is empty, try bag slot first
+    if (isEquipment && hasGearSlot === 'bag' && inventory.gear_slots.bag.item === null) {
+      console.log(`🎒 Equipping container ${item.item} to bag slot (has ${containerSlots} slots)`);
+      inventory.gear_slots.bag = {
+        item: item.item,
+        quantity: item.quantity,
+        contents: createEmptyContainerSlots(containerSlots)
+      };
+      return;
+    }
+
+    // Otherwise, containers always go to general slots
+    if (slotIndex < 4 && inventory.general_slots[slotIndex].item === null) {
+      console.log(`📦 Adding container ${item.item} to general slot ${slotIndex} (has ${containerSlots} slots)`);
+      inventory.general_slots[slotIndex] = {
+        slot: slotIndex,
+        item: item.item,
+        quantity: item.quantity,
+        contents: createEmptyContainerSlots(containerSlots)
+      };
+      return;
+    }
+  } else {
+    // Non-containers: try to add to backpack first if it exists
+    if (inventory.gear_slots.bag.item !== null && inventory.gear_slots.bag.contents) {
+      const emptyBagSlot = inventory.gear_slots.bag.contents.find(slot => slot.item === null);
+      if (emptyBagSlot) {
+        console.log(`📦 Adding ${item.item} to backpack slot ${emptyBagSlot.slot}`);
+        emptyBagSlot.item = item.item;
+        emptyBagSlot.quantity = item.quantity;
+        return;
+      }
+    }
+
+    // If backpack is full or doesn't exist, use general slots
+    if (slotIndex < 4 && inventory.general_slots[slotIndex].item === null) {
+      console.log(`📦 Adding ${item.item} to general slot ${slotIndex}`);
+      inventory.general_slots[slotIndex] = {
+        slot: slotIndex,
+        item: item.item,
+        quantity: item.quantity
+      };
+      return;
+    }
+  }
+
+  console.warn(`⚠️ Could not place item ${item.item} - inventory full`);
+}
+
+// Helper function to create empty container slots
+function createEmptyContainerSlots(numSlots) {
+  const slots = [];
+  for (let i = 0; i < numSlots; i++) {
+    slots.push({ slot: i, item: null, quantity: 0 });
+  }
+  return slots;
+}
+
+// Helper function to unpack packs and return contents
+async function unpackItem(packId) {
+  try {
+    console.log(`🎒 Attempting to unpack: "${packId}"`);
+    const packData = await getItemById(packId);
+    if (packData) {
+      console.log(`🎒 Loaded pack data for ${packId}:`, packData);
+      if (packData.contents) {
+        // Parse contents string if it's a string, or use directly if array
+        const contents = typeof packData.contents === 'string'
+          ? JSON.parse(packData.contents)
+          : packData.contents;
+
+        console.log(`🎒 Pack contents:`, contents);
+        // Convert to proper slot format
+        const slots = [];
+        contents.forEach((item, index) => {
+          if (item[0] !== 'Backpack') { // Don't include the backpack itself
+            slots.push({
+              slot: index,
+              item: item[0],
+              quantity: item[1]
+            });
+          }
+        });
+
+        // Fill remaining slots with null
+        const totalSlots = 20; // Backpack has 20 slots
+        while (slots.length < totalSlots) {
+          slots.push({
+            slot: slots.length,
+            item: null,
+            quantity: 0
+          });
+        }
+
+        console.log(`🎒 Successfully unpacked ${packId} into ${slots.filter(s => s.item).length} items`);
+        return slots;
+      } else {
+        console.warn(`🎒 Pack ${packId} has no contents field`);
+      }
+    } else {
+      console.warn(`🎒 Pack data not found for: ${packId}`);
+    }
+  } catch (error) {
+    console.warn(`🎒 Could not unpack: ${packId}`, error);
+  }
+  return null;
 }
 
 console.log('🎮 New game scripts loaded');

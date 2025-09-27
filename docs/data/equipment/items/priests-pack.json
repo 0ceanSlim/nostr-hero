@@ -1,0 +1,25 @@
+{
+  "name": "Priest's Pack",
+  "description": "A religious kit containing ceremonial supplies and basic adventuring gear for traveling clergy. Unpacking equips a backpack and places all contents inside it.",
+  "price": 2830,
+  "type": "Pack",
+  "weight": 29.0,
+  "stack": 1,
+  "ammunition": "",
+  "contains": "pack",
+  "contents": [["backpack", 1], ["blanket", 1], ["robes", 1], ["holy-water-flask", 1], ["rations", 2], ["tinderbox", 1], ["candle", 10], ["waterskin", 1]],
+  "gear_slot": "consumable",
+  "id": "priests-pack",
+  "img": "equipment/pack.jpg",
+  "rarity": "common",
+  "slots": "1",
+  "tags": [
+    "pack"
+  ],
+  "notes": [
+    "Contains: Backpack, Blanket, Robes, Holy Water Flask, Rations (2 days), Tinderbox, Candle (10), Waterskin",
+    "Must not be wearing a backpack to unpack",
+    "Unpacking equips backpack and places contents inside",
+    "Single use item - consumed when unpacked"
+  ]
+}

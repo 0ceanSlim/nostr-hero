@@ -187,16 +187,54 @@ class NostrCharacterGenerator {
                     inventory.push({ item: item[0], quantity: item[1] });
                 });
             } else if (gearItem.option) {
+                console.log(`🔍 Processing choice ${index}:`, gearItem.option);
                 const choice = {
                     id: `choice-${index}`,
-                    options: gearItem.option.map(opt => {
+                    options: gearItem.option.map((opt, optIndex) => {
+                        console.log(`🔍 Processing option ${optIndex}:`, opt);
                         if (typeof opt[0] === 'string') {
+                            // Simple choice: ["item", quantity]
+                            console.log(`→ Simple choice: ${opt[0]}`);
                             return { item: opt[0], quantity: opt[1] };
+                        } else if (Array.isArray(opt) && opt.length === 2 && Array.isArray(opt[0]) && Array.isArray(opt[0][0]) && typeof opt[0][0][0] === 'string') {
+                            // Complex nested choice: [[["battleaxe",1], ["flail",1]...], ["shield",1]] or [[weapons...], [weapons...]]
+                            // This represents a choice of weapon from first array + additional items/weapons
+                            console.log(`→ Complex choice detected`);
+                            const weaponChoices = opt[0]; // Array of weapon choices like [["battleaxe",1], ["flail",1]...]
+                            const additionalItems = opt.slice(1); // Additional items like ["shield",1] or more weapon arrays
+
+                            // Create user-friendly description without auto-picking weapons
+                            const weaponDescription = `Choose weapon`;
+
+                            // Handle additional items - they could be simple items or weapon arrays
+                            const additionalDescriptions = additionalItems.map(item => {
+                                if (Array.isArray(item) && Array.isArray(item[0])) {
+                                    // This is another weapon array
+                                    return "Choose weapon";
+                                } else {
+                                    // This is a simple item like ["shield", 1]
+                                    return `${item[0]} (x${item[1]})`;
+                                }
+                            });
+
+                            const description = [weaponDescription, ...additionalDescriptions].join(' + ');
+                            console.log(`→ Complex choice result: ${description}`);
+                            return {
+                                item: description,
+                                quantity: 1,
+                                isComplexChoice: true,
+                                weaponSlots: opt.map((slot, index) => {
+                                    if (Array.isArray(slot) && Array.isArray(slot[0])) {
+                                        return { type: 'weapon_choice', options: slot, index: index };
+                                    } else {
+                                        return { type: 'fixed_item', item: slot, index: index };
+                                    }
+                                })
+                            };
                         } else {
-                            // This is a choice between multiple items, e.g., [["leather armor", 1], ["longbow", 1]]
-                            // For now, we will join the item names and treat it as a single choice.
-                            // TODO: Handle this more gracefully in the UI.
-                            const items = opt.map(item => `${item[0]} (x${item[1]})`).join(', ');
+                            // Regular bundle: [["item1", 1], ["item2", 1]]
+                            console.log(`→ Regular bundle`);
+                            const items = opt.map(item => `${item[0]} (x${item[1]})`).join(' + ');
                             return { item: items, quantity: 1, isBundle: true, bundle: opt };
                         }
                     })

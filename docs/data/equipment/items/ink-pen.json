@@ -1,4 +1,5 @@
 {
+  "id": "ink-pen",
   "name": "Ink pen",
   "description": "A simple writing implement with a metal nib for dipping in ink.",
   "price": 2,

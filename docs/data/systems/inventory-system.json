@@ -1,0 +1,96 @@
+{
+  "inventory_system": {
+    "description": "Complete inventory and equipment system for character management",
+    "version": "1.0",
+    "slots": {
+      "general_inventory": {
+        "description": "General purpose inventory slots that can hold any item",
+        "count": 4,
+        "can_contain": "any",
+        "restrictions": ["no_containers_inside_containers"]
+      },
+      "gear_slots": {
+        "bag": {
+          "description": "Main bag slot for containers like backpacks, quivers, etc.",
+          "count": 1,
+          "can_contain": ["Backpack", "Quiver", "Pouch"],
+          "required_tags": ["container"],
+          "required_gear_slot": "bag"
+        },
+        "left_arm": {
+          "description": "Left arm slot for shields, weapons, or other held items",
+          "count": 1,
+          "can_contain": "any",
+          "restrictions": ["single_item"]
+        },
+        "right_arm": {
+          "description": "Right arm slot for weapons or other held items",
+          "count": 1,
+          "can_contain": "any",
+          "restrictions": ["single_item"]
+        },
+        "armor": {
+          "description": "Armor slot for protective gear",
+          "count": 1,
+          "can_contain": "armor_types",
+          "allowed_types": ["Light Armor", "Medium Armor", "Heavy Armor", "Shield"],
+          "restrictions": ["single_item"]
+        },
+        "necklace": {
+          "description": "Necklace slot for amulets and neck accessories",
+          "count": 1,
+          "can_contain": "neck_items",
+          "allowed_types": ["Amulet", "Necklace"],
+          "restrictions": ["single_item"]
+        },
+        "ring": {
+          "description": "Ring slot for magical rings and finger accessories",
+          "count": 1,
+          "can_contain": "ring_items",
+          "allowed_types": ["Ring"],
+          "restrictions": ["single_item"]
+        }
+      }
+    },
+    "container_system": {
+      "description": "System for tracking items inside containers",
+      "rules": {
+        "no_nested_containers": "Containers cannot be placed inside other containers",
+        "container_capacity": "Each container has a specific slot capacity defined in its item data",
+        "container_restrictions": "Containers can only hold items based on their 'contains' field",
+        "double_click_to_open": "Double-clicking a container opens a window showing its contents"
+      },
+      "container_types": {
+        "any": {
+          "description": "Can contain any item type",
+          "examples": ["Backpack", "Pouch", "Chest"]
+        },
+        "spell_components": {
+          "description": "Can only contain items with type matching spell components",
+          "examples": ["Component Pouch"],
+          "allowed_types": ["Spell Component", "Material Component"]
+        },
+        "arrows": {
+          "description": "Can only contain arrows, bolts, and similar ammunition",
+          "examples": ["Quiver"],
+          "allowed_types": ["Arrow", "Crossbow Bolt", "Javelin"],
+          "allowed_items": ["Arrow", "Crossbow bolts", "Bolt", "Javelin"]
+        },
+        "pack": {
+          "description": "Special pack containers that unpack into a backpack with contents",
+          "examples": ["Explorer's Pack", "Dungeoneer's Pack"],
+          "behavior": "consumed_on_use"
+        }
+      }
+    },
+    "item_tracking": {
+      "description": "How items are tracked in the inventory system",
+      "structure": {
+        "item_reference": "Items are referenced by their name/id from the equipment data",
+        "quantity": "Each inventory slot tracks quantity for stackable items",
+        "container_contents": "Containers have a separate 'contents' array tracking what's inside",
+        "unique_ids": "Each item instance gets a unique ID for tracking"
+      }
+    }
+  }
+}

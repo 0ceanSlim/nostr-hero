@@ -1,4 +1,5 @@
 {
+  "id": "lantern-hooded",
   "name": "Lantern hooded",
   "description": "A lantern with shutters that can be opened or closed to control the light.",
   "price": 500,

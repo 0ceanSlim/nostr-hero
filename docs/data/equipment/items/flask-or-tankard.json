@@ -1,4 +1,5 @@
 {
+  "id": "flask-or-tankard",
   "name": "Flask or Tankard",
   "description": "A metal drinking vessel that can hold ale, wine, or other beverages.",
   "price": 2,

@@ -1,4 +1,5 @@
 {
+  "id": "candle",
   "name": "Candle",
   "description": "A small wax candle that provides a modest amount of light when lit.",
   "price": 1,

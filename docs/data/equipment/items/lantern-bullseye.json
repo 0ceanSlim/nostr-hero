@@ -1,4 +1,5 @@
 {
+  "id": "lantern-bullseye",
   "name": "Lantern Bullseye",
   "description": "A focused lantern that casts a bright cone of light in one direction.",
   "price": 1000,

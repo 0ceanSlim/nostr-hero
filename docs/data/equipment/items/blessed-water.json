@@ -1,4 +1,5 @@
 {
+  "id": "blessed-water",
   "name": "Blessed Water",
   "description": "Water that has been consecrated by divine magic. It glows faintly with holy light and is warm to the touch. Required for casting Bless spells.",
   "price": 100,
@@ -8,21 +9,18 @@
   "ac": null,
   "damage": null,
   "heal": null,
+  "ammunition": "",
   "img": "equipment/spell-component.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
+  "spell_required_for": "bless",
   "tags": [
-    "spell_component",
-    "consumable",
-    "divine_magic",
-    "holy"
+    "spell_component"
   ],
   "notes": [
     "Required to cast Bless spell",
     "Consumed on use",
     "Can be blessed by clerics or purchased from temples"
-  ],
-  "spell_required_for": "bless",
-  "ammunition": ""
+  ]
 }

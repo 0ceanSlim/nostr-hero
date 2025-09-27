@@ -1,4 +1,5 @@
 {
+  "id": "cursed-bone-dust",
   "name": "Cursed Bone Dust",
   "description": "Fine powder ground from the bones of cursed creatures. It feels cold and seems to absorb light around it. Required for casting Bane spells.",
   "price": 200,
@@ -8,21 +9,18 @@
   "ac": null,
   "damage": null,
   "heal": null,
+  "ammunition": "",
   "img": "equipment/spell-component.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "uncommon",
+  "spell_required_for": "bane",
   "tags": [
-    "spell_component",
-    "consumable",
-    "necromancy",
-    "cursed"
+    "spell_component"
   ],
   "notes": [
     "Required to cast Bane spell",
     "Consumed on use",
     "Can be found on undead creatures or purchased from dark magic vendors"
-  ],
-  "spell_required_for": "bane",
-  "ammunition": ""
+  ]
 }

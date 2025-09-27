@@ -29,7 +29,10 @@
             <div class="w-32 h-32 mx-auto bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
               <span id="character-icon" class="text-4xl">⚔️</span>
             </div>
-            <h2 id="character-name" class="text-2xl font-bold text-green-400">Hero Name</h2>
+            <div class="mb-4">
+              <input type="text" id="character-name-input" class="hidden bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-center text-xl font-bold" maxlength="20" placeholder="Enter your name">
+              <h2 id="character-name" class="text-2xl font-bold text-green-400 cursor-pointer hover:text-green-300" onclick="editCharacterName()">Hero Name</h2>
+            </div>
             <p id="character-title" class="text-gray-300">Race Class</p>
           </div>
 

@@ -1,4 +1,5 @@
 {
+  "id": "signal-whistle",
   "name": "Signal whistle",
   "description": "A small whistle that produces a loud, sharp sound that can be heard up to 600 feet away. Essential for signaling allies, calling for help, or coordinating group movements.",
   "price": 5,

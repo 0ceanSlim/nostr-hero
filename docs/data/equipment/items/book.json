@@ -1,4 +1,5 @@
 {
+  "id": "book",
   "name": "Book",
   "price": 2500,
   "ac": null,

@@ -1,4 +1,5 @@
 {
+  "id": "chain-mail",
   "name": "Chain Mail",
   "description": "Interlocking metal rings that provide excellent protection at the cost of mobility and stealth.",
   "price": 0,
@@ -9,6 +10,7 @@
   "damage": null,
   "heal": null,
   "ammunition": "",
+  "gear_slot": "armor",
   "img": "equipment/armor.jpg",
   "range": "null",
   "range-long": "null",
@@ -16,12 +18,11 @@
   "stealth": "-1",
   "str": "13",
   "tags": [
-    "heavy-armor",
+    "heavy",
     "equipment"
   ],
   "notes": [
     "Requires Strength 13 to wear effectively",
     "Makes stealth more difficult"
-  ],
-  "gear_slot": "armor"
+  ]
 }

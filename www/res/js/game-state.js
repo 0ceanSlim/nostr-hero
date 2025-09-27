@@ -178,10 +178,11 @@ async function initializeGame() {
         displayCurrentLocation();
         updateAllDisplays();
 
-        // Start auto-save system
-        if (typeof startAutoSave === 'function') {
-            startAutoSave();
-        }
+        // DEBUG: Disable auto-save system to prevent undefined saves
+        // if (typeof startAutoSave === 'function') {
+        //     startAutoSave();
+        // }
+        console.log('🚫 Auto-save disabled for debugging');
 
     } catch (error) {
         console.error('Failed to initialize game:', error);
