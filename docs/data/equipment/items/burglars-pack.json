@@ -1,25 +1,72 @@
 {
+  "id": "burglars-pack",
   "name": "Burglar's Pack",
   "description": "A specialized kit for stealthy operations containing tools and supplies for infiltration and burglary. Unpacking equips a backpack and places all contents inside it.",
   "price": 1626,
   "type": "Pack",
   "weight": 46.5,
   "stack": 1,
-  "ammunition": "",
-  "contains": "pack",
-  "contents": [["backpack", 1], ["ball-bearings-bag-of-1000", 1], ["rope-hempen-50-feet", 1], ["bell", 1], ["candle", 5], ["crowbar", 1], ["hammer", 1], ["piton", 10], ["lantern-hooded", 1], ["oil-flask", 5], ["rations", 5], ["tinderbox", 1], ["waterskin", 1], ["clothes-travelers", 1]],
   "gear_slot": "consumable",
-  "id": "burglars-pack",
-  "img": "equipment/pack.jpg",
   "rarity": "common",
-  "slots": "1",
   "tags": [
     "pack"
   ],
-  "notes": [
-    "Contains: Backpack, Ball Bearings (1000), Rope (50 feet), Bell, Candle (5), Crowbar, Hammer, Piton (10), Hooded Lantern, Oil (5 flasks), Rations (5 days), Tinderbox, Waterskin, Traveler's Clothes",
-    "Must not be wearing a backpack to unpack",
-    "Unpacking equips backpack and places contents inside",
-    "Single use item - consumed when unpacked"
+  "contents": [
+    [
+      "backpack",
+      1
+    ],
+    [
+      "ball-bearings",
+      1
+    ],
+    [
+      "rope",
+      1
+    ],
+    [
+      "bell",
+      1
+    ],
+    [
+      "candle",
+      5
+    ],
+    [
+      "crowbar",
+      1
+    ],
+    [
+      "hammer",
+      1
+    ],
+    [
+      "piton",
+      10
+    ],
+    [
+      "lantern-hooded",
+      1
+    ],
+    [
+      "oil",
+      5
+    ],
+    [
+      "rations",
+      5
+    ],
+    [
+      "tinderbox",
+      1
+    ],
+    [
+      "waterskin",
+      1
+    ],
+    [
+      "clothes-travelers",
+      1
+    ]
   ]
 }

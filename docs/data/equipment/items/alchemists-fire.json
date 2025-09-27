@@ -1,0 +1,14 @@
+{
+  "id": "alchemists-fire",
+  "name": "Alchemist's Fire",
+  "description": "A sticky, adhesive fluid that ignites when exposed to air, creating persistent flames.",
+  "price": 5000,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": [
+    "thrown"
+  ]
+}

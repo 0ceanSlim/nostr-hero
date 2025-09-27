@@ -4,10 +4,13 @@
   "description": "A sophisticated kit for diplomats and noble travelers, containing writing supplies and fine clothing. Unpacking equips a backpack and places all contents inside it.",
   "price": 3402,
   "type": "Pack",
-  "weight": 39.0,
+  "weight": 39,
   "stack": 1,
-  "ammunition": "",
-  "contains": "pack",
+  "gear_slot": "consumable",
+  "rarity": "common",
+  "tags": [
+    "pack"
+  ],
   "contents": [
     [
       "backpack",
@@ -26,7 +29,7 @@
       2
     ],
     [
-      "ink-1-ounce-bottle",
+      "ink",
       1
     ],
     [
@@ -38,15 +41,15 @@
       1
     ],
     [
-      "oil-flask",
+      "oil",
       4
     ],
     [
-      "paper-one-sheet",
+      "paper",
       5
     ],
     [
-      "parchment-one-sheet",
+      "parchment",
       5
     ],
     [
@@ -57,18 +60,5 @@
       "tinderbox",
       1
     ]
-  ],
-  "gear_slot": "consumable",
-  "img": "equipment/pack.jpg",
-  "rarity": "common",
-  "slots": "1",
-  "tags": [
-    "pack"
-  ],
-  "notes": [
-    "Contains: Backpack, Map and Scroll Case (2), Fine Clothes, Rations (2 days), Ink Bottle, Ink Pen (5), Lamp, Oil (4 flasks), Paper (5 sheets), Parchment (5 sheets), Perfume Vial, Tinderbox",
-    "Must not be wearing a backpack to unpack",
-    "Unpacking equips backpack and places contents inside",
-    "Single use item - consumed when unpacked"
   ]
 }

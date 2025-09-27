@@ -1,25 +1,56 @@
 {
+  "id": "entertainers-pack",
   "name": "Entertainer's Pack",
   "description": "A performer's kit containing essential supplies for traveling entertainers and artists. Unpacking equips a backpack and places all contents inside it.",
   "price": 3300,
   "type": "Pack",
-  "weight": 38.0,
+  "weight": 38,
   "stack": 1,
-  "ammunition": "",
-  "contains": "pack",
-  "contents": [["backpack", 1], ["bedroll", 1], ["bell", 1], ["lantern-bullseye", 1], ["clothes-costume", 2], ["mirror-steel", 1], ["oil-flask", 8], ["rations", 9], ["tinderbox", 1], ["waterskin", 1]],
   "gear_slot": "consumable",
-  "id": "entertainers-pack",
-  "img": "equipment/pack.jpg",
   "rarity": "common",
-  "slots": "1",
   "tags": [
     "pack"
   ],
-  "notes": [
-    "Contains: Backpack, Bedroll, Bell, Bullseye Lantern, Costume Clothes (2), Steel Mirror, Oil (8 flasks), Rations (9 days), Tinderbox, Waterskin",
-    "Must not be wearing a backpack to unpack",
-    "Unpacking equips backpack and places contents inside",
-    "Single use item - consumed when unpacked"
+  "contents": [
+    [
+      "backpack",
+      1
+    ],
+    [
+      "bedroll",
+      1
+    ],
+    [
+      "bell",
+      1
+    ],
+    [
+      "lantern-bullseye",
+      1
+    ],
+    [
+      "clothes-costume",
+      2
+    ],
+    [
+      "mirror",
+      1
+    ],
+    [
+      "oil",
+      8
+    ],
+    [
+      "rations",
+      9
+    ],
+    [
+      "tinderbox",
+      1
+    ],
+    [
+      "waterskin",
+      1
+    ]
   ]
 }

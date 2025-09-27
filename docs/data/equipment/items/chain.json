@@ -1,0 +1,13 @@
+{
+  "id": "chain",
+  "name": "Chain",
+  "description": "A heavy iron chain useful for binding, climbing, or securing objects.",
+  "price": 5,
+  "type": "Adventuring Gear",
+  "weight": 10,
+  "stack": 1,
+  "rarity": "common",
+  "tags": [
+    "restraint"
+  ]
+}

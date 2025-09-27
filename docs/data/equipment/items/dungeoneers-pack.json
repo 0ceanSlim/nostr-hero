@@ -1,25 +1,56 @@
 {
+  "id": "dungeoneers-pack",
   "name": "Dungeoneer's Pack",
   "description": "A specialized kit for underground exploration containing tools and supplies for dungeon delving. Unpacking equips a backpack and places all contents inside it.",
   "price": 1100,
   "type": "Pack",
   "weight": 61.5,
   "stack": 1,
-  "ammunition": "",
-  "contains": "pack",
-  "contents": [["backpack", 1], ["caltrops", 1], ["crowbar", 1], ["oil-flask", 2], ["rations", 10], ["rope-hempen-50-feet", 1], ["tinderbox", 1], ["torch", 10], ["waterskin", 1], ["clothes-travelers", 1]],
   "gear_slot": "consumable",
-  "id": "dungeoneers-pack",
-  "img": "equipment/pack.jpg",
   "rarity": "common",
-  "slots": "1",
   "tags": [
     "pack"
   ],
-  "notes": [
-    "Contains: Backpack, Caltrops, Crowbar, Oil (2 flasks), Rations (10 days), Rope (50 feet), Tinderbox, Torch (10), Waterskin, Traveler's Clothes",
-    "Must not be wearing a backpack to unpack",
-    "Unpacking equips backpack and places contents inside",
-    "Single use item - consumed when unpacked"
+  "contents": [
+    [
+      "backpack",
+      1
+    ],
+    [
+      "caltrops",
+      1
+    ],
+    [
+      "crowbar",
+      1
+    ],
+    [
+      "oil",
+      2
+    ],
+    [
+      "rations",
+      10
+    ],
+    [
+      "rope",
+      1
+    ],
+    [
+      "tinderbox",
+      1
+    ],
+    [
+      "torch",
+      10
+    ],
+    [
+      "waterskin",
+      1
+    ],
+    [
+      "clothes-travelers",
+      1
+    ]
   ]
 }

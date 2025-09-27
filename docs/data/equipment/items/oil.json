@@ -1,0 +1,12 @@
+{
+  "id": "oil",
+  "name": "Oil",
+  "description": "A flask of lamp oil that can fuel lanterns or be used as an improvised weapon.",
+  "price": 10,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

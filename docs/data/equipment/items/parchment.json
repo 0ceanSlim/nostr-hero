@@ -1,0 +1,12 @@
+{
+  "id": "parchment",
+  "name": "Parchment",
+  "description": "A sheet of treated animal skin that serves as a writing surface.",
+  "price": 10,
+  "type": "Adventuring Gear",
+  "weight": 0.01,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

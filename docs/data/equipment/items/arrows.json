@@ -2,14 +2,9 @@
   "id": "arrows",
   "name": "Arrows",
   "price": 5,
-  "ac": null,
-  "damage": null,
-  "stack": 20,
-  "weight": 0.01,
   "type": "Ammunition",
+  "weight": 0,
+  "stack": 20,
   "rarity": "common",
-  "img": "equipment/ammunition.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": ""
+  "img": "equipment/ammunition.jpg"
 }

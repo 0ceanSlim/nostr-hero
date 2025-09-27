@@ -1,0 +1,12 @@
+{
+  "id": "holy-water",
+  "name": "Holy water",
+  "description": "Water blessed by a cleric, effective against undead and fiends.",
+  "price": 2500,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

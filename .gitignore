@@ -15,3 +15,4 @@ game.db
 !/www/static/style/tailwind.config.js
 !/www/views/
 !/www/data/
+item-editor-gui.exe

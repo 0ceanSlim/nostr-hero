@@ -1,0 +1,12 @@
+{
+  "id": "rope",
+  "name": "Rope",
+  "description": "A heavy rope made of hemp fibers, useful for climbing and securing objects.",
+  "price": 100,
+  "type": "Adventuring Gear",
+  "weight": 10,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

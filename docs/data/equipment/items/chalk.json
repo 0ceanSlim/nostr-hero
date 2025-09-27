@@ -1,0 +1,12 @@
+{
+  "id": "chalk",
+  "name": "Chalk",
+  "description": "A piece of white chalk for marking surfaces and leaving temporary messages.",
+  "price": 1,
+  "type": "Adventuring Gear",
+  "weight": 0.05,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

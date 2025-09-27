@@ -1,0 +1,12 @@
+{
+  "id": "ladder",
+  "name": "Ladder",
+  "description": "A portable wooden ladder that can be used to reach higher places.",
+  "price": 10,
+  "type": "Adventuring Gear",
+  "weight": 25,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": []
+}

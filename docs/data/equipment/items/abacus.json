@@ -1,16 +1,11 @@
 {
   "id": "abacus",
   "name": "Abacus",
+  "description": "A standard tool used to make calculations.",
   "price": 200,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "stack": 1,
-  "weight": 2,
   "type": "Adventuring Gear",
+  "weight": 2,
+  "stack": 1,
   "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": ""
+  "img": "equipment/adventuring-gear.jpg"
 }

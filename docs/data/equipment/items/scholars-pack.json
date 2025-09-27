@@ -4,10 +4,13 @@
   "description": "An academic's kit containing scholarly supplies and research materials for traveling scholars and wizards. Unpacking equips a backpack and places all contents inside it.",
   "price": 3902,
   "type": "Pack",
-  "weight": 40.0,
+  "weight": 40,
   "stack": 1,
-  "ammunition": "",
-  "contains": "pack",
+  "gear_slot": "consumable",
+  "rarity": "common",
+  "tags": [
+    "pack"
+  ],
   "contents": [
     [
       "backpack",
@@ -22,7 +25,7 @@
       1
     ],
     [
-      "ink-1-ounce-bottle",
+      "ink",
       1
     ],
     [
@@ -34,7 +37,7 @@
       1
     ],
     [
-      "parchment-one-sheet",
+      "parchment",
       10
     ],
     [
@@ -46,21 +49,8 @@
       1
     ],
     [
-      "rope-hempen-50-feet",
+      "rope",
       1
     ]
-  ],
-  "gear_slot": "consumable",
-  "img": "equipment/pack.jpg",
-  "rarity": "common",
-  "slots": "1",
-  "tags": [
-    "pack"
-  ],
-  "notes": [
-    "Contains: Backpack, Robes, Book, Ink Bottle, Ink Pen, Lamp, Parchment (10 sheets), Tinderbox, Dagger, Rope (50 feet)",
-    "Must not be wearing a backpack to unpack",
-    "Unpacking equips backpack and places contents inside",
-    "Single use item - consumed when unpacked"
   ]
 }

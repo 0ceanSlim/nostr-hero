@@ -2,20 +2,17 @@
   "id": "backpack",
   "name": "Backpack",
   "description": "A sturdy leather backpack with multiple compartments for organizing gear and supplies.",
-  "price": 0,
+  "price": 1000,
   "type": "Adventuring Gear",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
-  "ammunition": "",
-  "contains": "any",
   "gear_slot": "bag",
-  "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "slots": "20",
   "tags": [
     "container",
     "equipment"
   ],
+  "img": "equipment/adventuring-gear.jpg",
   "notes": [
     "Expands carrying capacity for adventuring",
     "adds 20 slots to inventory",

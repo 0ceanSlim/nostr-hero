@@ -98,7 +98,7 @@
       },
       {
         "option": [
-          ["cursed-bone-dust", 2],
+          ["bone-dust", 2],
           ["component-pouch", 1]
         ]
       },
@@ -106,7 +106,7 @@
         "given": [
           ["leather", 1],
           ["dagger", 1],
-          ["cursed-bone-dust", 1]
+          ["bone-dust", 1]
         ]
       }
     ]
@@ -603,13 +603,13 @@
       {
         "option": [
           ["component-pouch", 1],
-          ["bat-guano-and-sulfur", 2]
+          ["sulfur", 2]
         ]
       },
       {
         "given": [
           ["dagger", 2],
-          ["bat-guano-and-sulfur", 1]
+          ["sulfur", 1]
         ]
       }
     ]
@@ -675,7 +675,7 @@
       {
         "option": [
           ["component-pouch", 1],
-          ["bat-guano-and-sulfur", 1]
+          ["sulfur", 1]
         ]
       },
       {
@@ -713,13 +713,13 @@
       {
         "option": [
           ["component-pouch", 1],
-          ["bat-guano-and-sulfur", 2]
+          ["sulfur", 2]
         ]
       },
       {
         "given": [
           ["spellbook", 1],
-          ["bat-guano-and-sulfur", 1]
+          ["sulfur", 1]
         ]
       }
     ]

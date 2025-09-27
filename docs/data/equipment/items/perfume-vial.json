@@ -1,19 +1,12 @@
 {
   "id": "perfume-vial",
-  "name": "Perfume (vial)",
+  "name": "Perfume",
   "description": "A small vial of fragrant perfume used for personal scent.",
   "price": 500,
   "type": "Adventuring Gear",
   "weight": 0.1,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
+  "gear_slot": "",
   "rarity": "common",
-  "tags": [],
-  "notes": [],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": ""
+  "tags": []
 }
