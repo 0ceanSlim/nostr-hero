@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "spirit-dust",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Spirit Dust for summoning and animal magic"
+  ],
   "Gear_Slot": "hands"
 }

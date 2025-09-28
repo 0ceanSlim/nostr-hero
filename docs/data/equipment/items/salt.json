@@ -1,0 +1,19 @@
+{
+  "id": "salt",
+  "name": "Salt",
+  "description": "Pure crystalline salt that repels evil and forms protective barriers against malevolent forces.",
+  "price": 10,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 20,
+  "rarity": "common",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for protection magic",
+    "Commonly found from various sources",
+    "Must be gathered or purchased"
+  ]
+}

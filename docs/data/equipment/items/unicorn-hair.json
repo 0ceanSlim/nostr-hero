@@ -1,0 +1,19 @@
+{
+  "id": "unicorn-hair",
+  "name": "Unicorn Hair",
+  "description": "A strand of pure white hair from a unicorn's mane, glowing with divine healing power and absolute purity.",
+  "price": 1000,
+  "type": "Spell Component",
+  "weight": 0.01,
+  "stack": 1,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for pure healing magic",
+    "Extremely rarely given by unicorns",
+    "Cannot be taken by force"
+  ]
+}

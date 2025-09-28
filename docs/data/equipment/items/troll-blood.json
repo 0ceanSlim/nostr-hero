@@ -1,0 +1,19 @@
+{
+  "id": "troll-blood",
+  "name": "Troll Blood",
+  "description": "Thick, viscous blood from a troll that continues to regenerate even after being spilled. Pulses with life force.",
+  "price": 300,
+  "type": "Spell Component",
+  "weight": 0.3,
+  "stack": 5,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for regeneration magic",
+    "Rarely drops from trolls",
+    "Must be kept in special vials"
+  ]
+}

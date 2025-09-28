@@ -1,0 +1,19 @@
+{
+  "id": "raven-feather",
+  "name": "Raven Feather",
+  "description": "A black feather from a carrion crow, carrying whispers of death and messages from beyond.",
+  "price": 50,
+  "type": "Spell Component",
+  "weight": 0.05,
+  "stack": 15,
+  "rarity": "common",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for death and communication magic",
+    "Commonly drops from ravens",
+    "Must be gathered or purchased"
+  ]
+}

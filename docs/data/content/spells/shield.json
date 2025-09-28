@@ -31,5 +31,13 @@
     "+5 AC includes the triggering attack",
     "Lasts until start of your next turn"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "mana-crystals",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Staff provides unlimited mana-crystals"
+  }
 }

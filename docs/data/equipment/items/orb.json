@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "ether-essence",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Ether Essence for teleportation and dimensional magic"
+  ],
   "Gear_Slot": "hands"
 }

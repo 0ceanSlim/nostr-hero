@@ -33,5 +33,13 @@
     "Constitution save for half damage",
     "Pushes enemies away on failed save"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "elemental-sparks",
+        "quantity": 3
+      }
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks"
+  }
 }

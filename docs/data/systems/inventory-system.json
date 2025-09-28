@@ -33,7 +33,7 @@
           "description": "Armor slot for protective gear",
           "count": 1,
           "can_contain": "armor_types",
-          "allowed_types": ["Light Armor", "Medium Armor", "Heavy Armor", "Shield"],
+          "allowed_types": ["Light Armor", "Medium Armor", "Heavy Armor"],
           "restrictions": ["single_item"]
         },
         "necklace": {

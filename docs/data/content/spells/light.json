@@ -1,0 +1,43 @@
+{
+  "name": "Revealing Light",
+  "description": "You create bright light that reveals hidden enemies and illusions. Creates a 20-foot radius of bright light and 20 feet of dim light beyond that. Hidden or invisible creatures in the area have disadvantage on Stealth checks.",
+  "level": 0,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "1 hour",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "combat",
+    "cantrip",
+    "detection"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "cleric",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots",
+    "Touch range spell",
+    "Can target weapons or other objects for portable light source"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "quartz-dust",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Crystal provides unlimited quartz-dust"
+  }
+}

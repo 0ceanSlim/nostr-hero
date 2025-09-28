@@ -19,6 +19,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "mana-crystals",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Mana Crystals for large and ritual spells"
+  ],
   "Gear_Slot": "hands"
 }

@@ -1,0 +1,32 @@
+{
+  "name": "Protection from Evil and Good",
+  "description": "Until the spell ends, one willing creature you touch is protected against certain types of creatures: aberrations, celestials, elementals, fey, fiends, and undead.",
+  "level": 1,
+  "school": "abjuration",
+  "casting_time": "action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "10 minutes",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "protection",
+    "buff"
+  ],
+  "classes": [
+    "wizard",
+    "cleric",
+    "paladin",
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

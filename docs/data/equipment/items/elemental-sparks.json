@@ -1,0 +1,20 @@
+{
+  "id": "elemental-sparks",
+  "name": "Elemental Sparks",
+  "description": "Tiny motes of elemental energy that dance and flicker with primal power. Provided unlimited when using a Rod focus.",
+  "price": 150,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "focus_provided"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for elemental manipulation spells",
+    "Unlimited when Rod focus is equipped",
+    "Consumed on use if no Rod focus"
+  ]
+}

@@ -31,5 +31,11 @@
     "Dexterity save for half damage",
     "Good for multiple close enemies"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {"component": "elemental-sparks", "quantity": 2},
+      {"component": "ash", "quantity": 1}
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks (still need ash)"
+  }
 }

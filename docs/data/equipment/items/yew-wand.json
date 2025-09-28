@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "tree-sap",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Tree Sap for poison and transformation magic"
+  ],
   "Gear_Slot": "hands"
 }

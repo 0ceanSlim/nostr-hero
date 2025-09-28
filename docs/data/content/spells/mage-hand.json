@@ -1,0 +1,39 @@
+{
+  "name": "Spectral Strike",
+  "description": "You conjure a spectral hand that lashes out at an enemy. Make a ranged spell attack against a creature within range. On a hit, the target takes 1d6 force damage and must make a Strength saving throw or be pushed 5 feet away from you.",
+  "level": 0,
+  "school": "conjuration",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "8",
+  "duration": "instantaneous",
+  "damage": "1d6",
+  "damage_type": "force",
+  "type": "Spell",
+  "spell_attack": "ranged",
+  "save_type": "strength",
+  "tags": [
+    "combat",
+    "cantrip",
+    "force"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots",
+    "Deals force damage and can push enemies",
+    "Useful for battlefield control"
+  ],
+  "material_component": {
+    "required": [
+      {"component": "arcane-powder", "quantity": 1}
+    ],
+    "focus_provided": "Wand provides unlimited arcane-powder"
+  }
+}

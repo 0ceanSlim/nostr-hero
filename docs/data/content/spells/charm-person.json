@@ -1,0 +1,41 @@
+{
+  "name": "Charm Person",
+  "description": "You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and it does so with advantage if you or your companions are fighting it.",
+  "level": 1,
+  "school": "enchantment",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 hour",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "wisdom",
+  "tags": [
+    "control",
+    "enchantment"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "bard",
+    "druid",
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "pollen",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "Blinding Flash",
+  "description": "You create a sudden burst of brilliant light. All creatures within 10 feet must make a Constitution saving throw or be blinded until the end of their next turn.",
+  "level": 0,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "self",
+  "range_long": "6",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "constitution",
+  "tags": [
+    "combat",
+    "cantrip",
+    "control",
+    "blind"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots",
+    "Creates up to 4 lights or 1 humanoid form",
+    "Can move lights as bonus action"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "quartz-dust",
+        "quantity": 2
+      }
+    ],
+    "focus_provided": "Crystal provides unlimited quartz-dust"
+  }
+}

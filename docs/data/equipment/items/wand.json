@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "arcane-powder",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Arcane Powder for evocation and force spells"
+  ],
   "Gear_Slot": "hands"
 }

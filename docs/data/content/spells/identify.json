@@ -1,0 +1,43 @@
+{
+  "name": "Analyze Weakness",
+  "description": "You study a creature or object to identify vulnerabilities. When targeting a creature, your next attack against them has advantage and deals +1d6 damage. When targeting magic items, learn their properties.",
+  "level": 1,
+  "school": "divination",
+  "casting_time": "1 minute",
+  "range": "0",
+  "range_long": "0",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "combat",
+    "detection"
+  ],
+  "classes": [
+    "wizard",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "1 minute",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "quartz-dust",
+        "quantity": 2
+      },
+      {
+        "component": "starlight-essence",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Crystal provides unlimited quartz-dust (still need starlight-essence)"
+  }
+}

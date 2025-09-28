@@ -288,52 +288,63 @@ class NostrCharacterGenerator {
     generateStartingSpells(character) {
         if (!this.spellProgression || !this.startingSpells) {
             console.warn('Spell data not loaded');
-            return {};
+            return [];
         }
 
         const classProgression = this.spellProgression[character.class];
         if (!classProgression) {
-            return {}; // Not a spellcasting class
+            console.log(`${character.class} is not a spellcasting class`);
+            return []; // Not a spellcasting class
         }
 
-        const spells = {
-            cantrips: [],
-            level1: []
-        };
+        const spells = [];
 
-        const cantripsKnown = classProgression.cantrips_known[0]; // Level 1
-        const level1SpellsKnown = classProgression.spells_known[0]; // Level 1
+        const cantripsKnown = classProgression.cantrips_known[0]; // Level 1 (index 0)
+        const level1SpellsKnown = classProgression.spells_known[0]; // Level 1 (index 0)
 
         const classSpells = this.startingSpells[character.class.toLowerCase()];
         if (!classSpells) {
             console.warn('No starting spell list found for class:', character.class);
-            return {};
+            return [];
         }
 
+        console.log(`Generating spells for ${character.class}: ${cantripsKnown} cantrips, ${level1SpellsKnown} level 1 spells`);
+
         // Deterministically select cantrips
-        if (classSpells.cantrips && classSpells.cantrips.length > 0) {
+        if (classSpells.cantrips && classSpells.cantrips.length > 0 && cantripsKnown > 0) {
             const cantripSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'cantrips');
             const cantripRNG = this.createSeededRNG(cantripSeed);
             const availableCantrips = [...classSpells.cantrips];
 
             for (let i = 0; i < cantripsKnown && availableCantrips.length > 0; i++) {
                 const index = cantripRNG.intn(availableCantrips.length);
-                spells.cantrips.push(availableCantrips.splice(index, 1)[0]);
+                const spellId = availableCantrips.splice(index, 1)[0];
+                spells.push({
+                    spell: spellId,
+                    prepared: true,
+                    known: true
+                });
             }
         }
 
         // Deterministically select level 1 spells
-        if (classSpells.level1 && classSpells.level1.length > 0) {
+        if (classSpells.level1 && classSpells.level1.length > 0 && level1SpellsKnown > 0) {
             const spellSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'level1-spells');
             const spellRNG = this.createSeededRNG(spellSeed);
             const availableSpells = [...classSpells.level1];
 
             for (let i = 0; i < level1SpellsKnown && availableSpells.length > 0; i++) {
                 const index = spellRNG.intn(availableSpells.length);
-                spells.level1.push(availableSpells.splice(index, 1)[0]);
+                const spellId = availableSpells.splice(index, 1)[0];
+                spells.push({
+                    spell: spellId,
+                    prepared: true,
+                    known: true
+                });
             }
         }
 
+        console.log(`Generated ${spells.length} spells for ${character.class}:`, spells.map(s => s.spell));
         return spells;
     }
 

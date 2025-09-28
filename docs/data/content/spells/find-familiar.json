@@ -1,0 +1,29 @@
+{
+  "name": "Find Familiar",
+  "description": "You gain the service of a familiar, a spirit that takes an animal form you choose. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form.",
+  "level": 1,
+  "school": "conjuration",
+  "casting_time": "1 hour",
+  "range": "2",
+  "range_long": "2",
+  "duration": "instantaneous",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "summoning"
+  ],
+  "classes": [
+    "wizard"
+  ],
+  "rarity": "common",
+  "action_cost": "1 hour",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

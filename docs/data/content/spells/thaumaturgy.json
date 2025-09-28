@@ -1,0 +1,37 @@
+{
+  "name": "Thaumaturgy",
+  "description": "You manifest a minor wonder, a sign of supernatural power, within range. You create one of several magical effects within range.",
+  "level": 0,
+  "school": "transmutation",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 minute",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "cantrip"
+  ],
+  "classes": [
+    "cleric"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "starlight-essence",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
+}

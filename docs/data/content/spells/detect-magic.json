@@ -1,0 +1,43 @@
+{
+  "name": "Detect Magic",
+  "description": "For the duration, you sense the presence of magic within 30 feet. You also gain advantage on saves against magical effects for the duration.",
+  "level": 1,
+  "school": "divination",
+  "casting_time": "action",
+  "range": "self",
+  "range_long": "self",
+  "duration": "10 minutes",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "combat",
+    "detection",
+    "buff"
+  ],
+  "classes": [
+    "wizard",
+    "cleric",
+    "druid",
+    "paladin",
+    "ranger",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "quartz-dust",
+        "quantity": 2
+      }
+    ],
+    "focus_provided": "Crystal provides unlimited quartz-dust"
+  }
+}

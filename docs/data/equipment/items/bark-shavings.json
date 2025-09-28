@@ -1,0 +1,20 @@
+{
+  "id": "bark-shavings",
+  "name": "Bark Shavings",
+  "description": "Curled strips of ancient bark that pulse with life force and natural healing energy. Provided unlimited when using a Wooden Staff focus.",
+  "price": 25,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "focus_provided"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for growth and healing spells",
+    "Unlimited when Wooden Staff focus is equipped",
+    "Consumed on use if no Wooden Staff focus"
+  ]
+}

@@ -32,5 +32,13 @@
     "More powerful than Healing Word but takes full action",
     "No effect on undead or constructs"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "unicorn-hair",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
 }

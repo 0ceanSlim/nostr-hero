@@ -31,5 +31,10 @@
     "Can also target objects to ignite flammable materials",
     "Requires ranged spell attack roll"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {"component": "elemental-sparks", "quantity": 1}
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks"
+  }
 }

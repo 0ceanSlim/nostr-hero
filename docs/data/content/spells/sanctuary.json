@@ -1,0 +1,30 @@
+{
+  "name": "Sanctuary",
+  "description": "You ward a creature within range against attack. Until the spell ends, any creature who targets the warded creature with an attack or a harmful spell must first make a Wisdom saving throw.",
+  "level": 1,
+  "school": "abjuration",
+  "casting_time": "bonus action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 minute",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "wisdom",
+  "tags": [
+    "protection",
+    "buff"
+  ],
+  "classes": [
+    "cleric",
+    "paladin"
+  ],
+  "rarity": "common",
+  "action_cost": "bonus action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

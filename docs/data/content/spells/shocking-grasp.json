@@ -32,5 +32,17 @@
     "Advantage vs targets in metal armor",
     "Prevents reactions until their next turn"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "elemental-sparks",
+        "quantity": 1
+      },
+      {
+        "component": "iron-filings",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks (still need iron-filings)"
+  }
 }

@@ -30,5 +30,13 @@
     "Can split damage among multiple targets if desired",
     "Requires spellcasting focus or component pouch"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "arcane-powder",
+        "quantity": 3
+      }
+    ],
+    "focus_provided": "Wand provides unlimited arcane-powder"
+  }
 }

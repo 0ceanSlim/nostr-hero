@@ -1,0 +1,20 @@
+{
+  "id": "spirit-dust",
+  "name": "Spirit Dust",
+  "description": "Ethereal powder that glows with ancestral spirits and animal essence. Provided unlimited when using a Totem focus.",
+  "price": 75,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "focus_provided"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for summoning and animal magic",
+    "Unlimited when Totem focus is equipped",
+    "Consumed on use if no Totem focus"
+  ]
+}

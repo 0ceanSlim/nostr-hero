@@ -1,0 +1,30 @@
+{
+  "name": "Color Spray",
+  "description": "A dazzling array of flashing, colored light springs from your hand. Roll 6d10; the total is how many hit points of creatures this spell can affect.",
+  "level": 1,
+  "school": "illusion",
+  "casting_time": "action",
+  "range": "3",
+  "range_long": "3",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "control",
+    "illusion"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

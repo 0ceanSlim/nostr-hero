@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "bark-shavings",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Bark Shavings for growth and healing spells"
+  ],
   "Gear_Slot": "hands"
 }

@@ -1,0 +1,19 @@
+{
+  "id": "phase-spider-silk",
+  "name": "Phase Spider Silk",
+  "description": "Ethereal webbing that shifts between dimensions, appearing solid one moment and translucent the next.",
+  "price": 400,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 3,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for dimension magic",
+    "Rarely drops from phase spiders",
+    "Difficult to harvest safely"
+  ]
+}

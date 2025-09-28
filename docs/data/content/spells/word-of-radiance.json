@@ -1,0 +1,31 @@
+{
+  "name": "Word of Radiance",
+  "description": "You utter a divine word, and burning radiance erupts from you. Each creature of your choice that you can see within range must succeed on a Constitution saving throw or take 1d6 radiant damage.",
+  "level": 0,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "1",
+  "range_long": "1",
+  "duration": "instantaneous",
+  "damage": "1d6",
+  "damage_type": "radiant",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "constitution",
+  "tags": [
+    "combat",
+    "damage",
+    "radiant",
+    "cantrip"
+  ],
+  "classes": [
+    "cleric"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ],
+  "material_component": null
+}

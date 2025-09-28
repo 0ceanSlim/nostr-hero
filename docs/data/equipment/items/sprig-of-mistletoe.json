@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "pollen",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Pollen for charm and nature spells"
+  ],
   "Gear_Slot": "hands"
 }

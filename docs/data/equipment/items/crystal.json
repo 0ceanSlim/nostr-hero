@@ -19,8 +19,10 @@
     "focus",
     "equipment"
   ],
+  "provides": "quartz-dust",
   "notes": [
-    "Can be used as a spellcasting focus for arcane magic"
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Quartz Dust for light and divination spells"
   ],
   "Gear_Slot": "hands"
 }

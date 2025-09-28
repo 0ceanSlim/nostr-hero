@@ -1,0 +1,47 @@
+{
+  "name": "Repair Armor",
+  "description": "You magically repair damaged armor or shields. Target regains 1d4+1 AC points if armor is damaged, or removes one level of equipment degradation.",
+  "level": 0,
+  "school": "transmutation",
+  "casting_time": "1 minute",
+  "range": "0",
+  "range_long": "0",
+  "duration": "instantaneous",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "cantrip",
+    "repair"
+  ],
+  "classes": [
+    "wizard",
+    "cleric",
+    "druid",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "1 minute",
+  "mana_cost": 0,
+  "notes": [
+    "Cantrip - can be cast without using spell slots",
+    "Touch range spell",
+    "Repairs breaks and tears in objects"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "mana-crystals",
+        "quantity": 1
+      },
+      {
+        "component": "iron-filings",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Staff provides unlimited mana-crystals (still need iron-filings)"
+  }
+}

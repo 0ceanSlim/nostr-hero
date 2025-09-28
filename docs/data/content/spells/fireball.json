@@ -31,5 +31,17 @@
     "Classic high-damage spell",
     "Requires material component (bat guano and sulfur)"
   ],
-  "material_component": "bat-guano-and-sulfur"
+  "material_component": {
+    "required": [
+      {
+        "component": "elemental-sparks",
+        "quantity": 5
+      },
+      {
+        "component": "dragon-scale",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks (still need dragon-scale)"
+  }
 }

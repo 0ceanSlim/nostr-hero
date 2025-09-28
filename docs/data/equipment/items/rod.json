@@ -18,6 +18,10 @@
     "focus",
     "equipment"
   ],
-  "notes": [],
+  "provides": "elemental-sparks",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Elemental Sparks for elemental manipulation spells"
+  ],
   "Gear_Slot": "hands"
 }

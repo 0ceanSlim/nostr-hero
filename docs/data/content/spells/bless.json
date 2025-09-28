@@ -31,5 +31,13 @@
     "Requires concentration",
     "+1d4 bonus to attacks and saves"
   ],
-  "material_component": "blessed-water"
+  "material_component": {
+    "required": [
+      {
+        "component": "starlight-essence",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
 }

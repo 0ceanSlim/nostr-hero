@@ -1,0 +1,38 @@
+{
+  "name": "Guiding Bolt",
+  "description": "A flash of light streaks toward a creature of your choice within range. Make a ranged spell attack against the target. On a hit, the target takes 4d6 radiant damage.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "24",
+  "range_long": "24",
+  "duration": "1 round",
+  "damage": "4d6",
+  "damage_type": "radiant",
+  "type": "Spell",
+  "spell_attack": "ranged",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "radiant"
+  ],
+  "classes": [
+    "cleric"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "starlight-essence",
+        "quantity": 2
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
+}

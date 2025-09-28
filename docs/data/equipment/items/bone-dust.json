@@ -12,10 +12,5 @@
   ],
   "range": "null",
   "range-long": "null",
-  "img": "equipment/spell-component.jpg",
-  "notes": [
-    "Required to cast Bane spell",
-    "Consumed on use",
-    "Can be found on undead creatures or purchased from dark magic vendors"
-  ]
+  "img": "equipment/spell-component.jpg"
 }

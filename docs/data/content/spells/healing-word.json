@@ -30,5 +30,13 @@
     "Useful for reviving unconscious allies",
     "Only requires verbal component"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "pollen",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
 }

@@ -31,5 +31,13 @@
     "Floating weapon that can be moved",
     "Lasts 1 minute"
   ],
-  "material_component": null
+  "material_component": {
+    "required": [
+      {
+        "component": "starlight-essence",
+        "quantity": 2
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
 }

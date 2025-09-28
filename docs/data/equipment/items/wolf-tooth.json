@@ -1,0 +1,19 @@
+{
+  "id": "wolf-tooth",
+  "name": "Wolf Tooth",
+  "description": "A sharp canine tooth from a wild wolf, imbued with primal hunting instincts.",
+  "price": 35,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "common",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for bestial magic",
+    "Commonly drops from wolves",
+    "Must be gathered or purchased"
+  ]
+}

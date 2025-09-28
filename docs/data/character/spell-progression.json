@@ -1,181 +1,34 @@
 {
-  "spell_progression": {
-    "description": "How spellcasters learn and unlock new spells",
-    "starting_spells": {
-      "wizard": {
-        "level_1": {
-          "cantrips": ["fire-bolt", "ray-of-frost", "shocking-grasp"],
-          "spells": ["magic-missile", "shield", "cure-wounds", "burning-hands"],
-          "spellbook_spells": 6,
-          "notes": "Wizards start with spellbook containing 6 level 1 spells"
-        }
-      },
-      "sorcerer": {
-        "level_1": {
-          "cantrips": ["fire-bolt", "ray-of-frost", "shocking-grasp", "eldritch-blast"],
-          "spells": ["magic-missile", "shield", "thunderwave"],
-          "known_spells": 3,
-          "notes": "Sorcerers know limited spells but cast spontaneously"
-        }
-      },
-      "cleric": {
-        "level_1": {
-          "cantrips": ["sacred-flame", "shocking-grasp"],
-          "spells": "all_cleric_spells",
-          "prepared_spells": 4,
-          "notes": "Clerics can prepare spells from full cleric list daily"
-        }
-      },
-      "druid": {
-        "level_1": {
-          "cantrips": ["shocking-grasp", "ray-of-frost"],
-          "spells": "all_druid_spells",
-          "prepared_spells": 3,
-          "notes": "Druids can prepare spells from full druid list daily"
-        }
-      },
-      "bard": {
-        "level_1": {
-          "cantrips": ["vicious-mockery", "fire-bolt"],
-          "spells": ["healing-word", "thunderwave", "bane"],
-          "known_spells": 3,
-          "notes": "Bards know limited spells, focus on support"
-        }
-      },
-      "warlock": {
-        "level_1": {
-          "cantrips": ["eldritch-blast", "ray-of-frost"],
-          "spells": ["shield", "burning-hands"],
-          "known_spells": 2,
-          "notes": "Warlocks have fewest spells but unique mechanics"
-        }
-      },
-      "paladin": {
-        "level_2": {
-          "cantrips": [],
-          "spells": ["cure-wounds", "bless", "healing-word"],
-          "prepared_spells": 2,
-          "notes": "Paladins start spellcasting at level 2"
-        }
-      },
-      "ranger": {
-        "level_2": {
-          "cantrips": [],
-          "spells": ["cure-wounds", "healing-word"],
-          "known_spells": 2,
-          "notes": "Rangers start spellcasting at level 2, focus on utility"
-        }
-      }
-    },
-    "spell_learning_methods": {
-      "wizard": {
-        "method": "spellbook_copying",
-        "sources": [
-          "Found spellbooks in dungeons/ruins",
-          "Purchase scrolls from magic shops",
-          "Copy from other wizard spellbooks",
-          "Learn 2 spells free per level"
-        ],
-        "cost": "50 GP + materials per spell level",
-        "time": "2 hours per spell level"
-      },
-      "sorcerer": {
-        "method": "innate_learning",
-        "sources": [
-          "Automatically learn 1 spell per level",
-          "Replace known spell with new one on level up"
-        ],
-        "cost": "Free on level up",
-        "spell_limit": "Limited known spells"
-      },
-      "cleric": {
-        "method": "divine_preparation",
-        "sources": [
-          "Access to full cleric spell list",
-          "Prepare spells after long rest",
-          "Can change prepared spells daily"
-        ],
-        "cost": "Prayer and meditation",
-        "preparation_limit": "Wisdom modifier + cleric level"
-      },
-      "druid": {
-        "method": "natural_preparation",
-        "sources": [
-          "Access to full druid spell list",
-          "Prepare spells after long rest",
-          "Must be in natural environment to prepare"
-        ],
-        "cost": "Commune with nature",
-        "preparation_limit": "Wisdom modifier + druid level"
-      },
-      "bard": {
-        "method": "magical_secrets",
-        "sources": [
-          "Learn 1 spell per level from bard list",
-          "Magical Secrets: learn from any class at higher levels",
-          "Replace known spell on level up"
-        ],
-        "cost": "Free on level up",
-        "spell_limit": "Limited known spells"
-      },
-      "warlock": {
-        "method": "pact_magic",
-        "sources": [
-          "Learn spells from patron",
-          "Very limited spell selection",
-          "Unique warlock mechanics"
-        ],
-        "cost": "Pact with otherworldly being",
-        "spell_limit": "Fewest known spells"
-      }
-    },
-    "spell_acquisition_locations": {
-      "magic_shops": {
-        "description": "Scrolls and spellbooks for sale",
-        "availability": "Cities and large towns",
-        "cost": "50-500 GP depending on spell level",
-        "stock": "Common spells always available, rare spells limited"
-      },
-      "libraries": {
-        "description": "Ancient texts and research materials",
-        "availability": "Universities, temples, wizard towers",
-        "cost": "Free to study, copying costs materials",
-        "restrictions": "May require reputation or quests"
-      },
-      "dungeon_loot": {
-        "description": "Spellbooks and scrolls found as treasure",
-        "availability": "Ruins, wizard towers, monster hoards",
-        "cost": "Free but dangerous to obtain",
-        "randomness": "Random spells based on location theme"
-      },
-      "npc_teachers": {
-        "description": "Learn from other spellcasters",
-        "availability": "Guild halls, temples, wandering mages",
-        "cost": "Gold + reputation + quests",
-        "benefits": "Can teach specific spells or fighting techniques"
-      }
-    },
-    "level_progression": {
-      "cantrip_scaling": {
-        "description": "Cantrips get stronger as character levels up",
-        "level_5": "2 dice damage (2d8, 2d10, etc)",
-        "level_11": "3 dice damage",
-        "level_17": "4 dice damage"
-      },
-      "spell_slot_equivalent": {
-        "description": "Mana cost = spell level",
-        "level_1_spells": "1 mana",
-        "level_2_spells": "2 mana",
-        "level_3_spells": "3 mana",
-        "higher_level_casting": "Can spend extra mana to cast at higher levels"
-      },
-      "new_spell_access": {
-        "level_1": "Level 1 spells",
-        "level_3": "Level 2 spells",
-        "level_5": "Level 3 spells",
-        "level_7": "Level 4 spells",
-        "level_9": "Level 5 spells"
-      }
-    }
+  "Wizard": {
+    "cantrips_known": [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    "spells_known": [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44]
+  },
+  "Sorcerer": {
+    "cantrips_known": [4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    "spells_known": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15]
+  },
+  "Cleric": {
+    "cantrips_known": [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    "spells_known": [99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+  },
+  "Druid": {
+    "cantrips_known": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    "spells_known": [99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+  },
+  "Bard": {
+    "cantrips_known": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    "spells_known": [4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22]
+  },
+  "Warlock": {
+    "cantrips_known": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    "spells_known": [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
+  },
+  "Paladin": {
+    "cantrips_known": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "spells_known": [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
+  },
+  "Ranger": {
+    "cantrips_known": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "spells_known": [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
   }
 }

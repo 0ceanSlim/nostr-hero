@@ -1,0 +1,31 @@
+{
+  "name": "Unseen Servant",
+  "description": "This spell creates an invisible, mindless, shapeless force that performs simple tasks at your command until the spell ends.",
+  "level": 1,
+  "school": "conjuration",
+  "casting_time": "action",
+  "range": "12",
+  "range_long": "12",
+  "duration": "1 hour",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "summoning"
+  ],
+  "classes": [
+    "wizard",
+    "bard",
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

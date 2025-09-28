@@ -1,0 +1,44 @@
+{
+  "name": "Witch Bolt",
+  "description": "A beam of crackling, blue energy lances out toward a creature within range, forming a sustained arc of lightning between you and the target.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 minute",
+  "damage": "1d12",
+  "damage_type": "lightning",
+  "type": "Spell",
+  "spell_attack": "ranged",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "lightning"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "elemental-sparks",
+        "quantity": 1
+      },
+      {
+        "component": "iron-filings",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Rod provides unlimited elemental-sparks (still need iron-filings)"
+  }
+}
