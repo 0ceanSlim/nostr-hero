@@ -1,6 +1,82 @@
 // Save System for Nostr Hero
 // Handles saving game state to local JSON files
 
+// Load save data when game starts
+async function loadSaveData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const saveID = urlParams.get('save');
+
+    if (!saveID) {
+        console.log('No save ID in URL, using default empty state');
+        return;
+    }
+
+    if (!window.sessionManager || !window.sessionManager.isAuthenticated()) {
+        console.log('Not authenticated, cannot load save');
+        return;
+    }
+
+    try {
+        console.log('🔄 Loading save data for:', saveID);
+        const session = window.sessionManager.getSession();
+
+        const response = await fetch(`/api/saves/${session.npub}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch saves: ${response.status}`);
+        }
+
+        const saves = await response.json();
+        const saveData = saves.find(save => save.id === saveID);
+
+        if (!saveData) {
+            console.warn('⚠️ Save not found:', saveID);
+            return;
+        }
+
+        console.log('✅ Loaded save data:', saveData);
+
+        // Update DOM with loaded data
+        if (saveData.character) {
+            document.getElementById('character-data').textContent = JSON.stringify(saveData.character);
+        }
+        if (saveData.gameState) {
+            if (saveData.gameState.inventory) {
+                document.getElementById('inventory-data').textContent = JSON.stringify(saveData.gameState.inventory);
+            }
+            if (saveData.gameState.equipment) {
+                document.getElementById('equipment-data').textContent = JSON.stringify(saveData.gameState.equipment);
+            }
+            if (saveData.gameState.spells) {
+                document.getElementById('spell-data').textContent = JSON.stringify(saveData.gameState.spells);
+            }
+            if (saveData.gameState.location) {
+                document.getElementById('location-data').textContent = JSON.stringify(saveData.gameState.location);
+            }
+            if (saveData.gameState.combat !== undefined) {
+                document.getElementById('combat-data').textContent = JSON.stringify(saveData.gameState.combat);
+            }
+        }
+
+        console.log('✅ Save data loaded into DOM successfully');
+
+        // Mark save data as loaded to enable auto-saves
+        saveDataLoaded = true;
+
+    } catch (error) {
+        console.error('❌ Failed to load save data:', error);
+        // Even if loading fails, allow saves after delay
+        setTimeout(() => {
+            saveDataLoaded = true;
+        }, 5000);
+    }
+}
+
+// Load save data when the page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🎮 Save system: DOM loaded, attempting to load save data...');
+    await loadSaveData();
+});
+
 // Save game to local JSON file
 async function saveGameToLocal() {
     if (!window.sessionManager || !window.sessionManager.isAuthenticated()) {
@@ -76,15 +152,20 @@ function startAutoSave() {
         clearInterval(autoSaveInterval);
     }
 
-    autoSaveInterval = setInterval(async () => {
-        console.log('🔄 Auto-saving game...');
-        const success = await saveGameToLocal();
-        if (success) {
-            console.log('✅ Auto-save complete');
-        }
-    }, AUTO_SAVE_INTERVAL);
+    // Delay auto-save start to allow save data to load first
+    setTimeout(() => {
+        autoSaveInterval = setInterval(async () => {
+            if (saveDataLoaded) {
+                console.log('🔄 Auto-saving game...');
+                const success = await saveGameToLocal();
+                if (success) {
+                    console.log('✅ Auto-save complete');
+                }
+            }
+        }, AUTO_SAVE_INTERVAL);
 
-    console.log('⏰ Auto-save enabled (every 5 minutes)');
+        console.log('⏰ Auto-save enabled (every 5 minutes)');
+    }, 3000); // Reduced delay since we're using saveDataLoaded flag
 }
 
 function stopAutoSave() {
@@ -95,9 +176,12 @@ function stopAutoSave() {
     }
 }
 
+// Track if save data has been loaded to prevent early auto-saves
+let saveDataLoaded = false;
+
 // Save before leaving page
 window.addEventListener('beforeunload', async (event) => {
-    if (window.sessionManager && window.sessionManager.isAuthenticated()) {
+    if (saveDataLoaded && window.sessionManager && window.sessionManager.isAuthenticated()) {
         // Attempt quick save (though it may not complete due to page unload)
         saveGameToLocal();
     }
@@ -105,7 +189,7 @@ window.addEventListener('beforeunload', async (event) => {
 
 // Save on page visibility change (when tab becomes hidden)
 document.addEventListener('visibilitychange', async () => {
-    if (document.hidden && window.sessionManager && window.sessionManager.isAuthenticated()) {
+    if (saveDataLoaded && document.hidden && window.sessionManager && window.sessionManager.isAuthenticated()) {
         console.log('👁️ Page hidden, saving game...');
         await saveGameToLocal();
     }

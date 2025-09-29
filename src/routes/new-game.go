@@ -15,5 +15,5 @@ func NewGameHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	utils.RenderTemplate(w, data, "new-game.html", false)
+	utils.RenderTemplate(w, data, "game-intro.html", false)
 }

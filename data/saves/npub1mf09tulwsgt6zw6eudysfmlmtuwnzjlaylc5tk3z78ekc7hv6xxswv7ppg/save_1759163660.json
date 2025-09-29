@@ -1,0 +1,33 @@
+{
+  "id": "save_1759163660",
+  "npub": "npub1mf09tulwsgt6zw6eudysfmlmtuwnzjlaylc5tk3z78ekc7hv6xxswv7ppg",
+  "character": {
+    "fatigue": 0,
+    "hp": 0,
+    "location": "",
+    "mana": 0,
+    "max_hp": 0,
+    "max_mana": 0
+  },
+  "gameState": {
+    "character": {
+      "fatigue": 0,
+      "hp": 0,
+      "location": "",
+      "mana": 0,
+      "max_hp": 0,
+      "max_mana": 0
+    },
+    "combat": null,
+    "equipment": {},
+    "inventory": [],
+    "location": {
+      "current": "",
+      "discovered": []
+    },
+    "spells": []
+  },
+  "location": "",
+  "last_played": "2025-09-29T16:34:42Z",
+  "created_at": ""
+}
