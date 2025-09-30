@@ -3,917 +3,200 @@
 {{define "view"}}
 <script src="/res/js/session-manager.js"></script>
 <script src="/res/js/character-generator.js"></script>
+<script src="/res/components/continue-button.js"></script>
+<script src="/res/js/game-intro.js"></script>
+
+<style>
+/* Scene animations */
+@keyframes wipeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wipeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.scene-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.scene-container.fade-in {
+  opacity: 1;
+}
+
+.scene-container.fade-out {
+  opacity: 0;
+}
+
+.scene-background {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.scene-text {
+  opacity: 0;
+  animation: wipeIn 0.8s ease-out forwards;
+  animation-delay: 1s;
+  position: relative;
+  z-index: 1;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9),
+               -1px -1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.letter-container {
+  background: rgba(255, 248, 220, 0.95);
+  color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-width: 28rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: serif;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+/* Pixelated Continue Button */
+.pixel-continue-btn {
+  background: #fbbf24;
+  color: #000;
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  text-shadow: none;
+
+  /* Pixelated border effect */
+  box-shadow:
+    0 -2px 0 0 #fbbf24,
+    0 -4px 0 0 #000,
+    2px 0 0 0 #fbbf24,
+    4px 0 0 0 #000,
+    0 2px 0 0 #fbbf24,
+    0 4px 0 0 #000,
+    -2px 0 0 0 #fbbf24,
+    -4px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+
+.pixel-continue-btn:hover {
+  background: #fcd34d;
+  transform: translateY(-2px);
+  box-shadow:
+    0 -2px 0 0 #fcd34d,
+    0 -4px 0 0 #000,
+    2px 0 0 0 #fcd34d,
+    4px 0 0 0 #000,
+    0 2px 0 0 #fcd34d,
+    0 6px 0 0 #000,
+    -2px 0 0 0 #fcd34d,
+    -4px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+</style>
 
 <!-- Full-screen black background -->
-<div class="fixed inset-0 bg-black text-white font-mono z-50">
+<div class="fixed inset-0 bg-black text-white z-50">
 
   <!-- Initial name input screen -->
-  <div id="name-screen" class="flex flex-col items-center justify-center h-full">
-    <div id="typed-question" class="text-xl md:text-2xl text-center mb-8 px-4"></div>
-    <div id="name-input-container" class="hidden flex-col items-center space-y-4">
+  <div id="name-screen" class="flex flex-col items-center justify-center h-full relative z-10">
+    <div id="typed-question" class="text-xl md:text-2xl text-center mb-8 px-4">What is your name?</div>
+    <div id="name-input-container" class="flex flex-col items-center space-y-4">
       <input
         type="text"
         id="character-name"
         class="bg-gray-800 border-2 border-gray-600 rounded-lg px-6 py-3 text-xl text-center text-white focus:border-green-400 focus:outline-none min-w-72"
         placeholder="Enter your name..."
         maxlength="20"
-        _="on keydown if event.key is 'Enter' trigger click on #continue-btn"
+        onkeydown="if(event.key==='Enter') document.getElementById('continue-btn').click()"
       >
       <button
         id="continue-btn"
-        class="bg-green-600 hover:bg-green-700 text-black px-8 py-3 rounded-lg font-bold text-lg transition-colors disabled:opacity-50"
+        class="bg-green-600 hover:bg-green-700 text-black px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+        onclick="startIntroSequence()"
       >
         Begin Your Story
       </button>
     </div>
   </div>
 
-  <!-- Scene 1: Rainy Night -->
-  <div id="scene1" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="scene1-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Scene 2: Caretaker's Home -->
-  <div id="scene2" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="scene2-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Scene 3: Final Moments -->
-  <div id="scene3" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="scene3-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Final Words Quote -->
-  <div id="final-words" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="final-words-text" class="text-2xl md:text-4xl font-bold text-center max-w-4xl leading-relaxed text-yellow-400"></div>
-  </div>
-
-  <!-- Letter Introduction -->
-  <div id="letter-intro" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="letter-intro-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Background-specific Scene -->
-  <div id="background-scene" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="background-scene-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Letter Scene -->
-  <div id="letter-scene" class="hidden flex flex-col items-center justify-center h-full px-8 bg-gradient-to-b from-amber-900/20 to-yellow-800/20">
-    <div class="bg-amber-50 text-black p-8 rounded-lg shadow-2xl max-w-3xl mx-4 font-serif">
-      <div class="text-sm text-gray-600 mb-4 text-center">The Letter:</div>
-      <div id="letter-text" class="text-base leading-relaxed italic"></div>
-    </div>
-  </div>
-
-  <!-- Equipment Introduction -->
-  <div id="equipment-intro" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="equipment-intro-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
-  <!-- Equipment Quote -->
-  <div id="equipment-quote" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="equipment-quote-text" class="text-2xl md:text-3xl font-bold text-center max-w-4xl leading-relaxed text-purple-400"></div>
+  <!-- Universal Scene Container -->
+  <div id="scene-container" class="scene-container hidden">
+    <div id="scene-background" class="scene-background"></div>
+    <div id="scene-content" class="px-8 text-center max-w-4xl"></div>
   </div>
 
   <!-- Equipment Selection Screen -->
-  <div id="equipment-selection" class="hidden flex flex-col items-center justify-center h-full p-8 overflow-y-auto">
+  <div id="equipment-selection" class="hidden">
     <div class="bg-gray-800 rounded-2xl p-8 max-w-6xl w-full max-h-full overflow-y-auto">
       <h2 class="text-3xl font-bold text-center mb-8 text-yellow-400">Choose Your Equipment</h2>
-      <div id="equipment-choices" class="space-y-6">
-        <!-- Equipment choices will be populated here -->
-      </div>
+      <div id="equipment-choices" class="space-y-6"></div>
 
       <div class="mt-6">
         <h4 class="text-lg font-medium text-gray-300 mb-3">Starting Inventory:</h4>
-        <div id="starting-inventory" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          <!-- Starting items will be shown here -->
-        </div>
+        <div id="starting-inventory" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
       </div>
 
       <div class="text-center mt-8">
         <button
-          id="start-adventure-btn"
+          id="continue-adventure-btn"
           class="bg-green-600 hover:bg-green-700 text-black px-8 py-4 rounded-lg font-bold text-xl transition-colors"
-          onclick="startAdventure()"
+          onclick="continueAfterEquipment()"
           style="display: none;"
         >
-          ⚔️ Begin Your Adventure
+          Continue →
         </button>
       </div>
     </div>
   </div>
 
-
-  <!-- Final Note -->
-  <div id="final-note" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="final-note-text" class="text-2xl md:text-3xl font-bold text-center max-w-4xl leading-relaxed text-green-400"></div>
-  </div>
-
-  <!-- Departure Scene -->
-  <div id="departure" class="hidden flex flex-col items-center justify-center h-full px-8">
-    <div id="departure-text" class="text-lg md:text-xl text-center max-w-4xl leading-relaxed"></div>
-  </div>
-
 </div>
 
 <!-- Audio elements -->
-<audio id="intro-music" loop>
+<audio id="intro-music">
   <source src="/res/aud/newgame1_medieval-lofi-nokron-the-eternal-city.mp3" type="audio/mpeg">
 </audio>
 
-<audio id="game-music" loop>
+<audio id="game-music">
   <source src="/res/aud/load_medieval-lofi-cycle-of-life.mp3" type="audio/mpeg">
 </audio>
-
-<script>
-// Global variables
-let generatedCharacter = null;
-let characterIntroduction = null;
-let startingEquipment = null;
-let selectedEquipment = {};
-let selectedPack = null;
-let playerName = '';
-let currentChoiceIndex = 0;
-
-// Typing effect function
-function typeText(element, text, speed = 50) {
-  return new Promise((resolve) => {
-    element.textContent = '';
-    let i = 0;
-    const timer = setInterval(() => {
-      element.textContent += text[i];
-      i++;
-      if (i >= text.length) {
-        clearInterval(timer);
-        resolve();
-      }
-    }, speed);
-  });
-}
-
-// Fade transition function
-function fadeToScene(hideElement, showElement, delay = 2000) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      hideElement.classList.add('hidden');
-      showElement.classList.remove('hidden');
-      resolve();
-    }, delay);
-  });
-}
-
-// Initialize character generation
-document.addEventListener('DOMContentLoaded', async function() {
-  console.log('🎮 Initializing game intro...');
-
-  if (!window.sessionManager) {
-    console.error('❌ Session manager not available');
-    window.location.href = '/';
-    return;
-  }
-
-  try {
-    await window.sessionManager.init();
-
-    if (!window.sessionManager.isAuthenticated()) {
-      console.log('❌ User not authenticated, redirecting to home');
-      window.location.href = '/';
-      return;
-    }
-
-    const session = window.sessionManager.getSession();
-    console.log('✅ User authenticated:', session.npub);
-
-    // Generate character
-    await generateCharacterFromNpub(session.npub);
-
-    // Start intro music
-    const introMusic = document.getElementById('intro-music');
-    introMusic.volume = 0.3;
-    introMusic.play().catch(e => console.log('Music autoplay blocked:', e));
-
-    // Start the name input sequence
-    await typeText(document.getElementById('typed-question'), 'What is your name?', 75);
-    document.getElementById('name-input-container').classList.remove('hidden');
-    document.getElementById('name-input-container').classList.add('flex');
-    document.getElementById('character-name').focus();
-
-    // Add click handler for continue button
-    document.getElementById('continue-btn').onclick = function() {
-      const nameValue = document.getElementById('character-name').value.trim();
-      if (nameValue.length > 0) {
-        document.getElementById('name-screen').classList.add('hidden');
-        startIntroSequence();
-      }
-    };
-
-  } catch (error) {
-    console.error('❌ Failed to initialize intro:', error);
-    window.location.href = '/';
-  }
-});
-
-async function generateCharacterFromNpub(npub) {
-  try {
-    await window.characterGenerator.initialize();
-    generatedCharacter = await window.characterGenerator.generateCharacter(npub);
-    characterIntroduction = window.characterGenerator.generateIntroduction(generatedCharacter);
-    startingEquipment = window.characterGenerator.generateStartingEquipment(generatedCharacter);
-
-    console.log('Generated character:', generatedCharacter);
-    console.log('Character introduction:', characterIntroduction);
-    console.log('Starting equipment:', startingEquipment);
-  } catch (error) {
-    console.error('❌ Character generation failed:', error);
-    throw error;
-  }
-}
-
-async function startIntroSequence() {
-  playerName = document.getElementById('character-name').value.trim();
-
-  // Scene 1
-  document.getElementById('scene1').classList.remove('hidden');
-  await typeText(document.getElementById('scene1-text'), characterIntroduction.baseIntro.scene1, 40);
-  await fadeToScene(document.getElementById('scene1'), document.getElementById('scene2'), 3000);
-
-  // Scene 2
-  await typeText(document.getElementById('scene2-text'), characterIntroduction.baseIntro.scene2, 40);
-  await fadeToScene(document.getElementById('scene2'), document.getElementById('scene3'), 3000);
-
-  // Scene 3
-  await typeText(document.getElementById('scene3-text'), characterIntroduction.baseIntro.scene3, 40);
-  await fadeToScene(document.getElementById('scene3'), document.getElementById('final-words'), 3000);
-
-  // Final Words (larger, slower)
-  await typeText(document.getElementById('final-words-text'), `"${characterIntroduction.baseIntro.final_words}"`, 80);
-  await fadeToScene(document.getElementById('final-words'), document.getElementById('letter-intro'), 4000);
-
-  // Letter Introduction
-  await typeText(document.getElementById('letter-intro-text'), characterIntroduction.baseIntro.letter_intro, 40);
-  await fadeToScene(document.getElementById('letter-intro'), document.getElementById('background-scene'), 3000);
-
-  // Background Scene
-  if (characterIntroduction.backgroundIntro) {
-    const raceFlavoredScene = addRaceFlavorToScene(characterIntroduction.backgroundIntro.scene, generatedCharacter.race);
-    await typeText(document.getElementById('background-scene-text'), raceFlavoredScene, 40);
-    await fadeToScene(document.getElementById('background-scene'), document.getElementById('letter-scene'), 3000);
-
-    // Letter Scene
-    await typeText(document.getElementById('letter-text'), characterIntroduction.backgroundIntro.letter, 30);
-    await fadeToScene(document.getElementById('letter-scene'), document.getElementById('equipment-intro'), 4000);
-  }
-
-  // Equipment Introduction
-  if (characterIntroduction.equipmentIntro) {
-    await typeText(document.getElementById('equipment-intro-text'), characterIntroduction.equipmentIntro.scene, 40);
-    await fadeToScene(document.getElementById('equipment-intro'), document.getElementById('equipment-quote'), 3000);
-
-    // Equipment Quote
-    await typeText(document.getElementById('equipment-quote-text'), `"${characterIntroduction.equipmentIntro.quote}"`, 60);
-    await fadeToScene(document.getElementById('equipment-quote'), document.getElementById('equipment-selection'), 3000);
-  }
-
-  // Equipment Selection - use the original working showEquipmentSelection()
-  await fadeToScene(document.getElementById('equipment-quote'), document.getElementById('equipment-selection'), 3000);
-
-  // Use the ORIGINAL working equipment selection logic
-  showEquipmentSelection();
-}
-
-// EXACT COPY of working showEquipmentSelection from new-game.js
-function showEquipmentSelection() {
-  const equipmentSection = document.getElementById('equipment-selection');
-  const equipmentChoices = document.getElementById('equipment-choices');
-  const startingInventory = document.getElementById('starting-inventory');
-
-  // Show automatic equipment
-  startingInventory.innerHTML = '';
-  startingEquipment.inventory.forEach(item => {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'bg-gray-700 rounded p-2 text-sm';
-
-    const itemName = document.createElement('span');
-    itemName.className = 'text-white';
-    itemName.textContent = item.item;
-    itemDiv.appendChild(itemName);
-
-    if (item.quantity > 1) {
-      const quantity = document.createElement('span');
-      quantity.className = 'text-gray-400';
-      quantity.textContent = ' (' + item.quantity + ')';
-      itemDiv.appendChild(quantity);
-    }
-
-    startingInventory.appendChild(itemDiv);
-  });
-
-  // Show equipment choices
-  equipmentChoices.innerHTML = '';
-  if (startingEquipment.choices && startingEquipment.choices.length > 0) {
-    startingEquipment.choices.forEach((choice, index) => {
-      const choiceGroup = document.createElement('div');
-      choiceGroup.className = 'choice-group bg-gray-700 rounded p-4';
-
-      const choiceTitle = document.createElement('h5');
-      choiceTitle.className = 'text-md font-medium text-yellow-400 mb-3';
-      choiceTitle.textContent = 'Choose one:';
-      choiceGroup.appendChild(choiceTitle);
-
-      const optionsDiv = document.createElement('div');
-      optionsDiv.className = 'space-y-2';
-
-      choice.options.forEach((option, optionIndex) => {
-        const label = document.createElement('label');
-        label.className = 'flex items-center space-x-3 cursor-pointer hover:bg-gray-600 rounded p-2';
-
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'choice_' + index;
-        input.value = option.item; // Use option.item for the value
-        input.id = 'choice_' + index + '_' + optionIndex;
-        input.onchange = function() { selectEquipment(index, option); };
-        label.appendChild(input);
-
-        const span = document.createElement('span');
-        span.className = 'text-white';
-        // Show quantity for simple items when > 1
-        if (option.quantity && option.quantity > 1 && !option.isComplexChoice && !option.isBundle) {
-          span.textContent = `${option.item} x${option.quantity}`;
-        } else {
-          span.textContent = option.item;
-        }
-        label.appendChild(span);
-
-        // Add pack contents display for packs
-        if (option.item.includes('pack')) {
-          const packContentsDiv = document.createElement('div');
-          packContentsDiv.className = 'ml-6 mt-1 text-xs text-gray-300';
-          packContentsDiv.id = 'pack_contents_' + index + '_' + optionIndex;
-
-          // Load and display pack contents asynchronously
-          (async () => {
-            try {
-              const packData = await getItemById(option.item);
-              if (packData && packData.contents) {
-                const contents = typeof packData.contents === 'string'
-                  ? JSON.parse(packData.contents)
-                  : packData.contents;
-
-                // Convert item IDs to display names
-                const contentsList = await Promise.all(contents.map(async item => {
-                  if (Array.isArray(item) && item.length === 2) {
-                    const itemId = item[0];
-                    const quantity = item[1];
-
-                    // Skip backpack since it becomes the container
-                    if (itemId === 'backpack') return null;
-
-                    // Get item data to get display name
-                    const itemData = await getItemById(itemId);
-                    const displayName = itemData ? itemData.name : itemId;
-
-                    return quantity > 1 ? `${displayName} x${quantity}` : displayName;
-                  }
-                  return item;
-                }));
-
-                // Filter out null entries (like backpack) and join
-                const filteredList = contentsList.filter(item => item !== null);
-                packContentsDiv.textContent = `Contains: ${filteredList.join(', ')}`;
-              }
-            } catch (error) {
-              console.warn('Failed to load pack contents:', error);
-            }
-          })();
-
-          label.appendChild(packContentsDiv);
-        }
-
-        // Add weapon selection sub-interface for complex choices
-        if (option.isComplexChoice) {
-          const weaponSelector = document.createElement('div');
-          weaponSelector.className = 'ml-6 mt-2 hidden weapon-selector';
-          weaponSelector.id = 'weapon_selector_' + index + '_' + optionIndex;
-
-          option.weaponSlots.forEach((slot, slotIndex) => {
-            if (slot.type === 'weapon_choice') {
-              const weaponDiv = document.createElement('div');
-              weaponDiv.className = 'mb-2';
-
-              const weaponLabel = document.createElement('label');
-              weaponLabel.className = 'block text-sm text-yellow-400 mb-1';
-              weaponLabel.textContent = `Choose weapon ${slotIndex + 1}:`;
-              weaponDiv.appendChild(weaponLabel);
-
-              const weaponSelect = document.createElement('select');
-              weaponSelect.className = 'bg-gray-600 text-white rounded px-2 py-1 text-sm';
-              weaponSelect.name = `weapon_${index}_${optionIndex}_${slotIndex}`;
-
-              slot.options.forEach((weapon, weaponIndex) => {
-                const weaponOption = document.createElement('option');
-                weaponOption.value = weapon[0];
-                weaponOption.textContent = `${weapon[0]} (x${weapon[1]})`;
-                if (weaponIndex === 0) weaponOption.selected = true;
-                weaponSelect.appendChild(weaponOption);
-              });
-
-              weaponDiv.appendChild(weaponSelect);
-              weaponSelector.appendChild(weaponDiv);
-            }
-          });
-
-          label.appendChild(weaponSelector);
-
-          // Show/hide weapon selector when radio button changes
-          input.onchange = function() {
-            // Hide all weapon selectors for this choice
-            const allSelectors = document.querySelectorAll(`[id^="weapon_selector_${index}_"]`);
-            allSelectors.forEach(s => s.classList.add('hidden'));
-
-            // Show this weapon selector if it's a complex choice
-            if (option.isComplexChoice) {
-              weaponSelector.classList.remove('hidden');
-            }
-
-            selectEquipment(index, option);
-          };
-        }
-
-        optionsDiv.appendChild(label);
-      });
-
-      choiceGroup.appendChild(optionsDiv);
-      equipmentChoices.appendChild(choiceGroup);
-    });
-  } else {
-    const noChoices = document.createElement('p');
-    noChoices.className = 'text-gray-400';
-    noChoices.textContent = 'No equipment choices needed - your starting gear is ready!';
-    equipmentChoices.appendChild(noChoices);
-  }
-  equipmentSection.classList.remove('hidden');
-
-  // Update buttons
-  document.getElementById('start-adventure-btn').style.display = 'block';
-}
-
-function selectEquipment(choiceIndex, option) {
-  if (option.isComplexChoice) {
-    // Store the complex choice structure for processing later
-    selectedEquipment[choiceIndex] = {
-      ...option,
-      getSelectedWeapons: function() {
-        const selectedWeapons = [];
-
-        option.weaponSlots.forEach((slot, slotIndex) => {
-          if (slot.type === 'weapon_choice') {
-            const selectElement = document.querySelector(`select[name="weapon_${choiceIndex}_0_${slotIndex}"]`);
-            if (selectElement) {
-              selectedWeapons.push([selectElement.value, 1]);
-            }
-          } else if (slot.type === 'fixed_item') {
-            selectedWeapons.push(slot.item);
-          }
-        });
-
-        return selectedWeapons;
-      }
-    };
-  } else {
-    selectedEquipment[choiceIndex] = option;
-  }
-
-  console.log('Selected equipment:', selectedEquipment);
-}
-
-
-// All pack selection and departure logic removed - everything handled by startAdventure() now
-
-// EXACT COPY of working startAdventure from new-game.js
-async function startAdventure() {
-  try {
-    console.log('🎮 Starting your adventure...');
-    console.log('generatedCharacter:', generatedCharacter);
-    console.log('startingEquipment:', startingEquipment);
-    console.log('selectedEquipment:', selectedEquipment);
-    console.log('playerName:', playerName);
-
-    // Validate we have the required data
-    if (!generatedCharacter) {
-      throw new Error('No character data available');
-    }
-    if (!startingEquipment) {
-      throw new Error('No starting equipment data available');
-    }
-
-    // Get the final character name (either edited or generated)
-    const finalName = playerName || generatedCharacter.name;
-
-    // Collect all items (starting + selected)
-    let allItems = [];
-
-    // Add starting equipment with proper stacking
-    for (const startingItem of startingEquipment.inventory) {
-      await addItemWithStacking(allItems, startingItem.item, startingItem.quantity);
-    }
-
-    // Add selected equipment to items list with proper stacking
-    for (const option of Object.values(selectedEquipment)) {
-      if (option.isComplexChoice) {
-        // Handle complex weapon choices
-        const selectedWeapons = option.getSelectedWeapons();
-        for (const weapon of selectedWeapons) {
-          await addItemWithStacking(allItems, weapon[0], weapon[1]);
-        }
-      } else if (option.isBundle) {
-        for (const bundleItem of option.bundle) {
-          await addItemWithStacking(allItems, bundleItem[0], bundleItem[1]);
-        }
-      } else {
-        await addItemWithStacking(allItems, option.item, option.quantity);
-      }
-    }
-
-    // Create proper inventory structure with dynamic equipment placement
-    const inventory = await createInventoryFromItems(allItems);
-
-    // Prepare final character data (remove choices and other unnecessary fields)
-    const finalCharacter = {
-      name: finalName,
-      race: generatedCharacter.race,
-      class: generatedCharacter.class,
-      background: generatedCharacter.background,
-      alignment: generatedCharacter.alignment,
-      level: generatedCharacter.level,
-      experience: generatedCharacter.experience,
-      stats: generatedCharacter.stats,
-      hp: generatedCharacter.hp,
-      max_hp: generatedCharacter.max_hp,
-      mana: generatedCharacter.mana,
-      max_mana: generatedCharacter.max_mana,
-      fatigue: generatedCharacter.fatigue,
-      gold: generatedCharacter.gold,
-      inventory: inventory,
-      spells: generatedCharacter.spells || {}
-    };
-
-    console.log('Final character:', finalCharacter);
-
-    // Create new save file
-    const session = window.sessionManager.getSession();
-    const saveData = {
-      // Don't set ID - let the backend generate it to avoid undefined issues
-      npub: session.npub,
-      created_at: new Date().toISOString(),
-      last_played: new Date().toISOString(),
-      character: finalCharacter,
-      gameState: {
-        location: {
-          current: generatedCharacter.city || 'kingdom',
-          discovered: [generatedCharacter.city || 'kingdom'],
-          music_tracks_unlocked: ['character-creation', 'kingdom-theme']
-        }
-      }
-    };
-
-    const response = await fetch(`/api/saves/${session.npub}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(saveData)
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('✅ Save created successfully:', result);
-
-      // Play departure music and transition
-      const introMusic = document.getElementById('intro-music');
-      const gameMusic = document.getElementById('game-music');
-      introMusic.pause();
-      gameMusic.volume = 0.3;
-      gameMusic.play().catch(e => console.log('Game music autoplay blocked:', e));
-
-      // Show final departure scene
-      await showFinalDeparture();
-
-      // Redirect to game using the save_id from backend response
-      setTimeout(() => {
-        window.location.href = '/game?save=' + result.save_id;
-      }, 3000);
-    } else {
-      throw new Error('Failed to create save file');
-    }
-
-  } catch (error) {
-    console.error('❌ Failed to start adventure:', error);
-    alert('Failed to start adventure: ' + error.message);
-  }
-}
-
-async function showFinalDeparture() {
-  document.getElementById('equipment-selection').classList.add('hidden');
-  document.getElementById('final-note').classList.remove('hidden');
-  await typeText(document.getElementById('final-note-text'), `"${characterIntroduction.finalNote.quote}"`, 60);
-  await fadeToScene(document.getElementById('final-note'), document.getElementById('departure'), 3000);
-  await typeText(document.getElementById('departure-text'), characterIntroduction.departure.text, 40);
-}
-
-// Helper functions from the original working new-game.js
-
-// Cache for item data from database
-let itemsCache = null;
-
-// Load all items from database once
-async function loadItemsFromDatabase() {
-  if (itemsCache) {
-    return itemsCache;
-  }
-
-  try {
-    const response = await fetch('/api/items');
-    if (response.ok) {
-      itemsCache = await response.json();
-      console.log(`📦 Loaded ${itemsCache.length} items from database`);
-      return itemsCache;
-    }
-  } catch (error) {
-    console.warn('Could not load items from database:', error);
-  }
-  return [];
-}
-
-// Helper function to get item data from database cache by ID
-async function getItemById(itemId) {
-  try {
-    const items = await loadItemsFromDatabase();
-
-    // Find item by ID (exact match)
-    const item = items.find(i => i.id === itemId);
-
-    if (item) {
-      // Convert database format to expected frontend format
-      return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        type: item.item_type,
-        tags: item.tags || [],
-        rarity: item.rarity,
-        gear_slot: item.properties?.gear_slot,
-        slots: item.properties?.slots,
-        contents: item.properties?.contents,
-        ...item.properties // Spread all other properties
-      };
-    } else {
-      console.warn(`❌ Item ID "${itemId}" not found in database`);
-    }
-  } catch (error) {
-    console.warn(`Could not load item data for ID: ${itemId}`, error);
-  }
-  return null;
-}
-
-// Helper function to add items with proper stacking logic
-async function addItemWithStacking(allItems, itemId, quantity) {
-  // Get item data to check stack limit
-  const itemData = await getItemById(itemId);
-  const stackLimit = itemData ? parseInt(itemData.stack) || 1 : 1;
-
-  let remainingQuantity = quantity;
-
-  // Try to add to existing stacks first
-  for (let existingItem of allItems) {
-    if (existingItem.item === itemId && existingItem.quantity < stackLimit) {
-      const canAdd = Math.min(remainingQuantity, stackLimit - existingItem.quantity);
-      existingItem.quantity += canAdd;
-      remainingQuantity -= canAdd;
-
-      if (remainingQuantity <= 0) break;
-    }
-  }
-
-  // Create new stacks for remaining quantity
-  while (remainingQuantity > 0) {
-    const stackSize = Math.min(remainingQuantity, stackLimit);
-    allItems.push({ item: itemId, quantity: stackSize });
-    remainingQuantity -= stackSize;
-  }
-}
-
-// Dynamic inventory creation with proper equipment placement
-async function createInventoryFromItems(allItems) {
-  // Initialize empty inventory structure
-  const inventory = {
-    general_slots: [
-      { slot: 0, item: null, quantity: 0 },
-      { slot: 1, item: null, quantity: 0 },
-      { slot: 2, item: null, quantity: 0 },
-      { slot: 3, item: null, quantity: 0 }
-    ],
-    gear_slots: {
-      bag: { item: null, quantity: 0 },
-      left_arm: { item: null, quantity: 0 },
-      right_arm: { item: null, quantity: 0 },
-      armor: { item: null, quantity: 0 },
-      necklace: { item: null, quantity: 0 },
-      ring: { item: null, quantity: 0 }
-    }
-  };
-
-  let remainingItems = [...allItems];
-  let currentGeneralSlot = 0;
-  let twoHandedEquipped = false;
-
-  // 1. First pass - Handle packs (automatically unpack to bag slot)
-  for (let i = remainingItems.length - 1; i >= 0; i--) {
-    const item = remainingItems[i];
-    const itemName = item.item.toLowerCase();
-
-    if (itemName.includes('pack')) {
-      console.log(`🎒 Found pack: ${item.item}`);
-      // This is a pack - unpack it to bag slot
-      const packContents = await unpackItem(item.item);
-      if (packContents) {
-        console.log(`🎒 Successfully unpacked ${item.item}:`, packContents);
-        // Equip the pack itself as a backpack to bag slot (the pack becomes the backpack)
-        inventory.gear_slots.bag = {
-          item: 'backpack', // All packs become backpacks when equipped
-          quantity: 1,
-          contents: packContents
-        };
-        remainingItems.splice(i, 1);
-      }
-    }
-  }
-
-  // 2. Second pass - Handle all equipment items based on gear_slot
-  for (let i = remainingItems.length - 1; i >= 0; i--) {
-    const item = remainingItems[i];
-    const itemData = await getItemById(item.item);
-
-    // Check if item has equipment tag and gear_slot
-    if (itemData && itemData.tags && itemData.tags.includes('equipment') && itemData.gear_slot) {
-      const gearSlot = itemData.gear_slot;
-      console.log(`Found equipment: ${item.item} → ${gearSlot}`);
-
-      // Handle different gear slots
-      if (gearSlot === 'armor' && inventory.gear_slots.armor.item === null) {
-        console.log(`Equipping armor: ${item.item}`);
-        inventory.gear_slots.armor = {
-          item: item.item,
-          quantity: item.quantity
-        };
-        remainingItems.splice(i, 1);
-      } else if (gearSlot === 'hands') {
-        // Handle weapons - check if two-handed
-        const isTwoHanded = itemData.tags && itemData.tags.includes('two-handed');
-
-        if (isTwoHanded) {
-          if (inventory.gear_slots.right_arm.item === null) {
-            console.log(`Equipping two-handed weapon: ${item.item}`);
-            inventory.gear_slots.right_arm = {
-              item: item.item,
-              quantity: item.quantity
-            };
-            twoHandedEquipped = true;
-            remainingItems.splice(i, 1);
-          }
-        } else {
-          // One-handed weapon
-          if (inventory.gear_slots.right_arm.item === null) {
-            console.log(`Equipping weapon in right hand: ${item.item}`);
-            inventory.gear_slots.right_arm = {
-              item: item.item,
-              quantity: item.quantity
-            };
-            remainingItems.splice(i, 1);
-          } else if (inventory.gear_slots.left_arm.item === null && !twoHandedEquipped) {
-            console.log(`Equipping weapon in left hand: ${item.item}`);
-            inventory.gear_slots.left_arm = {
-              item: item.item,
-              quantity: item.quantity
-            };
-            remainingItems.splice(i, 1);
-          }
-        }
-      }
-    }
-  }
-
-  // 3. Put remaining items in general slots or bag
-  for (let item of remainingItems) {
-    const itemData = await getItemById(item.item);
-    addToGeneralSlotOrBag(inventory, item, currentGeneralSlot++, itemData);
-  }
-
-  return inventory;
-}
-
-// Helper function to add items to general slots or bag
-function addToGeneralSlotOrBag(inventory, item, slotIndex, itemData = null) {
-  // Try to add to backpack first if it exists
-  if (inventory.gear_slots.bag.item !== null && inventory.gear_slots.bag.contents) {
-    const emptyBagSlot = inventory.gear_slots.bag.contents.find(slot => slot.item === null);
-    if (emptyBagSlot) {
-      console.log(`📦 Adding ${item.item} to backpack slot ${emptyBagSlot.slot}`);
-      emptyBagSlot.item = item.item;
-      emptyBagSlot.quantity = item.quantity;
-      return;
-    }
-  }
-
-  // If backpack is full or doesn't exist, use general slots
-  if (slotIndex < 4 && inventory.general_slots[slotIndex].item === null) {
-    console.log(`📦 Adding ${item.item} to general slot ${slotIndex}`);
-    inventory.general_slots[slotIndex] = {
-      slot: slotIndex,
-      item: item.item,
-      quantity: item.quantity
-    };
-    return;
-  }
-
-  console.warn(`⚠️ Could not place item ${item.item} - inventory full`);
-}
-
-// Helper function to unpack packs and return contents
-async function unpackItem(packId) {
-  try {
-    console.log(`🎒 Attempting to unpack: "${packId}"`);
-    const packData = await getItemById(packId);
-    if (packData) {
-      console.log(`🎒 Loaded pack data for ${packId}:`, packData);
-      if (packData.contents) {
-        // Parse contents string if it's a string, or use directly if array
-        const contents = typeof packData.contents === 'string'
-          ? JSON.parse(packData.contents)
-          : packData.contents;
-
-        console.log(`🎒 Pack contents:`, contents);
-        // Convert to proper slot format
-        const slots = [];
-        contents.forEach((item, index) => {
-          if (item[0] !== 'Backpack') { // Don't include the backpack itself
-            slots.push({
-              slot: index,
-              item: item[0],
-              quantity: item[1]
-            });
-          }
-        });
-
-        // Fill remaining slots with null
-        const totalSlots = 20; // Backpack has 20 slots
-        while (slots.length < totalSlots) {
-          slots.push({
-            slot: slots.length,
-            item: null,
-            quantity: 0
-          });
-        }
-
-        console.log(`🎒 Successfully unpacked ${packId} into ${slots.filter(s => s.item).length} items`);
-        return slots;
-      } else {
-        console.warn(`🎒 Pack ${packId} has no contents field`);
-      }
-    } else {
-      console.warn(`🎒 Pack data not found for: ${packId}`);
-    }
-  } catch (error) {
-    console.warn(`🎒 Could not unpack: ${packId}`, error);
-  }
-  return null;
-}
-
-// Race flavor function
-function addRaceFlavorToScene(scene, race) {
-  const raceModifiers = {
-    'Human': 'With the adaptability common to your human lineage, ',
-    'Elf': 'Your elven grace and centuries-old wisdom guided you as ',
-    'Dwarf': 'The sturdy resilience of your dwarven ancestors strengthened you while ',
-    'Halfling': 'Your halfling\'s natural curiosity and comfort with simple pleasures meant ',
-    'Dragonborn': 'The draconic heritage flowing in your veins instilled pride as ',
-    'Gnome': 'Your gnomish ingenuity and love of tinkering made you naturally suited as ',
-    'Half-Elf': 'Caught between two worlds, your half-elf nature gave you unique perspective as ',
-    'Half-Orc': 'Despite the suspicious looks your orcish heritage often earned, you proved yourself as ',
-    'Tiefling': 'Though others feared your infernal bloodline, you channeled that strength into becoming ',
-    'Orc': 'Your orcish strength and warrior culture shaped you into '
-  };
-
-  const modifier = raceModifiers[race] || '';
-  if (scene.includes('The old caretaker')) {
-    return scene.replace('The old caretaker', modifier + 'the old caretaker');
-  } else if (scene.includes('They')) {
-    return scene.replace('They', modifier + 'they');
-  } else {
-    return modifier + scene.charAt(0).toLowerCase() + scene.slice(1);
-  }
-}
-</script>
 
 {{end}}

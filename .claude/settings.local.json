@@ -24,7 +24,8 @@
       "WebFetch(domain:civitai.com)",
       "Bash(dir:*)",
       "Bash(magick:*)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

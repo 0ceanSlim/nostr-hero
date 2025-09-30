@@ -121,7 +121,8 @@
         "Barbarian",
         "Paladin"
       ],
-      "text": "Along the wall rest weapons and armor, maintained with meticulous care despite their age. The old caretaker had seldom spoken of battles fought, but their knowledge of war craft was unmistakable. The way they taught you to stand, to strike, to endure - these weren't lessons learned from books.\n\n\"Take what suits your strength,\" they had said during your training. \"A warrior's tools should feel like extensions of the body, not burdens upon it.\"",
+      "text": "Along the wall rest weapons and armor, maintained with meticulous care despite their age. The old caretaker had seldom spoken of battles fought, but their knowledge of war craft was unmistakable. The way they taught you to stand, to strike, to endure - these weren't lessons learned from books.",
+      "quote": "Take what suits your strength. A warrior's tools should feel like extensions of the body, not burdens upon it.",
       "image": "scene4.png"
     },
     "faithful": {
@@ -130,7 +131,8 @@
         "Paladin",
         "Monk"
       ],
-      "text": "A modest altar sits in the corner, testament to devotion maintained through decades. The symbols of faith your caretaker cherished now seem to call to you with new purpose. Their teachings of discipline, meditation, and connection to forces beyond the material world echo in your mind.\n\n\"Faith and focus are weapons that never dull,\" they often reminded you. \"When body and spirit align, even mountains can be moved.\"",
+      "text": "A modest altar sits in the corner, testament to devotion maintained through decades. The symbols of faith your caretaker cherished now seem to call to you with new purpose. Their teachings of discipline, meditation, and connection to forces beyond the material world echo in your mind.",
+      "quote": "Faith and focus are weapons that never dull. When body and spirit align, even mountains can be moved.",
       "image": "scene4.png"
     },
     "wilderness": {
@@ -139,7 +141,8 @@
         "Druid",
         "Barbarian"
       ],
-      "text": "Hunting tools, wilderness guides, and pouches of seeds and herbs hang from hooks by the door. The caretaker's connection to the natural world was profound - they could read weather in cloud patterns, predict game movements by subtle signs, and find sustenance where others saw only forest and field.\n\n\"Nature provides for those who understand her language,\" they would say during your treks together. \"Respect her power, and she will lend it to you when needed.\"",
+      "text": "Hunting tools, wilderness guides, and pouches of seeds and herbs hang from hooks by the door. The caretaker's connection to the natural world was profound - they could read weather in cloud patterns, predict game movements by subtle signs, and find sustenance where others saw only forest and field.",
+      "quote": "Nature provides for those who understand her language. Respect her power, and she will lend it to you when needed.",
       "image": "scene4.png"
     },
     "arcane": {
@@ -148,7 +151,8 @@
         "Sorcerer",
         "Warlock"
       ],
-      "text": "Curious implements, ancient texts, and containers of strange substances occupy a small desk. Though your caretaker rarely demonstrated their arcane knowledge openly, there were moments when the laws of nature seemed to bend around them. The occasional glimpses you caught of their true capabilities left more questions than answers.\n\n\"Power demands precision,\" they would caution during your lessons. \"A mind undisciplined is more dangerous to its owner than to any adversary.\"",
+      "text": "Curious implements, ancient texts, and containers of strange substances occupy a small desk. Though your caretaker rarely demonstrated their arcane knowledge openly, there were moments when the laws of nature seemed to bend around them. The occasional glimpses you caught of their true capabilities left more questions than answers.",
+      "quote": "Power demands precision. A mind undisciplined is more dangerous to its owner than to any adversary.",
       "image": "scene4.png"
     },
     "clever": {
@@ -157,7 +161,8 @@
         "Bard",
         "Ranger"
       ],
-      "text": "Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.\n\n\"The clever tongue and the nimble hand open more doors than the strongest arm,\" they would say with a knowing smile. \"But remember that trust, once broken, is the most difficult lock to pick.\"",
+      "text": "Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.",
+      "quote": "The clever tongue and the nimble hand open more doors than the strongest arm. But remember that trust, once broken, is the most difficult lock to pick.",
       "image": "scene4.png"
     }
   },
