@@ -5,9 +5,12 @@ Scene 2: The Old Caretaker's Home
 For years, the old caretaker looked after you when no one else would. Teaching you, guiding you, preparing you for a world that can be both harsh and wondrous.
 Tonight, as the rain falls outside, they've passed peacefully in their sleep. Their final words still echo in your mind:
 "Your destiny awaits beyond these village borders. You have a hero's heart - don't let it remain hidden here."
-Scene 3: The Letter
+Scene 3: background specific scene
+Scene 4: The Letter scene
 Before passing, they left you a letter. It speaks of dreams unfulfilled and adventures never taken - and a wish that you might find your own path.
 Background-Specific Letters and Stories
+scene 4a: letter reading
+
 Religious Backgrounds (Acolyte)
 [Fade to: A small shrine in the corner of the room, candles flickering.]
 Their faith sustained them, even at the end. You were raised amidst prayers and rituals, guided by the old caretaker's unwavering devotion. Though they served as a humble acolyte rather than a high priest, their spiritual connection never faltered.
@@ -77,11 +80,15 @@ For the Clever (Rogue, Bard, Ranger)
 Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.
 "The clever tongue and the nimble hand open more doors than the strongest arm," they would say with a knowing smile. "But remember that trust, once broken, is the most difficult lock to pick."
 For All
-Whatever your calling, the equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.
-Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:
+scene 5: Whatever your calling, the equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.
+scene 5a text: As dawn approaches, you prepare to leave the only home you've known. The items you select will help define the hero you become.
+all selections except pack happen in individual scenes one per choice and one per given item
+scene6:Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:
 "The weight you carry shapes the journey. Choose wisely."
-As dawn approaches, you prepare to leave the only home you've known. The items you select will help define the hero you become.
+If pack choice allow choice, if given pack then show player the pack they're given
 Final Scene: Departure
 [Fade to: The village gate at dawn. Rain has stopped, and the first light breaks through clouds.]
 With the letter carefully folded and tucked away, you gather what you need for the journey ahead. The road stretches before you, damp from the night's rain but illuminated by the breaking dawn.
-Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here.
+
+text: Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here.
+Begin Journey Button (not for now it will just go to load game screen with a little notifier that I'm building the world please wait maybe we'll update this to share the character they got with a link somehow in the future. Just for now go back to load game screen and keep the save as json so I can review and make sure it's working right.)

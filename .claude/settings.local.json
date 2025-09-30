@@ -20,7 +20,11 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(node -e \"\nconst fs = require(''fs'');\nconst saveData = JSON.parse(fs.readFileSync(''data/saves/npub1zmc6qyqdfnllhnzzxr5wpepfpnzcf8q6m3jdveflmgruqvd3qa9sjv7f60/undefined.json'', ''utf8''));\nconsole.log(''Current save structure:'');\nconsole.log(''Character:'', JSON.stringify(saveData.character, null, 2));\nconsole.log(''Game state:'', JSON.stringify(saveData.gameState, null, 2));\n\")",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:civitai.com)",
+      "Bash(dir:*)",
+      "Bash(magick:*)",
+      "Bash(convert:*)"
     ],
     "deny": []
   }

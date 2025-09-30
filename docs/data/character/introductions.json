@@ -1,88 +1,182 @@
 {
-  "base_intro": {
-    "scene1": "The rain falls relentlessly, drumming against the worn cobblestones of your village. Tonight marks eighteen years since your arrival in this world - a life spent without the guidance of parents, but not without care.",
-    "scene2": "For years, the old caretaker looked after you when no one else would. Teaching you, guiding you, preparing you for a world that can be both harsh and wondrous.",
-    "scene3": "Tonight, as the rain falls outside, they've passed peacefully in their sleep. Their final words still echo in your mind:",
-    "final_words": "Your destiny awaits beyond these village borders. You have a hero's heart - don't let it remain hidden here.",
-    "letter_intro": "Before passing, they left you a letter. It speaks of dreams unfulfilled and adventures never taken - and a wish that you might find your own path."
+  "scene1": {
+    "text": "The rain falls relentlessly, drumming against the worn cobblestones of your village. Tonight marks eighteen years since your arrival in this world - a life spent without the guidance of parents, but not without care.",
+    "image": "scene1.png"
+  },
+  "scene2": {
+    "text": "For years, the old caretaker looked after you when no one else would. Teaching you, guiding you, preparing you for a world that can be both harsh and wondrous.\n\nTonight, as the rain falls outside, they've passed peacefully in their sleep. Their final words still echo in your mind:",
+    "image": "scene2.png"
+  },
+  "final_words": {
+    "text": "\"Your destiny awaits beyond these village borders. You have a hero's heart - don't let it remain hidden here.\""
   },
   "background_intros": {
     "Acolyte": {
-      "scene": "[Fade to: A small shrine in the corner of the room, candles flickering.] Their faith sustained them, even at the end. You were raised amidst prayers and rituals, guided by the old caretaker's unwavering devotion. Though they served as a humble acolyte rather than a high priest, their spiritual connection never faltered.",
-      "letter": "My child, faith has been my anchor through life's storms. I found purpose in service to higher powers, in the rituals that mark our days, in the comfort of ancient texts. But I remained too long within temple walls when the wider world called. The gods do not wish us to hide away from life, but to bring their light to dark places. Your spirit burns brighter than mine ever did - let it illuminate paths I was too cautious to walk. May the gods guide your steps as you forge your own connection to them."
+      "text": "Their faith sustained them, even at the end. You were raised amidst prayers and rituals, guided by the old caretaker's unwavering devotion. Though they served as a humble acolyte rather than a high priest, their spiritual connection never faltered.",
+      "image": "scene3.png"
     },
     "Criminal": {
-      "scene": "[Fade to: A hidden compartment being opened in the floor, revealing concealed items.] Even in their final days, they kept secrets well. The old caretaker taught you to survive in the shadows, to observe without being seen. They spoke little of their past, but their skills spoke volumes about a life lived beyond the law's reach.",
-      "letter": "I never told you everything about my past. Some secrets are best carried to the grave. What I've taught you - the silent step, the watchful eye, the patient hand - these were born of necessity in darker times. The shadows kept me alive, but they also kept me alone. There is honor to be found even in darkness, if you know where to look. Remember that locks aren't just on doors, but on hearts and minds too - choose wisely which you pick. Trust selectively, but when you do, trust completely."
+      "text": "Even in their final days, they kept secrets well. The old caretaker taught you to survive in the shadows, to observe without being seen. They spoke little of their past, but their skills spoke volumes about a life lived beyond the law's reach.",
+      "image": "scene3.png"
     },
     "Entertainer": {
-      "scene": "[Fade to: Musical instruments and colorful costumes in a trunk.] Their stories and songs brightened even the darkest nights. The old caretaker taught you to find beauty in performance, to create joy through melody and movement, to win hearts with words and wit. Their smile remained even when pain clouded their eyes.",
-      "letter": "Life is the grandest performance of all, and few truly master their role. I found joy in bringing smiles to weary faces, in crafting moments of wonder amid ordinary days. My greatest regret was playing it safe, limiting my stage to this small corner of the world. I could have performed in the great cities, captivated nobles and commoners alike, but fear kept me here. Your audience awaits beyond these village borders - go and find them. Remember that sometimes the most important person to convince is yourself."
+      "text": "Their stories and songs brightened even the darkest nights. The old caretaker taught you to find beauty in performance, to create joy through melody and movement, to win hearts with words and wit. Their smile remained even when pain clouded their eyes.",
+      "image": "scene3.png"
     },
     "Folk Hero": {
-      "scene": "[Fade to: Maps and natural implements - seeds, dried herbs, survival tools.] They knew the wilds better than the village streets. The old caretaker taught you to read the stars, to track game, to live in harmony with nature's harsh beauty. Their tales of distant lands filled your dreams with horizons unseen.",
-      "letter": "The earth provides, the sky guides, and between them is where we make our way. The road called to me all my life, but I answered it too rarely. I found you, and that journey was enough to fill my heart, but there were countless paths I left unexplored. The wilderness has much to teach those brave enough to listen - patience from mountains, persistence from rivers, renewal from forests, freedom from skies. Trust your instincts as you would trust the changing seasons. Remember that being lost sometimes leads to the most important discoveries. Answer every call that stirs your heart - some will lead nowhere, others everywhere."
+      "text": "They knew the wilds better than the village streets. The old caretaker taught you to read the stars, to track game, to live in harmony with nature's harsh beauty. Their tales of distant lands filled your dreams with horizons unseen.",
+      "image": "scene3.png"
     },
     "Guild Artisan": {
-      "scene": "[Fade to: A small workshop with tools and unfinished projects.] Their hands created beauty from raw materials. The old caretaker passed down the traditions of craftsmanship, teaching you to value quality and honest trade. Their workshop was always filled with projects - some finished, many not.",
-      "letter": "I built things meant to outlast me, traded goods that brought meaning to lives beyond my own. These hands shaped wood, metal, and cloth, but more importantly, they shaped you. I wish I'd seen more of the world that will inherit my work - there are techniques and materials I never encountered, markets and customers I never served. There is profound satisfaction in creation, in watching something of value emerge from your own effort. But creation requires inspiration, and inspiration thrives on experience. Craft your life as carefully as you would any masterpiece - with patience, vision, and the courage to start anew when necessary."
+      "text": "Their hands created beauty from raw materials. The old caretaker passed down the traditions of craftsmanship, teaching you to value quality and honest trade. Their workshop was always filled with projects - some finished, many not.",
+      "image": "scene3.png"
     },
     "Hermit": {
-      "scene": "[Fade to: Books and scrolls stacked on shelves and table.] Knowledge was their true devotion. The old caretaker filled your childhood with lessons drawn from countless books and scrolls, teaching you to value wisdom above all else. Their mind remained sharp even as their body failed.",
-      "letter": "In knowledge, I sought truth - in truth, meaning - in meaning, purpose. My collections of facts and theories brought me joy, but I wonder now if I observed life more than I lived it. I learned so much, yet experienced so little. These tomes contain the wisdom of ages, but they cannot tell you how mountain air fills the lungs at dawn, or how distant shores smell of adventure. Knowledge without application is merely trivia. Take what I've taught you and test it against the world. Be not just a vessel of information, but a seeker of understanding. The greatest library is written in the faces of strangers and the contours of unexplored lands."
+      "text": "Knowledge was their true devotion. The old caretaker filled your childhood with lessons drawn from countless books and scrolls, teaching you to value wisdom above all else. Their mind remained sharp even as their body failed.",
+      "image": "scene3.png"
     },
     "Noble": {
-      "scene": "[Fade to: A small but dignified chest bearing a faded coat of arms.] They never spoke much of their noble origins, but carried themselves with unmistakable dignity. The old caretaker taught you courtly manners alongside stories of honor and duty, training you in the ways of a station far above your current circumstances.",
-      "letter": "Blood and birthright - I left these behind long ago, yet they shaped me nonetheless. My family name brought me privilege, but also chains I was unwilling to wear. I chose freedom over obligation, simplicity over splendor. You bear no such burden - you might claim respect without the weight of expectation. Noble birth does not ensure a noble heart; true nobility lies in how one treats others, especially those who can offer nothing in return. Some will judge you by your lineage or lack thereof - let them. The opinion that matters most is the one you see reflected in still water at day's end."
+      "text": "They never spoke much of their noble origins, but carried themselves with unmistakable dignity. The old caretaker taught you courtly manners alongside stories of honor and duty, training you in the ways of a station far above your current circumstances.",
+      "image": "scene3.png"
     },
     "Outlander": {
-      "scene": "[Fade to: Maps and natural implements - seeds, dried herbs, survival tools.] They knew the wilds better than the village streets. The old caretaker taught you to read the stars, to track game, to live in harmony with nature's harsh beauty. Their tales of distant lands filled your dreams with horizons unseen.",
-      "letter": "The earth provides, the sky guides, and between them is where we make our way. The road called to me all my life, but I answered it too rarely. I found you, and that journey was enough to fill my heart, but there were countless paths I left unexplored. The wilderness has much to teach those brave enough to listen - patience from mountains, persistence from rivers, renewal from forests, freedom from skies. Trust your instincts as you would trust the changing seasons. Remember that being lost sometimes leads to the most important discoveries. Answer every call that stirs your heart - some will lead nowhere, others everywhere."
+      "text": "They knew the wilds better than the village streets. The old caretaker taught you to read the stars, to track game, to live in harmony with nature's harsh beauty. Their tales of distant lands filled your dreams with horizons unseen.",
+      "image": "scene3.png"
     },
     "Sage": {
-      "scene": "[Fade to: Books and scrolls stacked on shelves and table.] Knowledge was their true devotion. The old caretaker filled your childhood with lessons drawn from countless books and scrolls, teaching you to value wisdom above all else. Their mind remained sharp even as their body failed.",
-      "letter": "In knowledge, I sought truth - in truth, meaning - in meaning, purpose. My collections of facts and theories brought me joy, but I wonder now if I observed life more than I lived it. I learned so much, yet experienced so little. These tomes contain the wisdom of ages, but they cannot tell you how mountain air fills the lungs at dawn, or how distant shores smell of adventure. Knowledge without application is merely trivia. Take what I've taught you and test it against the world. Be not just a vessel of information, but a seeker of understanding. The greatest library is written in the faces of strangers and the contours of unexplored lands."
+      "text": "Knowledge was their true devotion. The old caretaker filled your childhood with lessons drawn from countless books and scrolls, teaching you to value wisdom above all else. Their mind remained sharp even as their body failed.",
+      "image": "scene3.png"
     },
     "Sailor": {
-      "scene": "[Fade to: A small model ship and nautical instruments.] The scent of salt water seemed to cling to them even after years inland. The old caretaker's tales of vast oceans and distant shores painted your dreams in shades of blue and green. Their gait always held the slight sway of someone more accustomed to rolling decks than solid ground.",
-      "letter": "The sea was my first love and greatest teacher. Its vastness taught me my true size in this world, its storms showed me both terror and beauty, its creatures revealed wonder in unknown depths. I came ashore for reasons that seemed important then, but the tides still pull at my soul. There is freedom on the waves that land-bound folk cannot comprehend - horizons that constantly renew themselves, ports that offer both welcome and farewell. Chart your own course, but remember that no map shows all there is to know, and sometimes the stars are the only guide worth following. May your voyages be bold and your harbors welcoming."
+      "text": "The scent of salt water seemed to cling to them even after years inland. The old caretaker's tales of vast oceans and distant shores painted your dreams in shades of blue and green. Their gait always held the slight sway of someone more accustomed to rolling decks than solid ground.",
+      "image": "scene3.png"
     },
     "Soldier": {
-      "scene": "[Fade to: A well-maintained weapon and worn uniform hung with care.] They stood tall until the very end. The old caretaker instilled discipline and vigilance in you, recounting battles and strategies with the precision of someone who had lived through conflict. Their posture never slouched, even in their final days.",
-      "letter": "I fought so others might live in peace. The weight of armor, the responsibility of the watch, the brotherhood forged in shared danger - these defined much of my life. I protected others but forgot to live my own life. There is honor in service, but remember that duty to yourself matters too. The warrior's path is walked step by disciplined step, but do not march so steadily that you miss the landscapes you're defending. Find worthy causes, but don't lose yourself to them. And know that sometimes the greatest courage is shown in laying down arms rather than taking them up."
+      "text": "They stood tall until the very end. The old caretaker instilled discipline and vigilance in you, recounting battles and strategies with the precision of someone who had lived through conflict. Their posture never slouched, even in their final days.",
+      "image": "scene3.png"
     },
     "Urchin": {
-      "scene": "[Fade to: Simple treasures hidden in unlikely places around the room.] They found you when no one else cared to look. The old caretaker had been like you once – a child of the streets, surviving by wit and will. They taught you to find opportunities where others saw nothing, to slip through life's cracks when necessary, to survive against the odds.",
-      "letter": "Nothing came easily to me, nor to you. The streets taught me to survive, but you deserve to thrive. When you have nothing, you learn what truly matters - a dry place during rain, a kind word during hardship, an outstretched hand when you've fallen. I gave you shelter, but you must find your place. The world has more to offer than alleys and shadows – claim your portion of it. Remember that wealth isn't measured only in coins, but in moments of genuine connection. Those who have struggled to climb understand the view better than those born on the peak. Your hardships weren't fair, but they forged strengths others lack."
+      "text": "They found you when no one else cared to look. The old caretaker had been like you once \u00e2\u20ac\u201c a child of the streets, surviving by wit and will. They taught you to find opportunities where others saw nothing, to slip through life's cracks when necessary, to survive against the odds.",
+      "image": "scene3.png"
+    }
+  },
+  "letter_intro": {
+    "text": "Before passing, they left you a letter. It speaks of dreams unfulfilled and adventures never taken - and a wish that you might find your own path.",
+    "image": "scene4.png"
+  },
+  "background_letters": {
+    "Acolyte": {
+      "text": "My child, faith has been my anchor through life's storms. I found purpose in service to higher powers, in the rituals that mark our days, in the comfort of ancient texts. But I remained too long within temple walls when the wider world called. The gods do not wish us to hide away from life, but to bring their light to dark places. Your spirit burns brighter than mine ever did - let it illuminate paths I was too cautious to walk. May the gods guide your steps as you forge your own connection to them.",
+      "image": "scene4letter.png"
+    },
+    "Criminal": {
+      "text": "I never told you everything about my past. Some secrets are best carried to the grave. What I've taught you - the silent step, the watchful eye, the patient hand - these were born of necessity in darker times. The shadows kept me alive, but they also kept me alone. There is honor to be found even in darkness, if you know where to look. Remember that locks aren't just on doors, but on hearts and minds too - choose wisely which you pick. Trust selectively, but when you do, trust completely.",
+      "image": "scene4letter.png"
+    },
+    "Entertainer": {
+      "text": "Life is the grandest performance of all, and few truly master their role. I found joy in bringing smiles to weary faces, in crafting moments of wonder amid ordinary days. My greatest regret was playing it safe, limiting my stage to this small corner of the world. I could have performed in the great cities, captivated nobles and commoners alike, but fear kept me here. Your audience awaits beyond these village borders - go and find them. Remember that sometimes the most important person to convince is yourself.",
+      "image": "scene4letter.png"
+    },
+    "Folk Hero": {
+      "text": "The earth provides, the sky guides, and between them is where we make our way. The road called to me all my life, but I answered it too rarely. I found you, and that journey was enough to fill my heart, but there were countless paths I left unexplored. The wilderness has much to teach those brave enough to listen - patience from mountains, persistence from rivers, renewal from forests, freedom from skies. Trust your instincts as you would trust the changing seasons. Remember that being lost sometimes leads to the most important discoveries. Answer every call that stirs your heart - some will lead nowhere, others everywhere.",
+      "image": "scene4letter.png"
+    },
+    "Guild Artisan": {
+      "text": "I built things meant to outlast me, traded goods that brought meaning to lives beyond my own. These hands shaped wood, metal, and cloth, but more importantly, they shaped you. I wish I'd seen more of the world that will inherit my work - there are techniques and materials I never encountered, markets and customers I never served. There is profound satisfaction in creation, in watching something of value emerge from your own effort. But creation requires inspiration, and inspiration thrives on experience. Craft your life as carefully as you would any masterpiece - with patience, vision, and the courage to start anew when necessary.",
+      "image": "scene4letter.png"
+    },
+    "Hermit": {
+      "text": "In knowledge, I sought truth - in truth, meaning - in meaning, purpose. My collections of facts and theories brought me joy, but I wonder now if I observed life more than I lived it. I learned so much, yet experienced so little. These tomes contain the wisdom of ages, but they cannot tell you how mountain air fills the lungs at dawn, or how distant shores smell of adventure. Knowledge without application is merely trivia. Take what I've taught you and test it against the world. Be not just a vessel of information, but a seeker of understanding. The greatest library is written in the faces of strangers and the contours of unexplored lands.",
+      "image": "scene4letter.png"
+    },
+    "Noble": {
+      "text": "Blood and birthright - I left these behind long ago, yet they shaped me nonetheless. My family name brought me privilege, but also chains I was unwilling to wear. I chose freedom over obligation, simplicity over splendor. You bear no such burden - you might claim respect without the weight of expectation. Noble birth does not ensure a noble heart; true nobility lies in how one treats others, especially those who can offer nothing in return. Some will judge you by your lineage or lack thereof - let them. The opinion that matters most is the one you see reflected in still water at day's end.",
+      "image": "scene4letter.png"
+    },
+    "Outlander": {
+      "text": "The earth provides, the sky guides, and between them is where we make our way. The road called to me all my life, but I answered it too rarely. I found you, and that journey was enough to fill my heart, but there were countless paths I left unexplored. The wilderness has much to teach those brave enough to listen - patience from mountains, persistence from rivers, renewal from forests, freedom from skies. Trust your instincts as you would trust the changing seasons. Remember that being lost sometimes leads to the most important discoveries. Answer every call that stirs your heart - some will lead nowhere, others everywhere.",
+      "image": "scene4letter.png"
+    },
+    "Sage": {
+      "text": "In knowledge, I sought truth - in truth, meaning - in meaning, purpose. My collections of facts and theories brought me joy, but I wonder now if I observed life more than I lived it. I learned so much, yet experienced so little. These tomes contain the wisdom of ages, but they cannot tell you how mountain air fills the lungs at dawn, or how distant shores smell of adventure. Knowledge without application is merely trivia. Take what I've taught you and test it against the world. Be not just a vessel of information, but a seeker of understanding. The greatest library is written in the faces of strangers and the contours of unexplored lands.",
+      "image": "scene4letter.png"
+    },
+    "Sailor": {
+      "text": "The sea was my first love and greatest teacher. Its vastness taught me my true size in this world, its storms showed me both terror and beauty, its creatures revealed wonder in unknown depths. I came ashore for reasons that seemed important then, but the tides still pull at my soul. There is freedom on the waves that land-bound folk cannot comprehend - horizons that constantly renew themselves, ports that offer both welcome and farewell. Chart your own course, but remember that no map shows all there is to know, and sometimes the stars are the only guide worth following. May your voyages be bold and your harbors welcoming.",
+      "image": "scene4letter.png"
+    },
+    "Soldier": {
+      "text": "I fought so others might live in peace. The weight of armor, the responsibility of the watch, the brotherhood forged in shared danger - these defined much of my life. I protected others but forgot to live my own life. There is honor in service, but remember that duty to yourself matters too. The warrior's path is walked step by disciplined step, but do not march so steadily that you miss the landscapes you're defending. Find worthy causes, but don't lose yourself to them. And know that sometimes the greatest courage is shown in laying down arms rather than taking them up.",
+      "image": "scene4letter.png"
+    },
+    "Urchin": {
+      "text": "Nothing came easily to me, nor to you. The streets taught me to survive, but you deserve to thrive. When you have nothing, you learn what truly matters - a dry place during rain, a kind word during hardship, an outstretched hand when you've fallen. I gave you shelter, but you must find your place. The world has more to offer than alleys and shadows \u00e2\u20ac\u201c claim your portion of it. Remember that wealth isn't measured only in coins, but in moments of genuine connection. Those who have struggled to climb understand the view better than those born on the peak. Your hardships weren't fair, but they forged strengths others lack.",
+      "image": "scene4letter.png"
     }
   },
   "equipment_intros": {
     "warrior": {
-      "scene": "Along the wall rest weapons and armor, maintained with meticulous care despite their age. The old caretaker had seldom spoken of battles fought, but their knowledge of war craft was unmistakable. The way they taught you to stand, to strike, to endure - these weren't lessons learned from books.",
-      "quote": "Take what suits your strength. A warrior's tools should feel like extensions of the body, not burdens upon it."
+      "classes": [
+        "Fighter",
+        "Barbarian",
+        "Paladin"
+      ],
+      "text": "Along the wall rest weapons and armor, maintained with meticulous care despite their age. The old caretaker had seldom spoken of battles fought, but their knowledge of war craft was unmistakable. The way they taught you to stand, to strike, to endure - these weren't lessons learned from books.\n\n\"Take what suits your strength,\" they had said during your training. \"A warrior's tools should feel like extensions of the body, not burdens upon it.\"",
+      "image": "scene4.png"
     },
     "faithful": {
-      "scene": "A modest altar sits in the corner, testament to devotion maintained through decades. The symbols of faith your caretaker cherished now seem to call to you with new purpose. Their teachings of discipline, meditation, and connection to forces beyond the material world echo in your mind.",
-      "quote": "Faith and focus are weapons that never dull. When body and spirit align, even mountains can be moved."
+      "classes": [
+        "Cleric",
+        "Paladin",
+        "Monk"
+      ],
+      "text": "A modest altar sits in the corner, testament to devotion maintained through decades. The symbols of faith your caretaker cherished now seem to call to you with new purpose. Their teachings of discipline, meditation, and connection to forces beyond the material world echo in your mind.\n\n\"Faith and focus are weapons that never dull,\" they often reminded you. \"When body and spirit align, even mountains can be moved.\"",
+      "image": "scene4.png"
     },
     "wilderness": {
-      "scene": "Hunting tools, wilderness guides, and pouches of seeds and herbs hang from hooks by the door. The caretaker's connection to the natural world was profound - they could read weather in cloud patterns, predict game movements by subtle signs, and find sustenance where others saw only forest and field.",
-      "quote": "Nature provides for those who understand her language. Respect her power, and she will lend it to you when needed."
+      "classes": [
+        "Ranger",
+        "Druid",
+        "Barbarian"
+      ],
+      "text": "Hunting tools, wilderness guides, and pouches of seeds and herbs hang from hooks by the door. The caretaker's connection to the natural world was profound - they could read weather in cloud patterns, predict game movements by subtle signs, and find sustenance where others saw only forest and field.\n\n\"Nature provides for those who understand her language,\" they would say during your treks together. \"Respect her power, and she will lend it to you when needed.\"",
+      "image": "scene4.png"
     },
     "arcane": {
-      "scene": "Curious implements, ancient texts, and containers of strange substances occupy a small desk. Though your caretaker rarely demonstrated their arcane knowledge openly, there were moments when the laws of nature seemed to bend around them. The occasional glimpses you caught of their true capabilities left more questions than answers.",
-      "quote": "Power demands precision. A mind undisciplined is more dangerous to its owner than to any adversary."
+      "classes": [
+        "Wizard",
+        "Sorcerer",
+        "Warlock"
+      ],
+      "text": "Curious implements, ancient texts, and containers of strange substances occupy a small desk. Though your caretaker rarely demonstrated their arcane knowledge openly, there were moments when the laws of nature seemed to bend around them. The occasional glimpses you caught of their true capabilities left more questions than answers.\n\n\"Power demands precision,\" they would caution during your lessons. \"A mind undisciplined is more dangerous to its owner than to any adversary.\"",
+      "image": "scene4.png"
     },
     "clever": {
-      "scene": "Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.",
-      "quote": "The clever tongue and the nimble hand open more doors than the strongest arm. But remember that trust, once broken, is the most difficult lock to pick."
+      "classes": [
+        "Rogue",
+        "Bard",
+        "Ranger"
+      ],
+      "text": "Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.\n\n\"The clever tongue and the nimble hand open more doors than the strongest arm,\" they would say with a knowing smile. \"But remember that trust, once broken, is the most difficult lock to pick.\"",
+      "image": "scene4.png"
     }
   },
-  "final_note": {
-    "text": "Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:",
-    "quote": "The weight you carry shapes the journey. Choose wisely."
+  "scene5": {
+    "text": "Whatever your calling, the equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.",
+    "image": "scene4.png"
+  },
+  "scene5a": {
+    "text": "As dawn approaches, you prepare to leave the only home you've known. The items you select will help define the hero you become."
+  },
+  "scene6": {
+    "text": "Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:\n\n\"The weight you carry shapes the journey. Choose wisely.\"",
+    "image": "scene2.png"
   },
   "departure": {
-    "text": "With the letter carefully folded and tucked away, you gather what you need for the journey ahead. The road stretches before you, damp from the night's rain but illuminated by the breaking dawn. Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here."
+    "text": "With the letter carefully folded and tucked away, you gather what you need for the journey ahead. The road stretches before you, damp from the night's rain but illuminated by the breaking dawn.",
+    "image": "scene3.png"
+  },
+  "final_text": {
+    "text": "Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here."
   }
 }
