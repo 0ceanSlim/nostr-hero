@@ -4,6 +4,7 @@
 <script src="/res/js/session-manager.js"></script>
 <script src="/res/js/character-generator.js"></script>
 <script src="/res/components/continue-button.js"></script>
+<script src="/res/js/equipment-selection.js"></script>
 <script src="/res/js/game-intro.js"></script>
 
 <style>
@@ -131,6 +132,34 @@
     2px 2px 0 0 #000,
     -2px 2px 0 0 #000;
 }
+
+/* Item Card Styles */
+.item-card {
+  opacity: 0;
+  animation: wipeIn 0.8s ease-out forwards;
+  animation-delay: 1s;
+  border: none;
+}
+
+/* Container selection styles (for bundle and simple item containers) */
+[data-option-index] {
+  transition: all 0.2s ease;
+}
+
+[data-option-index]:hover:not(.selected) {
+  border-color: #fbbf24 !important;
+}
+
+[data-option-index].selected {
+  border-color: #10b981 !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
+  background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+[data-option-index].selected * {
+  pointer-events: none !important;
+}
 </style>
 
 <!-- Full-screen black background -->
@@ -154,6 +183,13 @@
         onclick="startIntroSequence()"
       >
         Begin Your Story
+      </button>
+      <button
+        id="skip-to-equipment-btn"
+        class="bg-yellow-600 hover:bg-yellow-700 text-black px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+        onclick="skipToEquipment()"
+      >
+        🐛 DEBUG: Skip to Equipment
       </button>
     </div>
   </div>

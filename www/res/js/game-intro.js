@@ -264,15 +264,38 @@ async function startIntroSequence() {
   });
 
   // 9. Show equipment selection
-  document.getElementById('scene-container').classList.add('hidden');
-  showEquipmentSelection();
+  await startEquipmentSelection(startingEquipment);
+
+  // Get selected equipment
+  selectedEquipment = getSelectedEquipment();
+
+  // Continue with remaining scenes
+  await continueAfterEquipment();
+}
+
+/**
+ * DEBUG: Skip directly to equipment selection
+ */
+async function skipToEquipment() {
+  playerName = document.getElementById('character-name').value.trim() || 'Debug Hero';
+
+  // Hide name screen
+  document.getElementById('name-screen').classList.add('hidden');
+
+  // Show equipment selection directly
+  await startEquipmentSelection(startingEquipment);
+
+  // Get selected equipment
+  selectedEquipment = getSelectedEquipment();
+
+  console.log('🐛 DEBUG: Equipment selection completed:', selectedEquipment);
+  alert('Equipment selection complete! Check console for results.');
 }
 
 /**
  * Continue after equipment selection
  */
 async function continueAfterEquipment() {
-  document.getElementById('equipment-selection').classList.add('hidden');
 
   // 10. Scene 5a (black screen quote)
   await showScene({
@@ -604,17 +627,19 @@ async function startAdventure() {
 
     // Add selected equipment
     for (const option of Object.values(selectedEquipment)) {
-      if (option.isComplexChoice) {
-        const selectedWeapons = option.getSelectedWeapons();
-        for (const weapon of selectedWeapons) {
+      if (option.isComplexChoice && option.weapons) {
+        // Complex choice with weapons array
+        for (const weapon of option.weapons) {
           await addItemWithStacking(allItems, weapon[0], weapon[1]);
         }
-      } else if (option.isBundle) {
+      } else if (option.bundle) {
+        // Bundle option
         for (const bundleItem of option.bundle) {
           await addItemWithStacking(allItems, bundleItem[0], bundleItem[1]);
         }
-      } else {
-        await addItemWithStacking(allItems, option.item, option.quantity);
+      } else if (option.item) {
+        // Simple item option
+        await addItemWithStacking(allItems, option.item, option.quantity || 1);
       }
     }
 

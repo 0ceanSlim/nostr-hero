@@ -149,6 +149,28 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Filter by name if provided (name is actually the item ID from starting-gear.json)
+	nameQuery := r.URL.Query().Get("name")
+	if nameQuery != "" {
+		log.Printf("Filtering items by ID: '%s'", nameQuery)
+		var filteredItems []Item
+		for _, item := range items {
+			// Match by ID (the item filename without .json)
+			if item.ID == nameQuery {
+				log.Printf("  ✓ Match found: ID='%s', Name='%s'", item.ID, item.Name)
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		if len(filteredItems) == 0 {
+			log.Printf("  ⚠️ No items matched ID '%s'. Checking first 5 items in database:", nameQuery)
+			for i := 0; i < 5 && i < len(items); i++ {
+				log.Printf("    - ID: '%s', Name: '%s'", items[i].ID, items[i].Name)
+			}
+		}
+		items = filteredItems
+		log.Printf("Returning %d filtered items", len(items))
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
 }

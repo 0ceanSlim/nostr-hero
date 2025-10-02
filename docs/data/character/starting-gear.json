@@ -1,727 +1,1830 @@
 [
   {
     "class": "Barbarian",
-    "starting_gear": [
-      {
-        "option": [
-          ["greataxe", 1],
-          ["battleaxe", 1],
-          ["flail", 1],
-          ["glaive", 1],
-          ["greataxe", 1],
-          ["greatsword", 1],
-          ["halberd", 1],
-          ["lance", 1],
-          ["longsword", 1],
-          ["maul", 1],
-          ["morningstar", 1],
-          ["pike", 1],
-          ["rapier", 1],
-          ["scimitar", 1],
-          ["shortsword", 1],
-          ["trident", 1],
-          ["war pick", 1],
-          ["warhammer", 1],
-          ["whip", 1]
-        ]
-      },
-      {
-        "option": [
-          ["handaxe", 1],
-          ["handaxe", 1],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
-        ]
-      },
-      {
-        "given": [
-          ["explorers-pack", 1],
-          ["javelin", 4]
-        ]
-      }
-    ]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "greataxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "battleaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "flail",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "glaive",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greataxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatsword",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "halberd",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "lance",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "longsword",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "maul",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "morningstar",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "pike",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "rapier",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "scimitar",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortsword",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "trident",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "war pick",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "warhammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "whip",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": null,
+      "given_items": [
+        {
+          "item": "explorers-pack",
+          "quantity": 1
+        },
+        {
+          "item": "javelin",
+          "quantity": 4
+        }
+      ]
+    }
   },
   {
     "class": "Bard",
-    "starting_gear": [
-      {
-        "option": [
-          ["rapier", 1],
-          ["longsword", 1],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "rapier",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "longsword",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "lute",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "bagpipe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "drum",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dulcimer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "flute",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "lyre",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "horn",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "pan-flute",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shawm",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "viol",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "bone-dust",
+              "quantity": 2
+            },
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "diplomats-pack",
+          "entertainers-pack"
         ]
       },
-      {
-        "option": [
-          ["diplomats-pack", 1],
-          ["entertainers-pack", 1]
-        ]
-      },
-      {
-        "option": [
-          ["lute", 1],
-          ["bagpipe", 1],
-          ["drum", 1],
-          ["dulcimer", 1],
-          ["flute", 1],
-          ["lyre", 1],
-          ["horn", 1],
-          ["pan-flute", 1],
-          ["shawm", 1],
-          ["viol", 1]
-        ]
-      },
-      {
-        "option": [
-          ["bone-dust", 2],
-          ["component-pouch", 1]
-        ]
-      },
-      {
-        "given": [
-          ["leather", 1],
-          ["dagger", 1],
-          ["bone-dust", 1]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "leather",
+          "quantity": 1
+        },
+        {
+          "item": "dagger",
+          "quantity": 1
+        },
+        {
+          "item": "bone-dust",
+          "quantity": 1
+        }
+      ]
+    }
   },
   {
     "class": "Cleric",
-    "starting_gear": [
-      {
-        "option": [
-          ["mace", 1],
-          ["warhammer", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "warhammer",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "scale-mail",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "leather",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "chain-mail",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "crossbow-light",
+                  "quantity": 1
+                },
+                {
+                  "item": "crossbow-bolts",
+                  "quantity": 20
+                }
+              ]
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "amulet",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "emblem",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "reliquary",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "blessed-water",
+              "quantity": 2
+            },
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "priests-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["scale-mail", 1],
-          ["leather", 1],
-          ["chain-mail", 1]
-        ]
-      },
-      {
-        "option": [
-          [
-            ["crossbow-light", 1],
-            ["crossbow-bolts", 20]
-          ],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
-        ]
-      },
-      {
-        "option": [
-          ["priests-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "option": [
-          ["amulet", 1],
-          ["emblem", 1],
-          ["reliquary", 1]
-        ]
-      },
-      {
-        "option": [
-          ["blessed-water", 2],
-          ["component-pouch", 1]
-        ]
-      },
-      {
-        "given": [
-          ["shield", 1],
-          ["blessed-water", 1]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "shield",
+          "quantity": 1
+        },
+        {
+          "item": "blessed-water",
+          "quantity": 1
+        }
+      ]
+    }
   },
   {
     "class": "Druid",
-    "starting_gear": [
-      {
-        "option": [
-          ["shield", 1],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
-        ]
-      },
-      {
-        "option": [
-          ["scimitar", 1],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1]
-        ]
-      },
-      {
-        "option": [
-          ["sprig-of-mistletoe", 1],
-          ["totem", 1],
-          ["wooden-staff", 1],
-          ["yew-wand", 1]
-        ]
-      },
-      {
-        "option": [
-          ["component-pouch", 1],
-          ["blessed-water", 1]
-        ]
-      },
-      {
-        "given": [
-          ["leather", 1],
-          ["explorers-pack", 1]
-        ]
-      }
-    ]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "shield",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "scimitar",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "sprig-of-mistletoe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "totem",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "wooden-staff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "yew-wand",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "blessed-water",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": null,
+      "given_items": [
+        {
+          "item": "leather",
+          "quantity": 1
+        },
+        {
+          "item": "explorers-pack",
+          "quantity": 1
+        }
+      ]
+    }
   },
   {
     "class": "Fighter",
-    "starting_gear": [
-      {
-        "option": [
-          ["chain-mail", 1],
-          [
-            ["leather", 1],
-            ["longbow", 1],
-            ["arrows", 20]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "chain-mail",
+              "quantity": 1
+            },
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "leather",
+                  "quantity": 1
+                },
+                {
+                  "item": "longbow",
+                  "quantity": 1
+                },
+                {
+                  "item": "arrows",
+                  "quantity": 20
+                }
+              ]
+            }
           ]
-        ]
-      },
-      {
-        "option": [
-          [
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war-pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ],
-            ["shield", 1]
-          ],
-          [
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war-pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ],
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war-pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "multi_slot",
+              "slots": [
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war-pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                },
+                {
+                  "type": "fixed",
+                  "item": "shield",
+                  "quantity": 1
+                }
+              ]
+            },
+            {
+              "type": "multi_slot",
+              "slots": [
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war-pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                },
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war-pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                }
+              ]
+            }
           ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "crossbow-light",
+                  "quantity": 1
+                },
+                {
+                  "item": "crossbow-bolts",
+                  "quantity": 20
+                }
+              ]
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 2
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "dungeoneers-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          [
-            ["crossbow-light", 1],
-            ["crossbow-bolts", 20]
-          ],
-          ["handaxe", 2]
-        ]
-      },
-      {
-        "option": [
-          ["dungeoneers-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      }
-    ]
+      "given_items": []
+    }
   },
   {
     "class": "Monk",
-    "starting_gear": [
-      {
-        "option": [
-          ["shortsword", 1],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "shortsword",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "dungeoneers-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["dungeoneers-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "given": ["dart", 10]
-      }
-    ]
+      "given_items": []
+    }
   },
   {
     "class": "Paladin",
-    "starting_gear": [
-      {
-        "option": [
-          [
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war-pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ],
-            ["shield", 1]
-          ],
-          [
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ],
-            [
-              ["battleaxe", 1],
-              ["flail", 1],
-              ["glaive", 1],
-              ["greataxe", 1],
-              ["greatsword", 1],
-              ["halberd", 1],
-              ["lance", 1],
-              ["longsword", 1],
-              ["maul", 1],
-              ["morningstar", 1],
-              ["pike", 1],
-              ["rapier", 1],
-              ["scimitar", 1],
-              ["shortsword", 1],
-              ["trident", 1],
-              ["war-pick", 1],
-              ["warhammer", 1],
-              ["whip", 1]
-            ]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "multi_slot",
+              "slots": [
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war-pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                },
+                {
+                  "type": "fixed",
+                  "item": "shield",
+                  "quantity": 1
+                }
+              ]
+            },
+            {
+              "type": "multi_slot",
+              "slots": [
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                },
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "battleaxe",
+                    "flail",
+                    "glaive",
+                    "greataxe",
+                    "greatsword",
+                    "halberd",
+                    "lance",
+                    "longsword",
+                    "maul",
+                    "morningstar",
+                    "pike",
+                    "rapier",
+                    "scimitar",
+                    "shortsword",
+                    "trident",
+                    "war-pick",
+                    "warhammer",
+                    "whip"
+                  ]
+                }
+              ]
+            }
           ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 5
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "amulet",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "emblem",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "reliquary",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "priests-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["javelin", 5],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1]
-        ]
-      },
-      {
-        "option": [
-          ["amulet", 1],
-          ["emblem", 1],
-          ["reliquary", 1]
-        ]
-      },
-      {
-        "option": [
-          ["priests-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "given": [["chain-mail", 1]]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "chain-mail",
+          "quantity": 1
+        }
+      ]
+    }
   },
   {
     "class": "Ranger",
-    "starting_gear": [
-      {
-        "option": [
-          ["scale-mail", 1],
-          ["leather", 1]
-        ]
-      },
-      {
-        "option": [
-          ["shortsword", 2],
-          [
-            [
-              ["club", 1],
-              ["dagger", 1],
-              ["greatclub", 1],
-              ["handaxe", 1],
-              ["javelin", 1],
-              ["light-hammer", 1],
-              ["mace", 1],
-              ["quarterstaff", 1],
-              ["sickle", 1],
-              ["spear", 1]
-            ],
-            [
-              ["club", 1],
-              ["dagger", 1],
-              ["greatclub", 1],
-              ["handaxe", 1],
-              ["javelin", 1],
-              ["light-hammer", 1],
-              ["mace", 1],
-              ["quarterstaff", 1],
-              ["sickle", 1],
-              ["spear", 1]
-            ]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "scale-mail",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "leather",
+              "quantity": 1
+            }
           ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "shortsword",
+              "quantity": 2
+            },
+            {
+              "type": "multi_slot",
+              "slots": [
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "club",
+                    "dagger",
+                    "greatclub",
+                    "handaxe",
+                    "javelin",
+                    "light-hammer",
+                    "mace",
+                    "quarterstaff",
+                    "sickle",
+                    "spear"
+                  ]
+                },
+                {
+                  "type": "weapon_choice",
+                  "options": [
+                    "club",
+                    "dagger",
+                    "greatclub",
+                    "handaxe",
+                    "javelin",
+                    "light-hammer",
+                    "mace",
+                    "quarterstaff",
+                    "sickle",
+                    "spear"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "dungeoneers-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["dungeoneers-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "given": [
-          ["longbow", 1],
-          ["arrows", 20]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "longbow",
+          "quantity": 1
+        },
+        {
+          "item": "arrows",
+          "quantity": 20
+        }
+      ]
+    }
   },
   {
     "class": "Rogue",
-    "starting_gear": [
-      {
-        "option": [
-          ["rapier", 1],
-          ["shortsword", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "rapier",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortsword",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "shortbow",
+                  "quantity": 1
+                },
+                {
+                  "item": "arrows",
+                  "quantity": 20
+                }
+              ]
+            },
+            {
+              "type": "single",
+              "item": "shortsword",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "burglars-pack",
+          "dungeoneers-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          [
-            ["shortbow", 1],
-            ["arrows", 20]
-          ],
-          ["shortsword", 1]
-        ]
-      },
-      {
-        "option": [
-          ["burglars-pack", 1],
-          ["dungeoneers-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "given": [
-          ["leather", 1],
-          ["thieves-tools", 1],
-          ["dagger", 2]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "leather",
+          "quantity": 1
+        },
+        {
+          "item": "thieves-tools",
+          "quantity": 1
+        },
+        {
+          "item": "dagger",
+          "quantity": 2
+        }
+      ]
+    }
   },
   {
     "class": "Sorcerer",
-    "starting_gear": [
-      {
-        "option": [
-          [
-            ["crossbow-light", 1],
-            ["crossbow-bolts", 20]
-          ],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "crossbow-light",
+                  "quantity": 1
+                },
+                {
+                  "item": "crossbow-bolts",
+                  "quantity": 20
+                }
+              ]
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "wand",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "orb",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "rod",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "staff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crystal",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sulfur",
+              "quantity": 2
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "dungeoneers-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["wand", 1],
-          ["orb", 1],
-          ["rod", 1],
-          ["staff", 1],
-          ["crystal", 1]
-        ]
-      },
-      {
-        "option": [
-          ["dungeoneers-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "option": [
-          ["component-pouch", 1],
-          ["sulfur", 2]
-        ]
-      },
-      {
-        "given": [
-          ["dagger", 2],
-          ["sulfur", 1]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "dagger",
+          "quantity": 2
+        },
+        {
+          "item": "sulfur",
+          "quantity": 1
+        }
+      ]
+    }
   },
   {
     "class": "Warlock",
-    "starting_gear": [
-      {
-        "option": [
-          [
-            ["crossbow-light", 1],
-            ["crossbow-bolts", 20]
-          ],
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "crossbow-light",
+                  "quantity": 1
+                },
+                {
+                  "item": "crossbow-bolts",
+                  "quantity": 20
+                }
+              ]
+            },
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "club",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "greatclub",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "handaxe",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "javelin",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "light-hammer",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "mace",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sickle",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "spear",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crossbow-light",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dart",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "shortbow",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sling",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "wand",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "orb",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "rod",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "staff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crystal",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sulfur",
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "scholars-pack",
+          "dungeoneers-pack"
         ]
       },
-      {
-        "option": [
-          ["club", 1],
-          ["dagger", 1],
-          ["greatclub", 1],
-          ["handaxe", 1],
-          ["javelin", 1],
-          ["light-hammer", 1],
-          ["mace", 1],
-          ["quarterstaff", 1],
-          ["sickle", 1],
-          ["spear", 1],
-          ["crossbow-light", 1],
-          ["dart", 1],
-          ["shortbow", 1],
-          ["sling", 1]
-        ]
-      },
-      {
-        "option": [
-          ["wand", 1],
-          ["orb", 1],
-          ["rod", 1],
-          ["staff", 1],
-          ["crystal", 1]
-        ]
-      },
-      {
-        "option": [
-          ["scholars-pack", 1],
-          ["dungeoneers-pack", 1]
-        ]
-      },
-      {
-        "option": [
-          ["component-pouch", 1],
-          ["sulfur", 1]
-        ]
-      },
-      {
-        "given": [
-          ["leather", 1],
-          ["dagger", 2]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "leather",
+          "quantity": 1
+        },
+        {
+          "item": "dagger",
+          "quantity": 2
+        }
+      ]
+    }
   },
   {
     "class": "Wizard",
-    "starting_gear": [
-      {
-        "option": [
-          ["quarterstaff", 1],
-          ["dagger", 1]
+    "starting_gear": {
+      "equipment_choices": [
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "quarterstaff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "dagger",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "wand",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "orb",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "rod",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "staff",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "crystal",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "single",
+              "item": "component-pouch",
+              "quantity": 1
+            },
+            {
+              "type": "single",
+              "item": "sulfur",
+              "quantity": 2
+            }
+          ]
+        }
+      ],
+      "pack_choice": {
+        "description": "Choose your adventuring pack",
+        "options": [
+          "scholars-pack",
+          "explorers-pack"
         ]
       },
-      {
-        "option": [
-          ["wand", 1],
-          ["orb", 1],
-          ["rod", 1],
-          ["staff", 1],
-          ["crystal", 1]
-        ]
-      },
-      {
-        "option": [
-          ["scholars-pack", 1],
-          ["explorers-pack", 1]
-        ]
-      },
-      {
-        "option": [
-          ["component-pouch", 1],
-          ["sulfur", 2]
-        ]
-      },
-      {
-        "given": [
-          ["spellbook", 1],
-          ["sulfur", 1]
-        ]
-      }
-    ]
+      "given_items": [
+        {
+          "item": "spellbook",
+          "quantity": 1
+        },
+        {
+          "item": "sulfur",
+          "quantity": 1
+        }
+      ]
+    }
   }
 ]

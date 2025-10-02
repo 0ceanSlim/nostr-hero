@@ -180,69 +180,101 @@ class NostrCharacterGenerator {
         const inventory = [];
         const equipment = {};
         const choices = [];
+        const gearConfig = classGearData.starting_gear;
 
-        classGearData.starting_gear.forEach((gearItem, index) => {
-            if (gearItem.given) {
-                gearItem.given.forEach(item => {
-                    inventory.push({ item: item[0], quantity: item[1] });
-                });
-            } else if (gearItem.option) {
-                console.log(`🔍 Processing choice ${index}:`, gearItem.option);
+        // Process given items (auto-added to inventory)
+        if (gearConfig.given_items) {
+            gearConfig.given_items.forEach(givenItem => {
+                inventory.push({ item: givenItem.item, quantity: givenItem.quantity });
+            });
+        }
+
+        // Process equipment choices
+        if (gearConfig.equipment_choices) {
+            console.log(`🎒 Processing ${gearConfig.equipment_choices.length} equipment choices for ${characterClass}`);
+            gearConfig.equipment_choices.forEach((equipChoice, index) => {
+                console.log(`  Choice ${index}: ${equipChoice.options.length} options`);
                 const choice = {
                     id: `choice-${index}`,
-                    options: gearItem.option.map((opt, optIndex) => {
-                        console.log(`🔍 Processing option ${optIndex}:`, opt);
-                        if (typeof opt[0] === 'string') {
-                            // Simple choice: ["item", quantity]
-                            console.log(`→ Simple choice: ${opt[0]}`);
-                            return { item: opt[0], quantity: opt[1] };
-                        } else if (Array.isArray(opt) && opt.length === 2 && Array.isArray(opt[0]) && Array.isArray(opt[0][0]) && typeof opt[0][0][0] === 'string') {
-                            // Complex nested choice: [[["battleaxe",1], ["flail",1]...], ["shield",1]] or [[weapons...], [weapons...]]
-                            // This represents a choice of weapon from first array + additional items/weapons
-                            console.log(`→ Complex choice detected`);
-                            const weaponChoices = opt[0]; // Array of weapon choices like [["battleaxe",1], ["flail",1]...]
-                            const additionalItems = opt.slice(1); // Additional items like ["shield",1] or more weapon arrays
-
-                            // Create user-friendly description without auto-picking weapons
-                            const weaponDescription = `Choose weapon`;
-
-                            // Handle additional items - they could be simple items or weapon arrays
-                            const additionalDescriptions = additionalItems.map(item => {
-                                if (Array.isArray(item) && Array.isArray(item[0])) {
-                                    // This is another weapon array
-                                    return "Choose weapon";
-                                } else {
-                                    // This is a simple item like ["shield", 1]
-                                    return `${item[0]} (x${item[1]})`;
+                    description: equipChoice.description || '',
+                    options: equipChoice.options.map((opt, optIndex) => {
+                        if (opt.type === 'single') {
+                            // Single item choice
+                            return {
+                                item: opt.item,
+                                quantity: opt.quantity,
+                                type: 'single'
+                            };
+                        } else if (opt.type === 'bundle') {
+                            // Bundle of items
+                            const items = opt.items.map(i => `${i.item} (x${i.quantity})`).join(' + ');
+                            return {
+                                item: items,
+                                quantity: 1,
+                                isBundle: true,
+                                bundle: opt.items.map(i => [i.item, i.quantity]),
+                                type: 'bundle'
+                            };
+                        } else if (opt.type === 'multi_slot') {
+                            // Complex multi-slot choice (weapon+shield OR 2 weapons)
+                            const slotDescriptions = opt.slots.map(slot => {
+                                if (slot.type === 'weapon_choice') {
+                                    return 'Choose weapon';
+                                } else if (slot.type === 'fixed') {
+                                    return `${slot.item} (x${slot.quantity})`;
                                 }
+                                return 'Unknown slot';
                             });
 
-                            const description = [weaponDescription, ...additionalDescriptions].join(' + ');
-                            console.log(`→ Complex choice result: ${description}`);
                             return {
-                                item: description,
+                                item: slotDescriptions.join(' + '),
                                 quantity: 1,
                                 isComplexChoice: true,
-                                weaponSlots: opt.map((slot, index) => {
-                                    if (Array.isArray(slot) && Array.isArray(slot[0])) {
-                                        return { type: 'weapon_choice', options: slot, index: index };
-                                    } else {
-                                        return { type: 'fixed_item', item: slot, index: index };
+                                type: 'multi_slot',
+                                weaponSlots: opt.slots.map((slot, slotIndex) => {
+                                    if (slot.type === 'weapon_choice') {
+                                        // Convert weapon options to old format for compatibility
+                                        const weaponOptions = slot.options.map(w => [w, 1]);
+                                        return {
+                                            type: 'weapon_choice',
+                                            options: weaponOptions,
+                                            index: slotIndex
+                                        };
+                                    } else if (slot.type === 'fixed') {
+                                        return {
+                                            type: 'fixed_item',
+                                            item: [slot.item, slot.quantity],
+                                            index: slotIndex
+                                        };
                                     }
+                                    return { type: 'unknown', index: slotIndex };
                                 })
                             };
-                        } else {
-                            // Regular bundle: [["item1", 1], ["item2", 1]]
-                            console.log(`→ Regular bundle`);
-                            const items = opt.map(item => `${item[0]} (x${item[1]})`).join(' + ');
-                            return { item: items, quantity: 1, isBundle: true, bundle: opt };
                         }
+
+                        console.warn('Unknown option type:', opt);
+                        return { item: 'Unknown', quantity: 1 };
                     })
                 };
                 choices.push(choice);
-            }
-        });
+            });
+        }
 
+        // Add pack choice as a separate choice
+        if (gearConfig.pack_choice) {
+            const packChoice = {
+                id: 'pack-choice',
+                description: gearConfig.pack_choice.description || 'Choose your adventuring pack',
+                options: gearConfig.pack_choice.options.map(packId => ({
+                    item: packId,
+                    quantity: 1,
+                    type: 'single'
+                }))
+            };
+            choices.push(packChoice);
+        }
+
+        console.log(`✅ Generated ${choices.length} total choices for ${characterClass}:`, choices);
         return {
             inventory: inventory,
             equipment: equipment, // TODO: Handle default equipped items

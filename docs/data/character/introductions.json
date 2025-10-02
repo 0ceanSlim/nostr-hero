@@ -114,72 +114,53 @@
       "image": "scene4letter.png"
     }
   },
+  "scene5": {
+    "text": "The equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.",
+    "image": "scene5.png"
+  },
   "equipment_intros": {
     "warrior": {
-      "classes": [
-        "Fighter",
-        "Barbarian",
-        "Paladin"
-      ],
+      "classes": ["Fighter", "Barbarian", "Paladin"],
       "text": "Along the wall rest weapons and armor, maintained with meticulous care despite their age. The old caretaker had seldom spoken of battles fought, but their knowledge of war craft was unmistakable. The way they taught you to stand, to strike, to endure - these weren't lessons learned from books.",
       "quote": "Take what suits your strength. A warrior's tools should feel like extensions of the body, not burdens upon it.",
-      "image": "scene4.png"
+      "image": "scene5e.png"
     },
     "faithful": {
-      "classes": [
-        "Cleric",
-        "Paladin",
-        "Monk"
-      ],
+      "classes": ["Cleric", "Paladin", "Monk"],
       "text": "A modest altar sits in the corner, testament to devotion maintained through decades. The symbols of faith your caretaker cherished now seem to call to you with new purpose. Their teachings of discipline, meditation, and connection to forces beyond the material world echo in your mind.",
       "quote": "Faith and focus are weapons that never dull. When body and spirit align, even mountains can be moved.",
-      "image": "scene4.png"
+      "image": "scene5e.png"
     },
     "wilderness": {
-      "classes": [
-        "Ranger",
-        "Druid",
-        "Barbarian"
-      ],
+      "classes": ["Ranger", "Druid", "Barbarian"],
       "text": "Hunting tools, wilderness guides, and pouches of seeds and herbs hang from hooks by the door. The caretaker's connection to the natural world was profound - they could read weather in cloud patterns, predict game movements by subtle signs, and find sustenance where others saw only forest and field.",
       "quote": "Nature provides for those who understand her language. Respect her power, and she will lend it to you when needed.",
-      "image": "scene4.png"
+      "image": "scene5e.png"
     },
     "arcane": {
-      "classes": [
-        "Wizard",
-        "Sorcerer",
-        "Warlock"
-      ],
+      "classes": ["Wizard", "Sorcerer", "Warlock"],
       "text": "Curious implements, ancient texts, and containers of strange substances occupy a small desk. Though your caretaker rarely demonstrated their arcane knowledge openly, there were moments when the laws of nature seemed to bend around them. The occasional glimpses you caught of their true capabilities left more questions than answers.",
       "quote": "Power demands precision. A mind undisciplined is more dangerous to its owner than to any adversary.",
-      "image": "scene4.png"
+      "image": "scene5e.png"
     },
     "clever": {
-      "classes": [
-        "Rogue",
-        "Bard",
-        "Ranger"
-      ],
+      "classes": ["Rogue", "Bard", "Ranger"],
       "text": "Lockpicks, disguise elements, musical instruments, and other tools of cunning and charm rest in a compartment that, until recently, you hadn't known existed. Your caretaker's lessons in reading people, finding hidden paths, and turning disadvantages to advantages now reveal themselves as more than mere life skills.",
       "quote": "The clever tongue and the nimble hand open more doors than the strongest arm. But remember that trust, once broken, is the most difficult lock to pick.",
-      "image": "scene4.png"
+      "image": "scene5e.png"
     }
   },
-  "scene5": {
-    "text": "Whatever your calling, the equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.",
-    "image": "scene4.png"
-  },
   "scene5a": {
-    "text": "As dawn approaches, you prepare to leave the only home you've known. The items you select will help define the hero you become."
+    "text": "As dawn approaches, you prepare to leave the only home you've known. The items you select will help define the hero you become.",
+    "image": "scene5a.png"
   },
   "scene6": {
     "text": "Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:\n\n\"The weight you carry shapes the journey. Choose wisely.\"",
-    "image": "scene2.png"
+    "image": "scene6.png"
   },
   "departure": {
     "text": "With the letter carefully folded and tucked away, you gather what you need for the journey ahead. The road stretches before you, damp from the night's rain but illuminated by the breaking dawn.",
-    "image": "scene3.png"
+    "image": "scene7.png"
   },
   "final_text": {
     "text": "Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here."
