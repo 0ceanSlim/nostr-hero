@@ -4,6 +4,7 @@
 <script src="/res/js/session-manager.js"></script>
 <script src="/res/js/character-generator.js"></script>
 <script src="/res/components/continue-button.js"></script>
+<script src="/res/components/back-button.js"></script>
 <script src="/res/js/equipment-selection.js"></script>
 <script src="/res/js/game-intro.js"></script>
 
@@ -28,6 +29,51 @@
   to {
     opacity: 0;
     transform: translateY(-20px);
+  }
+}
+
+/* Equipment selection wipe animations */
+@keyframes wipeRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes wipeLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
@@ -133,17 +179,67 @@
     -2px 2px 0 0 #000;
 }
 
+/* Pixelated Back Button */
+.pixel-back-btn {
+  background: #6b7280;
+  color: #000;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 100;
+  text-shadow: none;
+
+  /* Pixelated border effect */
+  box-shadow:
+    0 -2px 0 0 #6b7280,
+    0 -3px 0 0 #000,
+    2px 0 0 0 #6b7280,
+    3px 0 0 0 #000,
+    0 2px 0 0 #6b7280,
+    0 3px 0 0 #000,
+    -2px 0 0 0 #6b7280,
+    -3px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+
+.pixel-back-btn:hover {
+  background: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow:
+    0 -2px 0 0 #9ca3af,
+    0 -3px 0 0 #000,
+    2px 0 0 0 #9ca3af,
+    3px 0 0 0 #000,
+    0 2px 0 0 #9ca3af,
+    0 4px 0 0 #000,
+    -2px 0 0 0 #9ca3af,
+    -3px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+
 /* Item Card Styles */
 .item-card {
-  opacity: 0;
-  animation: wipeIn 0.8s ease-out forwards;
-  animation-delay: 1s;
+  opacity: 1;
   border: none;
 }
 
 /* Container selection styles (for bundle and simple item containers) */
 [data-option-index] {
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 [data-option-index]:hover:not(.selected) {
@@ -155,10 +251,11 @@
   border-width: 3px !important;
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
   background-color: rgba(16, 185, 129, 0.05) !important;
+  box-sizing: border-box;
 }
 
-[data-option-index].selected * {
-  pointer-events: none !important;
+[data-option-index].selected .info-btn {
+  pointer-events: auto !important;
 }
 </style>
 

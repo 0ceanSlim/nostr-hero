@@ -135,9 +135,15 @@ class NostrCharacterGenerator {
         const race = character.race;
         const characterClass = character.class;
 
+        const backgroundIntro = this.introductions.background_intros.find(entry =>
+            entry.backgrounds.includes(background)
+        ) || this.introductions.background_intros.find(entry =>
+            entry.backgrounds.includes('Folk Hero')
+        );
+
         const introduction = {
             baseIntro: this.introductions.base_intro,
-            backgroundIntro: this.introductions.background_intros[background] || this.introductions.background_intros['Folk Hero'],
+            backgroundIntro: backgroundIntro,
             equipmentIntro: this.getEquipmentIntro(characterClass),
             finalNote: this.introductions.final_note,
             departure: this.introductions.departure

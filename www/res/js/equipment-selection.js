@@ -7,25 +7,158 @@ let currentChoiceIndex = 0;
 let selectedChoices = {};
 let equipmentChoices = [];
 let itemStatsCache = {}; // Cache for item stats
+let selectionHistory = []; // Track history for back button
+let currentBackButton = null; // Current back button element
+let backButtonCallback = null; // Callback to go back
 
 /**
- * Start equipment selection flow
+ * Start equipment selection flow (excluding pack)
  */
 async function startEquipmentSelection(equipment) {
   equipmentChoices = equipment.choices || [];
   currentChoiceIndex = 0;
   selectedChoices = {};
+  selectionHistory = []; // Clear history on new start
 
   if (equipmentChoices.length === 0) {
     return;
   }
 
-  // Show each choice as a separate scene
-  for (let i = 0; i < equipmentChoices.length; i++) {
-    currentChoiceIndex = i;
-    const choice = equipmentChoices[i];
-    await showEquipmentChoiceScene(choice, i);
+  // Show each choice as a separate scene (but stop before pack)
+  while (currentChoiceIndex < equipmentChoices.length) {
+    const choice = equipmentChoices[currentChoiceIndex];
+    const shouldGoBack = await showEquipmentChoiceScene(choice, currentChoiceIndex);
+
+    if (shouldGoBack) {
+      // Go back to previous choice
+      currentChoiceIndex--;
+      if (currentChoiceIndex >= 0) {
+        delete selectedChoices[currentChoiceIndex];
+      }
+    } else {
+      // Continue to next choice
+      currentChoiceIndex++;
+    }
   }
+}
+
+/**
+ * Handle pack selection (called after scene 6)
+ */
+async function handlePackSelection(packChoice, packGiven) {
+  const container = document.getElementById('scene-container');
+  const background = document.getElementById('scene-background');
+  const content = document.getElementById('scene-content');
+
+  // Show container
+  container.classList.remove('hidden');
+  container.classList.add('fade-in');
+  container.style.opacity = '1';
+
+  // Turn off background
+  background.style.backgroundImage = 'none';
+  background.style.backgroundColor = '#111827';
+  content.innerHTML = '';
+  content.style.zIndex = '10';
+
+  if (packChoice) {
+    // Player chooses pack
+    const title = document.createElement('div');
+    title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+    title.textContent = 'Choose Your Pack';
+    content.appendChild(title);
+
+    const description = document.createElement('div');
+    description.className = 'scene-text text-lg mb-6';
+    description.textContent = packChoice.description;
+    content.appendChild(description);
+
+    // Create options container
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6';
+
+    let selectedPackIndex = null;
+
+    // Create pack options
+    for (let i = 0; i < packChoice.options.length; i++) {
+      const packName = packChoice.options[i];
+      const packContainer = document.createElement('div');
+      packContainer.className = 'bg-gray-800 rounded-lg p-4 cursor-pointer transition-all';
+      packContainer.style.border = '3px solid #374151';
+      packContainer.style.boxSizing = 'border-box';
+      packContainer.style.minWidth = '200px';
+      packContainer.setAttribute('data-option-index', i);
+
+      const packTitle = document.createElement('div');
+      packTitle.className = 'text-lg font-bold text-yellow-400 mb-2';
+      packTitle.textContent = packName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      packContainer.appendChild(packTitle);
+
+      packContainer.onclick = () => {
+        // Deselect all
+        optionsContainer.querySelectorAll('[data-option-index]').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        // Select this one
+        packContainer.classList.add('selected');
+        selectedPackIndex = i;
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      };
+
+      optionsContainer.appendChild(packContainer);
+    }
+
+    content.appendChild(optionsContainer);
+
+    // Confirm button
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'pixel-continue-btn';
+    confirmBtn.textContent = 'Confirm Selection';
+    confirmBtn.disabled = true;
+    confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    content.appendChild(confirmBtn);
+
+    // Wait for selection
+    await new Promise(resolve => {
+      confirmBtn.onclick = () => {
+        if (selectedPackIndex !== null) {
+          selectedChoices['pack'] = packChoice.options[selectedPackIndex];
+          resolve();
+        }
+      };
+    });
+
+  } else if (packGiven) {
+    // Show given pack
+    const title = document.createElement('div');
+    title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+    title.textContent = 'Your Pack';
+    content.appendChild(title);
+
+    const packName = packGiven[0].item;
+    const packTitle = document.createElement('div');
+    packTitle.className = 'text-lg font-bold text-green-400 mb-2';
+    packTitle.textContent = packName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    content.appendChild(packTitle);
+
+    selectedChoices['pack'] = packName;
+
+    // Continue button
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'pixel-continue-btn mt-6';
+    continueBtn.textContent = 'Continue';
+    content.appendChild(continueBtn);
+
+    await new Promise(resolve => {
+      continueBtn.onclick = resolve;
+    });
+  }
+
+  // Fade out
+  content.style.animation = 'wipeRight 0.3s ease-in';
+  await new Promise(resolve => setTimeout(resolve, 300));
+  container.classList.add('hidden');
 }
 
 /**
@@ -48,15 +181,15 @@ async function showEquipmentChoiceScene(choice, choiceIndex) {
   title.textContent = `Choose Your Equipment (${choiceIndex + 1} of ${equipmentChoices.length})`;
   content.appendChild(title);
 
-  // Check if any option is a complex choice
-  const hasComplexChoice = choice.options.some(opt => opt.isComplexChoice);
+  // Check if any option is a complex choice (multi_slot)
+  const complexOptions = choice.options.filter(opt => opt.isComplexChoice);
 
-  if (hasComplexChoice) {
-    // Show complex choice with weapon slots
-    await showComplexChoiceSelection(content, choice, choiceIndex);
+  if (complexOptions.length > 0) {
+    // Show complex choice with weapon slots (two-step process)
+    return await showMultiSlotChoiceSelection(content, choice, choiceIndex, complexOptions);
   } else {
     // Show regular choice
-    await showRegularChoiceSelection(content, choice, choiceIndex);
+    return await showRegularChoiceSelection(content, choice, choiceIndex);
   }
 }
 
@@ -90,6 +223,7 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
 
   let selectedOption = null;
   let selectedOptionIndex = null;
+  let userClickedBack = false;
 
   // Separate bundles from simple items
   const bundles = choice.options.filter(opt => opt.isBundle);
@@ -127,17 +261,11 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
       console.log('  Found', allContainers.length, 'option containers to deselect');
       allContainers.forEach(row => {
         row.classList.remove('selected');
-        row.style.border = ''; // Clear custom border
-        row.style.boxShadow = '';
-        row.style.backgroundColor = '';
       });
 
-      // Select this container with strong visual feedback
+      // Select this container - let CSS handle the styling
       container.classList.add('selected');
-      container.style.border = '4px solid #10b981'; // Green border
-      container.style.boxShadow = '0 0 30px rgba(16, 185, 129, 0.8)'; // Green glow
-      container.style.backgroundColor = '#1f2937'; // Darker background
-      console.log('  Applied green border and shadow to container');
+      console.log('  Applied selected class to container');
 
       selectedOption = option;
       selectedOptionIndex = optionIndex;
@@ -156,8 +284,13 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
 
       // Create outer container for the bundle (this is what gets clicked and highlighted)
       const bundleContainer = document.createElement('div');
-      bundleContainer.className = 'p-4 bg-gray-800 rounded-lg border-2 border-gray-700';
+      bundleContainer.className = 'bg-gray-800 rounded-lg';
+      bundleContainer.style.padding = '0.75rem'; // Match gap between items (gap-3 = 0.75rem)
+      bundleContainer.style.border = '3px solid #374151'; // Start with 3px border
       bundleContainer.style.cursor = 'pointer';
+      bundleContainer.style.boxSizing = 'border-box';
+      bundleContainer.style.width = 'fit-content'; // Only as wide as content
+      bundleContainer.style.margin = '0 auto'; // Center it
 
       // Add bundle label
       const bundleLabel = document.createElement('div');
@@ -205,13 +338,21 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
   // Render simple items in a grid
   if (simpleItems.length > 0) {
     const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3';
+    gridContainer.className = 'flex flex-wrap justify-center gap-3';
+
+    // Use actual grid only if there are many items
+    if (simpleItems.length > 4) {
+      gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3';
+    }
 
     simpleItems.forEach((option, idx) => {
       const optionIndex = choice.options.indexOf(option);
       const itemsRow = document.createElement('div');
-      itemsRow.className = 'flex flex-row justify-center gap-2 flex-wrap p-2 bg-gray-800 rounded-lg border-2 border-gray-700';
+      itemsRow.className = 'flex flex-row justify-center gap-2 flex-wrap p-2 bg-gray-800 rounded-lg';
+      itemsRow.style.border = '3px solid #374151'; // Start with 3px border
       itemsRow.style.cursor = 'pointer';
+      itemsRow.style.boxSizing = 'border-box';
+      itemsRow.style.width = 'fit-content'; // Only as wide as content
 
       const itemCard = createSimpleItemCard(option.item, option.quantity, false);
 
@@ -243,22 +384,357 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
   confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
   content.appendChild(confirmBtn);
 
-  // Show scene
-  container.classList.remove('hidden', 'fade-out');
-  container.classList.add('fade-in');
+  // Add back button if this is not the first choice
+  if (choiceIndex > 0) {
+    const backBtn = createBackButton(() => {
+      userClickedBack = true;
+      // Enable confirm button so it can be clicked
+      confirmBtn.disabled = false;
+      confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      confirmBtn.click(); // Trigger the waiting promise to resolve
+    });
+    document.body.appendChild(backBtn);
+    currentBackButton = backBtn;
+  }
+
+  // Show scene with slide in animation (from right if moving forward, from left if coming back)
+  container.classList.remove('hidden');
+  container.style.opacity = '1';
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
 
   // Wait for confirmation
   await waitForButtonClick(confirmBtn);
 
+  // Remove back button
+  if (currentBackButton) {
+    currentBackButton.remove();
+    currentBackButton = null;
+  }
+
+  // Animate out with wipe
+  if (userClickedBack) {
+    content.style.animation = 'wipeLeft 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+    content.innerHTML = '';
+    return true; // Signal to go back
+  } else {
+    content.style.animation = 'wipeRight 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+    content.innerHTML = '';
+  }
+
   // Store selection
   selectedChoices[choiceIndex] = selectedOption;
 
-  // Animate out
-  await animateSceneOut(content, container);
+  return false; // Continue forward
 }
 
 /**
- * Show complex choice selection (weapon slots)
+ * Show multi-slot choice selection (two-step process)
+ * Step 1: Choose configuration (weapon+shield OR 2 weapons)
+ * Step 2: Choose specific weapons for each slot
+ */
+async function showMultiSlotChoiceSelection(content, choice, choiceIndex, complexOptions) {
+  const container = document.getElementById('scene-container');
+
+  // Step 1: Show configuration options
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'w-full max-w-6xl mx-auto overflow-y-auto px-4 mb-4';
+  scrollContainer.style.maxHeight = 'calc(100vh - 280px)';
+
+  const optionsContainer = document.createElement('div');
+  optionsContainer.className = 'flex flex-col gap-6';
+
+  let selectedConfiguration = null;
+  let selectedConfigIndex = null;
+  let userClickedBack = false;
+
+  // Render each multi-slot configuration
+  complexOptions.forEach((option, idx) => {
+    const optionIndex = choice.options.indexOf(option);
+
+    // Create container for this configuration
+    const configContainer = document.createElement('div');
+    configContainer.className = 'p-6 bg-gray-800 rounded-lg';
+    configContainer.style.border = '3px solid #374151'; // Start with 3px border
+    configContainer.style.cursor = 'pointer';
+    configContainer.style.boxSizing = 'border-box';
+    configContainer.dataset.optionIndex = optionIndex;
+
+    // Configuration title
+    const configTitle = document.createElement('div');
+    configTitle.className = 'text-center text-yellow-400 font-bold text-lg mb-4';
+    configTitle.textContent = `Option ${idx + 1}`;
+    configContainer.appendChild(configTitle);
+
+    // Show slot descriptions
+    const slotsDesc = document.createElement('div');
+    slotsDesc.className = 'text-center text-gray-300 space-y-2';
+
+    option.weaponSlots.forEach((slot, slotIdx) => {
+      const slotDiv = document.createElement('div');
+      if (slot.type === 'weapon_choice') {
+        slotDiv.innerHTML = `<span class="text-green-400">⚔️ Choose a weapon</span> from ${slot.options.length} options`;
+      } else if (slot.type === 'fixed_item') {
+        slotDiv.innerHTML = `<span class="text-blue-400">🛡️ ${slot.item[0]}</span> (included)`;
+      }
+      slotsDesc.appendChild(slotDiv);
+    });
+
+    configContainer.appendChild(slotsDesc);
+
+    // Click handler for configuration selection
+    configContainer.onclick = () => {
+      // Deselect all
+      optionsContainer.querySelectorAll('[data-option-index]').forEach(row => {
+        row.classList.remove('selected');
+      });
+
+      // Select this one
+      configContainer.classList.add('selected');
+      selectedConfiguration = option;
+      selectedConfigIndex = optionIndex;
+      confirmBtn.disabled = false;
+      confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    };
+
+    optionsContainer.appendChild(configContainer);
+
+    // Add OR separator
+    if (idx < complexOptions.length - 1) {
+      const separator = document.createElement('div');
+      separator.className = 'text-center text-yellow-400 font-bold text-xl my-2';
+      separator.textContent = '— OR —';
+      optionsContainer.appendChild(separator);
+    }
+  });
+
+  scrollContainer.appendChild(optionsContainer);
+  content.appendChild(scrollContainer);
+
+  // Confirm button
+  const confirmBtn = createContinueButton(0, 'Confirm Configuration');
+  confirmBtn.disabled = true;
+  confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  content.appendChild(confirmBtn);
+
+  // Add back button if this is not the first choice
+  if (choiceIndex > 0) {
+    const backBtn = createBackButton(() => {
+      userClickedBack = true;
+      // Enable confirm button so it can be clicked
+      confirmBtn.disabled = false;
+      confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      confirmBtn.click();
+    });
+    document.body.appendChild(backBtn);
+    currentBackButton = backBtn;
+  }
+
+  // Show scene with slide in animation
+  container.classList.remove('hidden');
+  container.style.opacity = '1';
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
+
+  // Wait for configuration selection
+  await waitForButtonClick(confirmBtn);
+
+  // Remove back button
+  if (currentBackButton) {
+    currentBackButton.remove();
+    currentBackButton = null;
+  }
+
+  // Animate out with wipe
+  if (userClickedBack) {
+    content.style.animation = 'wipeLeft 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+    content.innerHTML = '';
+    return true; // Signal to go back
+  } else {
+    content.style.animation = 'wipeRight 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+    content.innerHTML = '';
+  }
+
+  // Step 2: Now show weapon selection for each slot in the chosen configuration
+  const weaponSelections = {};
+  let currentSlotIdx = 0;
+  let weaponChoiceIndices = []; // Track which slots are weapon choices (for back navigation)
+
+  // Build list of weapon choice indices
+  selectedConfiguration.weaponSlots.forEach((slot, idx) => {
+    if (slot.type === 'weapon_choice') {
+      weaponChoiceIndices.push(idx);
+    }
+  });
+
+  let weaponChoicePosition = 0; // Position in weaponChoiceIndices array
+
+  while (weaponChoicePosition < weaponChoiceIndices.length) {
+    currentSlotIdx = weaponChoiceIndices[weaponChoicePosition];
+    const slot = selectedConfiguration.weaponSlots[currentSlotIdx];
+
+    // Show weapon selection scene
+    const result = await showWeaponSlotSelection(slot, weaponChoicePosition, weaponChoiceIndices.length, choiceIndex);
+
+    if (result.shouldGoBack) {
+      // Go back to previous weapon choice, or back to configuration if first
+      if (weaponChoicePosition > 0) {
+        weaponChoicePosition--;
+        const prevSlotIdx = weaponChoiceIndices[weaponChoicePosition];
+        delete weaponSelections[prevSlotIdx];
+      } else {
+        // Go back to configuration selection - restart the whole multi-slot process
+        return await showMultiSlotChoiceSelection(content, choice, choiceIndex, complexOptions);
+      }
+    } else {
+      weaponSelections[currentSlotIdx] = result.selectedWeapon;
+      weaponChoicePosition++;
+    }
+  }
+
+  // Fill in fixed items
+  selectedConfiguration.weaponSlots.forEach((slot, idx) => {
+    if (slot.type === 'fixed_item') {
+      weaponSelections[idx] = slot.item;
+    }
+  });
+
+  // Build final selection
+  const finalSelection = {
+    isComplexChoice: true,
+    weapons: Object.values(weaponSelections)
+  };
+
+  // Store selection
+  selectedChoices[choiceIndex] = finalSelection;
+  return false; // Continue forward
+}
+
+/**
+ * Show weapon selection for a single slot
+ */
+async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex) {
+  const container = document.getElementById('scene-container');
+  const content = document.getElementById('scene-content');
+
+  content.innerHTML = '';
+
+  // Title
+  const title = document.createElement('div');
+  title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+  title.textContent = `Choose Weapon ${slotIndex + 1} of ${totalSlots}`;
+  content.appendChild(title);
+
+  // Preload weapon stats
+  await preloadItemStats(slot.options.map(w => w[0]));
+
+  // Scrollable container
+  const scrollContainer = document.createElement('div');
+  scrollContainer.className = 'w-full max-w-6xl mx-auto overflow-y-auto px-4 mb-4';
+  scrollContainer.style.maxHeight = 'calc(100vh - 280px)';
+
+  // Grid for weapons
+  const gridContainer = document.createElement('div');
+  gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3';
+
+  let selectedWeapon = null;
+  let userClickedBack = false;
+
+  slot.options.forEach((weaponOption, idx) => {
+    const weaponName = weaponOption[0];
+    const quantity = weaponOption[1];
+
+    const itemContainer = document.createElement('div');
+    itemContainer.className = 'flex flex-row justify-center gap-2 flex-wrap p-2 bg-gray-800 rounded-lg';
+    itemContainer.style.border = '3px solid #374151'; // Start with 3px border
+    itemContainer.style.cursor = 'pointer';
+    itemContainer.style.boxSizing = 'border-box';
+    itemContainer.dataset.optionIndex = idx;
+
+    const itemCard = createSimpleItemCard(weaponName, quantity, false);
+
+    // Prevent card clicks, redirect to container
+    itemCard.addEventListener('click', (e) => {
+      if (!e.target.closest('.info-btn')) {
+        e.stopPropagation();
+        itemContainer.click();
+      }
+    });
+
+    itemContainer.onclick = (e) => {
+      if (e.target.closest('.info-btn')) return;
+
+      // Deselect all
+      gridContainer.querySelectorAll('[data-option-index]').forEach(row => {
+        row.classList.remove('selected');
+      });
+
+      // Select this one
+      itemContainer.classList.add('selected');
+      selectedWeapon = weaponOption;
+      confirmBtn.disabled = false;
+      confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    };
+
+    itemContainer.appendChild(itemCard);
+    gridContainer.appendChild(itemContainer);
+  });
+
+  scrollContainer.appendChild(gridContainer);
+  content.appendChild(scrollContainer);
+
+  // Confirm button
+  const confirmBtn = createContinueButton(0, 'Confirm Weapon');
+  confirmBtn.disabled = true;
+  confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  content.appendChild(confirmBtn);
+
+  // Add back button (always show during weapon selection, since we can go back to config or previous weapon)
+  const backBtn = createBackButton(() => {
+    userClickedBack = true;
+    // Enable confirm button so it can be clicked
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    confirmBtn.click();
+  });
+  document.body.appendChild(backBtn);
+  currentBackButton = backBtn;
+
+  // Show scene with slide in animation
+  container.classList.remove('hidden');
+  container.style.opacity = '1';
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
+
+  // Wait for weapon selection
+  await waitForButtonClick(confirmBtn);
+
+  // Remove back button
+  if (currentBackButton) {
+    currentBackButton.remove();
+    currentBackButton = null;
+  }
+
+  // Animate out with wipe
+  if (userClickedBack) {
+    content.style.animation = 'wipeLeft 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+  } else {
+    content.style.animation = 'wipeRight 0.3s ease-in';
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  content.innerHTML = '';
+
+  return {
+    selectedWeapon: selectedWeapon,
+    shouldGoBack: userClickedBack
+  };
+}
+
+/**
+ * DEPRECATED: Old complex choice selection (kept for reference)
  */
 async function showComplexChoiceSelection(content, choice, choiceIndex) {
   const container = document.getElementById('scene-container');
@@ -414,56 +890,105 @@ function createEquipmentCard(option) {
 }
 
 /**
+ * Get rarity color based on item rarity
+ */
+function getRarityColor(itemName) {
+  // TODO: This should come from item data
+  // For now, defaulting to common (grey)
+  const rarityColors = {
+    'common': '#9ca3af',      // grey
+    'uncommon': '#10b981',    // green
+    'rare': '#3b82f6',        // blue
+    'legendary': '#a855f7',   // purple
+    'mythic': '#f97316'       // orange
+  };
+  return rarityColors.common; // Default to common for now
+}
+
+/**
  * Create a simple item card (for use in weapon slots and simple items)
  */
 function createSimpleItemCard(itemName, quantity, isInBundle = false) {
   const card = document.createElement('div');
-  card.className = 'item-card bg-gray-800 rounded-lg p-2 transition-all hover:scale-105 relative';
-  card.style.width = '100px';
-  card.style.minHeight = '120px';
+  card.className = 'item-card bg-gray-800 rounded-lg relative overflow-hidden';
+  card.style.width = '110px';
+  card.style.height = '110px';
+  card.style.aspectRatio = '1/1';
+
+  // Add border for bundle items to differentiate them
+  if (isInBundle) {
+    card.style.border = '2px solid #4b5563'; // gray border for bundle items
+  }
 
   // Only add cursor pointer if not in bundle (bundle items aren't individually clickable)
   if (!isInBundle) {
     card.style.cursor = 'pointer';
   }
 
-  // Info button (question mark)
-  const infoBtn = document.createElement('button');
-  infoBtn.className = 'info-btn absolute top-1 right-1 w-5 h-5 bg-yellow-400 text-black rounded-full text-xs font-bold flex items-center justify-center hover:bg-yellow-300 transition-colors z-10';
-  infoBtn.textContent = '?';
-  infoBtn.style.fontSize = '10px';
-  infoBtn.onclick = (e) => {
-    e.stopPropagation(); // Don't trigger card/container selection
-    showItemModal(itemName);
-  };
-  card.appendChild(infoBtn);
-
-  // Item image
+  // Item image (fills 80% of container)
   const img = document.createElement('img');
   img.src = `/res/img/items/${getItemImageName(itemName)}.png`;
   img.alt = itemName;
-  img.className = 'w-14 h-14 mx-auto mb-1 object-contain';
+  img.className = 'absolute inset-0 w-full h-full object-contain p-3';
   img.onerror = () => {
     img.src = '/res/img/otherstuff.png';
   };
   card.appendChild(img);
 
-  // Item name
+  // Rarity dot (top right, larger)
+  const rarityDot = document.createElement('div');
+  rarityDot.className = 'absolute top-1.5 right-1.5 z-10';
+  rarityDot.style.width = '10px';
+  rarityDot.style.height = '10px';
+  rarityDot.style.borderRadius = '50%';
+  rarityDot.style.backgroundColor = getRarityColor(itemName);
+  rarityDot.style.border = '1px solid rgba(0,0,0,0.3)';
+  card.appendChild(rarityDot);
+
+  // Quantity text (top left, purple text only, larger)
+  if (quantity && quantity > 1) {
+    const qtyText = document.createElement('div');
+    qtyText.className = 'absolute top-1 left-1.5 z-10 font-bold';
+    qtyText.style.color = '#a855f7'; // purple
+    qtyText.style.fontSize = '0.85rem';
+    qtyText.style.textShadow = '0 0 3px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.9)';
+    qtyText.textContent = `×${quantity}`;
+    card.appendChild(qtyText);
+  }
+
+  // Item name overlay at bottom (will be populated with actual name from item data)
   const name = document.createElement('div');
-  name.className = 'text-center text-white font-semibold text-xs leading-tight mb-1 px-1';
+  name.className = 'item-name absolute bottom-0 left-0 right-0 text-center text-white font-semibold px-1 py-1 z-10';
   name.style.fontSize = '0.65rem';
-  name.style.lineHeight = '0.9rem';
-  name.textContent = itemName;
+  name.style.lineHeight = '0.75rem';
+  name.style.backgroundColor = 'rgba(0,0,0,0.6)';
+  name.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+  name.dataset.itemId = itemName; // Store item ID for lookup
+  name.textContent = itemName; // Temporary - will be replaced by actual name
   card.appendChild(name);
 
-  // Quantity
-  if (quantity && quantity > 1) {
-    const qtyDiv = document.createElement('div');
-    qtyDiv.className = 'text-center text-gray-400';
-    qtyDiv.style.fontSize = '0.6rem';
-    qtyDiv.textContent = `x${quantity}`;
-    card.appendChild(qtyDiv);
-  }
+  // Fetch and update with actual item name
+  getItemStats(itemName).then(() => {
+    const cachedData = itemStatsCache[itemName];
+    if (cachedData) {
+      const nameMatch = cachedData.match(/<div class="font-bold text-yellow-400[^>]*>([^<]+)<\/div>/);
+      if (nameMatch && nameMatch[1]) {
+        name.textContent = nameMatch[1];
+      }
+    }
+  });
+
+  // Info button (bottom right, yellow ?, larger, hover effect)
+  const infoBtn = document.createElement('button');
+  infoBtn.className = 'info-btn absolute bottom-1 right-1.5 text-yellow-400 font-bold hover:text-green-400 transition-colors z-20';
+  infoBtn.textContent = '?';
+  infoBtn.style.fontSize = '16px';
+  infoBtn.style.textShadow = '0 0 3px rgba(0,0,0,0.8), 1px 1px 2px rgba(0,0,0,0.9)';
+  infoBtn.onclick = (e) => {
+    e.stopPropagation(); // Don't trigger card/container selection
+    showItemModal(itemName);
+  };
+  card.appendChild(infoBtn);
 
   return card;
 }

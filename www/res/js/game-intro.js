@@ -208,37 +208,59 @@ async function startIntroSequence() {
   });
 
   // 3. Final Words (black screen quote)
+  console.log('🎬 Step 3: Final Words');
   await showScene({
     text: introData.final_words.text,
     isQuote: true
   });
 
-  // 4. Background Scene (scene 3)
-  const bgIntro = introData.background_intros[generatedCharacter.background];
+  // 4. Background Intro - MOVED BEFORE letter intro
+  console.log('🎬 Step 4: Background Intro for:', generatedCharacter.background);
+  const bgIntro = introData.background_intros.find(entry =>
+    entry.backgrounds.includes(generatedCharacter.background)
+  );
+  console.log('🎬 Background intro data:', bgIntro);
   if (bgIntro) {
+    console.log('🎬 Showing background intro scene');
     await showScene({
       text: bgIntro.text,
       image: bgIntro.image
     });
+  } else {
+    console.warn('⚠️ No background intro found for:', generatedCharacter.background);
   }
 
-  // 5. Letter Intro (scene 4)
+  // 5. Letter Intro - MOVED AFTER background intro
+  console.log('🎬 Step 5: Letter Intro');
   await showScene({
     text: introData.letter_intro.text,
     image: introData.letter_intro.image
   });
 
   // 6. Letter Reading (scene 4a)
-  const bgLetter = introData.background_letters[generatedCharacter.background];
+  console.log('🎬 Step 6: Letter Reading for:', generatedCharacter.background);
+  const bgLetter = introData.background_letters.find(entry =>
+    entry.backgrounds.includes(generatedCharacter.background)
+  );
+  console.log('🎬 Background letter data:', bgLetter);
   if (bgLetter) {
+    console.log('🎬 Showing letter reading scene');
     await showScene({
       text: bgLetter.text,
       image: bgLetter.image,
       isLetter: true
     });
+  } else {
+    console.warn('⚠️ No background letter found for:', generatedCharacter.background);
   }
 
-  // 7. Equipment Intro (class-based) - narrative + quote
+  // 7. Scene 5 - Equipment ready
+  await showScene({
+    text: introData.scene5.text,
+    image: introData.scene5.image
+  });
+
+  // 8. Equipment Intro (class-based) - narrative + quote
   const equipCategory = getEquipmentCategory(generatedCharacter.class);
   const equipIntro = introData.equipment_intros[equipCategory];
   if (equipIntro) {
@@ -257,13 +279,13 @@ async function startIntroSequence() {
     }
   }
 
-  // 8. Scene 5 - Equipment ready
+  // 9. Scene 5a (black screen quote) - MOVED HERE before equipment selection
   await showScene({
-    text: introData.scene5.text,
-    image: introData.scene5.image
+    text: introData.scene5a.text,
+    isQuote: true
   });
 
-  // 9. Show equipment selection
+  // 10. Show equipment selection
   await startEquipmentSelection(startingEquipment);
 
   // Get selected equipment
@@ -297,27 +319,22 @@ async function skipToEquipment() {
  */
 async function continueAfterEquipment() {
 
-  // 10. Scene 5a (black screen quote)
-  await showScene({
-    text: introData.scene5a.text,
-    isQuote: true
-  });
-
-  // 11. Scene 6 - Pack
+  // 11. Scene 6 - Pack note
   await showScene({
     text: introData.scene6.text,
     image: introData.scene6.image
   });
 
-  // TODO: Pack selection would go here
+  // 12. Pack selection
+  await handlePackSelection(startingEquipment.pack_choice, startingEquipment.pack_given);
 
-  // 12. Departure
+  // 13. Departure
   await showScene({
     text: introData.departure.text,
     image: introData.departure.image
   });
 
-  // 13. Final Text + Begin Journey button
+  // 14. Final Text + Begin Journey button
   await showFinalScene(
     introData.final_text.text,
     'Begin Journey',
