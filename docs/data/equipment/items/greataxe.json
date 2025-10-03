@@ -2,6 +2,7 @@
   "id": "greataxe",
   "name": "Greataxe",
   "description": "",
+  "ai_description": "enormous single-bladed axe with massive curved steel head, long wooden handle, barbarian's two-handed cleaving weapon",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 7.0,

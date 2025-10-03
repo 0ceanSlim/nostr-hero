@@ -2,6 +2,7 @@
   "id": "plate",
   "name": "Plate",
   "description": "",
+  "ai_description": "full suit of articulated steel plates, gleaming knight's armor with pauldrons, breastplate, and helm, ultimate protection",
   "price": 150000,
   "type": "Heavy Armor",
   "weight": 65.0,

@@ -2,6 +2,7 @@
   "id": "blowgun",
   "name": "Blowgun",
   "description": "",
+  "ai_description": "long hollow wooden tube with carved mouthpiece, slender blowpipe for shooting small darts, tribal hunting weapon",
   "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 1.0,

@@ -2,6 +2,7 @@
   "id": "bat-wing",
   "name": "Bat Wing",
   "description": "A leathery wing membrane from a cave bat, still radiating the essence of flight and darkness.",
+  "ai_description": "dark leathery membrane with thin wing bones, stretched bat wing with shadowy aura and translucent skin",
   "price": 30,
   "type": "Spell Component",
   "weight": 0.1,

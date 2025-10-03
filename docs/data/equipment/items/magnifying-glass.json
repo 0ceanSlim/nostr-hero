@@ -2,6 +2,7 @@
   "id": "magnifying-glass",
   "name": "Magnifying glass",
   "description": "A convex lens in a handle that makes small objects appear larger for detailed examination.",
+  "ai_description": "round magnifying lens with wooden handle, investigation tool for examining fine details and small text",
   "price": 10000,
   "type": "Adventuring Gear",
   "weight": 0.1,

@@ -2,6 +2,7 @@
   "id": "bagpipe",
   "name": "Bagpipe",
   "description": "A musical wind instrument with enclosed reeds fed from a constant reservoir of air in the form of a bag. Proficiency with this instrument allows you to add your proficiency bonus to any ability checks you make to play music with it.",
+  "ai_description": "traditional bagpipe with leather air bag and wooden pipes, scottish instrument with drone pipes and chanter",
   "price": 3000,
   "type": "Musical Instrument",
   "weight": 6.0,

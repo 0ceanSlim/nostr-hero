@@ -2,6 +2,7 @@
   "id": "hammer-sledge",
   "name": "Sledge Hammer",
   "description": "A heavy two-handed hammer designed for breaking through walls and large objects.",
+  "ai_description": "massive steel-headed hammer with long wooden handle, heavy demolition tool with flat striking face",
   "price": 200,
   "type": "Adventuring Gear",
   "weight": 10.0,

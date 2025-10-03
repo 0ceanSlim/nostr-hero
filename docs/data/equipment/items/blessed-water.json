@@ -2,6 +2,7 @@
   "id": "blessed-water",
   "name": "Blessed Water",
   "description": "Water that has been consecrated by divine magic. It glows faintly with holy light and is warm to the touch. Required for casting Bless spells.",
+  "ai_description": "small vial of glowing holy water, blessed liquid with soft golden radiance and pure white glow",
   "price": 100,
   "type": "Spell Component",
   "weight": 0.1,

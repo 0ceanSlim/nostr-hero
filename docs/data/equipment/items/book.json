@@ -1,6 +1,8 @@
 {
   "id": "book",
   "name": "Book",
+  "description": "",
+  "ai_description": "leather-bound tome with yellowed pages, thick book with metal clasps and embossed cover design",
   "price": 2500,
   "type": "Adventuring Gear",
   "weight": 5,

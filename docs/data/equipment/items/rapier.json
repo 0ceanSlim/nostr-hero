@@ -2,6 +2,7 @@
   "id": "rapier",
   "name": "Rapier",
   "description": "",
+  "ai_description": "slender thrusting sword with narrow blade and elaborate bell guard, dueling weapon with sharp point and basket hilt",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,

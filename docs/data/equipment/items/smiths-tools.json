@@ -2,6 +2,7 @@
   "id": "smiths-tools",
   "name": "Smith's tools",
   "description": "Heavy hammers, tongs, and anvil accessories needed for working metal and forging weapons or armor.",
+  "ai_description": "blacksmith's hammers, tongs, and anvil tools, metalworking implements for forging steel weapons",
   "price": 2000,
   "type": "Artisan's Tools",
   "weight": 8.0,

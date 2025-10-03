@@ -2,6 +2,7 @@
   "id": "net",
   "name": "Net",
   "description": "",
+  "ai_description": "large fishing net with weighted edges and hemp rope, gladiator's throwing weapon for capturing enemies",
   "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 3.0,

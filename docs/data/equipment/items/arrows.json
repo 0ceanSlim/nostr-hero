@@ -1,6 +1,8 @@
 {
   "id": "arrows",
   "name": "Arrows",
+  "description": "",
+  "ai_description": "bundle of wooden arrows with steel points and feathered fletching, straight shafts for bow shooting with sharp tips",
   "price": 5,
   "type": "Ammunition",
   "weight": 0,

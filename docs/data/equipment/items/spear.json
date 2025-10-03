@@ -2,6 +2,7 @@
   "id": "spear",
   "name": "Spear",
   "description": "",
+  "ai_description": "long wooden shaft with sharp iron spearhead, classic thrusting weapon with metal point and leather grip",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 3.0,

@@ -2,6 +2,7 @@
   "id": "splint",
   "name": "Splint",
   "description": "",
+  "ai_description": "heavy armor with vertical metal strips over mail backing, plate segments connected by flexible chain",
   "price": 20000,
   "type": "Heavy Armor",
   "weight": 60.0,

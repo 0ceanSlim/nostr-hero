@@ -2,6 +2,7 @@
   "id": "longbow",
   "name": "Longbow",
   "description": "",
+  "ai_description": "tall recurved bow made from yew wood, elegant archery weapon with leather grip and bowstring, traditional ranger's weapon",
   "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 2.0,

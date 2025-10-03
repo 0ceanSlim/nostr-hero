@@ -2,6 +2,7 @@
   "id": "lamp",
   "name": "Lamp",
   "description": "An oil-burning lamp that provides steady light when fueled.",
+  "ai_description": "metal oil lamp with glass chimney and carrying handle, fuel-burning light source with wick and reservoir",
   "price": 50,
   "ac": null,
   "damage": null,

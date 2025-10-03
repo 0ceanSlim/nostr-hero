@@ -1,6 +1,7 @@
 {
   "id": "chain-shirt",
   "name": "Chain Shirt",
+  "ai_description": "lightweight armor of interlocked metal rings, flexible chainmail covering torso and shoulders",
   "price": 5000,
   "type": "Medium Armor",
   "weight": 20.0,

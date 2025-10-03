@@ -2,6 +2,7 @@
   "id": "shortbow",
   "name": "Shortbow",
   "description": "A compact recurved bow made for mobility and quick shots in combat.",
+  "ai_description": "compact curved bow made from flexible wood, shorter archery weapon with wrapped grip and taut bowstring",
   "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 2.0,

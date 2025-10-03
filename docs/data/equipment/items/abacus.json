@@ -2,6 +2,7 @@
   "id": "abacus",
   "name": "Abacus",
   "description": "A standard tool used to make calculations.",
+  "ai_description": "wooden rectangular counting frame with horizontal rods, colorful sliding beads arranged in rows, ancient calculation tool",
   "price": 200,
   "type": "Adventuring Gear",
   "weight": 2,

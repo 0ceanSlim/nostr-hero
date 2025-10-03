@@ -2,6 +2,7 @@
   "id": "club",
   "name": "Club",
   "description": "A simple wooden club, rough-hewn and heavy enough to deal damage in close combat.",
+  "ai_description": "crude wooden club with thick heavy end, rough-hewn branch or stick used as primitive bludgeoning weapon",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 2.0,

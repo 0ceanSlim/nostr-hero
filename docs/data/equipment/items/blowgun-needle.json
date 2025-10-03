@@ -12,5 +12,6 @@
   "img": "equipment/ammunition.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "ai_description": "Thin sharp dart with feathered end and metal tip"
 }

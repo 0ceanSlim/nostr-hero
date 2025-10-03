@@ -2,6 +2,7 @@
   "id": "ring-mail",
   "name": "Ring Mail",
   "description": "",
+  "ai_description": "leather armor with metal rings sewn onto surface, reinforced hide vest with iron ring attachments",
   "price": 3000,
   "type": "Heavy Armor",
   "weight": 40.0,

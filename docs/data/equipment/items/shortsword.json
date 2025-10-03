@@ -2,6 +2,7 @@
   "id": "shortsword",
   "name": "Shortsword",
   "description": "",
+  "ai_description": "short steel blade with simple crossguard and leather-wrapped hilt, compact slashing weapon for quick strikes",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,

@@ -1,6 +1,7 @@
 {
   "name": "Rations",
   "description": "Dried food packed in a waterproof bag, providing one day's sustenance for one person.",
+  "ai_description": "wrapped bundle of dried meat, hardtack biscuits, and preserved fruit, tied with rope, travel provisions",
   "price": 50,
   "type": "Adventuring Gear",
   "weight": 2.0,

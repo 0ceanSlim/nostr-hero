@@ -1,6 +1,7 @@
 {
   "id": "wooden-staff",
   "name": "Wooden Staff",
+  "ai_description": "tall wooden walking staff with natural bark texture, druidic focus carved from living oak branch",
   "price": 500,
   "type": "Druidic Focus",
   "weight": 4.0,

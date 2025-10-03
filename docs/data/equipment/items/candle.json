@@ -2,6 +2,7 @@
   "id": "candle",
   "name": "Candle",
   "description": "A small wax candle that provides a modest amount of light when lit.",
+  "ai_description": "small white wax candle with cotton wick, cylindrical taper candle for providing dim light",
   "price": 1,
   "ac": null,
   "damage": null,

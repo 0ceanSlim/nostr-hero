@@ -2,6 +2,7 @@
   "id": "pike",
   "name": "Pike",
   "description": "",
+  "ai_description": "very long wooden polearm with sharp steel spearhead, extended reach weapon for infantry formation fighting",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 18.0,

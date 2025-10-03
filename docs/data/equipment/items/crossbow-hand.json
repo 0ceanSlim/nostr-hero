@@ -2,6 +2,7 @@
   "id": "crossbow-hand",
   "name": "Crossbow hand",
   "description": "A small hand-held crossbow that can be fired with one hand.",
+  "ai_description": "compact hand crossbow with pistol grip, small one-handed weapon with steel prod and simple trigger mechanism",
   "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 3.0,

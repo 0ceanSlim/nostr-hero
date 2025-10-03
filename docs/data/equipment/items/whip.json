@@ -2,6 +2,7 @@
   "id": "whip",
   "name": "Whip",
   "description": "",
+  "ai_description": "long braided leather cord with wrapped handle, flexible weapon for striking at extended reach",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 3.0,

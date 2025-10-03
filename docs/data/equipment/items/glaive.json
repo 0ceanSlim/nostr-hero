@@ -2,6 +2,7 @@
   "id": "glaive",
   "name": "Glaive",
   "description": "",
+  "ai_description": "long polearm with single-edged blade on long wooden shaft, slashing poleweapon with curved cutting edge and spike tip",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,

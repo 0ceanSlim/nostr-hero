@@ -2,6 +2,7 @@
   "id": "clothes-travelers",
   "name": "Clothes Traveler's",
   "description": "Sturdy, practical clothing designed for long journeys and outdoor activities.",
+  "ai_description": "durable leather vest over linen shirt and reinforced trousers, practical adventuring outfit with belt and pockets",
   "price": 200,
   "type": "Clothes",
   "weight": 4.0,

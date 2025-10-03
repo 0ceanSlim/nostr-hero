@@ -2,6 +2,7 @@
   "id": "flail",
   "name": "Flail",
   "description": "",
+  "ai_description": "weapon with wooden handle connected to spiked iron ball by chain, medieval swinging weapon with flexible striking head",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,

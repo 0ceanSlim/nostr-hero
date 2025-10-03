@@ -1,6 +1,8 @@
 {
   "id": "amulet",
   "name": "Amulet",
+  "description": "",
+  "ai_description": "ornate holy symbol amulet on chain, religious charm with divine symbols and polished metal disc",
   "price": 500,
   "type": "Holy Symbol",
   "weight": 1.0,

@@ -2,6 +2,7 @@
   "id": "war-pick",
   "name": "War pick",
   "description": "",
+  "ai_description": "one-handed weapon with heavy pickaxe head, martial pick designed for armor penetration with pointed steel blade",
   "price": 5,
   "type": "Martial Melee Weapons",
   "weight": 2.0,

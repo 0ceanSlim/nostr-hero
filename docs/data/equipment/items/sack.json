@@ -2,6 +2,7 @@
   "id": "sack",
   "name": "Sack",
   "description": "",
+  "ai_description": "rough burlap sack with drawstring closure, simple cloth bag for carrying grain or loose items",
   "price": 1,
   "type": "Adventuring Gear",
   "weight": 0.5,

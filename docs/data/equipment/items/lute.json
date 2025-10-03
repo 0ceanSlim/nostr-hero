@@ -2,6 +2,7 @@
   "id": "lute",
   "name": "Lute",
   "description": "A stringed instrument with a rounded body and graceful neck, favored by bards and traveling musicians.",
+  "ai_description": "wooden stringed instrument with pear-shaped body, long neck with tuning pegs, classical bard's lute with sound hole",
   "price": 3500,
   "type": "Musical Instrument",
   "weight": 2.0,

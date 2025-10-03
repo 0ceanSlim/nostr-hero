@@ -2,6 +2,7 @@
   "id": "jewelers-tools",
   "name": "Jeweler's tools",
   "description": "These special tools include a small saw and hammer, files, pliers, and tweezers. Proficiency with jeweler's tools lets you add your proficiency bonus to any ability checks you make to craft jewelry and determine the authenticity and value of gems.",
+  "ai_description": "delicate tools including tiny hammers, files, and gem tweezers, precision instruments for crafting jewelry",
   "price": 2500,
   "type": "Artisan's Tools",
   "weight": 2.0,

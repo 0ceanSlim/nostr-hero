@@ -2,6 +2,7 @@
   "id": "greatsword",
   "name": "Greatsword",
   "description": "",
+  "ai_description": "massive two-handed sword with long straight steel blade, crossguard and leather-wrapped grip, heavy ceremonial weapon",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,

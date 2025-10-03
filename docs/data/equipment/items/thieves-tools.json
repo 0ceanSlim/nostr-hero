@@ -2,6 +2,7 @@
   "id": "thieves-tools",
   "name": "Thieves' tools",
   "description": "A compact kit containing lockpicks, small files, and other tools needed for delicate criminal work.",
+  "ai_description": "small leather pouch with lockpicks and files, criminal tools for bypassing locks and traps",
   "price": 2500,
   "type": "Artisan's Tools",
   "weight": 1.0,

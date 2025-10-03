@@ -2,6 +2,7 @@
   "id": "dagger",
   "name": "Dagger",
   "description": "A short, sharp blade perfect for close quarters combat or throwing at enemies.",
+  "ai_description": "short steel dagger with pointed blade, simple crossguard, dark leather-wrapped handle, sharp piercing weapon",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 1.0,

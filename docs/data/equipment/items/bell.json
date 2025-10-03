@@ -1,6 +1,8 @@
 {
   "id": "bell",
   "name": "Bell",
+  "description": "",
+  "ai_description": "small brass bell with wooden handle, warning device that rings when shaken or struck",
   "price": 100,
   "ac": null,
   "damage": null,

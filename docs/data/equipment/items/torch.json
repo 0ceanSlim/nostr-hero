@@ -2,6 +2,7 @@
   "id": "torch",
   "name": "Torch",
   "description": "A wooden stick wrapped with oil-soaked cloth that provides light when lit.",
+  "ai_description": "wooden stick with oil-soaked cloth wrapped around one end, medieval light source, unlit torch with dark fabric",
   "price": 1,
   "ac": null,
   "damage": null,

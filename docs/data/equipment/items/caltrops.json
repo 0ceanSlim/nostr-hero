@@ -2,6 +2,7 @@
   "id": "caltrops",
   "name": "Caltrops",
   "description": "Sharp metal spikes designed to slow down pursuers by damaging feet and hooves.",
+  "ai_description": "small iron spikes with four pointed legs arranged in pyramid shape, sharp metal caltrops designed to always land point-up",
   "price": 0,
   "type": "Adventuring Gear",
   "weight": 0.1,

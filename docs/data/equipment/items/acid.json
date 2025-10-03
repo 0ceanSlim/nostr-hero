@@ -1,6 +1,7 @@
 {
   "id": "acid",
   "name": "Acid",
+  "ai_description": "small glass vial with cork stopper, filled with bright green bubbling corrosive acid, viscous liquid with small bubbles, dangerous chemical",
   "price": 2500,
   "type": "Adventuring Gear",
   "weight": 1,

@@ -2,6 +2,7 @@
   "id": "greater-healing",
   "name": "Greater healing",
   "description": "A more potent healing potion with a deeper red color and stronger magical aura.",
+  "ai_description": "crystal vial with deep crimson healing potion, magical liquid with intense red glow and swirling energy patterns",
   "price": 10000,
   "ac": null,
   "damage": null,

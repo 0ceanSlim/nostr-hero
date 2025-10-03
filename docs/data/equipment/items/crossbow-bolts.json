@@ -1,5 +1,7 @@
 {
   "name": "Crossbow Bolts",
+  "description": "",
+  "ai_description": "short heavy arrows with steel points and wooden shafts, thick crossbow ammunition with metal tips and fletching",
   "price": 5,
   "type": "Ammunition",
   "weight": 0.015,

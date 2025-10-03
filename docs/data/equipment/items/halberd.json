@@ -2,6 +2,7 @@
   "id": "halberd",
   "name": "Halberd",
   "description": "",
+  "ai_description": "versatile polearm with axe blade, spear point and hook on long wooden staff, medieval combination weapon for reach combat",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,

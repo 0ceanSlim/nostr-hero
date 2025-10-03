@@ -2,6 +2,7 @@
   "id": "mess-kit",
   "name": "Mess kit",
   "description": "A tin box containing a cup, fork, knife, spoon, and plate for eating meals.",
+  "ai_description": "metal camping set with tin plate, cup, fork, knife and spoon, portable eating utensils in compact box",
   "price": 20,
   "type": "Adventuring Gear",
   "weight": 1.0,

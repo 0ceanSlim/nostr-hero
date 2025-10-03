@@ -2,6 +2,7 @@
   "id": "hammer",
   "name": "Hammer",
   "description": "A standard hammer with a wooden handle, useful for construction and repairs.",
+  "ai_description": "wooden-handled tool with heavy iron head, flat striking surface and claw back, carpenter's hammer for construction work",
   "price": 100,
   "type": "Tools",
   "weight": 3.0,

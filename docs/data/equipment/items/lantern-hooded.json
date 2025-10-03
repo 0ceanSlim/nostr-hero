@@ -2,6 +2,7 @@
   "id": "lantern-hooded",
   "name": "Lantern hooded",
   "description": "A lantern with shutters that can be opened or closed to control the light.",
+  "ai_description": "metal lantern with glass panels and adjustable shutters, oil-burning light source with carrying handle and wick",
   "price": 500,
   "type": "Adventuring Gear",
   "weight": 2.0,

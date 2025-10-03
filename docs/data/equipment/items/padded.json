@@ -2,6 +2,7 @@
   "id": "padded",
   "name": "Padded",
   "description": "",
+  "ai_description": "quilted cloth armor with thick padding, soft fabric protection stuffed with cotton layers",
   "price": 500,
   "type": "Light Armor",
   "weight": 8.0,

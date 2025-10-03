@@ -2,6 +2,7 @@
   "id": "backpack",
   "name": "Backpack",
   "description": "A sturdy leather backpack with multiple compartments for organizing gear and supplies.",
+  "ai_description": "brown leather adventurer's pack with buckled straps and multiple pockets, worn traveling bag with reinforced seams",
   "price": 1000,
   "type": "Adventuring Gear",
   "weight": 5,

@@ -2,6 +2,7 @@
   "id": "warhammer",
   "name": "Warhammer",
   "description": "",
+  "ai_description": "balanced hammer with steel head and wooden grip, versatile one-handed weapon with flat striking surface",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 2.0,

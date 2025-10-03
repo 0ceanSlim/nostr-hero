@@ -2,6 +2,7 @@
   "id": "carpenters-tools",
   "name": "Carpenter's tools",
   "description": "These special tools include a saw, hammer, nails, hatchet, square, ruler, an adze, a plane, and a chisel. Proficiency with carpenter's tools lets you add your proficiency bonus to any ability checks you make to construct with wood.",
+  "ai_description": "wooden toolbox with saw, hammer, measuring square, wood plane, chisel set, crafting tools for woodworking",
   "price": 800,
   "type": "Artisan's Tools",
   "weight": 6.0,

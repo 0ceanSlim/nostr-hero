@@ -2,6 +2,7 @@
   "id": "battleaxe",
   "name": "Battleaxe",
   "description": "",
+  "ai_description": "large double-bladed axe with long wooden handle, broad steel blade on both sides, heavy weapon for two-handed combat",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 4.0,

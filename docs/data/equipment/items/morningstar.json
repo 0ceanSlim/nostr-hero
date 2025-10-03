@@ -2,6 +2,7 @@
   "id": "morningstar",
   "name": "Morningstar",
   "description": "",
+  "ai_description": "wooden-handled weapon with iron head covered in sharp metal spikes, medieval mace with protruding points",
   "price": 15,
   "type": "Martial Melee Weapons",
   "weight": 4.0,

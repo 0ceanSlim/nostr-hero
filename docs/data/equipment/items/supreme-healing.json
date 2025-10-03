@@ -2,6 +2,7 @@
   "id": "supreme-healing",
   "name": "Supreme healing",
   "description": "The most powerful healing potion, radiating with divine energy.",
+  "ai_description": "divine crystal flask with radiant healing nectar, ultimate potion with pure white light and celestial aura",
   "price": 50000,
   "ac": null,
   "damage": null,

@@ -2,6 +2,7 @@
   "id": "crossbow-heavy",
   "name": "Crossbow heavy",
   "description": "A large, powerful crossbow that requires two hands to operate effectively.",
+  "ai_description": "large wooden crossbow with steel prod and intricate loading mechanism, heavy siege weapon with cranking lever and bolt groove",
   "price": 0,
   "type": "Martial Ranged Weapons",
   "weight": 18.0,

@@ -1,6 +1,7 @@
 {
   "id": "orb",
   "name": "Orb",
+  "ai_description": "crystal sphere with swirling magical energy, transparent arcane focus orb with inner ethereal mists",
   "price": 2000,
   "type": "Arcane Focus",
   "weight": 3.0,

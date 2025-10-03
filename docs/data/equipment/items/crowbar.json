@@ -2,6 +2,7 @@
   "id": "crowbar",
   "name": "Crowbar",
   "description": "A heavy iron bar with a flattened end, useful for prying open doors and containers.",
+  "ai_description": "heavy iron pry bar with curved flattened end and straight shaft, black metal tool for forcing open locks and doors",
   "price": 200,
   "type": "Adventuring Gear",
   "weight": 5.0,

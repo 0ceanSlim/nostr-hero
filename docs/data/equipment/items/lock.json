@@ -2,6 +2,7 @@
   "id": "lock",
   "name": "Lock",
   "description": "A sturdy padlock with a key, used to secure doors, chests, and containers.",
+  "ai_description": "heavy iron padlock with brass key, security device with thick shackle and complex internal mechanism",
   "price": 1000,
   "type": "Adventuring Gear",
   "weight": 1.0,

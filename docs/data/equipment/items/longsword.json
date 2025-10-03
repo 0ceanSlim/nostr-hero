@@ -2,6 +2,7 @@
   "id": "longsword",
   "name": "Longsword",
   "description": "A well-balanced blade with a long, straight edge. The signature weapon of knights and warriors.",
+  "ai_description": "medieval longsword with straight double-edged blade, steel crossguard, leather-wrapped handle with pommel, classic knight weapon",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 3.0,

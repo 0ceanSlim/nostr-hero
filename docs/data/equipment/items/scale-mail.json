@@ -2,6 +2,7 @@
   "id": "scale-mail",
   "name": "Scale Mail",
   "description": "",
+  "ai_description": "armor made of overlapping metal scales sewn to leather backing, dragon-like protective covering with bronze or steel plates",
   "price": 5000,
   "type": "Medium Armor",
   "weight": 45.0,

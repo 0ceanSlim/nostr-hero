@@ -1,5 +1,7 @@
 {
   "name": "Shield",
+  "description": "",
+  "ai_description": "round wooden shield with iron boss and leather straps, protective barrier with painted heraldic design and metal rim",
   "price": 1000,
   "type": "Heavy Armor",
   "weight": 6.0,

@@ -1,6 +1,7 @@
 {
   "id": "block-and-tackle",
   "name": "Block and Tackle",
+  "ai_description": "pulley system with multiple wheels and rope, mechanical advantage device for lifting heavy loads",
   "price": 100,
   "ac": null,
   "damage": null,

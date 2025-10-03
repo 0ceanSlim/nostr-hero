@@ -2,6 +2,7 @@
   "id": "dart",
   "name": "Dart",
   "description": "",
+  "ai_description": "small pointed throwing weapon with sharp metal tip, lightweight projectile with feathered tail for accuracy",
   "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 0.25,

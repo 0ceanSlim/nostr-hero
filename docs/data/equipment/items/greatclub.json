@@ -2,6 +2,7 @@
   "id": "greatclub",
   "name": "Greatclub",
   "description": "",
+  "ai_description": "massive wooden club with thick knotted head, crude two-handed bludgeoning weapon made from heavy oak branch",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 10.0,

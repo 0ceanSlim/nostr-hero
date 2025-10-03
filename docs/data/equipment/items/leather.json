@@ -2,6 +2,7 @@
   "id": "leather",
   "name": "Leather",
   "description": "Supple leather armor that provides basic protection while maintaining flexibility and stealth.",
+  "ai_description": "brown boiled leather vest with shoulder guards, flexible armor with leather straps and buckles, simple protection for rogues",
   "price": 1000,
   "type": "Light Armor",
   "weight": 10.0,

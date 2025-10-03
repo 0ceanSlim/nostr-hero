@@ -1,6 +1,8 @@
 {
   "id": "flute",
   "name": "Flute",
+  "description": "",
+  "ai_description": "slender wooden wind instrument with finger holes, elegant pipe flute with carved decorations and silver accents",
   "price": 200,
   "type": "Musical Instrument",
   "weight": 1.0,

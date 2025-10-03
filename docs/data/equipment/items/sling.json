@@ -2,6 +2,7 @@
   "id": "sling",
   "name": "Sling",
   "description": "",
+  "ai_description": "simple leather strap with woven pouch for stones, ancient projectile weapon with long cords for whirling motion",
   "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 0.1,

@@ -2,6 +2,7 @@
   "id": "waterskin",
   "name": "Waterskin",
   "description": "",
+  "ai_description": "leather water pouch with cork stopper and carrying strap, weathered brown hide container for liquids",
   "price": 20,
   "type": "Adventuring Gear",
   "weight": 5.0,

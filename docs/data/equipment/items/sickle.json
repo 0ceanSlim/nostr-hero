@@ -2,6 +2,7 @@
   "id": "sickle",
   "name": "Sickle",
   "description": "",
+  "ai_description": "curved blade on short wooden handle, farming tool repurposed as light slashing weapon with hooked cutting edge",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 2.0,

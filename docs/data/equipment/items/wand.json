@@ -1,6 +1,7 @@
 {
   "id": "wand",
   "name": "Wand",
+  "ai_description": "slender wooden wand with arcane crystals, spell-casting focus with magical symbols and glowing tip",
   "price": 1000,
   "type": "Arcane Focus",
   "weight": 1.0,

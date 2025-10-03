@@ -2,6 +2,7 @@
   "id": "maul",
   "name": "Maul",
   "description": "",
+  "ai_description": "heavy two-handed hammer with oversized iron head, massive blunt weapon with wooden handle and thick striking face",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 10.0,

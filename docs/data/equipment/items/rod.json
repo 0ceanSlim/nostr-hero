@@ -1,6 +1,7 @@
 {
   "id": "rod",
   "name": "Rod",
+  "ai_description": "polished metal rod with elemental gemstone tip, arcane focus staff with crystalline head and runes",
   "price": 1000,
   "type": "Arcane Focus",
   "weight": 2.0,

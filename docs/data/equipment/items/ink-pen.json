@@ -2,6 +2,7 @@
   "id": "ink-pen",
   "name": "Ink pen",
   "description": "A simple writing implement with a metal nib for dipping in ink.",
+  "ai_description": "wooden shaft with metal writing nib, quill pen replacement with sharp point for ink writing",
   "price": 2,
   "type": "Adventuring Gear",
   "weight": 0.025,

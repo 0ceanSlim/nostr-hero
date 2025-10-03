@@ -18,6 +18,7 @@
     "directional",
     "oil-burning"
   ],
+  "ai_description": "Brass lantern with focused lens and directional shutters",
   "rarity": "common",
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",

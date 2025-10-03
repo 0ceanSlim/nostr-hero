@@ -2,6 +2,7 @@
   "id": "chest",
   "name": "Chest",
   "description": "A large wooden chest reinforced with iron bands, perfect for storing valuables and equipment.",
+  "ai_description": "wooden treasure chest with iron reinforcement bands, storage box with heavy lid and metal lock mechanism",
   "price": 5,
   "type": "Adventuring Gear",
   "weight": 25.0,

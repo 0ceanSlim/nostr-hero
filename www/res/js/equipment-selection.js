@@ -45,15 +45,18 @@ async function startEquipmentSelection(equipment) {
 /**
  * Handle pack selection (called after scene 6)
  */
-async function handlePackSelection(packChoice, packGiven) {
+async function handlePackSelection(startingEquipment) {
   const container = document.getElementById('scene-container');
   const background = document.getElementById('scene-background');
   const content = document.getElementById('scene-content');
 
-  // Show container
-  container.classList.remove('hidden');
-  container.classList.add('fade-in');
-  container.style.opacity = '1';
+  // Check if pack is a choice
+  const packChoice = startingEquipment.pack_choice;
+
+  // Check if pack is in given items
+  const packGiven = startingEquipment.inventory?.find(item =>
+    item.item && item.item.includes('-pack')
+  );
 
   // Turn off background
   background.style.backgroundImage = 'none';
@@ -70,7 +73,7 @@ async function handlePackSelection(packChoice, packGiven) {
 
     const description = document.createElement('div');
     description.className = 'scene-text text-lg mb-6';
-    description.textContent = packChoice.description;
+    description.textContent = packChoice.description || 'Choose your adventuring pack';
     content.appendChild(description);
 
     // Create options container
@@ -81,7 +84,8 @@ async function handlePackSelection(packChoice, packGiven) {
 
     // Create pack options
     for (let i = 0; i < packChoice.options.length; i++) {
-      const packName = packChoice.options[i];
+      const option = packChoice.options[i];
+      const packName = option.item;
       const packContainer = document.createElement('div');
       packContainer.className = 'bg-gray-800 rounded-lg p-4 cursor-pointer transition-all';
       packContainer.style.border = '3px solid #374151';
@@ -119,11 +123,15 @@ async function handlePackSelection(packChoice, packGiven) {
     confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
     content.appendChild(confirmBtn);
 
+    // Show container with fade-in
+    container.classList.remove('hidden', 'fade-out');
+    container.classList.add('fade-in');
+
     // Wait for selection
     await new Promise(resolve => {
       confirmBtn.onclick = () => {
         if (selectedPackIndex !== null) {
-          selectedChoices['pack'] = packChoice.options[selectedPackIndex];
+          selectedChoices['pack'] = packChoice.options[selectedPackIndex].item;
           resolve();
         }
       };
@@ -136,11 +144,22 @@ async function handlePackSelection(packChoice, packGiven) {
     title.textContent = 'Your Pack';
     content.appendChild(title);
 
-    const packName = packGiven[0].item;
+    const description = document.createElement('div');
+    description.className = 'scene-text text-lg mb-4 text-center';
+    description.textContent = 'You have been provided with this pack:';
+    content.appendChild(description);
+
+    const packName = packGiven.item;
+    const packContainer = document.createElement('div');
+    packContainer.className = 'bg-gray-800 rounded-lg p-4 mx-auto';
+    packContainer.style.maxWidth = '300px';
+
     const packTitle = document.createElement('div');
-    packTitle.className = 'text-lg font-bold text-green-400 mb-2';
+    packTitle.className = 'text-lg font-bold text-green-400 mb-2 text-center';
     packTitle.textContent = packName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    content.appendChild(packTitle);
+    packContainer.appendChild(packTitle);
+
+    content.appendChild(packContainer);
 
     selectedChoices['pack'] = packName;
 
@@ -150,14 +169,36 @@ async function handlePackSelection(packChoice, packGiven) {
     continueBtn.textContent = 'Continue';
     content.appendChild(continueBtn);
 
+    // Show container with fade-in
+    container.classList.remove('hidden', 'fade-out');
+    container.classList.add('fade-in');
+
     await new Promise(resolve => {
       continueBtn.onclick = resolve;
     });
   }
 
-  // Fade out
-  content.style.animation = 'wipeRight 0.3s ease-in';
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // Animate text out first (wipe down)
+  const textElements = content.querySelectorAll('.scene-text, .pixel-continue-btn, .bg-gray-800');
+  textElements.forEach(el => {
+    el.style.animation = 'wipeOut 0.6s ease-in forwards';
+  });
+
+  // Wait for text animation to complete
+  await new Promise(resolve => setTimeout(resolve, 600));
+
+  // Clear content
+  content.innerHTML = '';
+
+  // Then fade out the scene
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  container.classList.remove('fade-in');
+  container.classList.add('fade-out');
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Fully reset container for next scene
+  container.classList.remove('fade-out');
   container.classList.add('hidden');
 }
 

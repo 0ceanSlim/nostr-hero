@@ -25,7 +25,8 @@
       "Bash(dir:*)",
       "Bash(magick:*)",
       "Bash(convert:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(make:*)"
     ],
     "deny": []
   }

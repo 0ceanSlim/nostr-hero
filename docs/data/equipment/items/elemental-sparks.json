@@ -2,6 +2,7 @@
   "id": "elemental-sparks",
   "name": "Elemental Sparks",
   "description": "Tiny motes of elemental energy that dance and flicker with primal power. Provided unlimited when using a Rod focus.",
+  "ai_description": "tiny dancing lights of various colors, floating elemental sparks that flicker between fire, ice, and lightning",
   "price": 150,
   "type": "Spell Component",
   "weight": 0.1,

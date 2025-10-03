@@ -2,6 +2,7 @@
   "id": "crossbow-light",
   "name": "Crossbow light",
   "description": "A compact crossbow that can be operated with one hand.",
+  "ai_description": "small wooden crossbow with steel bow prod, one-handed mechanical weapon with trigger mechanism and bolt groove",
   "price": 0,
   "type": "Simple Ranged Weapons",
   "weight": 5.0,

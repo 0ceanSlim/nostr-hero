@@ -1,6 +1,7 @@
 {
   "id": "bedroll",
   "name": "Bedroll",
+  "ai_description": "rolled up sleeping mat made of thick canvas and wool padding, leather straps holding it closed, portable camping bed",
   "price": 100,
   "ac": null,
   "damage": null,

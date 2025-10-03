@@ -1,6 +1,8 @@
 {
   "id": "drum",
   "name": "Drum",
+  "description": "",
+  "ai_description": "round wooden drum with stretched leather drumhead, percussion instrument with rope tensioning and wooden sticks",
   "price": 600,
   "type": "Musical Instrument",
   "weight": 3.0,

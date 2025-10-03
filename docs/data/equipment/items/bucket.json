@@ -2,6 +2,7 @@
   "id": "bucket",
   "name": "Bucket",
   "description": "A sturdy wooden bucket with an iron handle, useful for carrying water or other liquids.",
+  "ai_description": "wooden water bucket with iron handle, rustic container with metal bands and rope handle for carrying liquids",
   "price": 0,
   "type": "Adventuring Gear",
   "weight": 2.0,

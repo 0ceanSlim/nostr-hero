@@ -2,6 +2,7 @@
   "id": "clothes-costume",
   "name": "Clothes Costume",
   "description": "Elaborate costume clothing for disguises, performances, or special occasions.",
+  "ai_description": "colorful theatrical garments with decorative trim, elaborate costume with masks and fancy accessories",
   "price": 500,
   "type": "Clothes",
   "weight": 4.0,

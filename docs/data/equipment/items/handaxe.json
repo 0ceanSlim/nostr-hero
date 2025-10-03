@@ -2,6 +2,7 @@
   "id": "handaxe",
   "name": "Handaxe",
   "description": "",
+  "ai_description": "small one-handed axe with sharp steel blade and wooden handle, throwing hatchet with curved cutting edge",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 2.0,

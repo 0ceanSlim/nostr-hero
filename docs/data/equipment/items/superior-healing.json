@@ -2,6 +2,7 @@
   "id": "superior-healing",
   "name": "Superior healing",
   "description": "A superior healing potion that glows with intense magical energy.",
+  "ai_description": "ornate glass bottle with brilliant red healing elixir, powerful potion with bright magical glow and golden shimmer",
   "price": 20000,
   "ac": null,
   "damage": null,

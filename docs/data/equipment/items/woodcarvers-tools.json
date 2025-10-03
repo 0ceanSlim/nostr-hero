@@ -2,6 +2,7 @@
   "id": "woodcarvers-tools",
   "name": "Woodcarver's tools",
   "description": "These special tools include a knife, gouge, and a small saw. Proficiency with woodcarver's tools lets you add your proficiency bonus to any ability checks you make to craft objects from wood.",
+  "ai_description": "sharp carving knives, gouges, and small saws, wood-shaping tools for crafting detailed wooden items",
   "price": 100,
   "type": "Artisan's Tools",
   "weight": 5.0,

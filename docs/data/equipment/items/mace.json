@@ -2,6 +2,7 @@
   "id": "mace",
   "name": "Mace",
   "description": "",
+  "ai_description": "heavy blunt weapon with flanged iron head on wooden handle, medieval crushing weapon with studded striking surface",
   "price": 5,
   "type": "Simple Melee Weapons",
   "weight": 5.0,

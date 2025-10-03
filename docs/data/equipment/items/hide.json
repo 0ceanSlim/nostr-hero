@@ -1,6 +1,7 @@
 {
   "id": "hide",
   "name": "Hide",
+  "ai_description": "rough animal leather armor with thick fur trim, primitive protection made from beast hides",
   "price": 1000,
   "type": "Medium Armor",
   "weight": 12.0,

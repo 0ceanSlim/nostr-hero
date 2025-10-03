@@ -2,6 +2,7 @@
   "id": "lance",
   "name": "Lance",
   "description": "",
+  "ai_description": "long wooden pole with sharp steel spearhead, cavalry weapon with extended reach and pointed tip",
   "price": 0,
   "type": "Martial Melee Weapons",
   "weight": 6.0,

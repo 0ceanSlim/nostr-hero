@@ -1,6 +1,8 @@
 {
   "id": "breastplate",
   "name": "Breastplate",
+  "description": "",
+  "ai_description": "fitted steel chestplate with shoulder straps, partial armor covering torso with decorative engravings",
   "price": 40000,
   "type": "Medium Armor",
   "weight": 20,

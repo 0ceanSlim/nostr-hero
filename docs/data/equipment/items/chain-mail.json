@@ -2,6 +2,7 @@
   "id": "chain-mail",
   "name": "Chain Mail",
   "description": "Interlocking metal rings that provide excellent protection at the cost of mobility and stealth.",
+  "ai_description": "heavy armor made of thousands of interlocked iron rings, medieval mail hauberk with long sleeves and protective coif",
   "price": 0,
   "type": "Heavy Armor",
   "weight": 55.0,

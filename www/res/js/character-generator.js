@@ -266,9 +266,10 @@ class NostrCharacterGenerator {
             });
         }
 
-        // Add pack choice as a separate choice
+        // Store pack choice separately (not in choices array)
+        let packChoice = null;
         if (gearConfig.pack_choice) {
-            const packChoice = {
+            packChoice = {
                 id: 'pack-choice',
                 description: gearConfig.pack_choice.description || 'Choose your adventuring pack',
                 options: gearConfig.pack_choice.options.map(packId => ({
@@ -277,14 +278,14 @@ class NostrCharacterGenerator {
                     type: 'single'
                 }))
             };
-            choices.push(packChoice);
         }
 
-        console.log(`✅ Generated ${choices.length} total choices for ${characterClass}:`, choices);
+        console.log(`✅ Generated ${choices.length} equipment choices for ${characterClass}:`, choices);
         return {
             inventory: inventory,
             equipment: equipment, // TODO: Handle default equipped items
-            choices: choices
+            choices: choices,
+            pack_choice: packChoice
         };
     }
 

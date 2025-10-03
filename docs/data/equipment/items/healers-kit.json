@@ -2,6 +2,7 @@
   "id": "healers-kit",
   "name": "Healer's kit",
   "description": "A collection of bandages, salves, and medical supplies for treating wounds.",
+  "ai_description": "leather satchel with rolled bandages, glass bottles of healing salve, needle and thread, medical instruments",
   "price": 500,
   "type": "Adventuring Gear",
   "weight": 3.0,

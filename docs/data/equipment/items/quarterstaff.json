@@ -2,6 +2,7 @@
   "id": "quarterstaff",
   "name": "Quarterstaff",
   "description": "",
+  "ai_description": "long wooden staff with smooth polished surface, simple fighting stick with metal end caps for walking and combat",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 5.0,

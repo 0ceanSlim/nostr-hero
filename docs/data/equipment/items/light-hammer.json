@@ -2,6 +2,7 @@
   "id": "light-hammer",
   "name": "Light hammer",
   "description": "",
+  "ai_description": "small iron hammer with flat striking head and wooden handle, light throwing hammer for combat and utility",
   "price": 0,
   "type": "Simple Melee Weapons",
   "weight": 2.0,

@@ -1,6 +1,8 @@
 {
   "id": "blanket",
   "name": "Blanket",
+  "description": "",
+  "ai_description": "thick woolen blanket in earth tones, warm covering with woven pattern and frayed edges for sleeping outdoors",
   "price": 50,
   "ac": null,
   "damage": null,

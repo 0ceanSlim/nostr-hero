@@ -2,6 +2,7 @@
   "id": "holy-water",
   "name": "Holy water",
   "description": "Water blessed by a cleric, effective against undead and fiends.",
+  "ai_description": "clear glass vial with blessed water, sacred liquid with faint holy glow and silver cross symbol",
   "price": 2500,
   "type": "Adventuring Gear",
   "weight": 1,

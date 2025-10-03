@@ -2,6 +2,7 @@
   "id": "bone-dust",
   "name": "Bone Dust",
   "description": "Fine powder ground from the bones of cursed creatures. It feels cold and seems to absorb light around it. Required for casting Bane spells.",
+  "ai_description": "pale white bone powder with dark shadows, cursed dust that absorbs light and radiates cold energy",
   "price": 200,
   "type": "Spell Component",
   "weight": 0,
