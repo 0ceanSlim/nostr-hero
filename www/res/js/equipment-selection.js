@@ -40,6 +40,80 @@ async function startEquipmentSelection(equipment) {
       currentChoiceIndex++;
     }
   }
+
+  // Show confirmation after all equipment choices are made
+  const confirmed = await showFinalConfirmation();
+  if (!confirmed) {
+    // Go back to last choice
+    currentChoiceIndex = equipmentChoices.length - 1;
+    delete selectedChoices[currentChoiceIndex];
+    return startEquipmentSelection({choices: equipmentChoices});
+  }
+}
+
+/**
+ * Show final confirmation before proceeding to given items
+ */
+async function showFinalConfirmation() {
+  const container = document.getElementById('scene-container');
+  const content = document.getElementById('scene-content');
+
+  // Wipe out current content
+  content.style.animation = 'wipeRight 0.3s ease-in';
+  await new Promise(resolve => setTimeout(resolve, 300));
+  content.innerHTML = '';
+
+  // Show confirmation dialog
+  const confirmDialog = document.createElement('div');
+  confirmDialog.className = 'flex flex-col items-center justify-center gap-6';
+
+  const message = document.createElement('div');
+  message.className = 'text-2xl font-bold text-yellow-400 text-center';
+  message.textContent = 'Are you sure?';
+  confirmDialog.appendChild(message);
+
+  const subMessage = document.createElement('div');
+  subMessage.className = 'text-lg text-gray-300 text-center max-w-md';
+  subMessage.textContent = 'Once you proceed, you cannot change your equipment choices.';
+  confirmDialog.appendChild(subMessage);
+
+  const note = document.createElement('div');
+  note.className = 'text-sm text-gray-400 text-center max-w-md italic';
+  note.textContent = 'You can always find more equipment in game.';
+  confirmDialog.appendChild(note);
+
+  const buttonContainer = document.createElement('div');
+  buttonContainer.className = 'flex flex-col gap-3 items-center';
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'pixel-continue-btn';
+  confirmBtn.textContent = 'Yes, Continue';
+  buttonContainer.appendChild(confirmBtn);
+
+  const backBtn = document.createElement('button');
+  backBtn.className = 'pixel-continue-btn';
+  backBtn.style.background = '#6b7280'; // Gray background
+  backBtn.textContent = 'Go Back';
+  buttonContainer.appendChild(backBtn);
+
+  confirmDialog.appendChild(buttonContainer);
+  content.appendChild(confirmDialog);
+
+  // Slide in
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
+
+  // Wait for user choice
+  const userChoice = await new Promise(resolve => {
+    confirmBtn.onclick = () => resolve(true);
+    backBtn.onclick = () => resolve(false);
+  });
+
+  // Wipe out confirmation dialog
+  content.style.animation = 'wipeRight 0.3s ease-in';
+  await new Promise(resolve => setTimeout(resolve, 300));
+  content.innerHTML = '';
+
+  return userChoice;
 }
 
 /**
@@ -64,41 +138,103 @@ async function handlePackSelection(startingEquipment) {
   content.innerHTML = '';
   content.style.zIndex = '10';
 
+  // Show container with fade-in
+  container.classList.remove('hidden', 'fade-out');
+  // First ensure we're not in fade-in state
+  container.classList.remove('fade-in');
+  // Force reflow to ensure classes are applied
+  void container.offsetHeight;
+  // Now add fade-in to trigger transition
+  container.classList.add('fade-in');
+
   if (packChoice) {
     // Player chooses pack
     const title = document.createElement('div');
-    title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+    title.className = 'text-xl md:text-2xl font-bold text-yellow-400 mb-4';
     title.textContent = 'Choose Your Pack';
     content.appendChild(title);
 
     const description = document.createElement('div');
-    description.className = 'scene-text text-lg mb-6';
+    description.className = 'text-lg mb-6';
     description.textContent = packChoice.description || 'Choose your adventuring pack';
     content.appendChild(description);
 
+    // Preload all pack items for display
+    const allPackItems = [];
+    for (const option of packChoice.options) {
+      const packData = await fetchPackData(option.item);
+      const contents = packData?.properties?.contents || packData?.contents;
+      if (contents) {
+        contents.forEach(item => allPackItems.push(item[0]));
+      }
+    }
+    await preloadItemStats(allPackItems);
+
+    // Create scrollable container
+    const scrollContainer = document.createElement('div');
+    scrollContainer.className = 'w-full max-w-6xl mx-auto overflow-y-auto px-4 mb-4';
+    scrollContainer.style.maxHeight = 'calc(100vh - 280px)';
+
     // Create options container
     const optionsContainer = document.createElement('div');
-    optionsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6';
+    optionsContainer.className = 'flex flex-col gap-6';
 
     let selectedPackIndex = null;
 
-    // Create pack options
+    // Create pack options (similar to bundles)
     for (let i = 0; i < packChoice.options.length; i++) {
       const option = packChoice.options[i];
       const packName = option.item;
+
+      // Fetch pack data to get contents
+      const packData = await fetchPackData(packName);
+
+      // Create outer container for the pack (like bundle)
       const packContainer = document.createElement('div');
-      packContainer.className = 'bg-gray-800 rounded-lg p-4 cursor-pointer transition-all';
+      packContainer.className = 'bg-gray-800 rounded-lg';
+      packContainer.style.padding = '0.75rem';
       packContainer.style.border = '3px solid #374151';
+      packContainer.style.cursor = 'pointer';
       packContainer.style.boxSizing = 'border-box';
-      packContainer.style.minWidth = '200px';
+      packContainer.style.width = 'fit-content';
+      packContainer.style.margin = '0 auto';
       packContainer.setAttribute('data-option-index', i);
 
+      // Pack name as title
       const packTitle = document.createElement('div');
-      packTitle.className = 'text-lg font-bold text-yellow-400 mb-2';
+      packTitle.className = 'text-center text-yellow-400 font-bold text-xl mb-3';
       packTitle.textContent = packName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       packContainer.appendChild(packTitle);
 
-      packContainer.onclick = () => {
+      // Create inner flex container for pack items (like bundle items)
+      const contents = packData?.properties?.contents || packData?.contents;
+      if (contents) {
+        const itemsRow = document.createElement('div');
+        itemsRow.className = 'flex flex-row justify-center gap-3 flex-wrap';
+
+        // Add each item in the pack as a card
+        contents.forEach((packItem) => {
+          const itemName = packItem[0];
+          const quantity = packItem[1];
+          const itemCard = createSimpleItemCard(itemName, quantity, true);
+
+          // Prevent clicks on individual cards from bubbling
+          itemCard.addEventListener('click', (e) => {
+            if (!e.target.closest('.info-btn')) {
+              e.stopPropagation();
+              packContainer.click();
+            }
+          });
+
+          itemsRow.appendChild(itemCard);
+        });
+
+        packContainer.appendChild(itemsRow);
+      }
+
+      packContainer.onclick = (e) => {
+        if (e.target.closest('.info-btn')) return;
+
         // Deselect all
         optionsContainer.querySelectorAll('[data-option-index]').forEach(opt => {
           opt.classList.remove('selected');
@@ -113,7 +249,8 @@ async function handlePackSelection(startingEquipment) {
       optionsContainer.appendChild(packContainer);
     }
 
-    content.appendChild(optionsContainer);
+    scrollContainer.appendChild(optionsContainer);
+    content.appendChild(scrollContainer);
 
     // Confirm button
     const confirmBtn = document.createElement('button');
@@ -122,10 +259,6 @@ async function handlePackSelection(startingEquipment) {
     confirmBtn.disabled = true;
     confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
     content.appendChild(confirmBtn);
-
-    // Show container with fade-in
-    container.classList.remove('hidden', 'fade-out');
-    container.classList.add('fade-in');
 
     // Wait for selection
     await new Promise(resolve => {
@@ -140,24 +273,56 @@ async function handlePackSelection(startingEquipment) {
   } else if (packGiven) {
     // Show given pack
     const title = document.createElement('div');
-    title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+    title.className = 'text-xl md:text-2xl font-bold text-yellow-400 mb-4';
     title.textContent = 'Your Pack';
     content.appendChild(title);
 
     const description = document.createElement('div');
-    description.className = 'scene-text text-lg mb-4 text-center';
+    description.className = 'text-lg mb-4 text-center';
     description.textContent = 'You have been provided with this pack:';
     content.appendChild(description);
 
     const packName = packGiven.item;
-    const packContainer = document.createElement('div');
-    packContainer.className = 'bg-gray-800 rounded-lg p-4 mx-auto';
-    packContainer.style.maxWidth = '300px';
 
+    // Fetch pack data to get contents
+    const packData = await fetchPackData(packName);
+
+    // Preload pack items
+    const contents = packData?.properties?.contents || packData?.contents;
+    if (contents) {
+      await preloadItemStats(contents.map(item => item[0]));
+    }
+
+    // Create pack container (like bundle)
+    const packContainer = document.createElement('div');
+    packContainer.className = 'bg-gray-800 rounded-lg';
+    packContainer.style.padding = '0.75rem';
+    packContainer.style.border = '3px solid #10b981'; // Green border for given
+    packContainer.style.boxSizing = 'border-box';
+    packContainer.style.width = 'fit-content';
+    packContainer.style.margin = '0 auto';
+
+    // Pack name as title
     const packTitle = document.createElement('div');
-    packTitle.className = 'text-lg font-bold text-green-400 mb-2 text-center';
+    packTitle.className = 'text-center text-green-400 font-bold text-xl mb-3';
     packTitle.textContent = packName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     packContainer.appendChild(packTitle);
+
+    // Create inner flex container for pack items (reuse contents from above)
+    if (contents) {
+      const itemsRow = document.createElement('div');
+      itemsRow.className = 'flex flex-row justify-center gap-3 flex-wrap';
+
+      // Add each item in the pack as a card
+      contents.forEach((packItem) => {
+        const itemName = packItem[0];
+        const quantity = packItem[1];
+        const itemCard = createSimpleItemCard(itemName, quantity, true);
+        itemsRow.appendChild(itemCard);
+      });
+
+      packContainer.appendChild(itemsRow);
+    }
 
     content.appendChild(packContainer);
 
@@ -168,10 +333,6 @@ async function handlePackSelection(startingEquipment) {
     continueBtn.className = 'pixel-continue-btn mt-6';
     continueBtn.textContent = 'Continue';
     content.appendChild(continueBtn);
-
-    // Show container with fade-in
-    container.classList.remove('hidden', 'fade-out');
-    container.classList.add('fade-in');
 
     await new Promise(resolve => {
       continueBtn.onclick = resolve;
@@ -191,14 +352,12 @@ async function handlePackSelection(startingEquipment) {
   content.innerHTML = '';
 
   // Then fade out the scene
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
   container.classList.remove('fade-in');
   container.classList.add('fade-out');
   await new Promise(resolve => setTimeout(resolve, 800));
 
   // Fully reset container for next scene
-  container.classList.remove('fade-out');
+  container.classList.remove('fade-in', 'fade-out');
   container.classList.add('hidden');
 }
 
@@ -218,7 +377,7 @@ async function showEquipmentChoiceScene(choice, choiceIndex) {
 
   // Title
   const title = document.createElement('div');
-  title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+  title.className = 'text-xl md:text-2xl font-bold text-yellow-400 mb-4';
   title.textContent = `Choose Your Equipment (${choiceIndex + 1} of ${equipmentChoices.length})`;
   content.appendChild(title);
 
@@ -664,7 +823,7 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
 
   // Title
   const title = document.createElement('div');
-  title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-4';
+  title.className = 'text-xl md:text-2xl font-bold text-yellow-400 mb-4';
   title.textContent = `Choose Weapon ${slotIndex + 1} of ${totalSlots}`;
   content.appendChild(title);
 
@@ -1208,6 +1367,44 @@ async function preloadItemStats(itemNames) {
       const match = cached.match(/>([^<]+)<\/div>/);
       console.log(`  ${name} -> ${match ? match[1] : 'unknown'}`);
     }
+  }
+}
+
+/**
+ * Fetch pack data from API to get contents
+ */
+async function fetchPackData(packName) {
+  try {
+    console.log('📦 Fetching pack data for:', packName);
+    const response = await fetch(`/api/items?name=${encodeURIComponent(packName)}`);
+    if (!response.ok) {
+      console.warn('❌ Failed to fetch pack data for:', packName);
+      return null;
+    }
+
+    const items = await response.json();
+    console.log('📊 API returned for', packName, ':', items);
+
+    if (!items || items.length === 0) {
+      console.warn('⚠️ No pack data found for:', packName);
+      return null;
+    }
+
+    const packData = items[0];
+    const contents = packData?.properties?.contents || packData?.contents;
+    console.log('📋 Pack data structure:', {
+      id: packData.id,
+      name: packData.name,
+      hasContents: !!contents,
+      contentsCount: contents ? contents.length : 0,
+      contentsLocation: packData.contents ? 'root' : (packData.properties?.contents ? 'properties.contents' : 'not found'),
+      fullData: packData
+    });
+
+    return packData; // Return the pack item data with contents
+  } catch (error) {
+    console.error('❌ Error fetching pack data:', packName, error);
+    return null;
   }
 }
 

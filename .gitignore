@@ -16,3 +16,5 @@ game.db
 !/www/views/
 !/www/data/
 item-editor-gui.exe
+nostr-hero.exe
+pixellab-gen.exe

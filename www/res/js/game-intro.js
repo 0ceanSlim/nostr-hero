@@ -99,6 +99,11 @@ async function showScene(config) {
 
   // Show container with fade-in
   container.classList.remove('hidden', 'fade-out');
+  // First ensure we're not in fade-in state
+  container.classList.remove('fade-in');
+  // Force reflow to ensure classes are applied
+  void container.offsetHeight;
+  // Now add fade-in to trigger transition
   container.classList.add('fade-in');
 
   // Wait for user to click Continue
@@ -113,12 +118,16 @@ async function showScene(config) {
   // Wait for text animation to complete
   await new Promise(resolve => setTimeout(resolve, 600));
 
-  // Then fade out the scene
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Clear content
+  content.innerHTML = '';
 
+  // Then fade out the scene
   container.classList.remove('fade-in');
   container.classList.add('fade-out');
   await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Fully reset container for next scene
+  container.classList.remove('fade-in', 'fade-out');
   container.classList.add('hidden');
 }
 
@@ -145,6 +154,8 @@ async function showFinalScene(text, buttonText, buttonAction) {
   `;
 
   container.classList.remove('hidden', 'fade-out');
+  // Force reflow to ensure hidden is removed before fade-in
+  void container.offsetHeight;
   container.classList.add('fade-in');
 }
 
@@ -320,8 +331,11 @@ async function skipToEquipment() {
   // Get selected equipment
   selectedEquipment = getSelectedEquipment();
 
-  console.log('🐛 DEBUG: Equipment selection completed:', selectedEquipment);
-  alert('Equipment selection complete! Check console for results.');
+  // Show given items scene
+  await showGivenItemsScene(startingEquipment.inventory);
+
+  // Continue with remaining scenes (pack selection, departure, etc.)
+  await continueAfterEquipment();
 }
 
 /**
@@ -565,6 +579,13 @@ async function showGivenItemsScene(givenItems) {
     return; // No items to show
   }
 
+  // Filter out packs (they will be shown in the pack screen)
+  const nonPackItems = givenItems.filter(item => !item.item.includes('-pack'));
+
+  if (nonPackItems.length === 0) {
+    return; // No non-pack items to show
+  }
+
   const container = document.getElementById('scene-container');
   const background = document.getElementById('scene-background');
   const content = document.getElementById('scene-content');
@@ -577,13 +598,13 @@ async function showGivenItemsScene(givenItems) {
 
   // Title
   const title = document.createElement('div');
-  title.className = 'scene-text text-xl md:text-2xl font-bold text-yellow-400 mb-6';
+  title.className = 'text-xl md:text-2xl font-bold text-yellow-400 mb-6';
   title.textContent = 'Items Provided';
   content.appendChild(title);
 
   // Description
   const description = document.createElement('div');
-  description.className = 'scene-text text-lg mb-6 text-center';
+  description.className = 'text-lg mb-6 text-center';
   description.textContent = 'In addition to your choices, you have been provided with these items:';
   content.appendChild(description);
 
@@ -591,46 +612,41 @@ async function showGivenItemsScene(givenItems) {
   const itemsContainer = document.createElement('div');
   itemsContainer.className = 'flex flex-wrap justify-center gap-3 mb-6 max-w-4xl mx-auto';
 
-  // Display each given item
-  for (const givenItem of givenItems) {
+  // Display each given item (excluding packs) with green selection border
+  for (const givenItem of nonPackItems) {
     const itemCard = createGivenItemCard(givenItem.item, givenItem.quantity);
+    // Add green selection border
+    itemCard.style.border = '3px solid #10b981';
+    itemCard.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
+    itemCard.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
     itemsContainer.appendChild(itemCard);
   }
 
   content.appendChild(itemsContainer);
 
-  // Continue button
-  const continueBtn = createContinueButton(2000);
+  // Continue button (no delay for equipment screens)
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'pixel-continue-btn';
+  continueBtn.textContent = 'Continue →';
   content.appendChild(continueBtn);
 
-  // Show container with fade-in
-  container.classList.remove('hidden', 'fade-out');
-  container.classList.add('fade-in');
+  // Show container (no hidden class, just slide in)
+  container.classList.remove('hidden');
+  container.style.opacity = '1';
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
 
   // Wait for user to click Continue
   await waitForButtonClick(continueBtn);
 
-  // Animate text out first (wipe down)
-  const textElements = content.querySelectorAll('.scene-text, .item-card, .pixel-continue-btn');
-  textElements.forEach(el => {
-    el.style.animation = 'wipeOut 0.6s ease-in forwards';
-  });
-
-  // Wait for text animation to complete
-  await new Promise(resolve => setTimeout(resolve, 600));
+  // Swipe out to the right
+  content.style.animation = 'wipeRight 0.3s ease-in';
+  await new Promise(resolve => setTimeout(resolve, 300));
 
   // Clear content
   content.innerHTML = '';
 
-  // Then fade out the scene
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  container.classList.remove('fade-in');
-  container.classList.add('fade-out');
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  // Fully reset container for next scene
-  container.classList.remove('fade-out');
+  // Reset container for next scene (fade transitions)
+  container.classList.remove('fade-in', 'fade-out');
   container.classList.add('hidden');
 }
 
