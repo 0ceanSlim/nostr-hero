@@ -29,6 +29,11 @@ func MigrateFromJSON() error {
 		return fmt.Errorf("failed to migrate items: %v", err)
 	}
 
+	// Migrate spells
+	if err := migrateSpells(); err != nil {
+		return fmt.Errorf("failed to migrate spells: %v", err)
+	}
+
 	// Migrate content data (monsters, locations)
 	if err := migrateContentData(); err != nil {
 		return fmt.Errorf("failed to migrate content data: %v", err)
@@ -172,6 +177,77 @@ func migrateItemFile(filePath string) error {
 
 	stmt := `INSERT INTO items (id, name, description, item_type, properties, tags, rarity) VALUES (?, ?, ?, ?, ?, ?, ?)`
 	_, err = db.Exec(stmt, id, name, description, itemType, string(propertiesJSON), string(tagsJSON), rarity)
+	return err
+}
+
+// migrateSpells migrates all spell JSON files
+func migrateSpells() error {
+	log.Println("Migrating spells...")
+
+	spellsPath := filepath.Join("docs", "data", "content", "spells")
+
+	// Clear existing spells
+	if _, err := db.Exec("DELETE FROM spells"); err != nil {
+		return fmt.Errorf("failed to clear spells table: %v", err)
+	}
+
+	count := 0
+	err := filepath.WalkDir(spellsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(path, ".json") {
+			if err := migrateSpellFile(path); err != nil {
+				log.Printf("Warning: failed to migrate spell file %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk spells directory: %v", err)
+	}
+
+	log.Printf("Migrated %d spells", count)
+	return nil
+}
+
+// migrateSpellFile migrates a single spell JSON file
+func migrateSpellFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var spell map[string]interface{}
+	if err := json.Unmarshal(data, &spell); err != nil {
+		return err
+	}
+
+	// Extract base filename as ID
+	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
+
+	// Convert spell data to required fields
+	name, _ := spell["name"].(string)
+	description, _ := spell["description"].(string)
+	level, _ := spell["level"].(float64)
+	school, _ := spell["school"].(string)
+	damage, _ := spell["damage"].(string)
+	manaCostFloat, _ := spell["mana_cost"].(float64)
+	manaCost := int(manaCostFloat)
+
+	// Extract classes as JSON
+	classesJSON, _ := json.Marshal(spell["classes"])
+
+	// Serialize all properties as JSON for the properties field
+	propertiesJSON, _ := json.Marshal(spell)
+
+	stmt := `INSERT INTO spells (id, name, description, level, school, damage, mana_cost, classes, properties)
+	         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err = db.Exec(stmt, id, name, description, int(level), school, damage, manaCost, string(classesJSON), string(propertiesJSON))
 	return err
 }
 

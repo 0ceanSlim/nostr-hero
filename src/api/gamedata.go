@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"nostr-hero/src/db"
 )
@@ -182,10 +183,30 @@ func SpellsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Extract spell ID from URL path if present (e.g., /api/spells/fire-bolt)
+	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/spells/"), "/")
+	spellID := ""
+	if len(pathParts) > 0 && pathParts[0] != "" {
+		spellID = pathParts[0]
+	}
+
 	spells, err := LoadAllSpells(database)
 	if err != nil {
 		log.Printf("Error loading spells: %v", err)
 		http.Error(w, "Failed to load spells", http.StatusInternalServerError)
+		return
+	}
+
+	// Filter by ID if provided
+	if spellID != "" {
+		for _, spell := range spells {
+			if spell.ID == spellID {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(spell)
+				return
+			}
+		}
+		http.Error(w, "Spell not found", http.StatusNotFound)
 		return
 	}
 

@@ -38,8 +38,8 @@ func vectorizeImage(inputPath, outputPath string) error {
 
 // Create SVG wrapper for pixel-perfect scaling
 func createPixelPerfectSVG(pngPath, svgPath string) error {
-	// Get relative path from SVG to PNG (SVG is in svg/, PNG is in png/)
-	pngRelativePath := "../png/" + filepath.Base(pngPath)
+	// Use absolute path for PNG reference (works in web browser)
+	pngAbsolutePath := "/res/img/items/png/" + filepath.Base(pngPath)
 
 	svgContent := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -55,7 +55,7 @@ func createPixelPerfectSVG(pngPath, svgPath string) error {
     </style>
   </defs>
   <image href="%s" class="pixel-art" width="32" height="32"/>
-</svg>`, pngRelativePath)
+</svg>`, pngAbsolutePath)
 
 	return os.WriteFile(svgPath, []byte(svgContent), 0644)
 }

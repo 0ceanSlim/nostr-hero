@@ -4,7 +4,7 @@
   "description": "A conical wooden wind instrument fitted with a double reed, the predecessor of the oboe. It produces a loud, penetrating sound. Proficiency with this instrument allows you to add your proficiency bonus to any ability checks you make to play music with it.",
   "price": 200,
   "type": "Musical Instrument",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/shawm.png"
 }

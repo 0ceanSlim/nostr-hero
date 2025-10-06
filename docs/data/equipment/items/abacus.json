@@ -8,5 +8,6 @@
   "weight": 2,
   "stack": 1,
   "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg"
+  "img": "equipment/adventuring-gear.jpg",
+  "image": "/res/img/items/abacus.png"
 }

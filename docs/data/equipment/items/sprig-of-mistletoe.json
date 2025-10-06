@@ -24,5 +24,6 @@
     "Can be used as a spellcasting focus for druidic magic",
     "Provides unlimited Pollen for charm and nature spells"
   ],
-  "Gear_Slot": "hands"
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/sprig-of-mistletoe.png"
 }

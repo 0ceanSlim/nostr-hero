@@ -5,7 +5,7 @@
   "ai_description": "wooden toolbox with saw, hammer, measuring square, wood plane, chisel set, crafting tools for woodworking",
   "price": 800,
   "type": "Artisan's Tools",
-  "weight": 6.0,
+  "weight": 6,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/carpenters-tools.png"
 }

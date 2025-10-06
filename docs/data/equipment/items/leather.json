@@ -5,7 +5,7 @@
   "ai_description": "brown boiled leather vest with shoulder guards, flexible armor with leather straps and buckles, simple protection for rogues",
   "price": 1000,
   "type": "Light Armor",
-  "weight": 10.0,
+  "weight": 10,
   "stack": 1,
   "ac": "11 + Dex",
   "damage": null,
@@ -22,5 +22,6 @@
   ],
   "notes": [
     "Light armor allows full dexterity bonus"
-  ]
+  ],
+  "image": "/res/img/items/leather.png"
 }

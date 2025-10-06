@@ -5,7 +5,7 @@
   "ai_description": "armor made of overlapping metal scales sewn to leather backing, dragon-like protective covering with bronze or steel plates",
   "price": 5000,
   "type": "Medium Armor",
-  "weight": 45.0,
+  "weight": 45,
   "stack": 1,
   "ac": "14 + Dex(max2)",
   "damage": null,
@@ -22,5 +22,6 @@
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/scale-mail.png"
 }

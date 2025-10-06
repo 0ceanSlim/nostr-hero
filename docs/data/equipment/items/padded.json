@@ -5,7 +5,7 @@
   "ai_description": "quilted cloth armor with thick padding, soft fabric protection stuffed with cotton layers",
   "price": 500,
   "type": "Light Armor",
-  "weight": 8.0,
+  "weight": 8,
   "stack": 1,
   "ac": "11 + Dex",
   "ammunition": "",
@@ -18,5 +18,6 @@
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/padded.png"
 }

@@ -16,5 +16,6 @@
     "Used for poison magic",
     "Commonly drops from serpents",
     "Must be gathered or purchased"
-  ]
+  ],
+  "image": "/res/img/items/snake-scale.png"
 }

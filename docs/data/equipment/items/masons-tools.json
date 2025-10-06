@@ -5,7 +5,7 @@
   "ai_description": "stone-working tools with trowel, chisel, and square, masonry implements for shaping and laying stone",
   "price": 1000,
   "type": "Artisan's Tools",
-  "weight": 8.0,
+  "weight": 8,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/masons-tools.png"
 }

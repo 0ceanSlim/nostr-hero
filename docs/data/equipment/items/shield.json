@@ -4,7 +4,7 @@
   "ai_description": "round wooden shield with iron boss and leather straps, protective barrier with painted heraldic design and metal rim",
   "price": 1000,
   "type": "Heavy Armor",
-  "weight": 6.0,
+  "weight": 6,
   "stack": 1,
   "ac": "+2",
   "damage": null,
@@ -19,5 +19,6 @@
   "tags": [
     "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/shield.png"
 }

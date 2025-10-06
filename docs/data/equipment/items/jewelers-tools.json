@@ -5,7 +5,7 @@
   "ai_description": "delicate tools including tiny hammers, files, and gem tweezers, precision instruments for crafting jewelry",
   "price": 2500,
   "type": "Artisan's Tools",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/jewelers-tools.png"
 }

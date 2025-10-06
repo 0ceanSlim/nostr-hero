@@ -9,5 +9,6 @@
   "gear_slot": "",
   "rarity": "common",
   "tags": [],
-  "ai_description": "Cream-colored animal skin sheet with smooth writing surface"
+  "ai_description": "Cream-colored animal skin sheet with smooth writing surface",
+  "image": "/res/img/items/parchment.png"
 }

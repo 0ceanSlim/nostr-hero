@@ -5,7 +5,7 @@
   "ai_description": "massive wooden club with thick knotted head, crude two-handed bludgeoning weapon made from heavy oak branch",
   "price": 0,
   "type": "Simple Melee Weapons",
-  "weight": 10.0,
+  "weight": 10,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
@@ -21,5 +21,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/greatclub.png"
 }

@@ -5,7 +5,7 @@
   "ai_description": "curved hunting horn made from animal horn or brass, wind instrument with wide bell and narrow mouthpiece",
   "price": 300,
   "type": "Musical Instrument",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/horn.png"
 }

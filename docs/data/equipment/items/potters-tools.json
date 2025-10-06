@@ -5,7 +5,7 @@
   "ai_description": "clay-working tools with shaping needles and scrapers, pottery implements for crafting vessels and bowls",
   "price": 1000,
   "type": "Artisan's Tools",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/potters-tools.png"
 }

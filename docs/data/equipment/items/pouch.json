@@ -5,7 +5,7 @@
   "ai_description": "small leather belt pouch with drawstring closure and metal clasps, worn coin purse for storing small items",
   "price": 0,
   "type": "Adventuring Gear",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -22,5 +22,6 @@
     "container",
     "equipment"
   ],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/pouch.png"
 }

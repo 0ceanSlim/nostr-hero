@@ -343,6 +343,9 @@ async function skipToEquipment() {
  */
 async function continueAfterEquipment() {
 
+  // 11.5 Show starting spells (if spellcaster)
+  await showStartingSpells(generatedCharacter);
+
   // 12. Scene 6 - Pack note (moved before pack selection)
   await showScene({
     text: introData.scene6.text,
@@ -389,21 +392,24 @@ function getRarityColor(itemName) {
 /**
  * Create a styled item card for given items display
  */
-function createGivenItemCard(itemName, quantity) {
+async function createGivenItemCard(itemName, quantity) {
   const card = document.createElement('div');
   card.className = 'item-card bg-gray-800 rounded-lg relative overflow-hidden';
   card.style.width = '110px';
   card.style.height = '110px';
   card.style.aspectRatio = '1/1';
 
+  // Fetch item data to get the image path
+  const itemData = await getItemById(itemName);
+
   // Item image (fills container with padding)
   const img = document.createElement('img');
-  img.src = `/res/img/items/${getItemImageName(itemName)}.png`;
+  img.src = itemData?.image || `/res/img/items/${itemName}.png`;
   img.alt = itemName;
   img.className = 'absolute inset-0 w-full h-full object-contain p-3';
-  img.onerror = () => {
-    img.src = '/res/img/otherstuff.png';
-  };
+  img.style.imageRendering = 'pixelated';
+  img.style.imageRendering = '-moz-crisp-edges';
+  img.style.imageRendering = 'crisp-edges';
   card.appendChild(img);
 
   // Rarity dot (top right)
@@ -614,7 +620,7 @@ async function showGivenItemsScene(givenItems) {
 
   // Display each given item (excluding packs) with green selection border
   for (const givenItem of nonPackItems) {
-    const itemCard = createGivenItemCard(givenItem.item, givenItem.quantity);
+    const itemCard = await createGivenItemCard(givenItem.item, givenItem.quantity);
     // Add green selection border
     itemCard.style.border = '3px solid #10b981';
     itemCard.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.6)';
@@ -648,6 +654,319 @@ async function showGivenItemsScene(givenItems) {
   // Reset container for next scene (fade transitions)
   container.classList.remove('fade-in', 'fade-out');
   container.classList.add('hidden');
+}
+
+/**
+ * Show starting spells scene (if character is a spellcaster)
+ */
+async function showStartingSpells(character) {
+  // Skip if not a spellcaster or no spells
+  if (!character.spells || character.spells.length === 0) {
+    console.log(`${character.class} has no starting spells, skipping spell scene`);
+    return;
+  }
+
+  const container = document.getElementById('scene-container');
+  const content = document.getElementById('scene-content');
+
+  // Clear existing content
+  content.innerHTML = '';
+
+  // Title
+  const title = document.createElement('h2');
+  title.className = 'text-4xl mb-4 text-center';
+  title.textContent = 'Your Magical Arsenal';
+  content.appendChild(title);
+
+  // Description
+  const description = document.createElement('div');
+  description.className = 'text-lg mb-6 text-center max-w-3xl mx-auto';
+  description.innerHTML = `As a ${character.class}, you begin your journey with knowledge of these spells. You can prepare them for use in your spell slots.`;
+  content.appendChild(description);
+
+  // Spell Slots Info
+  if (character.spell_slots) {
+    const slotsInfo = document.createElement('div');
+    slotsInfo.className = 'bg-gray-800 rounded-lg p-4 mb-6 max-w-2xl mx-auto border-2 border-purple-600';
+
+    const slotsTitle = document.createElement('div');
+    slotsTitle.className = 'text-xl font-bold mb-2 text-purple-400 text-center';
+    slotsTitle.textContent = 'Spell Slots Available';
+    slotsInfo.appendChild(slotsTitle);
+
+    const slotsGrid = document.createElement('div');
+    slotsGrid.className = 'flex justify-center gap-4 text-sm';
+
+    // spell_slots is now an object of arrays, not numbers
+    Object.entries(character.spell_slots).forEach(([level, slots]) => {
+      if (Array.isArray(slots) && slots.length > 0) {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'text-center';
+        const levelName = level === 'cantrips' ? 'Cantrips' : `Level ${level.replace('level_', '')}`;
+        slotDiv.innerHTML = `<div class="text-gray-400">${levelName}</div><div class="text-2xl font-bold text-purple-300">${slots.length}</div>`;
+        slotsGrid.appendChild(slotDiv);
+      }
+    });
+
+    slotsInfo.appendChild(slotsGrid);
+    content.appendChild(slotsInfo);
+  }
+
+  // Spells container
+  const spellsContainer = document.createElement('div');
+  spellsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6 max-w-5xl mx-auto';
+
+  // Load and display each spell
+  console.log(`Loading ${character.spells.length} spells for display`);
+  for (const spellId of character.spells) {
+    console.log(`Creating card for spell: ${spellId}`);
+    try {
+      const spellCard = await createSpellCard(spellId);
+      if (spellCard) {
+        spellsContainer.appendChild(spellCard);
+      }
+    } catch (error) {
+      console.error(`Failed to create card for spell ${spellId}:`, error);
+    }
+  }
+
+  if (spellsContainer.children.length === 0) {
+    console.warn('No spell cards were created');
+  }
+
+  content.appendChild(spellsContainer);
+
+  // Continue button
+  const continueBtn = document.createElement('button');
+  continueBtn.className = 'pixel-continue-btn';
+  continueBtn.textContent = 'Continue →';
+  content.appendChild(continueBtn);
+
+  // Show container
+  container.classList.remove('hidden');
+  container.style.opacity = '1';
+  content.style.animation = 'slideInFromRight 0.3s ease-out';
+
+  // Wait for user to click Continue
+  await waitForButtonClick(continueBtn);
+
+  // Swipe out
+  content.style.animation = 'wipeRight 0.3s ease-in';
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  // Clear content
+  content.innerHTML = '';
+
+  // Reset container
+  container.classList.remove('fade-in', 'fade-out');
+  container.classList.add('hidden');
+}
+
+/**
+ * Create a spell card with spell information
+ */
+async function createSpellCard(spellId) {
+  // Fetch spell data from API
+  console.log(`Fetching spell data for: ${spellId}`);
+  const response = await fetch(`/api/spells/${spellId}`);
+
+  if (!response.ok) {
+    console.error(`Failed to fetch spell ${spellId}: ${response.status} ${response.statusText}`);
+    return null;
+  }
+
+  const spell = await response.json();
+  console.log(`Spell data received for ${spellId}:`, spell);
+
+  // Outer container for card and tooltip
+  const container = document.createElement('div');
+  container.className = 'relative';
+  container.style.width = '120px';
+  container.style.height = '150px';
+
+  // Card element
+  const card = document.createElement('div');
+  card.className = 'relative bg-gray-900 rounded-lg border-2 border-purple-600 hover:border-purple-400 transition-all cursor-pointer overflow-hidden';
+  card.style.width = '100%';
+  card.style.height = '100%';
+
+  // Spell school image
+  const school = spell.school || 'evocation';
+  const img = document.createElement('img');
+  img.src = `/res/img/spells/${school}.png`;
+  img.className = 'w-full h-full object-cover';
+  img.onerror = () => {
+    img.src = '/res/img/spells/evocation.png'; // Fallback
+  };
+  card.appendChild(img);
+
+  // Overlay gradient for better text visibility
+  const overlay = document.createElement('div');
+  overlay.className = 'absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent';
+  card.appendChild(overlay);
+
+  // Top left: Level indicator
+  const levelBadge = document.createElement('div');
+  levelBadge.className = 'absolute top-1 left-1 bg-purple-900 text-purple-100 font-bold text-xs px-2 py-1 rounded';
+  levelBadge.textContent = spell.level === 0 ? 'C' : `L${spell.level}`;
+  card.appendChild(levelBadge);
+
+  // Top right: Info button
+  const infoBtn = document.createElement('button');
+  infoBtn.className = 'absolute top-1 right-1 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center';
+  infoBtn.textContent = '?';
+  infoBtn.onclick = (e) => {
+    e.stopPropagation();
+    showSpellTooltip(spell, container);
+  };
+  card.appendChild(infoBtn);
+
+  // Bottom left: Materials indicator
+  const materialComponent = spell.properties?.material_component || spell.material_component;
+  if (materialComponent && materialComponent.required && materialComponent.required.length > 0) {
+    const materialBadge = document.createElement('div');
+    materialBadge.className = 'absolute bottom-8 left-1 bg-yellow-700 text-yellow-100 font-bold text-xs px-2 py-1 rounded';
+    materialBadge.textContent = 'M';
+    materialBadge.title = 'Requires materials';
+    card.appendChild(materialBadge);
+  }
+
+  // Bottom right: Damage indicator
+  if (spell.damage) {
+    const damageBadge = document.createElement('div');
+    damageBadge.className = 'absolute bottom-8 right-1 bg-red-700 text-red-100 font-bold text-xs px-2 py-1 rounded';
+    damageBadge.textContent = spell.damage;
+    card.appendChild(damageBadge);
+  }
+
+  // Bottom: Spell name
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-80 text-purple-200 text-xs font-bold text-center py-1 px-1 truncate';
+  nameDiv.textContent = spell.name || spellId;
+  nameDiv.title = spell.name || spellId;
+  card.appendChild(nameDiv);
+
+  container.appendChild(card);
+  return container;
+}
+
+/**
+ * Show spell tooltip with detailed information
+ */
+function showSpellTooltip(spell, containerElement) {
+  // Remove any existing tooltips
+  const existing = document.querySelector('.spell-tooltip');
+  if (existing) {
+    existing.remove();
+  }
+
+  // Create tooltip
+  const tooltip = document.createElement('div');
+  tooltip.className = 'spell-tooltip fixed bg-gray-800 border-2 border-purple-500 rounded-lg p-4 shadow-xl z-50';
+  tooltip.style.maxWidth = '400px';
+  tooltip.style.minWidth = '300px';
+
+  // Position near the card
+  const rect = containerElement.getBoundingClientRect();
+  tooltip.style.left = `${rect.right + 10}px`;
+  tooltip.style.top = `${rect.top}px`;
+
+  // Spell name and level
+  const header = document.createElement('div');
+  header.className = 'flex justify-between items-start mb-2 border-b border-purple-600 pb-2';
+
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'text-xl font-bold text-purple-300';
+  nameDiv.textContent = spell.name;
+
+  const levelDiv = document.createElement('div');
+  levelDiv.className = 'text-sm text-purple-400';
+  levelDiv.textContent = spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`;
+
+  header.appendChild(nameDiv);
+  header.appendChild(levelDiv);
+  tooltip.appendChild(header);
+
+  // School and casting time
+  const meta = document.createElement('div');
+  meta.className = 'text-sm text-gray-400 mb-3';
+  const castingTime = spell.properties?.casting_time || spell.casting_time || 'Action';
+  const range = spell.properties?.range || spell.range || 'Touch';
+  const duration = spell.properties?.duration || spell.duration || 'Instantaneous';
+  meta.innerHTML = `<div><strong>School:</strong> ${spell.school}</div>
+                    <div><strong>Casting Time:</strong> ${castingTime}</div>
+                    <div><strong>Range:</strong> ${range}</div>
+                    <div><strong>Duration:</strong> ${duration}</div>`;
+  tooltip.appendChild(meta);
+
+  // Description
+  const desc = document.createElement('div');
+  desc.className = 'text-sm text-gray-300 mb-3 border-t border-gray-700 pt-2';
+  desc.textContent = spell.description;
+  tooltip.appendChild(desc);
+
+  // Damage and effects
+  if (spell.damage || spell.properties?.heal) {
+    const effects = document.createElement('div');
+    effects.className = 'flex flex-wrap gap-2 text-xs mb-2';
+
+    if (spell.damage) {
+      const dmg = document.createElement('span');
+      dmg.className = 'bg-red-900 text-red-200 px-2 py-1 rounded';
+      const damageType = spell.properties?.damage_type || spell.damage_type || 'damage';
+      dmg.textContent = `${spell.damage} ${damageType}`;
+      effects.appendChild(dmg);
+    }
+
+    if (spell.properties?.heal) {
+      const heal = document.createElement('span');
+      heal.className = 'bg-green-900 text-green-200 px-2 py-1 rounded';
+      heal.textContent = `Heal: ${spell.properties.heal}`;
+      effects.appendChild(heal);
+    }
+
+    tooltip.appendChild(effects);
+  }
+
+  // Materials
+  const materialComponent = spell.properties?.material_component || spell.material_component;
+  if (materialComponent && materialComponent.required) {
+    const materials = document.createElement('div');
+    materials.className = 'text-xs text-yellow-300 bg-yellow-900 bg-opacity-30 p-2 rounded mb-2';
+    materials.innerHTML = `<strong>Materials Required:</strong><br>${materialComponent.required.map(m => `${m.component} (${m.quantity})`).join(', ')}`;
+    tooltip.appendChild(materials);
+  }
+
+  // Close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'w-full bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded mt-2';
+  closeBtn.textContent = 'Close';
+  closeBtn.onclick = () => tooltip.remove();
+  tooltip.appendChild(closeBtn);
+
+  document.body.appendChild(tooltip);
+
+  // Close on click outside
+  const closeOnClickOutside = (e) => {
+    if (!tooltip.contains(e.target) && !containerElement.contains(e.target)) {
+      tooltip.remove();
+      document.removeEventListener('click', closeOnClickOutside);
+    }
+  };
+  setTimeout(() => {
+    document.addEventListener('click', closeOnClickOutside);
+  }, 100);
+
+  // Adjust position if tooltip goes off screen
+  setTimeout(() => {
+    const tooltipRect = tooltip.getBoundingClientRect();
+    if (tooltipRect.right > window.innerWidth) {
+      tooltip.style.left = `${rect.left - tooltipRect.width - 10}px`;
+    }
+    if (tooltipRect.bottom > window.innerHeight) {
+      tooltip.style.top = `${window.innerHeight - tooltipRect.height - 10}px`;
+    }
+  }, 0);
 }
 
 // ============================================================================
@@ -854,76 +1173,341 @@ function checkEquipmentComplete() {
 // SAVE AND START ADVENTURE
 // ============================================================================
 
-/**
- * Create final inventory from all items with stacking
- */
-async function addItemWithStacking(inventory, itemName, quantity) {
-  // Load item database
-  const itemDbResponse = await fetch('/data/systems/item-database.json');
-  const itemDatabase = await itemDbResponse.json();
-  const itemData = itemDatabase.items[itemName];
+// Cache for item data from database
+let itemsCache = null;
 
-  if (!itemData) {
-    console.warn(`Item not found in database: ${itemName}`);
-    return;
+/**
+ * Load all items from database once
+ */
+async function loadItemsFromDatabase() {
+  if (itemsCache) {
+    return itemsCache;
   }
 
-  // Find existing stack or add new
-  const existingItem = inventory.find(inv => inv.item === itemName);
-  if (existingItem) {
-    existingItem.quantity += quantity;
-  } else {
-    inventory.push({
-      item: itemName,
-      quantity: quantity,
-      stackable: itemData.stackable || false
-    });
+  try {
+    const response = await fetch('/api/items');
+    if (response.ok) {
+      itemsCache = await response.json();
+      console.log(`📦 Loaded ${itemsCache.length} items from database`);
+      return itemsCache;
+    }
+  } catch (error) {
+    console.warn('Could not load items from database:', error);
+  }
+  return [];
+}
+
+/**
+ * Get item data from database cache by ID
+ */
+async function getItemById(itemId) {
+  try {
+    const items = await loadItemsFromDatabase();
+
+    // Find item by ID (exact match)
+    const item = items.find(i => i.id === itemId);
+
+    if (item) {
+      // Convert database format to expected frontend format
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        type: item.item_type,
+        tags: item.tags || [],
+        rarity: item.rarity,
+        gear_slot: item.properties?.gear_slot,
+        slots: item.properties?.slots,
+        contents: item.properties?.contents,
+        stack: item.properties?.stack,
+        ...item.properties // Spread all other properties
+      };
+    } else {
+      console.warn(`❌ Item ID "${itemId}" not found in database`);
+    }
+  } catch (error) {
+    console.warn(`Could not load item data for ID: ${itemId}`, error);
+  }
+  return null;
+}
+
+/**
+ * Add items with proper stacking logic
+ */
+async function addItemWithStacking(allItems, itemId, quantity) {
+  // Get item data to check stack limit
+  const itemData = await getItemById(itemId);
+  const stackLimit = itemData ? parseInt(itemData.stack) || 1 : 1;
+
+  let remainingQuantity = quantity;
+
+  // Try to add to existing stacks first
+  for (let existingItem of allItems) {
+    if (existingItem.item === itemId && existingItem.quantity < stackLimit) {
+      const canAdd = Math.min(remainingQuantity, stackLimit - existingItem.quantity);
+      existingItem.quantity += canAdd;
+      remainingQuantity -= canAdd;
+
+      if (remainingQuantity <= 0) break;
+    }
+  }
+
+  // Create new stacks for remaining quantity
+  while (remainingQuantity > 0) {
+    const stackSize = Math.min(remainingQuantity, stackLimit);
+    allItems.push({ item: itemId, quantity: stackSize });
+    remainingQuantity -= stackSize;
   }
 }
 
 /**
- * Create proper inventory structure with equipment slots
+ * Unpack packs and return contents
+ */
+async function unpackItem(packId) {
+  try {
+    console.log(`🎒 Attempting to unpack: "${packId}"`);
+    const packData = await getItemById(packId);
+    if (packData) {
+      console.log(`🎒 Loaded pack data for ${packId}:`, packData);
+      if (packData.contents) {
+        // Parse contents string if it's a string, or use directly if array
+        const contents = typeof packData.contents === 'string'
+          ? JSON.parse(packData.contents)
+          : packData.contents;
+
+        console.log(`🎒 Pack contents:`, contents);
+        // Convert to proper slot format
+        const slots = [];
+        let slotIndex = 0;
+        contents.forEach((item) => {
+          const itemId = item[0];
+          const itemName = itemId.toLowerCase();
+          // Don't include the backpack itself or any pack items
+          if (itemName !== 'backpack' && !itemName.includes('-pack') && !itemName.includes('pack-')) {
+            slots.push({
+              slot: slotIndex,
+              item: itemId,
+              quantity: item[1]
+            });
+            slotIndex++;
+          } else {
+            console.log(`🎒 Excluding from pack contents: ${itemId}`);
+          }
+        });
+
+        // Fill remaining slots with null
+        const totalSlots = 20; // Backpack has 20 slots
+        while (slots.length < totalSlots) {
+          slots.push({
+            slot: slots.length,
+            item: null,
+            quantity: 0
+          });
+        }
+
+        console.log(`🎒 Successfully unpacked ${packId} into ${slots.filter(s => s.item).length} items`);
+        return slots;
+      } else {
+        console.warn(`🎒 Pack ${packId} has no contents field`);
+      }
+    } else {
+      console.warn(`🎒 Pack data not found for: ${packId}`);
+    }
+  } catch (error) {
+    console.warn(`🎒 Could not unpack: ${packId}`, error);
+  }
+  return null;
+}
+
+/**
+ * Add items to general slots or bag
+ */
+function addToGeneralSlotOrBag(inventory, item, slotIndex, itemData = null) {
+  // Check if item is a container (has 'container' tag)
+  const isContainer = itemData?.tags?.includes('container') ||
+                     item.item.toLowerCase().includes('pouch') ||
+                     item.item.toLowerCase().includes('pack');
+
+  // Containers should NOT go in the bag (no containers inside containers)
+  if (isContainer) {
+    console.log(`📦 ${item.item} is a container, placing in general slot`);
+    if (slotIndex < 4 && inventory.general_slots[slotIndex].item === null) {
+      inventory.general_slots[slotIndex] = {
+        slot: slotIndex,
+        item: item.item,
+        quantity: item.quantity
+      };
+      return;
+    }
+  } else {
+    // Try to add to backpack first if it exists (only non-containers)
+    if (inventory.gear_slots.bag.item !== null && inventory.gear_slots.bag.contents) {
+      const emptyBagSlot = inventory.gear_slots.bag.contents.find(slot => slot.item === null);
+      if (emptyBagSlot) {
+        console.log(`📦 Adding ${item.item} to backpack slot ${emptyBagSlot.slot}`);
+        emptyBagSlot.item = item.item;
+        emptyBagSlot.quantity = item.quantity;
+        return;
+      }
+    }
+  }
+
+  // If backpack is full or item is a container, use general slots
+  if (slotIndex < 4 && inventory.general_slots[slotIndex].item === null) {
+    console.log(`📦 Adding ${item.item} to general slot ${slotIndex}`);
+    inventory.general_slots[slotIndex] = {
+      slot: slotIndex,
+      item: item.item,
+      quantity: item.quantity
+    };
+    return;
+  }
+
+  console.warn(`⚠️ Could not place item ${item.item} - inventory full`);
+}
+
+/**
+ * Dynamic inventory creation with proper equipment placement
  */
 async function createInventoryFromItems(allItems) {
-  const inventoryResponse = await fetch('/data/systems/inventory-system.json');
-  const inventorySystem = await inventoryResponse.json();
-
+  // Initialize empty inventory structure
   const inventory = {
-    equipped: {},
-    backpack: {
-      slots: inventorySystem.containers.leather_backpack.capacity,
-      weight_capacity: inventorySystem.containers.leather_backpack.weight_capacity,
-      items: []
+    general_slots: [
+      { slot: 0, item: null, quantity: 0 },
+      { slot: 1, item: null, quantity: 0 },
+      { slot: 2, item: null, quantity: 0 },
+      { slot: 3, item: null, quantity: 0 }
+    ],
+    gear_slots: {
+      bag: { item: null, quantity: 0 },
+      left_arm: { item: null, quantity: 0 },
+      right_arm: { item: null, quantity: 0 },
+      armor: { item: null, quantity: 0 },
+      necklace: { item: null, quantity: 0 },
+      ring: { item: null, quantity: 0 },
+      ammunition: { item: null, quantity: 0 },
+      clothes: { item: null, quantity: 0 }
     }
   };
 
-  // Load item database for slot info
-  const itemDbResponse = await fetch('/data/systems/item-database.json');
-  const itemDatabase = await itemDbResponse.json();
+  let remainingItems = [...allItems];
+  let currentGeneralSlot = 0;
+  let twoHandedEquipped = false;
 
-  // Auto-equip items that can be equipped
-  for (const inventoryItem of allItems) {
-    const itemData = itemDatabase.items[inventoryItem.item];
+  // 1. First pass - Handle packs (automatically unpack to bag slot)
+  for (let i = remainingItems.length - 1; i >= 0; i--) {
+    const item = remainingItems[i];
+    const itemName = item.item.toLowerCase();
 
-    if (itemData && itemData.slot) {
-      // Try to equip
-      const slot = itemData.slot;
-      if (!inventory.equipped[slot]) {
-        inventory.equipped[slot] = {
-          item: inventoryItem.item,
-          quantity: 1
+    if (itemName.includes('pack')) {
+      console.log(`🎒 Found pack: ${item.item}`);
+      // This is a pack - unpack it to bag slot
+      const packContents = await unpackItem(item.item);
+      if (packContents) {
+        console.log(`🎒 Successfully unpacked ${item.item}:`, packContents);
+        // Equip the pack itself as a backpack to bag slot (the pack becomes the backpack)
+        inventory.gear_slots.bag = {
+          item: 'backpack', // All packs become backpacks when equipped
+          quantity: 1,
+          contents: packContents
         };
-        inventoryItem.quantity -= 1;
+        remainingItems.splice(i, 1);
       }
     }
+  }
 
-    // Put remaining in backpack
-    if (inventoryItem.quantity > 0) {
-      inventory.backpack.items.push({
-        item: inventoryItem.item,
-        quantity: inventoryItem.quantity
-      });
+  // 2. Second pass - Handle all equipment items based on gear_slot
+  for (let i = remainingItems.length - 1; i >= 0; i--) {
+    const item = remainingItems[i];
+    const itemData = await getItemById(item.item);
+
+    console.log(`🔍 Checking item: ${item.item}`, {
+      hasData: !!itemData,
+      tags: itemData?.tags,
+      gearSlot: itemData?.gear_slot
+    });
+
+    // Check if item has equipment tag and gear_slot
+    if (itemData && itemData.tags && itemData.tags.includes('equipment') && itemData.gear_slot) {
+      const gearSlot = itemData.gear_slot;
+      console.log(`⚔️ Found equipment: ${item.item} → ${gearSlot}`);
+
+      // Handle different gear slots
+      if (gearSlot === 'armor' && inventory.gear_slots.armor.item === null) {
+        console.log(`Equipping armor: ${item.item}`);
+        inventory.gear_slots.armor = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'necklace' && inventory.gear_slots.necklace.item === null) {
+        console.log(`Equipping necklace: ${item.item}`);
+        inventory.gear_slots.necklace = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'ring' && inventory.gear_slots.ring.item === null) {
+        console.log(`Equipping ring: ${item.item}`);
+        inventory.gear_slots.ring = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'ammunition' && inventory.gear_slots.ammunition.item === null) {
+        console.log(`Equipping ammunition: ${item.item}`);
+        inventory.gear_slots.ammunition = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'clothes' && inventory.gear_slots.clothes.item === null) {
+        console.log(`Equipping clothes: ${item.item}`);
+        inventory.gear_slots.clothes = {
+          item: item.item,
+          quantity: item.quantity
+        };
+        remainingItems.splice(i, 1);
+      } else if (gearSlot === 'hands') {
+        // Handle weapons - check if two-handed
+        const isTwoHanded = itemData.tags && itemData.tags.includes('two-handed');
+
+        if (isTwoHanded) {
+          if (inventory.gear_slots.right_arm.item === null) {
+            console.log(`Equipping two-handed weapon: ${item.item}`);
+            inventory.gear_slots.right_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            twoHandedEquipped = true;
+            remainingItems.splice(i, 1);
+          }
+        } else {
+          // One-handed weapon
+          if (inventory.gear_slots.right_arm.item === null) {
+            console.log(`Equipping weapon in right hand: ${item.item}`);
+            inventory.gear_slots.right_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            remainingItems.splice(i, 1);
+          } else if (inventory.gear_slots.left_arm.item === null && !twoHandedEquipped) {
+            console.log(`Equipping weapon in left hand: ${item.item}`);
+            inventory.gear_slots.left_arm = {
+              item: item.item,
+              quantity: item.quantity
+            };
+            remainingItems.splice(i, 1);
+          }
+        }
+      }
     }
+  }
+
+  // 3. Put remaining items in general slots or bag
+  for (let item of remainingItems) {
+    const itemData = await getItemById(item.item);
+    addToGeneralSlotOrBag(inventory, item, currentGeneralSlot++, itemData);
   }
 
   return inventory;
@@ -935,43 +1519,58 @@ async function createInventoryFromItems(allItems) {
 async function startAdventure() {
   try {
     console.log('🎮 Starting adventure...');
+    console.log('generatedCharacter:', generatedCharacter);
+    console.log('startingEquipment:', startingEquipment);
+    console.log('selectedEquipment:', selectedEquipment);
+    console.log('playerName:', playerName);
 
-    if (!generatedCharacter || !startingEquipment) {
-      throw new Error('Missing character or equipment data');
+    // Validate we have the required data
+    if (!generatedCharacter) {
+      throw new Error('No character data available');
+    }
+    if (!startingEquipment) {
+      throw new Error('No starting equipment data available');
     }
 
+    // Get the final character name (either edited or generated)
     const finalName = playerName || generatedCharacter.name;
 
-    // Collect all items
+    // Collect all items (starting + selected)
     let allItems = [];
 
-    // Add starting equipment
+    // Add starting equipment with proper stacking
     for (const startingItem of startingEquipment.inventory) {
       await addItemWithStacking(allItems, startingItem.item, startingItem.quantity);
     }
 
-    // Add selected equipment
-    for (const option of Object.values(selectedEquipment)) {
-      if (option.isComplexChoice && option.weapons) {
-        // Complex choice with weapons array
-        for (const weapon of option.weapons) {
+    // Add selected equipment to items list with proper stacking
+    for (const [key, option] of Object.entries(selectedEquipment)) {
+      // Skip pack - it will be handled separately in inventory creation
+      if (key === 'pack') {
+        // Pack is just a string ID, add it as an item
+        await addItemWithStacking(allItems, option, 1);
+        continue;
+      }
+
+      if (option.isComplexChoice) {
+        // Handle complex weapon choices
+        const selectedWeapons = option.weapons || [];
+        for (const weapon of selectedWeapons) {
           await addItemWithStacking(allItems, weapon[0], weapon[1]);
         }
-      } else if (option.bundle) {
-        // Bundle option
+      } else if (option.isBundle) {
         for (const bundleItem of option.bundle) {
           await addItemWithStacking(allItems, bundleItem[0], bundleItem[1]);
         }
       } else if (option.item) {
-        // Simple item option
         await addItemWithStacking(allItems, option.item, option.quantity || 1);
       }
     }
 
-    // Create inventory structure
+    // Create proper inventory structure with dynamic equipment placement
     const inventory = await createInventoryFromItems(allItems);
 
-    // Final character data
+    // Prepare final character data (remove choices and other unnecessary fields)
     const finalCharacter = {
       name: finalName,
       race: generatedCharacter.race,
@@ -988,46 +1587,50 @@ async function startAdventure() {
       fatigue: generatedCharacter.fatigue,
       gold: generatedCharacter.gold,
       inventory: inventory,
-      spells: generatedCharacter.spells || {}
+      known_spells: generatedCharacter.spells || [],
+      spell_slots: generatedCharacter.spell_slots || {}
     };
 
-    // Create save file
+    console.log('Final character:', finalCharacter);
+
+    // Create new save file
     const session = window.sessionManager.getSession();
     const saveData = {
+      // Don't set ID - let the backend generate it to avoid undefined issues
       npub: session.npub,
       created_at: new Date().toISOString(),
       last_played: new Date().toISOString(),
       character: finalCharacter,
-      gameState: {
-        location: {
-          current: generatedCharacter.city || 'kingdom',
-          discovered: [generatedCharacter.city || 'kingdom'],
-          music_tracks_unlocked: ['character-creation', 'kingdom-theme']
-        }
-      }
+      location: {
+        current: generatedCharacter.city || 'kingdom',
+        discovered: [generatedCharacter.city || 'kingdom']
+      },
+      music_tracks_unlocked: ['character-creation', 'kingdom-theme']
     };
 
     const response = await fetch(`/api/saves/${session.npub}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(saveData)
     });
 
     if (response.ok) {
       const result = await response.json();
-      console.log('✅ Save created:', result);
+      console.log('✅ Save created successfully:', result);
 
-      // Switch music
+      // Play departure music and transition
       const introMusic = document.getElementById('intro-music');
       const gameMusic = document.getElementById('game-music');
       introMusic.pause();
       gameMusic.volume = 0.3;
-      gameMusic.play().catch(e => console.log('Music blocked:', e));
+      gameMusic.play().catch(e => console.log('Game music autoplay blocked:', e));
 
-      // Redirect to game
+      // Redirect to game using the save_id from backend response
       setTimeout(() => {
         window.location.href = '/game?save=' + result.save_id;
-      }, 2000);
+      }, 3000);
     } else {
       throw new Error('Failed to create save file');
     }

@@ -5,7 +5,7 @@
   "ai_description": "glass timekeeper with sand flowing between twin bulbs, hourglass timer with narrow waist and wooden frame",
   "price": 2500,
   "type": "Adventuring Gear",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -18,5 +18,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/hourglass.png"
 }

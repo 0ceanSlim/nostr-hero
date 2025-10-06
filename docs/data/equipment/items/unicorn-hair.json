@@ -16,5 +16,6 @@
     "Used for pure healing magic",
     "Extremely rarely given by unicorns",
     "Cannot be taken by force"
-  ]
+  ],
+  "image": "/res/img/items/unicorn-hair.png"
 }

@@ -5,7 +5,7 @@
   "ai_description": "large wooden crossbow with steel prod and intricate loading mechanism, heavy siege weapon with cranking lever and bolt groove",
   "price": 0,
   "type": "Martial Ranged Weapons",
-  "weight": 18.0,
+  "weight": 18,
   "stack": 1,
   "ac": null,
   "damage": "1d10",
@@ -28,5 +28,6 @@
     "Loading property requires action to reload",
     "Heavy weapon"
   ],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/crossbow-heavy.png"
 }

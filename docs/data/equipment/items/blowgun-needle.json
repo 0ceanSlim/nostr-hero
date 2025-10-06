@@ -13,5 +13,7 @@
   "range": "null",
   "range-long": "null",
   "ammunition": "",
-  "ai_description": "Thin sharp dart with feathered end and metal tip"
+  "ai_description": "Thin sharp dart with feathered end and metal tip",
+  "image": "/res/img/items/blowgun-needle.png",
+  "gear_slot": "ammunition"
 }

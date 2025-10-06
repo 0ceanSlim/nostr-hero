@@ -22,5 +22,6 @@
   "img": "equipment/potion.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/superior-healing.png"
 }

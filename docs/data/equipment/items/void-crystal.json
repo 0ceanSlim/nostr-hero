@@ -4,7 +4,7 @@
   "description": "A dark crystal that seems to absorb light and reality itself. Looking into it reveals the endless depths of nothingness.",
   "price": 8000,
   "type": "Spell Component",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "rarity": "rare",
   "tags": [
@@ -16,5 +16,6 @@
     "Used for banishment magic",
     "Extremely rare drop from void creatures",
     "Dangerous to study for too long"
-  ]
+  ],
+  "image": "/res/img/items/void-crystal.png"
 }

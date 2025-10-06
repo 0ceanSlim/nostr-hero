@@ -5,7 +5,7 @@
   "ai_description": "short steel dagger with pointed blade, simple crossguard, dark leather-wrapped handle, sharp piercing weapon",
   "price": 0,
   "type": "Simple Melee Weapons",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": "1d4",
@@ -25,5 +25,6 @@
   "notes": [
     "Can be thrown at targets within 60 feet"
   ],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/dagger.png"
 }

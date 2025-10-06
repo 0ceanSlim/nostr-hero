@@ -17,5 +17,6 @@
     "Used for large and ritual spells",
     "Unlimited when Staff focus is equipped",
     "Consumed on use if no Staff focus"
-  ]
+  ],
+  "image": "/res/img/items/mana-crystals.png"
 }

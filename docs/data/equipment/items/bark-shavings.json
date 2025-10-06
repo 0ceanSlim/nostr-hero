@@ -17,5 +17,6 @@
     "Used for growth and healing spells",
     "Unlimited when Wooden Staff focus is equipped",
     "Consumed on use if no Wooden Staff focus"
-  ]
+  ],
+  "image": "/res/img/items/bark-shavings.png"
 }

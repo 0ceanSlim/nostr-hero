@@ -5,7 +5,7 @@
   "ai_description": "elegant writing set with quills, inkwells, and fine parchments, professional calligraphy tools with gold leaf",
   "price": 1000,
   "type": "Artisan's Tools",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/calligraphers-supplies.png"
 }

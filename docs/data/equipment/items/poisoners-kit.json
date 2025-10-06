@@ -5,7 +5,7 @@
   "ai_description": "glass vials and chemical apparatus, alchemical kit for brewing toxic substances and deadly concoctions",
   "price": 5000,
   "type": "Tools",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/poisoners-kit.png"
 }

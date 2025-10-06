@@ -4,7 +4,7 @@
   "ai_description": "tall wooden walking staff with natural bark texture, druidic focus carved from living oak branch",
   "price": 500,
   "type": "Druidic Focus",
-  "weight": 4.0,
+  "weight": 4,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -24,5 +24,6 @@
     "Can be used as a spellcasting focus for druidic magic",
     "Provides unlimited Bark Shavings for growth and healing spells"
   ],
-  "Gear_Slot": "hands"
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/wooden-staff.png"
 }

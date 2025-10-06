@@ -5,7 +5,7 @@
   "ai_description": "long wooden pole with sharp steel spearhead, cavalry weapon with extended reach and pointed tip",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 6.0,
+  "weight": 6,
   "stack": 1,
   "ac": null,
   "damage": "1d12",
@@ -24,5 +24,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/lance.png"
 }

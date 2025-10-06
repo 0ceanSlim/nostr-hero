@@ -5,7 +5,7 @@
   "ai_description": "nautical instruments including sextant, compass, and charts, navigation tools for plotting sea voyages",
   "price": 2500,
   "type": "Tools",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/navigators-tools.png"
 }

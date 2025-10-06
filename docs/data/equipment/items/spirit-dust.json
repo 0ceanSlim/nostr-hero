@@ -17,5 +17,6 @@
     "Used for summoning and animal magic",
     "Unlimited when Totem focus is equipped",
     "Consumed on use if no Totem focus"
-  ]
+  ],
+  "image": "/res/img/items/spirit-dust.png"
 }

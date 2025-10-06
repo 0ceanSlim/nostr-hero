@@ -3,24 +3,12 @@
 {{define "view"}}
     <!-- Hidden Game State Storage -->
     <div id="game-state" style="display: none;">
-        <div id="character-data">
-            {"hp": 0, "max_hp": 0, "mana": 0, "max_mana": 0, "location": "", "fatigue": 0}
-        </div>
-        <div id="inventory-data">
-            []
-        </div>
-        <div id="equipment-data">
-            {}
-        </div>
-        <div id="spell-data">
-            []
-        </div>
-        <div id="location-data">
-            {"current": "", "discovered": []}
-        </div>
-        <div id="combat-data">
-            null
-        </div>
+        <div id="character-data">{"hp": 0, "max_hp": 0, "mana": 0, "max_mana": 0, "location": "", "fatigue": 0}</div>
+        <div id="inventory-data">[]</div>
+        <div id="equipment-data">{}</div>
+        <div id="spell-data">[]</div>
+        <div id="location-data">{"current": "", "discovered": []}</div>
+        <div id="combat-data">null</div>
     </div>
 
     <!-- Static Game Data Storage -->
@@ -32,109 +20,71 @@
         <div id="all-packs">[]</div>
     </div>
 
-    <!-- Main Game Container -->
-    <div id="game-app" class="container mx-auto p-4">
-        <!-- Game Header -->
-        <div class="bg-gray-800 rounded-lg p-4 mb-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-yellow-400">Nostr Hero</h1>
-                <div class="flex space-x-2">
-                    <button id="save-btn"
-                            onclick="saveGameToLocal()"
-                            class="bg-yellow-600 hover:bg-yellow-700 text-gray-900 px-4 py-2 rounded font-bold">
-                        💾 Save Game
-                    </button>
-                    <button onclick="exportSave()"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold">
-                        📦 Export
-                    </button>
-                    <button onclick="window.location.href='/saves'"
-                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-bold">
-                        📂 Saves
-                    </button>
-                    <button onclick="logout()"
-                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold">
-                        🚪 Logout
-                    </button>
+    <!-- Message Area (Fixed Position) -->
+    <div id="message-area" class="fixed top-4 right-4 max-w-sm space-y-2 z-50"></div>
+
+    <!-- Main Game Container - Full Screen with Retro Border -->
+    <div id="game-app" class="fixed inset-0 bg-gray-900 text-white font-mono overflow-hidden flex items-center justify-center">
+
+        <!-- Retro Game Window -->
+        <div class="w-full h-full max-w-[1600px] max-h-[900px] bg-gray-800 flex flex-col" style="border: 2px solid #ca8a04; image-rendering: pixelated; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);">
+
+            <!-- Retro Title Bar -->
+            <div class="bg-gradient-to-b from-yellow-700 to-yellow-800 border-b-2 border-yellow-900 px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="text-xs font-bold text-black">⚔️ NOSTR HERO v1.0 ⚔️</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="w-6 h-6 bg-red-600 border-2 border-red-800 hover:bg-red-500 text-xs font-bold">✕</button>
                 </div>
             </div>
+
+            <!-- Main Content Area: 2 columns (75/25 split) -->
+            <div class="flex flex-1 overflow-hidden">
+
+            <!-- LEFT COLUMN (75%) - Scene + Text + Actions -->
+            <div class="w-[75%] flex flex-col">
+
+                {{template "game/scene.html"}}
+
+                {{template "game/game-text.html"}}
+
+                {{template "game/action-buttons.html"}}
+
+            </div>
+
+            <!-- RIGHT COLUMN (25%) - Stats + Content + Tabs -->
+            <div class="w-[25%] flex flex-col">
+
+                {{template "game/player-stats.html"}}
+
+                <!-- Tabbed Content Area -->
+                <div class="flex-1 bg-gray-800 border-4 border-yellow-800 overflow-hidden flex flex-col" style="clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
+                    <!-- Tab Content -->
+                    <div class="flex-1 overflow-y-auto p-4">
+
+                        {{template "game/tabs/equipment.html"}}
+
+                        {{template "game/tabs/inventory.html"}}
+
+                        {{template "game/tabs/spells.html"}}
+
+                        {{template "game/tabs/stats.html"}}
+
+                        {{template "game/tabs/music.html"}}
+
+                    </div>
+                </div>
+
+                {{template "game/tab-buttons.html"}}
+
+            </div>
+
         </div>
 
-        <!-- Character Panel -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div id="character-panel" class="bg-gray-800 rounded-lg p-4">
-                <h2 class="text-xl font-bold mb-3 text-green-400">Character</h2>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>HP:</span>
-                        <span><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
-                    </div>
-                    <div class="w-full bg-gray-600 rounded-full h-2">
-                        <div id="hp-bar" class="bg-red-500 h-2 rounded-full transition-all" style="width: 100%"></div>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Mana:</span>
-                        <span><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
-                    </div>
-                    <div class="w-full bg-gray-600 rounded-full h-2">
-                        <div id="mana-bar" class="bg-blue-500 h-2 rounded-full transition-all" style="width: 100%"></div>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Fatigue:</span>
-                        <span id="fatigue-level">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Inventory Panel -->
-            <div id="inventory-panel" class="bg-gray-800 rounded-lg p-4">
-                <h2 class="text-xl font-bold mb-3 text-blue-400">Inventory</h2>
-                <div id="inventory-list" class="space-y-1 max-h-32 overflow-y-auto">
-                    <!-- Inventory items will be populated here -->
-                </div>
-            </div>
-
-            <!-- Spells Panel -->
-            <div id="spells-panel" class="bg-gray-800 rounded-lg p-4">
-                <h2 class="text-xl font-bold mb-3 text-purple-400">Spells</h2>
-                <div id="spells-list" class="space-y-1 max-h-32 overflow-y-auto">
-                    <!-- Prepared spells will be populated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Game Area -->
-        <div class="bg-gray-800 rounded-lg p-6">
-            <!-- Location Display -->
-            <div id="location-panel">
-                <h2 id="location-name" class="text-2xl font-bold mb-4 text-yellow-400"></h2>
-                <p id="location-description" class="text-gray-300 mb-6 leading-relaxed"></p>
-
-                <!-- Location Actions -->
-                <div id="location-actions" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Actions will be populated dynamically -->
-                </div>
-            </div>
-
-            <!-- Combat Interface (Hidden by default) -->
-            <div id="combat-interface" class="hidden mt-6 border-t border-gray-600 pt-6">
-                <h3 class="text-xl font-bold mb-4 text-red-400">Combat</h3>
-                <div id="combat-status" class="mb-4">
-                    <!-- Combat status will be displayed here -->
-                </div>
-                <div id="combat-actions" class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <!-- Combat actions will be populated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Message Area -->
-        <div id="message-area" class="fixed bottom-4 right-4 max-w-sm space-y-2 z-50">
-            <!-- Messages will appear here -->
-        </div>
     </div>
 
-    <!-- Game Logic Scripts - Load in correct order -->
+    <!-- JavaScript -->
     <script src="/res/js/session-manager.js"></script>
     <script src="/res/js/game-ui.js"></script>
     <script src="/res/js/auth.js"></script>
@@ -143,4 +93,37 @@
     <script src="/res/js/game-logic.js"></script>
     <script src="/res/js/save-system.js"></script>
     <script src="/res/js/startup.js"></script>
+
+    <script>
+        function switchTab(tabName) {
+            const tabs = ['equipment', 'inventory', 'spells', 'stats', 'music'];
+            const panels = {
+                equipment: document.getElementById('equipment-panel'),
+                inventory: document.getElementById('inventory-panel'),
+                spells: document.getElementById('spells-panel'),
+                stats: document.getElementById('stats-panel'),
+                music: document.getElementById('music-panel')
+            };
+            const buttons = {
+                equipment: document.getElementById('tab-equipment'),
+                inventory: document.getElementById('tab-inventory'),
+                spells: document.getElementById('tab-spells'),
+                stats: document.getElementById('tab-stats'),
+                music: document.getElementById('tab-music')
+            };
+
+            // Update all tabs and panels
+            tabs.forEach(tab => {
+                if (tab === tabName) {
+                    // Active tab
+                    buttons[tab].className = 'flex-1 py-3 bg-gradient-to-b from-yellow-700 to-yellow-900 font-bold text-xs border-r-2 border-gray-900 text-yellow-300';
+                    panels[tab].classList.remove('hidden');
+                } else {
+                    // Inactive tabs
+                    buttons[tab].className = 'flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400';
+                    panels[tab].classList.add('hidden');
+                }
+            });
+        }
+    </script>
 {{end}}

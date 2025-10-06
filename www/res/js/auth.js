@@ -10,16 +10,21 @@ function initializeAuthentication() {
     // Set up session manager event listeners
     window.sessionManager.on('sessionReady', (sessionData) => {
         console.log('✅ Session ready');
-        // Only redirect to saves if not already on saves page
-        if (window.location.pathname !== '/saves') {
+        // Only redirect to saves if on home page (not saves, game, or new-game)
+        const allowedPaths = ['/saves', '/game', '/new-game'];
+        if (!allowedPaths.includes(window.location.pathname)) {
             console.log('Redirecting to saves page');
             window.location.href = '/saves';
         }
     });
 
     window.sessionManager.on('authenticationRequired', () => {
-        console.log('🔐 Authentication required, showing login interface');
-        showLoginInterface();
+        console.log('🔐 Authentication required');
+        // Only show login interface on game pages, not on home page
+        if (window.location.pathname === '/game' || window.location.pathname === '/new-game') {
+            console.log('Showing login interface');
+            showLoginInterface();
+        }
     });
 
     window.sessionManager.on('sessionExpired', () => {
@@ -32,8 +37,9 @@ function initializeAuthentication() {
         console.log(`✅ Authentication successful via ${method}`);
         showMessage(`✅ Successfully logged in via ${method}!`, 'success');
         setTimeout(() => {
-            // Only redirect to saves if not already on saves page
-            if (window.location.pathname !== '/saves') {
+            // Only redirect to saves if on home page (not saves, game, or new-game)
+            const allowedPaths = ['/saves', '/game', '/new-game'];
+            if (!allowedPaths.includes(window.location.pathname)) {
                 console.log('Redirecting to saves page after login');
                 window.location.href = '/saves';
             }

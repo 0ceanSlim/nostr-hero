@@ -9,5 +9,6 @@
   "gear_slot": "",
   "rarity": "common",
   "tags": [],
-  "ai_description": "Small glass bottle with black ink and cork stopper"
+  "ai_description": "Small glass bottle with black ink and cork stopper",
+  "image": "/res/img/items/ink.png"
 }

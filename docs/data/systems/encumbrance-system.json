@@ -3,9 +3,9 @@
     "description": "Weight-based encumbrance system affecting combat, stealth, fatigue, and travel",
     "weight_calculation": {
       "base_capacity": "5 * strength_score",
-      "backpack_modifier": "2x total capacity when equipped",
-      "formula": "base_capacity * (backpack_equipped ? 2 : 1)",
-      "example": "STR 14 character with backpack = (5 * 14) * 2 = 140 lbs capacity"
+      "container_modifier": "Items with weight_increase field add to total capacity",
+      "formula": "base_capacity + sum(equipped_items.weight_increase)",
+      "example": "STR 14 character with backpack (+25) = (5 * 14) + 25 = 95 lbs capacity"
     },
     "encumbrance_categories": {
       "light": {

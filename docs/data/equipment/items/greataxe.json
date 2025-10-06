@@ -5,7 +5,7 @@
   "ai_description": "enormous single-bladed axe with massive curved steel head, long wooden handle, barbarian's two-handed cleaving weapon",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 7.0,
+  "weight": 7,
   "stack": 1,
   "ac": null,
   "damage": "1d12",
@@ -22,5 +22,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/greataxe.png"
 }

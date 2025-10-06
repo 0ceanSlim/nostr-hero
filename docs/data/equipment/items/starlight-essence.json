@@ -16,5 +16,6 @@
     "Used for divine magic",
     "Extremely rare gift from celestials",
     "Said to contain fragments of creation itself"
-  ]
+  ],
+  "image": "/res/img/items/starlight-essence.png"
 }

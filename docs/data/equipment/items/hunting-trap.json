@@ -5,7 +5,7 @@
   "ai_description": "iron jaw trap with serrated teeth, spring-loaded snare device that clamps shut when triggered",
   "price": 500,
   "type": "Adventuring Gear",
-  "weight": 25.0,
+  "weight": 25,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -19,5 +19,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/hunting-trap.png"
 }

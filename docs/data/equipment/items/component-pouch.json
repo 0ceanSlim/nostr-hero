@@ -5,7 +5,7 @@
   "ai_description": "leather spellcaster's pouch with small compartments, magic component bag filled with crystals, herbs, and mystical materials",
   "price": 25,
   "type": "Adventuring Gear",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -22,5 +22,6 @@
   ],
   "notes": [
     "Can be used as a spellcasting focus for material components"
-  ]
+  ],
+  "image": "/res/img/items/component-pouch.png"
 }

@@ -21,5 +21,5 @@ func GameHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	utils.RenderTemplate(w, data, "game.html", false)
+	utils.RenderTemplateWithLayout(w, data, "game.html", false, true)
 }

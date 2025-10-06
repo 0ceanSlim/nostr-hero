@@ -1,0 +1,79 @@
+{{define "game/player-stats.html"}}
+<!-- Player Stats Area -->
+<div class="bg-gray-700 border-4 border-yellow-800 p-3 space-y-2" style="clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
+    <!-- Character Name, Level, and Gold -->
+    <div class="flex justify-between items-center">
+        <div id="char-name" class="text-lg font-bold text-yellow-400">Character</div>
+        <div class="flex items-center gap-2">
+            <div class="text-lg font-bold text-yellow-400">Lv. <span id="char-level">1</span></div>
+            <div class="flex items-center gap-1">
+                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-4 h-4" style="image-rendering: pixelated;">
+                <span class="text-sm font-bold text-yellow-400"><span id="char-gold">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Experience Bar -->
+    <div class="relative w-full bg-gray-900 h-3 flex items-center justify-center px-1" style="clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);">
+        <div id="exp-bar" class="absolute inset-0 bg-cyan-400 h-3 transition-all" style="width: 0%;"></div>
+        <span class="relative z-10 text-xs font-bold" style="color: #0e7490;"><span id="current-exp">0</span>/<span id="exp-to-next">100</span></span>
+    </div>
+
+    <!-- HP Bar -->
+    <div class="relative w-full bg-gray-900 h-5 flex items-center justify-between px-2" style="clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);">
+        <div id="hp-bar" class="absolute inset-0 bg-red-600 h-5 transition-all" style="width: 100%;"></div>
+        <span class="relative z-10 text-xs font-bold" style="color: #991b1b;">HP</span>
+        <span class="relative z-10 text-xs font-bold" style="color: #991b1b;"><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
+    </div>
+
+    <!-- Mana Bar -->
+    <div class="relative w-full bg-gray-900 h-5 flex items-center justify-between px-2" style="clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);">
+        <div id="mana-bar" class="absolute inset-0 bg-purple-600 h-5 transition-all" style="width: 100%;"></div>
+        <span class="relative z-10 text-xs font-bold" style="color: #6b21a8;">MANA</span>
+        <span class="relative z-10 text-xs font-bold" style="color: #6b21a8;"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
+    </div>
+
+    <!-- Fatigue & Weight Bar -->
+    <div class="flex gap-1">
+        <!-- Fatigue Bar (takes most of space) -->
+        <div class="relative flex-1 bg-gray-900 h-5 flex items-center justify-between px-2" style="clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px);">
+            <div id="fatigue-bar" class="absolute inset-0 h-5 transition-all" style="width: 0%; background: linear-gradient(90deg, #10b981 0%, #eab308 50%, #f97316 75%, #ef4444 100%);"></div>
+            <span class="relative z-10 text-xs font-bold" style="color: #065f46;">FATIGUE <span id="fatigue-level">0</span>/10</span>
+            <span id="fatigue-status" class="relative z-10 text-xs font-bold" style="color: #065f46; font-size: 9px;">FRESH</span>
+        </div>
+        <!-- Weight Display -->
+        <div class="relative bg-gray-900 h-5 flex items-center justify-between px-2" style="clip-path: polygon(2px 0, calc(100% - 2px) 0, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 0 calc(100% - 2px), 0 2px); min-width: 80px;">
+            <span class="text-xs font-bold" style="font-size: 9px;">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
+            <span id="weight-status" class="text-xs font-bold text-white" style="font-size: 8px;">OK</span>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-6 gap-2 text-center text-xs pt-2">
+        <div>
+            <div class="text-gray-400">STR</div>
+            <div id="stat-str" class="font-bold">10</div>
+        </div>
+        <div>
+            <div class="text-gray-400">DEX</div>
+            <div id="stat-dex" class="font-bold">10</div>
+        </div>
+        <div>
+            <div class="text-gray-400">CON</div>
+            <div id="stat-con" class="font-bold">10</div>
+        </div>
+        <div>
+            <div class="text-gray-400">INT</div>
+            <div id="stat-int" class="font-bold">10</div>
+        </div>
+        <div>
+            <div class="text-gray-400">WIS</div>
+            <div id="stat-wis" class="font-bold">10</div>
+        </div>
+        <div>
+            <div class="text-gray-400">CHA</div>
+            <div id="stat-cha" class="font-bold">10</div>
+        </div>
+    </div>
+</div>
+{{end}}

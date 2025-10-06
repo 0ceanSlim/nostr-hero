@@ -6,6 +6,7 @@
   "price": 1000,
   "type": "Adventuring Gear",
   "weight": 5,
+  "weight_increase": 35,
   "stack": 1,
   "gear_slot": "bag",
   "rarity": "common",
@@ -17,6 +18,8 @@
   "notes": [
     "Expands carrying capacity for adventuring",
     "adds 20 slots to inventory",
+    "Increases weight capacity by 35 lbs",
     "Cannot be placed inside of another container"
-  ]
+  ],
+  "image": "/res/img/items/backpack.png"
 }

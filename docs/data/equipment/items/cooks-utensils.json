@@ -13,5 +13,6 @@
   "img": "equipment/tool.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/cooks-utensils.png"
 }

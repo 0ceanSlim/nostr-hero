@@ -17,5 +17,6 @@
     "Used for evocation and force spells",
     "Unlimited when Wand focus is equipped",
     "Consumed on use if no Wand focus"
-  ]
+  ],
+  "image": "/res/img/items/arcane-powder.png"
 }

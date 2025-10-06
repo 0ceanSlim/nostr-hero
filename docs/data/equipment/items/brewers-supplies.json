@@ -5,7 +5,7 @@
   "ai_description": "collection of vats, tubes, and fermenting equipment, brewing tools for making ale and spirits",
   "price": 2000,
   "type": "Artisan's Tools",
-  "weight": 9.0,
+  "weight": 9,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/brewers-supplies.png"
 }

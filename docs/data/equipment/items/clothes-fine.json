@@ -4,19 +4,21 @@
   "description": "High-quality clothing made from fine fabrics, suitable for nobles and wealthy merchants.",
   "price": 1500,
   "type": "Clothes",
-  "weight": 6.0,
+  "weight": 6,
   "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "tags": [],
+  "tags": ["equipment"],
+  "gear_slot": "clothes",
   "ai_description": "Elegant silk doublet with gold trim, velvet cloak, noble attire",
   "notes": [
     "Appropriate for formal occasions and high society"
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/clothes-fine.png"
 }

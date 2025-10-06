@@ -5,7 +5,7 @@
   "ai_description": "leather satchel with rolled bandages, glass bottles of healing salve, needle and thread, medical instruments",
   "price": 500,
   "type": "Adventuring Gear",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 10,
   "ac": null,
   "damage": null,
@@ -22,5 +22,6 @@
     "Can be used to stabilize dying creatures",
     "Contains 10 uses",
     "Each use heals 2 hitpoints"
-  ]
+  ],
+  "image": "/res/img/items/healers-kit.png"
 }

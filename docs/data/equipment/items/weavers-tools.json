@@ -5,7 +5,7 @@
   "ai_description": "collection of needles, thread, and cloth scraps, textile tools for sewing and mending fabric items",
   "price": 100,
   "type": "Artisan's Tools",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/weavers-tools.png"
 }

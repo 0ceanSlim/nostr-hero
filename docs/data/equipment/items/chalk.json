@@ -9,5 +9,6 @@
   "stack": 1,
   "gear_slot": "",
   "rarity": "common",
-  "tags": []
+  "tags": [],
+  "image": "/res/img/items/chalk.png"
 }

@@ -17,5 +17,6 @@
     "Used for elemental manipulation spells",
     "Unlimited when Rod focus is equipped",
     "Consumed on use if no Rod focus"
-  ]
+  ],
+  "image": "/res/img/items/elemental-sparks.png"
 }

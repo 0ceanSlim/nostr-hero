@@ -51,7 +51,23 @@ function getSpellById(spellId) {
 
 function getLocationById(locationId) {
     const allLocations = JSON.parse(document.getElementById('all-locations').textContent || '[]');
-    return allLocations.find(location => location.id === locationId);
+
+    // First, try to find in top-level locations
+    const topLevel = allLocations.find(location => location.id === locationId);
+    if (topLevel) return topLevel;
+
+    // If not found, search within city districts
+    for (const location of allLocations) {
+        if (location.properties?.districts) {
+            for (const district of Object.values(location.properties.districts)) {
+                if (district.id === locationId) {
+                    return district;
+                }
+            }
+        }
+    }
+
+    return undefined;
 }
 
 function getMonsterById(monsterId) {
@@ -80,6 +96,12 @@ function getCurrentNpub() {
     }
     return null;
 }
+
+// Listen for startup completion and initialize game
+window.addEventListener('nostrHeroReady', () => {
+    console.log('🎮 Startup complete, initializing game...');
+    initializeGame();
+});
 
 // Initialize the game with fresh state or from save
 async function initializeGame() {
@@ -147,11 +169,12 @@ async function initializeGame() {
                     const saves = await saveResponse.json();
                     const save = saves.find(s => s.id === saveID);
 
-                    if (save && save.gameState) {
-                        initializeFromSave(save.gameState);
+                    if (save) {
+                        // New save structure: character and location are at root level
+                        initializeFromSave(save);
                         showMessage('✅ Save file loaded successfully!', 'success');
                     } else {
-                        throw new Error('Save file not found or corrupted');
+                        throw new Error('Save file not found');
                     }
                 } else {
                     throw new Error('Failed to load save files');
@@ -174,9 +197,18 @@ async function initializeGame() {
             return;
         }
 
+        // Hide loading screen and show game UI
+        const gameApp = document.getElementById('game-app');
+        if (gameApp) {
+            // Clear the loading screen content
+            gameApp.style.display = 'block';
+        }
+
         // Start game UI
         displayCurrentLocation();
         updateAllDisplays();
+
+        console.log('✅ Game initialized and ready to play!');
 
         // DEBUG: Disable auto-save system to prevent undefined saves
         // if (typeof startAutoSave === 'function') {
@@ -191,8 +223,20 @@ async function initializeGame() {
 }
 
 // Initialize game state from a loaded save
-function initializeFromSave(gameState) {
-    console.log('Loading game from save:', gameState);
+function initializeFromSave(saveData) {
+    console.log('Loading game from save:', saveData);
+
+    // New save structure has character and location at root
+    // Map it to the old DOM structure for compatibility
+    const gameState = {
+        character: saveData.character,
+        location: saveData.location,
+        inventory: saveData.character?.inventory || [],
+        equipment: saveData.character?.inventory?.gear_slots || {},
+        spells: saveData.character?.spells || [],
+        combat: null
+    };
+
     updateGameState(gameState);
 }
 

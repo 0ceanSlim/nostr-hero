@@ -10,6 +10,43 @@ let itemStatsCache = {}; // Cache for item stats
 let selectionHistory = []; // Track history for back button
 let currentBackButton = null; // Current back button element
 let backButtonCallback = null; // Callback to go back
+let itemsDatabaseCache = null; // Cache for items from database
+
+/**
+ * Load items from database cache
+ */
+async function loadItemsFromDatabase() {
+  if (itemsDatabaseCache) {
+    return itemsDatabaseCache;
+  }
+
+  try {
+    const response = await fetch('/api/items');
+    if (!response.ok) {
+      throw new Error('Failed to fetch items from database');
+    }
+    const data = await response.json();
+    itemsDatabaseCache = data.items || [];
+    return itemsDatabaseCache;
+  } catch (error) {
+    console.error('Error loading items from database:', error);
+    return [];
+  }
+}
+
+/**
+ * Get item data from database cache by ID
+ */
+async function getItemById(itemId) {
+  try {
+    const items = await loadItemsFromDatabase();
+    const item = items.find(i => i.id === itemId);
+    return item || null;
+  } catch (error) {
+    console.error(`Error getting item ${itemId}:`, error);
+    return null;
+  }
+}
 
 /**
  * Start equipment selection flow (excluding pack)
@@ -213,10 +250,10 @@ async function handlePackSelection(startingEquipment) {
         itemsRow.className = 'flex flex-row justify-center gap-3 flex-wrap';
 
         // Add each item in the pack as a card
-        contents.forEach((packItem) => {
+        for (const packItem of contents) {
           const itemName = packItem[0];
           const quantity = packItem[1];
-          const itemCard = createSimpleItemCard(itemName, quantity, true);
+          const itemCard = await createSimpleItemCard(itemName, quantity, true);
 
           // Prevent clicks on individual cards from bubbling
           itemCard.addEventListener('click', (e) => {
@@ -227,7 +264,7 @@ async function handlePackSelection(startingEquipment) {
           });
 
           itemsRow.appendChild(itemCard);
-        });
+        }
 
         packContainer.appendChild(itemsRow);
       }
@@ -314,12 +351,12 @@ async function handlePackSelection(startingEquipment) {
       itemsRow.className = 'flex flex-row justify-center gap-3 flex-wrap';
 
       // Add each item in the pack as a card
-      contents.forEach((packItem) => {
+      for (const packItem of contents) {
         const itemName = packItem[0];
         const quantity = packItem[1];
-        const itemCard = createSimpleItemCard(itemName, quantity, true);
+        const itemCard = await createSimpleItemCard(itemName, quantity, true);
         itemsRow.appendChild(itemCard);
-      });
+      }
 
       packContainer.appendChild(itemsRow);
     }
@@ -478,7 +515,8 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
   // Render bundles first (if any)
   if (bundles.length > 0) {
     console.log('🎁 Rendering', bundles.length, 'bundles');
-    bundles.forEach((option, idx) => {
+    for (let idx = 0; idx < bundles.length; idx++) {
+      const option = bundles[idx];
       const optionIndex = choice.options.indexOf(option);
       console.log('  Bundle', idx, ':', option);
 
@@ -503,10 +541,10 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
       itemsRow.className = 'flex flex-row justify-center gap-3 flex-wrap';
 
       // Add each item in the bundle as a card
-      option.bundle.forEach((bundleItem) => {
+      for (const bundleItem of option.bundle) {
         const itemName = bundleItem[0];
         const quantity = bundleItem[1];
-        const itemCard = createSimpleItemCard(itemName, quantity, true);
+        const itemCard = await createSimpleItemCard(itemName, quantity, true);
 
         // Prevent clicks on individual cards from bubbling to container
         // but allow info button clicks to work
@@ -519,12 +557,12 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
         });
 
         itemsRow.appendChild(itemCard);
-      });
+      }
 
       bundleContainer.appendChild(itemsRow);
       createClickableOption(option, optionIndex, bundleContainer);
       optionsContainer.appendChild(bundleContainer);
-    });
+    }
 
     // Add OR separator after bundles if there are simple items
     if (simpleItems.length > 0) {
@@ -545,7 +583,8 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
       gridContainer.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3';
     }
 
-    simpleItems.forEach((option, idx) => {
+    for (let idx = 0; idx < simpleItems.length; idx++) {
+      const option = simpleItems[idx];
       const optionIndex = choice.options.indexOf(option);
       const itemsRow = document.createElement('div');
       itemsRow.className = 'flex flex-row justify-center gap-2 flex-wrap p-2 bg-gray-800 rounded-lg';
@@ -554,7 +593,7 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
       itemsRow.style.boxSizing = 'border-box';
       itemsRow.style.width = 'fit-content'; // Only as wide as content
 
-      const itemCard = createSimpleItemCard(option.item, option.quantity, false);
+      const itemCard = await createSimpleItemCard(option.item, option.quantity, false);
 
       // Prevent clicks on card from bubbling, redirect to container
       // but allow info button clicks to work
@@ -570,7 +609,7 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
 
       createClickableOption(option, optionIndex, itemsRow);
       gridContainer.appendChild(itemsRow);
-    });
+    }
 
     optionsContainer.appendChild(gridContainer);
   }
@@ -842,7 +881,8 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
   let selectedWeapon = null;
   let userClickedBack = false;
 
-  slot.options.forEach((weaponOption, idx) => {
+  for (let idx = 0; idx < slot.options.length; idx++) {
+    const weaponOption = slot.options[idx];
     const weaponName = weaponOption[0];
     const quantity = weaponOption[1];
 
@@ -853,7 +893,7 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
     itemContainer.style.boxSizing = 'border-box';
     itemContainer.dataset.optionIndex = idx;
 
-    const itemCard = createSimpleItemCard(weaponName, quantity, false);
+    const itemCard = await createSimpleItemCard(weaponName, quantity, false);
 
     // Prevent card clicks, redirect to container
     itemCard.addEventListener('click', (e) => {
@@ -880,7 +920,7 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
 
     itemContainer.appendChild(itemCard);
     gridContainer.appendChild(itemContainer);
-  });
+  }
 
   scrollContainer.appendChild(gridContainer);
   content.appendChild(scrollContainer);
@@ -965,7 +1005,8 @@ async function showComplexChoiceSelection(content, choice, choiceIndex) {
   const slotSelections = {};
 
   // Render each weapon slot
-  complexOption.weaponSlots.forEach((slot, slotIndex) => {
+  for (let slotIndex = 0; slotIndex < complexOption.weaponSlots.length; slotIndex++) {
+    const slot = complexOption.weaponSlots[slotIndex];
     const slotDiv = document.createElement('div');
     slotDiv.className = 'flex flex-col';
 
@@ -981,7 +1022,7 @@ async function showComplexChoiceSelection(content, choice, choiceIndex) {
 
     if (slot.type === 'fixed_item') {
       // Fixed item - show as pre-selected
-      const itemCard = createSimpleItemCard(slot.item[0], slot.item[1]);
+      const itemCard = await createSimpleItemCard(slot.item[0], slot.item[1]);
       itemCard.classList.add('selected');
       itemCard.style.pointerEvents = 'none';
       itemCard.style.opacity = '0.7';
@@ -990,10 +1031,10 @@ async function showComplexChoiceSelection(content, choice, choiceIndex) {
       slotSelections[slotIndex] = slot.item;
     } else if (slot.type === 'weapon_choice') {
       // Show each weapon option as a card
-      slot.options.forEach(weaponOption => {
+      for (const weaponOption of slot.options) {
         const weaponName = weaponOption[0];
         const quantity = weaponOption[1];
-        const itemCard = createSimpleItemCard(weaponName, quantity);
+        const itemCard = await createSimpleItemCard(weaponName, quantity);
 
         itemCard.onclick = () => {
           // Deselect all in this slot
@@ -1010,12 +1051,12 @@ async function showComplexChoiceSelection(content, choice, choiceIndex) {
         };
 
         itemsRow.appendChild(itemCard);
-      });
+      }
     }
 
     slotDiv.appendChild(itemsRow);
     slotsContainer.appendChild(slotDiv);
-  });
+  }
 
   scrollContainer.appendChild(slotsContainer);
   content.appendChild(scrollContainer);
@@ -1057,7 +1098,7 @@ async function showComplexChoiceSelection(content, choice, choiceIndex) {
 /**
  * Create equipment card based on option type
  */
-function createEquipmentCard(option) {
+async function createEquipmentCard(option) {
   const card = document.createElement('div');
   card.className = 'item-card bg-gray-800 rounded-lg p-3 cursor-pointer transition-all hover:scale-105 relative';
   card.style.width = '140px';
@@ -1072,7 +1113,7 @@ function createEquipmentCard(option) {
     card.appendChild(createBundleContent(option));
   } else {
     // Simple item
-    card.appendChild(createSimpleItemContent(option));
+    card.appendChild(await createSimpleItemContent(option));
   }
 
   // Tooltip on hover (debounced)
@@ -1108,7 +1149,7 @@ function getRarityColor(itemName) {
 /**
  * Create a simple item card (for use in weapon slots and simple items)
  */
-function createSimpleItemCard(itemName, quantity, isInBundle = false) {
+async function createSimpleItemCard(itemName, quantity, isInBundle = false) {
   const card = document.createElement('div');
   card.className = 'item-card bg-gray-800 rounded-lg relative overflow-hidden';
   card.style.width = '110px';
@@ -1125,14 +1166,17 @@ function createSimpleItemCard(itemName, quantity, isInBundle = false) {
     card.style.cursor = 'pointer';
   }
 
+  // Fetch item data from database
+  const itemData = await getItemById(itemName);
+
   // Item image (fills 80% of container)
   const img = document.createElement('img');
-  img.src = `/res/img/items/${getItemImageName(itemName)}.png`;
+  img.src = itemData?.image || `/res/img/items/${itemName}.png`;
   img.alt = itemName;
   img.className = 'absolute inset-0 w-full h-full object-contain p-3';
-  img.onerror = () => {
-    img.src = '/res/img/otherstuff.png';
-  };
+  img.style.imageRendering = 'pixelated';
+  img.style.imageRendering = '-moz-crisp-edges';
+  img.style.imageRendering = 'crisp-edges';
   card.appendChild(img);
 
   // Rarity dot (top right, larger)
@@ -1196,17 +1240,20 @@ function createSimpleItemCard(itemName, quantity, isInBundle = false) {
 /**
  * Create content for simple item
  */
-function createSimpleItemContent(option) {
+async function createSimpleItemContent(option) {
   const container = document.createElement('div');
+
+  // Fetch item data from database
+  const itemData = await getItemById(option.item);
 
   // Item image
   const img = document.createElement('img');
-  img.src = `/res/img/items/${getItemImageName(option.item)}.png`;
+  img.src = itemData?.image || `/res/img/items/${option.item}.png`;
   img.alt = option.item;
   img.className = 'w-20 h-20 mx-auto mb-2 object-contain';
-  img.onerror = () => {
-    img.src = '/res/img/otherstuff.png';
-  };
+  img.style.imageRendering = 'pixelated';
+  img.style.imageRendering = '-moz-crisp-edges';
+  img.style.imageRendering = 'crisp-edges';
   container.appendChild(img);
 
   // Item name

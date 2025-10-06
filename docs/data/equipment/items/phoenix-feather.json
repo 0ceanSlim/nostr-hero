@@ -16,5 +16,6 @@
     "Used for resurrection magic",
     "Extremely rare drop from phoenix",
     "Considered priceless by mages"
-  ]
+  ],
+  "image": "/res/img/items/phoenix-feather.png"
 }

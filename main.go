@@ -51,7 +51,7 @@ func main() {
 	// Game data API endpoints
 	mux.HandleFunc("/api/game-data", api.GameDataHandler)
 	mux.HandleFunc("/api/items", api.ItemsHandler)
-	mux.HandleFunc("/api/spells", api.SpellsHandler)
+	mux.HandleFunc("/api/spells/", api.SpellsHandler) // Note the trailing slash to match /api/spells/{id}
 	mux.HandleFunc("/api/monsters", api.MonstersHandler)
 	mux.HandleFunc("/api/locations", api.LocationsHandler)
 

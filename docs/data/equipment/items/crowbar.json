@@ -5,7 +5,7 @@
   "ai_description": "heavy iron pry bar with curved flattened end and straight shaft, black metal tool for forcing open locks and doors",
   "price": 200,
   "type": "Adventuring Gear",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -18,5 +18,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/crowbar.png"
 }

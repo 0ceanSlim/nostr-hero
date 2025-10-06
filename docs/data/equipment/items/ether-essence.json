@@ -17,5 +17,6 @@
     "Used for teleportation and dimensional magic",
     "Unlimited when Orb focus is equipped",
     "Consumed on use if no Orb focus"
-  ]
+  ],
+  "image": "/res/img/items/ether-essence.png"
 }

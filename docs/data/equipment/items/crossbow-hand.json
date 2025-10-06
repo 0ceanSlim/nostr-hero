@@ -5,7 +5,7 @@
   "ai_description": "compact hand crossbow with pistol grip, small one-handed weapon with steel prod and simple trigger mechanism",
   "price": 0,
   "type": "Martial Ranged Weapons",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": "1d6",
@@ -27,5 +27,6 @@
     "Light weapon",
     "Loading property requires action to reload"
   ],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/crossbow-hand.png"
 }

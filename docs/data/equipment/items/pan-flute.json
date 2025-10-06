@@ -5,7 +5,7 @@
   "ai_description": "set of bamboo pipes of different lengths bound together, rustic panpipes with natural wood binding and curved arrangement",
   "price": 1200,
   "type": "Musical Instrument",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/pan-flute.png"
 }

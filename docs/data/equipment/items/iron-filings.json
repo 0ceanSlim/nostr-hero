@@ -16,5 +16,6 @@
     "Used for lightning spells",
     "Commonly drops from constructs",
     "Must be gathered or purchased"
-  ]
+  ],
+  "image": "/res/img/items/iron-filings.png"
 }

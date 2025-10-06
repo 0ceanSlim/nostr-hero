@@ -5,7 +5,7 @@
   "ai_description": "large fishing net with weighted edges and hemp rope, gladiator's throwing weapon for capturing enemies",
   "price": 0,
   "type": "Martial Ranged Weapons",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "img": "equipment/weapon.jpg",
   "range": "1",
@@ -18,5 +18,6 @@
   ],
   "notes": [
     "retrains target"
-  ]
+  ],
+  "image": "/res/img/items/net.png"
 }

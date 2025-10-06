@@ -4,7 +4,7 @@
   "ai_description": "crystal sphere with swirling magical energy, transparent arcane focus orb with inner ethereal mists",
   "price": 2000,
   "type": "Arcane Focus",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -24,5 +24,6 @@
     "Can be used as a spellcasting focus for arcane magic",
     "Provides unlimited Ether Essence for teleportation and dimensional magic"
   ],
-  "Gear_Slot": "hands"
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/orb.png"
 }

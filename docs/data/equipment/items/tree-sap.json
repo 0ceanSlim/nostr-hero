@@ -17,5 +17,6 @@
     "Used for poison and transformation magic",
     "Unlimited when Yew Wand focus is equipped",
     "Consumed on use if no Yew Wand focus"
-  ]
+  ],
+  "image": "/res/img/items/tree-sap.png"
 }

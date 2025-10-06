@@ -5,7 +5,7 @@
   "ai_description": "wooden treasure chest with iron reinforcement bands, storage box with heavy lid and metal lock mechanism",
   "price": 5,
   "type": "Adventuring Gear",
-  "weight": 25.0,
+  "weight": 25,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -23,5 +23,6 @@
     "Can only be placed in owned buildings",
     "Provides secure storage for large quantities of items"
   ],
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/chest.png"
 }

@@ -5,7 +5,7 @@
   "ai_description": "faceted crystal orb with inner magical glow, clear quartz focus with prismatic light refractions and mystical energy",
   "price": 1000,
   "type": "Arcane Focus",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -25,5 +25,6 @@
     "Can be used as a spellcasting focus for arcane magic",
     "Provides unlimited Quartz Dust for light and divination spells"
   ],
-  "Gear_Slot": "hands"
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/crystal.png"
 }

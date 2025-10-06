@@ -95,6 +95,25 @@
     transition: all 0.3s ease-in-out;
   }
 }
+
+/* Pixel-art styling */
+.pixel-border {
+  border-radius: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  box-shadow:
+    0 0 0 2px #ca8a04,
+    4px 0 0 2px #1f2937,
+    -4px 0 0 2px #1f2937,
+    0 4px 0 2px #1f2937,
+    0 -4px 0 2px #1f2937,
+    4px 4px 0 2px #1f2937,
+    -4px -4px 0 2px #1f2937,
+    4px -4px 0 2px #1f2937,
+    -4px 4px 0 2px #1f2937;
+}
+
 /* Custom CSS for mobile dropdown alignment */
 @media (max-width: 1024px) {
   #navbar {

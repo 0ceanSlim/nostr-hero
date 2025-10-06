@@ -1,0 +1,11 @@
+{{define "game/scene.html"}}
+<!-- Scene Image Area (16:9 aspect ratio, centered) -->
+<div class="w-full bg-gray-800 border-4 border-yellow-800 flex-shrink-0 flex items-center justify-center p-4" style="height: 40vh; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
+    <div class="relative w-full h-full flex items-center justify-center">
+        <img id="scene-image" src="/res/img/locations/kingdom.png" alt="Scene" class="max-w-full max-h-full object-contain" style="aspect-ratio: 16/9; image-rendering: pixelated;">
+        <div class="absolute top-0 left-0 right-0 text-center bg-gradient-to-b from-black to-transparent p-3">
+            <h2 id="scene-title" class="text-2xl font-bold text-yellow-400 drop-shadow-lg" style="text-shadow: 2px 2px 4px #000;">Kingdom</h2>
+        </div>
+    </div>
+</div>
+{{end}}

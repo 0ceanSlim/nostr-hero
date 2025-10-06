@@ -5,7 +5,7 @@
   "ai_description": "leather armor with metal rings sewn onto surface, reinforced hide vest with iron ring attachments",
   "price": 3000,
   "type": "Heavy Armor",
-  "weight": 40.0,
+  "weight": 40,
   "stack": 1,
   "ac": "14",
   "damage": null,
@@ -22,5 +22,6 @@
   "notes": [
     "Disadvantage on Stealth"
   ],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/ring-mail.png"
 }

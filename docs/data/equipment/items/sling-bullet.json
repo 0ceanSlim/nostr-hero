@@ -6,10 +6,11 @@
   "type": "Ammunition",
   "weight": 0.015,
   "stack": 8,
-  "gear_slot": "",
+  "gear_slot": "ammunition",
   "rarity": "common",
   "tags": [
     "ammunition"
   ],
-  "ai_description": "Smooth round stones and lead bullets in leather pouch"
+  "ai_description": "Smooth round stones and lead bullets in leather pouch",
+  "image": "/res/img/items/sling-bullet.png"
 }

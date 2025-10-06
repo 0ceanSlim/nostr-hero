@@ -4,7 +4,7 @@
   "ai_description": "lightweight armor of interlocked metal rings, flexible chainmail covering torso and shoulders",
   "price": 5000,
   "type": "Medium Armor",
-  "weight": 20.0,
+  "weight": 20,
   "stack": 1,
   "ac": "13 + Dex(max2)",
   "damage": null,
@@ -18,5 +18,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/chain-shirt.png"
 }

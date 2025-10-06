@@ -16,5 +16,6 @@
     "Used for regeneration magic",
     "Rarely drops from trolls",
     "Must be kept in special vials"
-  ]
+  ],
+  "image": "/res/img/items/troll-blood.png"
 }

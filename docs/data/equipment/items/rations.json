@@ -4,7 +4,7 @@
   "ai_description": "wrapped bundle of dried meat, hardtack biscuits, and preserved fruit, tied with rope, travel provisions",
   "price": 50,
   "type": "Adventuring Gear",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "range-long": "null",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/rations.png"
 }

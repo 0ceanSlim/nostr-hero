@@ -5,7 +5,7 @@
   "ai_description": "metal lantern with glass panels and adjustable shutters, oil-burning light source with carrying handle and wick",
   "price": 500,
   "type": "Adventuring Gear",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -22,5 +22,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/lantern-hooded.png"
 }

@@ -1,8 +1,6 @@
 {{define "title"}}Nostr Hero - Select Save{{end}}
 
 {{define "view"}}
-<script src="/res/js/session-manager.js"></script>
-<script src="/res/js/game-ui.js"></script>
 <div class="max-w-4xl mx-auto p-6">
   <div class="text-center mb-8">
     <h1 class="text-4xl font-bold text-yellow-400 mb-2">⚔️ Choose Your Adventure ⚔️</h1>
@@ -88,7 +86,16 @@
   </div>
 </template>
 
+<script src="/res/js/session-manager.js"></script>
+<script src="/res/js/game-ui.js"></script>
 <script>
+// Helper function to show messages (fallback if game-ui.js not loaded yet)
+if (typeof showMessage === 'undefined') {
+  function showMessage(text, type = 'info', duration = 5000) {
+    console.log(`[${type.toUpperCase()}] ${text}`);
+  }
+}
+
 // Initialize save selection page
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('🎮 Initializing save selection page...');
@@ -177,6 +184,12 @@ function displaySaveFiles(saves) {
 
   saves.forEach(save => {
     const saveEl = template.content.cloneNode(true);
+
+    // Get location - handle both old (string) and new (object) formats
+    const locationName = typeof save.location === 'string'
+      ? save.location
+      : (save.location?.current || 'Unknown Location');
+
     const html = saveEl.firstElementChild.outerHTML
       .replace('{SAVE_ID}', save.id)
       .replace('{CHARACTER_ICON}', getCharacterIcon(save.character.race, save.character.class))
@@ -184,7 +197,7 @@ function displaySaveFiles(saves) {
       .replace('{CHARACTER_RACE}', save.character.race || 'Unknown')
       .replace('{CHARACTER_CLASS}', save.character.class || 'Adventurer')
       .replace('{CHARACTER_LEVEL}', save.character.level || 1)
-      .replace('{LOCATION_NAME}', save.location || 'Unknown Location')
+      .replace('{LOCATION_NAME}', locationName)
       .replace('{CURRENT_HP}', save.character.hp || 0)
       .replace('{MAX_HP}', save.character.max_hp || 0)
       .replace('{FATIGUE}', save.character.fatigue || 0)

@@ -16,5 +16,6 @@
     "Used for decay and disease magic",
     "Commonly drops from fungal creatures",
     "Must be gathered or purchased"
-  ]
+  ],
+  "image": "/res/img/items/mushroom-spores.png"
 }

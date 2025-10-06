@@ -5,7 +5,7 @@
   "ai_description": "leather-working kit with awl, punch, and stitching tools, craft implements for making armor and goods",
   "price": 500,
   "type": "Artisan's Tools",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/leatherworkers-tools.png"
 }

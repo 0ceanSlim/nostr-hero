@@ -9,6 +9,7 @@ class NostrCharacterGenerator {
         this.startingGold = null;
         this.startingSpells = null;
         this.spellProgression = null;
+        this.spellSlots = null;
         this.racialStartingCities = null;
     }
 
@@ -24,6 +25,7 @@ class NostrCharacterGenerator {
                 goldResponse,
                 spellsResponse,
                 progressionResponse,
+                slotsResponse,
                 citiesResponse
             ] = await Promise.all([
                 fetch('/data/systems/weights.json'),
@@ -32,6 +34,7 @@ class NostrCharacterGenerator {
                 fetch('/data/character/starting-gold.json'),
                 fetch('/data/character/starting-spells.json'),
                 fetch('/data/character/spell-progression.json'),
+                fetch('/data/character/spell-slots.json'),
                 fetch('/data/character/racial-starting-cities.json')
             ]);
 
@@ -41,6 +44,7 @@ class NostrCharacterGenerator {
             if (!goldResponse.ok) throw new Error('Failed to load starting gold data');
             if (!spellsResponse.ok) throw new Error('Failed to load starting spells data');
             if (!progressionResponse.ok) throw new Error('Failed to load spell progression data');
+            if (!slotsResponse.ok) throw new Error('Failed to load spell slots data');
             if (!citiesResponse.ok) throw new Error('Failed to load racial starting cities data');
 
             this.weights = await weightsResponse.json();
@@ -49,6 +53,7 @@ class NostrCharacterGenerator {
             this.startingGold = await goldResponse.json();
             this.startingSpells = await spellsResponse.json();
             this.spellProgression = await progressionResponse.json();
+            this.spellSlots = await slotsResponse.json();
             const citiesData = await citiesResponse.json();
             this.racialStartingCities = citiesData.racial_starting_cities;
 
@@ -123,6 +128,7 @@ class NostrCharacterGenerator {
         character.choices = equipmentResult.choices;
 
         character.spells = this.generateStartingSpells(character);
+        character.spell_slots = this.generateSpellSlots(character);
         character.city = this.generateStartingCity(character);
 
         console.log('✅ Generated character from API:', character);
@@ -325,66 +331,68 @@ class NostrCharacterGenerator {
 
     // Generate starting spells based on class
     generateStartingSpells(character) {
-        if (!this.spellProgression || !this.startingSpells) {
+        if (!this.startingSpells) {
             console.warn('Spell data not loaded');
             return [];
         }
 
-        const classProgression = this.spellProgression[character.class];
-        if (!classProgression) {
-            console.log(`${character.class} is not a spellcasting class`);
-            return []; // Not a spellcasting class
-        }
-
-        const spells = [];
-
-        const cantripsKnown = classProgression.cantrips_known[0]; // Level 1 (index 0)
-        const level1SpellsKnown = classProgression.spells_known[0]; // Level 1 (index 0)
-
         const classSpells = this.startingSpells[character.class.toLowerCase()];
         if (!classSpells) {
-            console.warn('No starting spell list found for class:', character.class);
+            console.log(`${character.class} has no starting spells`);
             return [];
         }
 
-        console.log(`Generating spells for ${character.class}: ${cantripsKnown} cantrips, ${level1SpellsKnown} level 1 spells`);
+        const knownSpells = [];
 
-        // Deterministically select cantrips
-        if (classSpells.cantrips && classSpells.cantrips.length > 0 && cantripsKnown > 0) {
-            const cantripSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'cantrips');
-            const cantripRNG = this.createSeededRNG(cantripSeed);
-            const availableCantrips = [...classSpells.cantrips];
+        // Add ALL cantrips from starting spells (they know all of them)
+        if (classSpells.cantrips && classSpells.cantrips.length > 0) {
+            knownSpells.push(...classSpells.cantrips);
+        }
 
-            for (let i = 0; i < cantripsKnown && availableCantrips.length > 0; i++) {
-                const index = cantripRNG.intn(availableCantrips.length);
-                const spellId = availableCantrips.splice(index, 1)[0];
-                spells.push({
-                    spell: spellId,
-                    prepared: true,
-                    known: true
-                });
+        // Add ALL level 1 spells from starting spells (they know all of them)
+        if (classSpells.level1 && classSpells.level1.length > 0) {
+            knownSpells.push(...classSpells.level1);
+        }
+
+        console.log(`Generated ${knownSpells.length} known spells for ${character.class}:`, knownSpells);
+        return knownSpells;
+    }
+
+    // Generate spell slots for character
+    generateSpellSlots(character) {
+        if (!this.spellSlots) {
+            console.warn('Spell slots data not loaded');
+            return {};
+        }
+
+        const classSlots = this.spellSlots[character.class.toLowerCase()];
+        if (!classSlots) {
+            console.log(`${character.class} is not a spellcasting class or has no spell slots`);
+            return {};
+        }
+
+        // Get slot counts for level 1
+        const level1SlotCounts = classSlots["1"] || {};
+        console.log(`Spell slot counts for ${character.class} level 1:`, level1SlotCounts);
+
+        // Convert slot counts to actual slot objects
+        const spellSlots = {};
+
+        for (const [slotType, count] of Object.entries(level1SlotCounts)) {
+            if (count > 0) {
+                spellSlots[slotType] = [];
+                for (let i = 0; i < count; i++) {
+                    spellSlots[slotType].push({
+                        slot: i,
+                        spell: null,      // No spell prepared initially
+                        quantity: 0       // Can prepare up to 5 of same spell
+                    });
+                }
             }
         }
 
-        // Deterministically select level 1 spells
-        if (classSpells.level1 && classSpells.level1.length > 0 && level1SpellsKnown > 0) {
-            const spellSeed = this.createDeterministicSeed(this.npubToHex(character.npub), 'level1-spells');
-            const spellRNG = this.createSeededRNG(spellSeed);
-            const availableSpells = [...classSpells.level1];
-
-            for (let i = 0; i < level1SpellsKnown && availableSpells.length > 0; i++) {
-                const index = spellRNG.intn(availableSpells.length);
-                const spellId = availableSpells.splice(index, 1)[0];
-                spells.push({
-                    spell: spellId,
-                    prepared: true,
-                    known: true
-                });
-            }
-        }
-
-        console.log(`Generated ${spells.length} spells for ${character.class}:`, spells.map(s => s.spell));
-        return spells;
+        console.log(`Generated spell slots for ${character.class}:`, spellSlots);
+        return spellSlots;
     }
 
     // Convert npub to hex key (matching Go backend format)

@@ -5,7 +5,7 @@
   "ai_description": "small metal box containing flint stone, steel striker, and dry tinder cloth, fire-starting kit with hinged lid",
   "price": 50,
   "type": "Adventuring Gear",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "range-long": "null",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/tinderbox.png"
 }

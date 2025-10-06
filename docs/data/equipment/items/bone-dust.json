@@ -13,5 +13,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "img": "equipment/spell-component.jpg"
+  "img": "equipment/spell-component.jpg",
+  "image": "/res/img/items/bone-dust.png"
 }

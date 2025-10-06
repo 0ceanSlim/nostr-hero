@@ -16,5 +16,6 @@
     "Used for web and binding spells",
     "Commonly drops from spiders",
     "Must be gathered or purchased"
-  ]
+  ],
+  "image": "/res/img/items/spider-silk.png"
 }

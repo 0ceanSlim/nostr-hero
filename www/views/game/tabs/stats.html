@@ -1,0 +1,72 @@
+{{define "game/tabs/stats.html"}}
+<!-- Stats Tab -->
+<div id="stats-panel" class="hidden space-y-3">
+    <h3 class="text-sm font-bold text-yellow-400 mb-2">CHARACTER INFO</h3>
+    <div class="text-sm space-y-1">
+        <div class="flex justify-between">
+            <span class="text-gray-400">Race:</span>
+            <span id="char-race" class="font-bold">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">Class:</span>
+            <span id="char-class" class="font-bold">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">Background:</span>
+            <span id="char-background" class="font-bold">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">Alignment:</span>
+            <span id="char-alignment" class="font-bold">-</span>
+        </div>
+    </div>
+
+    <h3 class="text-sm font-bold text-yellow-400 mb-2 mt-4">COMBAT STATS</h3>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+        <div class="flex justify-between">
+            <span class="text-gray-400">Attack:</span>
+            <span id="attack-bonus" class="font-bold">+0</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">AC:</span>
+            <span id="armor-class" class="font-bold">10</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">Initiative:</span>
+            <span id="initiative" class="font-bold">+0</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-400">Speed:</span>
+            <span id="speed" class="font-bold">30 ft</span>
+        </div>
+    </div>
+
+    <h3 class="text-sm font-bold text-yellow-400 mb-2 mt-4">SAVING THROWS</h3>
+    <div class="grid grid-cols-3 gap-2 text-xs text-center">
+        <div>
+            <div class="text-gray-400">STR</div>
+            <div id="save-str" class="font-bold">+0</div>
+        </div>
+        <div>
+            <div class="text-gray-400">DEX</div>
+            <div id="save-dex" class="font-bold">+0</div>
+        </div>
+        <div>
+            <div class="text-gray-400">CON</div>
+            <div id="save-con" class="font-bold">+0</div>
+        </div>
+        <div>
+            <div class="text-gray-400">INT</div>
+            <div id="save-int" class="font-bold">+0</div>
+        </div>
+        <div>
+            <div class="text-gray-400">WIS</div>
+            <div id="save-wis" class="font-bold">+0</div>
+        </div>
+        <div>
+            <div class="text-gray-400">CHA</div>
+            <div id="save-cha" class="font-bold">+0</div>
+        </div>
+    </div>
+</div>
+{{end}}

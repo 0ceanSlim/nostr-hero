@@ -23,5 +23,6 @@
     "Required to cast Bless spell",
     "Consumed on use",
     "Can be blessed by clerics or purchased from temples"
-  ]
+  ],
+  "image": "/res/img/items/blessed-water.png"
 }

@@ -4,7 +4,7 @@
   "description": "A tool with a broad flat blade and typically upturned sides, used for moving earth, snow, or other material. Essential for digging holes, graves, or excavation work.",
   "price": 2,
   "type": "Tools",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": "1d6",
@@ -19,5 +19,6 @@
   ],
   "ai_description": "Iron-headed digging tool with wooden handle and broad blade",
   "notes": [],
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/shovel.png"
 }

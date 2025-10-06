@@ -13,13 +13,13 @@ import (
 )
 
 type SaveFile struct {
-	ID         string                 `json:"id"`
-	Npub       string                 `json:"npub"`
-	Character  map[string]interface{} `json:"character"`
-	GameState  map[string]interface{} `json:"gameState"`
-	Location   string                 `json:"location"`
-	LastPlayed string                 `json:"last_played"`
-	CreatedAt  string                 `json:"created_at"`
+	ID                  string                 `json:"id"`
+	Npub                string                 `json:"npub"`
+	CreatedAt           string                 `json:"created_at"`
+	LastPlayed          string                 `json:"last_played"`
+	Character           map[string]interface{} `json:"character"`
+	Location            map[string]interface{} `json:"location"`
+	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
 }
 
 const SavesDirectory = "data/saves"
@@ -199,13 +199,14 @@ func GetSaveInfo(npub, saveID string) (*SaveFile, error) {
 		return nil, err
 	}
 
-	// Return save without full game state for performance
+	// Return save info for listings
 	return &SaveFile{
-		ID:         save.ID,
-		Npub:       save.Npub,
-		Character:  save.Character,
-		Location:   save.Location,
-		LastPlayed: save.LastPlayed,
-		CreatedAt:  save.CreatedAt,
+		ID:                  save.ID,
+		Npub:                save.Npub,
+		CreatedAt:           save.CreatedAt,
+		LastPlayed:          save.LastPlayed,
+		Character:           save.Character,
+		Location:            save.Location,
+		MusicTracksUnlocked: save.MusicTracksUnlocked,
 	}, nil
 }

@@ -5,7 +5,7 @@
   "ai_description": "small one-handed axe with sharp steel blade and wooden handle, throwing hatchet with curved cutting edge",
   "price": 0,
   "type": "Simple Melee Weapons",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": "1d6",
@@ -22,5 +22,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/handaxe.png"
 }

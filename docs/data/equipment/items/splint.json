@@ -5,7 +5,7 @@
   "ai_description": "heavy armor with vertical metal strips over mail backing, plate segments connected by flexible chain",
   "price": 20000,
   "type": "Heavy Armor",
-  "weight": 60.0,
+  "weight": 60,
   "stack": 1,
   "ac": "17",
   "ammunition": "",
@@ -19,5 +19,6 @@
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/splint.png"
 }

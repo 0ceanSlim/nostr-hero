@@ -11,5 +11,6 @@
   "tags": [
     "spell_component"
   ],
-  "ai_description": "Yellow crystalline powder in glass vial with acrid smell"
+  "ai_description": "Yellow crystalline powder in glass vial with acrid smell",
+  "image": "/res/img/items/sulfur.png"
 }

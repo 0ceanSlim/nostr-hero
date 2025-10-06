@@ -5,7 +5,7 @@
   "ai_description": "leather armor reinforced with metal studs and rivets, tough hide vest with iron spikes for extra protection",
   "price": 4500,
   "type": "Light Armor",
-  "weight": 13.0,
+  "weight": 13,
   "stack": 1,
   "ac": "12 + Dex",
   "damage": null,
@@ -19,5 +19,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/studded-leather.png"
 }

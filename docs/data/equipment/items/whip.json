@@ -5,7 +5,7 @@
   "ai_description": "long braided leather cord with wrapped handle, flexible weapon for striking at extended reach",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": "1d4",
@@ -22,5 +22,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/whip.png"
 }

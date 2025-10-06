@@ -5,7 +5,7 @@
   "ai_description": "collection of mortar, pestle, and herb pouches, healing kit with dried plants and preparation tools",
   "price": 500,
   "type": "Tools",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/herbalism-kit.png"
 }

@@ -11,5 +11,6 @@
   "tags": [
     "poison"
   ],
-  "ai_description": "Green liquid in small glass vial with skull warning label"
+  "ai_description": "Green liquid in small glass vial with skull warning label",
+  "image": "/res/img/items/poison-basic.png"
 }

@@ -1,0 +1,10 @@
+{{define "game/tab-buttons.html"}}
+<!-- Tab Buttons Area -->
+<div class="bg-gray-800 border-4 border-yellow-800 flex" style="clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
+    <button id="tab-equipment" onclick="switchTab('equipment')" class="flex-1 py-3 bg-gradient-to-b from-yellow-700 to-yellow-900 font-bold text-xs border-r-2 border-gray-900 text-yellow-300">⚔️ GEAR</button>
+    <button id="tab-inventory" onclick="switchTab('inventory')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">🎒 INV</button>
+    <button id="tab-spells" onclick="switchTab('spells')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">✨ SPELLS</button>
+    <button id="tab-stats" onclick="switchTab('stats')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">📊 STATS</button>
+    <button id="tab-music" onclick="switchTab('music')" class="flex-1 py-3 bg-gray-700 font-bold text-xs text-gray-400">🎵 MUSIC</button>
+</div>
+{{end}}

@@ -23,5 +23,6 @@
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/lantern-bullseye.png"
 }

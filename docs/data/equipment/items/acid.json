@@ -9,5 +9,6 @@
   "rarity": "common",
   "range": "null",
   "range-long": "null",
-  "img": "equipment/adventuring-gear.jpg"
+  "img": "equipment/adventuring-gear.jpg",
+  "image": "/res/img/items/acid.png"
 }

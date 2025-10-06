@@ -5,7 +5,7 @@
   "ai_description": "long wooden staff with smooth polished surface, simple fighting stick with metal end caps for walking and combat",
   "price": 0,
   "type": "Simple Melee Weapons",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": "1d6,1d8",
@@ -21,5 +21,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/quarterstaff.png"
 }

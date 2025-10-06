@@ -5,7 +5,7 @@
   "ai_description": "full suit of articulated steel plates, gleaming knight's armor with pauldrons, breastplate, and helm, ultimate protection",
   "price": 150000,
   "type": "Heavy Armor",
-  "weight": 65.0,
+  "weight": 65,
   "stack": 1,
   "ac": "18",
   "damage": null,
@@ -23,5 +23,6 @@
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "gear_slot": "armor"
+  "gear_slot": "armor",
+  "image": "/res/img/items/plate.png"
 }

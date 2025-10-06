@@ -4,7 +4,7 @@
   "ai_description": "slender wooden wand with arcane crystals, spell-casting focus with magical symbols and glowing tip",
   "price": 1000,
   "type": "Arcane Focus",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -24,5 +24,6 @@
     "Can be used as a spellcasting focus for arcane magic",
     "Provides unlimited Arcane Powder for evocation and force spells"
   ],
-  "Gear_Slot": "hands"
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/wand.png"
 }

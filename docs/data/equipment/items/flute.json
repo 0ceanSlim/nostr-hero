@@ -5,7 +5,7 @@
   "ai_description": "slender wooden wind instrument with finger holes, elegant pipe flute with carved decorations and silver accents",
   "price": 200,
   "type": "Musical Instrument",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "range-long": "null",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/flute.png"
 }

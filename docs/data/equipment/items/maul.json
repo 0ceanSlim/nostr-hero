@@ -5,7 +5,7 @@
   "ai_description": "heavy two-handed hammer with oversized iron head, massive blunt weapon with wooden handle and thick striking face",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 10.0,
+  "weight": 10,
   "stack": 1,
   "ac": null,
   "damage": "2d6",
@@ -22,5 +22,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/maul.png"
 }

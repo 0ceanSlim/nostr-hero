@@ -16,5 +16,7 @@
   "range-long": "null",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/crossbow-bolts.png",
+  "gear_slot": "ammunition"
 }

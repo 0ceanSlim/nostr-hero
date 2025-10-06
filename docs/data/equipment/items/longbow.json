@@ -5,7 +5,7 @@
   "ai_description": "tall recurved bow made from yew wood, elegant archery weapon with leather grip and bowstring, traditional ranger's weapon",
   "price": 0,
   "type": "Martial Ranged Weapons",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
@@ -23,5 +23,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/longbow.png"
 }

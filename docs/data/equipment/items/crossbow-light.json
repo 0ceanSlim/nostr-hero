@@ -5,7 +5,7 @@
   "ai_description": "small wooden crossbow with steel bow prod, one-handed mechanical weapon with trigger mechanism and bolt groove",
   "price": 0,
   "type": "Simple Ranged Weapons",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": "1d6",
@@ -26,5 +26,6 @@
     "Requires bolts to fire",
     "Loading property requires action to reload"
   ],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/crossbow-light.png"
 }

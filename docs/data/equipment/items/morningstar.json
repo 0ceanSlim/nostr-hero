@@ -5,7 +5,7 @@
   "ai_description": "wooden-handled weapon with iron head covered in sharp metal spikes, medieval mace with protruding points",
   "price": 15,
   "type": "Martial Melee Weapons",
-  "weight": 4.0,
+  "weight": 4,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
@@ -20,5 +20,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/morningstar.png"
 }

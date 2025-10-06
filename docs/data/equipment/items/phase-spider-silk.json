@@ -16,5 +16,6 @@
     "Used for dimension magic",
     "Rarely drops from phase spiders",
     "Difficult to harvest safely"
-  ]
+  ],
+  "image": "/res/img/items/phase-spider-silk.png"
 }

@@ -145,33 +145,8 @@ class NostrHeroStartup {
     }
 
     updateLoadingIndicator(stepName, progress) {
-        const gameContainer = document.getElementById('game-app');
-        if (gameContainer && !this.isInitialized) {
-            const progressPercent = Math.round(progress * 100);
-            gameContainer.innerHTML = `
-                <div class="flex items-center justify-center min-h-screen">
-                    <div class="text-center">
-                        <div class="mb-8">
-                            <h1 class="text-4xl font-bold text-yellow-400 mb-2">⚔️ Nostr Hero ⚔️</h1>
-                            <p class="text-gray-400">A decentralized text-based RPG</p>
-                        </div>
-
-                        <div class="mb-6">
-                            <div class="w-64 bg-gray-700 rounded-full h-2 mx-auto mb-2">
-                                <div class="bg-yellow-400 h-2 rounded-full transition-all duration-300"
-                                     style="width: ${progressPercent}%"></div>
-                            </div>
-                            <p class="text-sm text-gray-300">${progressPercent}% - ${stepName}</p>
-                        </div>
-
-                        <div class="text-xs text-gray-500">
-                            <p>🔐 Powered by Nostr</p>
-                            <p>🌐 Your keys, your character</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+        // Don't show loading indicator - the game HTML is already rendered
+        // This prevents the loading screen from overwriting the game UI
     }
 
     onInitializationComplete() {

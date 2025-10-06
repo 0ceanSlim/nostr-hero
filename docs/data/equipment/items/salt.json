@@ -16,5 +16,6 @@
     "Used for protection magic",
     "Commonly found from various sources",
     "Must be gathered or purchased"
-  ]
+  ],
+  "image": "/res/img/items/salt.png"
 }

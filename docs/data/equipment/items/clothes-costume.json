@@ -5,18 +5,20 @@
   "ai_description": "colorful theatrical garments with decorative trim, elaborate costume with masks and fancy accessories",
   "price": 500,
   "type": "Clothes",
-  "weight": 4.0,
+  "weight": 4,
   "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "tags": [],
+  "tags": ["equipment"],
+  "gear_slot": "clothes",
   "notes": [
     "Can be used for disguises or performances"
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/clothes-costume.png"
 }

@@ -5,18 +5,20 @@
   "ai_description": "plain brown tunic and trousers made of rough wool and linen, simple peasant clothing with basic stitching",
   "price": 50,
   "type": "Clothes",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": null,
   "heal": null,
   "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "tags": [],
+  "tags": ["equipment"],
+  "gear_slot": "clothes",
   "notes": [
     "Basic clothing for daily wear"
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/clothes-common.png"
 }

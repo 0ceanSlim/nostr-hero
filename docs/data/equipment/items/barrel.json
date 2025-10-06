@@ -5,7 +5,7 @@
   "ai_description": "large wooden barrel with metal hoops, storage container with curved staves and removable lid for bulk storage",
   "price": 200,
   "type": "Adventuring Gear",
-  "weight": 70.0,
+  "weight": 70,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -18,5 +18,6 @@
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/barrel.png"
 }

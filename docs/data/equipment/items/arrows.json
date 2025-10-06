@@ -8,5 +8,7 @@
   "weight": 0,
   "stack": 20,
   "rarity": "common",
-  "img": "equipment/ammunition.jpg"
+  "img": "equipment/ammunition.jpg",
+  "image": "/res/img/items/arrows.png",
+  "gear_slot": "ammunition"
 }

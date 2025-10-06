@@ -5,7 +5,7 @@
   "ai_description": "three-pronged fishing spear with long wooden handle, neptune's weapon with sharp steel tines and crossbar",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": "1d6,1d8",
@@ -22,5 +22,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/trident.png"
 }

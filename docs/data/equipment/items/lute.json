@@ -5,7 +5,7 @@
   "ai_description": "wooden stringed instrument with pear-shaped body, long neck with tuning pegs, classical bard's lute with sound hole",
   "price": 3500,
   "type": "Musical Instrument",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -18,5 +18,6 @@
   "tags": [],
   "notes": [
     "Can be used to perform music and entertain crowds"
-  ]
+  ],
+  "image": "/res/img/items/lute.png"
 }

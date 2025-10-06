@@ -5,7 +5,7 @@
   "ai_description": "round wooden drum with stretched leather drumhead, percussion instrument with rope tensioning and wooden sticks",
   "price": 600,
   "type": "Musical Instrument",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "range-long": "null",
   "rarity": "common",
   "tags": [],
-  "notes": []
+  "notes": [],
+  "image": "/res/img/items/drum.png"
 }

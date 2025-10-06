@@ -16,5 +16,6 @@
     "Used for dark magic",
     "Rarely drops from demons",
     "Dangerous to handle without protection"
-  ]
+  ],
+  "image": "/res/img/items/demon-ichor.png"
 }

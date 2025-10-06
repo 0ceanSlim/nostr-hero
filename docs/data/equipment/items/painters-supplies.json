@@ -5,7 +5,7 @@
   "ai_description": "art supplies with easel, canvas, and paint brushes, colorful pigments and tools for creating artwork",
   "price": 1000,
   "type": "Artisan's Tools",
-  "weight": 5.0,
+  "weight": 5,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/painters-supplies.png"
 }

@@ -5,7 +5,7 @@
   "ai_description": "wooden water bucket with iron handle, rustic container with metal bands and rope handle for carrying liquids",
   "price": 0,
   "type": "Adventuring Gear",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -22,5 +22,6 @@
   ],
   "slots": 2,
   "contains": "any",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/bucket.png"
 }

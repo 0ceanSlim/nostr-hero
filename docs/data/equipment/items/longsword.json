@@ -5,7 +5,7 @@
   "ai_description": "medieval longsword with straight double-edged blade, steel crossguard, leather-wrapped handle with pommel, classic knight weapon",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 3.0,
+  "weight": 3,
   "stack": 1,
   "ac": null,
   "damage": "1d8,1d10",
@@ -23,5 +23,6 @@
   "notes": [
     "Can be wielded with two hands for increased damage"
   ],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/longsword.png"
 }

@@ -5,7 +5,7 @@
   "ai_description": "heavy iron padlock with brass key, security device with thick shackle and complex internal mechanism",
   "price": 1000,
   "type": "Adventuring Gear",
-  "weight": 1.0,
+  "weight": 1,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -19,5 +19,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/lock.png"
 }

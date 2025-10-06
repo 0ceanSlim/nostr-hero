@@ -17,5 +17,6 @@
     "Used for light and divination spells",
     "Unlimited when Crystal focus is equipped",
     "Consumed on use if no Crystal focus"
-  ]
+  ],
+  "image": "/res/img/items/quartz-dust.png"
 }

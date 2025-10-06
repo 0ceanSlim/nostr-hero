@@ -35,29 +35,40 @@ async function loadSaveData() {
 
         console.log('✅ Loaded save data:', saveData);
 
-        // Update DOM with loaded data
+        // Update DOM with loaded data (new structure)
         if (saveData.character) {
             document.getElementById('character-data').textContent = JSON.stringify(saveData.character);
         }
-        if (saveData.gameState) {
-            if (saveData.gameState.inventory) {
-                document.getElementById('inventory-data').textContent = JSON.stringify(saveData.gameState.inventory);
-            }
-            if (saveData.gameState.equipment) {
-                document.getElementById('equipment-data').textContent = JSON.stringify(saveData.gameState.equipment);
-            }
-            if (saveData.gameState.spells) {
-                document.getElementById('spell-data').textContent = JSON.stringify(saveData.gameState.spells);
-            }
-            if (saveData.gameState.location) {
-                document.getElementById('location-data').textContent = JSON.stringify(saveData.gameState.location);
-            }
-            if (saveData.gameState.combat !== undefined) {
-                document.getElementById('combat-data').textContent = JSON.stringify(saveData.gameState.combat);
-            }
+
+        // Location from new structure
+        if (saveData.location) {
+            document.getElementById('location-data').textContent = JSON.stringify(saveData.location);
         }
 
+        // Inventory is now inside character object
+        if (saveData.character && saveData.character.inventory) {
+            document.getElementById('inventory-data').textContent = JSON.stringify(saveData.character.inventory);
+        }
+
+        // Spells are now inside character object
+        if (saveData.character && saveData.character.spells) {
+            document.getElementById('spell-data').textContent = JSON.stringify(saveData.character.spells);
+        }
+
+        // Equipment is now inside character.inventory.gear_slots
+        if (saveData.character && saveData.character.inventory && saveData.character.inventory.gear_slots) {
+            document.getElementById('equipment-data').textContent = JSON.stringify(saveData.character.inventory.gear_slots);
+        }
+
+        // Combat data (default to null if not present)
+        document.getElementById('combat-data').textContent = 'null';
+
         console.log('✅ Save data loaded into DOM successfully');
+
+        // Trigger UI update
+        if (typeof updateCharacterDisplay === 'function') {
+            updateCharacterDisplay();
+        }
 
         // Mark save data as loaded to enable auto-saves
         saveDataLoaded = true;

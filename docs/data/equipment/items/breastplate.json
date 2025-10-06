@@ -13,5 +13,6 @@
     "equipment"
   ],
   "ac": "14 + Dex(max2)",
-  "img": "equipment/armor.jpg"
+  "img": "equipment/armor.jpg",
+  "image": "/res/img/items/breastplate.png"
 }

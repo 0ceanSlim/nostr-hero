@@ -18,5 +18,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "necklace"
+  "gear_slot": "necklace",
+  "image": "/res/img/items/emblem.png"
 }

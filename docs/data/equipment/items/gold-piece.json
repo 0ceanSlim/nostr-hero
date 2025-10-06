@@ -2,7 +2,7 @@
   "id": "gold-piece",
   "name": "Gold Piece",
   "description": "",
-  "ai_description": "small round gold coin with royal crest, shiny currency with embossed crown and inscription, standard fantasy money",
+  "ai_description": "a large stack of gold coins",
   "price": 1,
   "type": "Gold",
   "weight": 0.006,
@@ -16,5 +16,6 @@
   "notes": [],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/gold-piece.png"
 }

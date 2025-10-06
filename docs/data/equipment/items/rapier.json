@@ -5,7 +5,7 @@
   "ai_description": "slender thrusting sword with narrow blade and elaborate bell guard, dueling weapon with sharp point and basket hilt",
   "price": 0,
   "type": "Martial Melee Weapons",
-  "weight": 2.0,
+  "weight": 2,
   "stack": 1,
   "ac": null,
   "damage": "1d8",
@@ -21,5 +21,6 @@
     "equipment"
   ],
   "notes": [],
-  "gear_slot": "hands"
+  "gear_slot": "hands",
+  "image": "/res/img/items/rapier.png"
 }

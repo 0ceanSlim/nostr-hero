@@ -5,7 +5,7 @@
   "ai_description": "massive steel-headed hammer with long wooden handle, heavy demolition tool with flat striking face",
   "price": 200,
   "type": "Adventuring Gear",
-  "weight": 10.0,
+  "weight": 10,
   "stack": 1,
   "ac": null,
   "damage": null,
@@ -20,5 +20,6 @@
   ],
   "range": "null",
   "range-long": "null",
-  "ammunition": ""
+  "ammunition": "",
+  "image": "/res/img/items/hammer-sledge.png"
 }
