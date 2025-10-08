@@ -1,0 +1,21 @@
+{
+  "id": "blessed-incense",
+  "name": "Blessed Incense",
+  "description": "Sacred incense blessed by divine rites, producing fragrant smoke that enhances holy magic.",
+  "ai_description": "ornate incense sticks with holy smoke, blessed aromatic incense with golden wisps and divine symbols",
+  "price": 100,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 15,
+  "rarity": "common",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for holy and protective spells",
+    "Provided unlimited by Holy Symbol (Amulet)",
+    "Must be gathered or purchased"
+  ],
+  "image": "/res/img/items/blessed-incense.png"
+}

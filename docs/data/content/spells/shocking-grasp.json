@@ -26,23 +26,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Melee spell attack - must be adjacent",
     "Advantage vs targets in metal armor",
     "Prevents reactions until their next turn"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "elemental-sparks",
-        "quantity": 1
-      },
-      {
-        "component": "iron-filings",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Rod provides unlimited elemental-sparks (still need iron-filings)"
-  }
+  ]
 }

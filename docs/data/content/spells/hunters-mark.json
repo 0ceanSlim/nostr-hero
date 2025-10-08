@@ -22,17 +22,21 @@
   ],
   "rarity": "common",
   "action_cost": "bonus action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],
   "material_component": {
     "required": [
       {
-        "component": "wolf-tooth",
+        "component": "bone-dust",
+        "quantity": 2
+      },
+      {
+        "component": "pollen",
         "quantity": 1
       }
     ],
-    "focus_provided": "No focus provides this component - must be obtained"
+    "focus_provided": "Totem provides unlimited bone-dust, Sprig of Mistletoe provides unlimited pollen"
   }
 }

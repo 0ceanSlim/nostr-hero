@@ -25,7 +25,7 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],

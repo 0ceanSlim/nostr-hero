@@ -24,21 +24,21 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],
   "material_component": {
     "required": [
       {
-        "component": "elemental-sparks",
-        "quantity": 1
+        "component": "arcane-powder",
+        "quantity": 2
       },
       {
-        "component": "iron-filings",
+        "component": "sulfur",
         "quantity": 1
       }
     ],
-    "focus_provided": "Rod provides unlimited elemental-sparks (still need iron-filings)"
+    "focus_provided": "Wand provides unlimited arcane-powder, Rod provides unlimited sulfur"
   }
 }

@@ -66,13 +66,21 @@ async function showScene(config) {
   // Clear and set up content
   content.innerHTML = '';
 
+  // Add skip button (top right)
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'pixel-skip-btn';
+  skipBtn.textContent = 'Skip Scene';
+  skipBtn.onclick = () => {
+    continueBtn.click();
+  };
+  container.appendChild(skipBtn);
+
   if (config.isLetter) {
-    // Letter scene - special styling
+    // Letter scene - special styling positioned on background letter
     const letterDiv = document.createElement('div');
     letterDiv.className = 'letter-container';
     letterDiv.innerHTML = `
-      <div class="text-sm opacity-70 mb-4 text-center">The Letter:</div>
-      <div class="leading-relaxed">${config.text}</div>
+      <div>${config.text}</div>
     `;
     content.appendChild(letterDiv);
   } else {
@@ -95,6 +103,20 @@ async function showScene(config) {
   // Add Continue button using component
   const buttonDelay = config.buttonDelay !== undefined ? config.buttonDelay : 7000;
   const continueBtn = createContinueButton(buttonDelay);
+
+  // For letter scenes, position button below the letter area
+  if (config.isLetter) {
+    continueBtn.style.cssText = `
+      position: fixed !important;
+      bottom: 10vh !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      z-index: 100 !important;
+      margin: 0 !important;
+    `;
+  }
+
   content.appendChild(continueBtn);
 
   // Show container with fade-in
@@ -109,14 +131,30 @@ async function showScene(config) {
   // Wait for user to click Continue
   await waitForButtonClick(continueBtn);
 
-  // Animate text out first (wipe down)
-  const textElements = content.querySelectorAll('.scene-text, .letter-container, .pixel-continue-btn');
-  textElements.forEach(el => {
-    el.style.animation = 'wipeOut 0.6s ease-in forwards';
-  });
+  // Remove skip button
+  skipBtn.remove();
 
-  // Wait for text animation to complete
-  await new Promise(resolve => setTimeout(resolve, 600));
+  // For letter scenes, just fade out without wipe animation
+  if (config.isLetter) {
+    // Fade out the letter container and button
+    const textElements = content.querySelectorAll('.letter-container, .pixel-continue-btn');
+    textElements.forEach(el => {
+      el.style.transition = 'opacity 0.6s ease-out';
+      el.style.opacity = '0';
+    });
+
+    // Wait for fade animation to complete
+    await new Promise(resolve => setTimeout(resolve, 600));
+  } else {
+    // Animate text out first (wipe down) for regular scenes
+    const textElements = content.querySelectorAll('.scene-text, .pixel-continue-btn');
+    textElements.forEach(el => {
+      el.style.animation = 'wipeOut 0.6s ease-in forwards';
+    });
+
+    // Wait for text animation to complete
+    await new Promise(resolve => setTimeout(resolve, 600));
+  }
 
   // Clear content
   content.innerHTML = '';
@@ -303,48 +341,35 @@ async function startIntroSequence() {
     image: introData.scene5a.image
   });
 
-  // 10. Show equipment selection
+  // 10. Spell knowledge intro (if spellcaster)
+  if (generatedCharacter.spells && generatedCharacter.spells.length > 0) {
+    await showScene({
+      text: introData.spell_knowledge.text,
+      image: introData.spell_knowledge.image
+    });
+  }
+
+  // 11. Show starting spells (if spellcaster) - MOVED BEFORE equipment
+  await showStartingSpells(generatedCharacter);
+
+  // 11. Show equipment selection
   await startEquipmentSelection(startingEquipment);
 
   // Get selected equipment
   selectedEquipment = getSelectedEquipment();
 
-  // 11. Show items given in addition to choices
+  // 12. Show items given in addition to choices
   await showGivenItemsScene(startingEquipment.inventory);
 
   // Continue with remaining scenes
   await continueAfterEquipment();
 }
 
-/**
- * DEBUG: Skip directly to equipment selection
- */
-async function skipToEquipment() {
-  playerName = document.getElementById('character-name').value.trim() || 'Debug Hero';
-
-  // Hide name screen
-  document.getElementById('name-screen').classList.add('hidden');
-
-  // Show equipment selection directly
-  await startEquipmentSelection(startingEquipment);
-
-  // Get selected equipment
-  selectedEquipment = getSelectedEquipment();
-
-  // Show given items scene
-  await showGivenItemsScene(startingEquipment.inventory);
-
-  // Continue with remaining scenes (pack selection, departure, etc.)
-  await continueAfterEquipment();
-}
 
 /**
  * Continue after equipment selection
  */
 async function continueAfterEquipment() {
-
-  // 11.5 Show starting spells (if spellcaster)
-  await showStartingSpells(generatedCharacter);
 
   // 12. Scene 6 - Pack note (moved before pack selection)
   await showScene({
@@ -540,6 +565,20 @@ async function getItemStats(itemName) {
       statsHTML += `<div class="text-green-400 text-sm font-semibold mb-3">${itemData.item_type}</div>`;
     }
 
+    // Check if this is a focus item
+    const isFocus = itemData.item_type === 'Arcane Focus' || itemData.item_type === 'Druidic Focus' || itemData.item_type === 'Holy Symbol';
+
+    // If it's a focus, show the component it provides prominently
+    if (isFocus && props.provides) {
+      statsHTML += `<div class="bg-purple-900 bg-opacity-40 border-2 border-purple-500 rounded-lg p-3 mb-3">`;
+      statsHTML += `<div class="text-purple-300 text-xs font-semibold mb-2">✨ Provides Unlimited:</div>`;
+      statsHTML += `<div class="flex items-center gap-2">`;
+      statsHTML += `<img src="/res/img/items/${props.provides}.png" class="w-8 h-8 object-contain" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;" onerror="this.style.display='none'">`;
+      statsHTML += `<div class="text-white font-semibold">${props.provides.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</div>`;
+      statsHTML += `</div>`;
+      statsHTML += `</div>`;
+    }
+
     // Stats section
     statsHTML += `<div class="space-y-1 mb-3">`;
 
@@ -567,6 +606,15 @@ async function getItemStats(itemName) {
     // Add full description
     if (itemData.description) {
       statsHTML += `<div class="text-gray-300 text-sm mt-3 leading-relaxed border-t border-gray-600 pt-3">${itemData.description}</div>`;
+    }
+
+    // Add notes for focuses
+    if (isFocus && props.notes && props.notes.length > 0) {
+      statsHTML += `<div class="text-purple-300 text-xs mt-3 leading-relaxed border-t border-purple-600 pt-3">`;
+      props.notes.forEach(note => {
+        statsHTML += `<div class="mb-1">• ${note}</div>`;
+      });
+      statsHTML += `</div>`;
     }
 
     return statsHTML;
@@ -667,10 +715,14 @@ async function showStartingSpells(character) {
   }
 
   const container = document.getElementById('scene-container');
+  const background = document.getElementById('scene-background');
   const content = document.getElementById('scene-content');
 
-  // Clear existing content
+  // Turn off background
+  background.style.backgroundImage = 'none';
+  background.style.backgroundColor = '#111827';
   content.innerHTML = '';
+  content.style.zIndex = '10';
 
   // Title
   const title = document.createElement('h2');
@@ -712,9 +764,10 @@ async function showStartingSpells(character) {
     content.appendChild(slotsInfo);
   }
 
-  // Spells container
+  // Spells container - scrollable with max height
   const spellsContainer = document.createElement('div');
-  spellsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6 max-w-5xl mx-auto';
+  spellsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6 max-w-5xl mx-auto overflow-y-auto';
+  spellsContainer.style.maxHeight = '400px';
 
   // Load and display each spell
   console.log(`Loading ${character.spells.length} spells for display`);
@@ -789,12 +842,18 @@ async function createSpellCard(spellId) {
   card.className = 'relative bg-gray-900 rounded-lg border-2 border-purple-600 hover:border-purple-400 transition-all cursor-pointer overflow-hidden';
   card.style.width = '100%';
   card.style.height = '100%';
+  card.onclick = () => {
+    showSpellTooltip(spell, container);
+  };
 
   // Spell school image
   const school = spell.school || 'evocation';
   const img = document.createElement('img');
   img.src = `/res/img/spells/${school}.png`;
   img.className = 'w-full h-full object-cover';
+  img.style.imageRendering = 'pixelated';
+  img.style.imageRendering = '-moz-crisp-edges';
+  img.style.imageRendering = 'crisp-edges';
   img.onerror = () => {
     img.src = '/res/img/spells/evocation.png'; // Fallback
   };
@@ -811,32 +870,72 @@ async function createSpellCard(spellId) {
   levelBadge.textContent = spell.level === 0 ? 'C' : `L${spell.level}`;
   card.appendChild(levelBadge);
 
-  // Top right: Info button
-  const infoBtn = document.createElement('button');
-  infoBtn.className = 'absolute top-1 right-1 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center';
-  infoBtn.textContent = '?';
-  infoBtn.onclick = (e) => {
-    e.stopPropagation();
-    showSpellTooltip(spell, container);
-  };
-  card.appendChild(infoBtn);
+  // Top right: Damage indicator
+  if (spell.damage) {
+    const damageType = (spell.properties?.damage_type || spell.damage_type || '').toLowerCase();
+    const damageEmojis = {
+      'fire': '🔥',
+      'cold': '❄️',
+      'lightning': '⚡',
+      'thunder': '⚡',
+      'acid': '🧪',
+      'poison': '☠️',
+      'necrotic': '☠️',
+      'radiant': '✨',
+      'psychic': '🧠',
+      'force': '🌀',
+      'slashing': '🗡️',
+      'piercing': '🏹',
+      'bludgeoning': '🔨'
+    };
+    const emoji = damageEmojis[damageType] || '⚔️';
 
-  // Bottom left: Materials indicator
-  const materialComponent = spell.properties?.material_component || spell.material_component;
-  if (materialComponent && materialComponent.required && materialComponent.required.length > 0) {
-    const materialBadge = document.createElement('div');
-    materialBadge.className = 'absolute bottom-8 left-1 bg-yellow-700 text-yellow-100 font-bold text-xs px-2 py-1 rounded';
-    materialBadge.textContent = 'M';
-    materialBadge.title = 'Requires materials';
-    card.appendChild(materialBadge);
+    const damageBadge = document.createElement('div');
+    damageBadge.className = 'absolute top-1 right-1 bg-red-700 text-red-100 font-bold text-xs px-2 py-1 rounded';
+    damageBadge.textContent = `${spell.damage} ${emoji}`;
+    card.appendChild(damageBadge);
   }
 
-  // Bottom right: Damage indicator
-  if (spell.damage) {
-    const damageBadge = document.createElement('div');
-    damageBadge.className = 'absolute bottom-8 right-1 bg-red-700 text-red-100 font-bold text-xs px-2 py-1 rounded';
-    damageBadge.textContent = spell.damage;
-    card.appendChild(damageBadge);
+  // Bottom left: Materials indicator with images
+  const materialComponent = spell.properties?.material_component || spell.material_component;
+  if (materialComponent && materialComponent.required && materialComponent.required.length > 0) {
+    // Container for material components
+    const materialsContainer = document.createElement('div');
+    materialsContainer.className = 'absolute bottom-8 left-1 flex flex-col gap-0.5';
+
+    // Show each material component
+    materialComponent.required.forEach(mat => {
+      const matDiv = document.createElement('div');
+      matDiv.className = 'relative';
+      matDiv.style.width = '24px';
+      matDiv.style.height = '24px';
+
+      // Material image
+      const matImg = document.createElement('img');
+      matImg.src = `/res/img/items/${mat.component}.png`;
+      matImg.className = 'w-full h-full object-contain';
+      matImg.style.imageRendering = 'pixelated';
+      matImg.style.imageRendering = '-moz-crisp-edges';
+      matImg.style.imageRendering = 'crisp-edges';
+      matImg.onerror = () => {
+        // Fallback to a generic component icon
+        matImg.style.display = 'none';
+      };
+
+      // Quantity badge (top-right of material icon)
+      const qtyBadge = document.createElement('div');
+      qtyBadge.className = 'absolute -top-1 -right-1 bg-purple-700 text-white font-bold rounded-full flex items-center justify-center';
+      qtyBadge.style.fontSize = '8px';
+      qtyBadge.style.width = '12px';
+      qtyBadge.style.height = '12px';
+      qtyBadge.textContent = mat.quantity;
+
+      matDiv.appendChild(matImg);
+      matDiv.appendChild(qtyBadge);
+      materialsContainer.appendChild(matDiv);
+    });
+
+    card.appendChild(materialsContainer);
   }
 
   // Bottom: Spell name

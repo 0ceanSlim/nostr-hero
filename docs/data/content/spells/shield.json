@@ -25,7 +25,7 @@
   ],
   "rarity": "common",
   "action_cost": "reaction",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Cast as reaction when hit by attack",
     "+5 AC includes the triggering attack",

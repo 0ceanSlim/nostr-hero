@@ -24,7 +24,7 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Always hits target - no attack roll needed",
     "Can split damage among multiple targets if desired",

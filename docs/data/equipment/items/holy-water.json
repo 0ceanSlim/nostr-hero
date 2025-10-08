@@ -1,14 +1,21 @@
 {
   "id": "holy-water",
-  "name": "Holy water",
-  "description": "Water blessed by a cleric, effective against undead and fiends.",
-  "ai_description": "clear glass vial with blessed water, sacred liquid with faint holy glow and silver cross symbol",
-  "price": 2500,
-  "type": "Adventuring Gear",
-  "weight": 1,
-  "stack": 1,
-  "gear_slot": "",
+  "name": "Holy Water",
+  "description": "Water blessed by divine powers, harmful to undead and fiends.",
+  "ai_description": "crystal flask of glowing water, blessed holy water with divine light and purifying aura",
+  "price": 150,
+  "type": "Spell Component",
+  "weight": 0.5,
+  "stack": 10,
   "rarity": "common",
-  "tags": [],
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for turning undead and cleansing spells",
+    "Provided unlimited by Holy Symbol (Reliquary)",
+    "Must be gathered or purchased"
+  ],
   "image": "/res/img/items/holy-water.png"
 }

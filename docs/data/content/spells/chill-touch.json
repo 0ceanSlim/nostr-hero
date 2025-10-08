@@ -25,17 +25,8 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "spirit-dust",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Totem provides unlimited spirit-dust"
-  }
+  ]
 }

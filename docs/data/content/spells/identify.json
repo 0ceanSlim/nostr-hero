@@ -23,7 +23,7 @@
   ],
   "rarity": "common",
   "action_cost": "1 minute",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],
@@ -34,10 +34,10 @@
         "quantity": 2
       },
       {
-        "component": "starlight-essence",
+        "component": "ether-essence",
         "quantity": 1
       }
     ],
-    "focus_provided": "Crystal provides unlimited quartz-dust (still need starlight-essence)"
+    "focus_provided": "Crystal provides unlimited quartz-dust, Orb provides unlimited ether-essence"
   }
 }

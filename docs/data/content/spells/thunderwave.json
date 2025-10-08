@@ -27,7 +27,7 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Area effect around caster",
     "Constitution save for half damage",
@@ -36,10 +36,14 @@
   "material_component": {
     "required": [
       {
-        "component": "elemental-sparks",
-        "quantity": 3
+        "component": "bone-dust",
+        "quantity": 2
+      },
+      {
+        "component": "tree-sap",
+        "quantity": 1
       }
     ],
-    "focus_provided": "Rod provides unlimited elemental-sparks"
+    "focus_provided": "Totem provides unlimited bone-dust, Yew Wand provides unlimited tree-sap, OR Wand provides unlimited arcane-powder, Crystal provides unlimited quartz-dust (for wizards)"
   }
 }

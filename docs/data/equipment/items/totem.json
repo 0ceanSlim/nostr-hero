@@ -19,10 +19,10 @@
     "equipment"
   ],
   "ai_description": "Carved wooden animal figurine with tribal symbols and feathers",
-  "provides": "spirit-dust",
+  "provides": "bone-dust",
   "notes": [
     "Can be used as a spellcasting focus for druidic magic",
-    "Provides unlimited Spirit Dust for summoning and animal magic"
+    "Provides unlimited Bone Dust for necromancy and summoning magic"
   ],
   "Gear_Slot": "hands",
   "image": "/res/img/items/totem.png"

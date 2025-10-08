@@ -22,17 +22,8 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "tree-sap",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Yew Wand provides unlimited tree-sap"
-  }
+  ]
 }

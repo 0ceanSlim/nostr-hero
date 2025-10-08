@@ -1,6 +1,11 @@
 {{define "title"}}Nostr Hero - New Adventure{{end}}
 
 {{define "view"}}
+<!-- Google Fonts - Handwritten font for letter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+
 <script src="/res/js/session-manager.js"></script>
 <script src="/res/js/character-generator.js"></script>
 <script src="/res/components/continue-button.js"></script>
@@ -115,18 +120,30 @@
 }
 
 .letter-container {
-  background: rgba(255, 248, 220, 0.95);
+  position: absolute;
   color: #1a1a1a;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  max-width: 28rem;
-  max-height: 80vh;
+  padding: 1.5rem 2rem;
   overflow-y: auto;
-  font-family: serif;
-  font-style: italic;
-  position: relative;
+  font-family: 'Caveat', cursive;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1;
+  text-align: left;
   z-index: 1;
+  /* Position to match the black letter area in the background */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Size to fit within the letter area - narrower for better fit, taller for more text */
+  width: 28vw;
+  max-width: 380px;
+  min-width: 280px;
+  height: 50vh;
+  max-height: 500px;
+  /* Transparent background to show the letter texture beneath */
+  background: transparent;
+  /* Ensure text is readable */
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
 /* Pixelated Continue Button */
@@ -230,6 +247,57 @@
     -2px 2px 0 0 #000;
 }
 
+/* Skip Scene Button */
+.pixel-skip-btn {
+  background: #dc2626;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  text-shadow: none;
+
+  /* Pixelated border effect */
+  box-shadow:
+    0 -2px 0 0 #dc2626,
+    0 -3px 0 0 #000,
+    2px 0 0 0 #dc2626,
+    3px 0 0 0 #000,
+    0 2px 0 0 #dc2626,
+    0 3px 0 0 #000,
+    -2px 0 0 0 #dc2626,
+    -3px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+
+.pixel-skip-btn:hover {
+  background: #ef4444;
+  transform: translateY(-1px);
+  box-shadow:
+    0 -2px 0 0 #ef4444,
+    0 -3px 0 0 #000,
+    2px 0 0 0 #ef4444,
+    3px 0 0 0 #000,
+    0 2px 0 0 #ef4444,
+    0 4px 0 0 #000,
+    -2px 0 0 0 #ef4444,
+    -3px 0 0 0 #000,
+
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    2px 2px 0 0 #000,
+    -2px 2px 0 0 #000;
+}
+
 /* Item Card Styles */
 .item-card {
   border: none;
@@ -279,13 +347,6 @@
         onclick="startIntroSequence()"
       >
         Begin Your Story
-      </button>
-      <button
-        id="skip-to-equipment-btn"
-        class="bg-yellow-600 hover:bg-yellow-700 text-black px-6 py-2 rounded-lg font-bold text-sm transition-colors"
-        onclick="skipToEquipment()"
-      >
-        🐛 DEBUG: Skip to Equipment
       </button>
     </div>
   </div>

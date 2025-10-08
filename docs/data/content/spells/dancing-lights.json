@@ -25,19 +25,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots",
     "Creates up to 4 lights or 1 humanoid form",
     "Can move lights as bonus action"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "quartz-dust",
-        "quantity": 2
-      }
-    ],
-    "focus_provided": "Crystal provides unlimited quartz-dust"
-  }
+  ]
 }

@@ -24,7 +24,7 @@
   ],
   "rarity": "uncommon",
   "action_cost": "action",
-  "mana_cost": 3,
+  "mana_cost": 4,
   "notes": [
     "Area of effect spell - can hit multiple enemies",
     "Dexterity save for half damage",

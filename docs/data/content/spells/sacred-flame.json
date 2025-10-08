@@ -23,19 +23,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - unlimited casting",
     "Dexterity save or take damage",
     "Radiant damage effective vs undead"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "starlight-essence",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "No focus provides this component - must be obtained"
-  }
+  ]
 }

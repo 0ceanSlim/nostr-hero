@@ -24,19 +24,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots",
     "Can target 1 creature or 2 creatures within 5 feet of each other",
     "Requires Dexterity saving throw"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "elemental-sparks",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Rod provides unlimited elemental-sparks"
-  }
+  ]
 }

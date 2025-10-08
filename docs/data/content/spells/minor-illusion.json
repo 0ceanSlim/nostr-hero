@@ -26,19 +26,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots",
     "Can create sound or visual illusion",
     "Investigation check to discern it's an illusion"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "ether-essence",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Orb provides unlimited ether-essence"
-  }
+  ]
 }

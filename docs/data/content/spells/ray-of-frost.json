@@ -25,19 +25,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Ranged spell attack",
     "Slows target movement",
     "Good for kiting enemies"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "elemental-sparks",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Rod provides unlimited elemental-sparks"
-  }
+  ]
 }

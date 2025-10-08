@@ -25,7 +25,7 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Cone area effect",
     "Dexterity save for half damage",
@@ -33,9 +33,15 @@
   ],
   "material_component": {
     "required": [
-      {"component": "elemental-sparks", "quantity": 2},
-      {"component": "ash", "quantity": 1}
+      {
+        "component": "sulfur",
+        "quantity": 2
+      },
+      {
+        "component": "arcane-powder",
+        "quantity": 1
+      }
     ],
-    "focus_provided": "Rod provides unlimited elemental-sparks (still need ash)"
+    "focus_provided": "Rod provides unlimited sulfur, Wand provides unlimited arcane-powder"
   }
 }

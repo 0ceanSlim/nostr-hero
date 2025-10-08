@@ -26,16 +26,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots",
     "Enhances weapon with magical damage",
     "Touch range spell"
-  ],
-  "material_component": {
-    "required": [
-      {"component": "mana-crystals", "quantity": 1}
-    ],
-    "focus_provided": "Staff provides unlimited mana-crystals"
-  }
+  ]
 }

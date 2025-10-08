@@ -118,6 +118,10 @@
       "image": "scene4letter.png"
     }
   ],
+  "spell_knowledge": {
+    "text": "Your caretaker's teachings echo in your mind - incantations, gestures, and the feeling of power flowing through you. The magic you've learned awaits your command.",
+    "image": "scene4b.png"
+  },
   "scene5": {
     "text": "The equipment before you seems chosen with uncanny foresight. Basic provisions for travel, tools particular to your talents, even clothing suited for the road - all arranged as a final gift.",
     "image": "scene5.png"

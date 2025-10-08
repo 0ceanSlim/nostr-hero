@@ -22,21 +22,21 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],
   "material_component": {
     "required": [
       {
-        "component": "spirit-dust",
+        "component": "holy-water",
         "quantity": 2
       },
       {
-        "component": "raven-feather",
+        "component": "blessed-incense",
         "quantity": 1
       }
     ],
-    "focus_provided": "Totem provides unlimited spirit-dust (still need raven-feather)"
+    "focus_provided": "Reliquary provides unlimited holy-water, Amulet provides unlimited blessed-incense"
   }
 }

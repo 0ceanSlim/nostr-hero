@@ -18,7 +18,11 @@
   "tags": [
     "equipment"
   ],
-  "notes": [],
+  "provides": "blessed-incense",
+  "notes": [
+    "Can be used as a spellcasting focus for divine magic",
+    "Provides unlimited Blessed Incense for holy and protective spells"
+  ],
   "gear_slot": "necklace",
   "image": "/res/img/items/amulet.png"
 }

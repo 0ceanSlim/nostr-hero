@@ -2,7 +2,7 @@
   "spell_system": {
     "description": "Magic system integrated with existing combat mechanics",
     "mana_system": {
-      "description": "Simple mana points system instead of spell slots",
+      "description": "Simple mana points system with formula-based spell costs",
       "base_mana": {
         "wizard": 4,
         "sorcerer": 4,
@@ -23,15 +23,27 @@
         "paladin": 1,
         "ranger": 1
       },
+      "spell_costs": {
+        "formula": "spell_level + 1",
+        "cantrip": 1,
+        "level_1": 2,
+        "level_2": 3,
+        "level_3": 4,
+        "level_4": 5,
+        "level_5": 6,
+        "level_6": 7,
+        "level_7": 8,
+        "level_8": 9,
+        "level_9": 10
+      },
       "mana_recovery": {
-        "short_rest": "Half mana recovered",
-        "long_rest": "Full mana recovered",
-        "note": "Rest in cities/safe locations only"
+        "daily_recovery": "Full mana restored after each day of travel or long rest",
+        "note": "Long rest requires safe location (cities, camps, etc.)"
       }
     },
     "spell_acquisition": {
       "cantrips": {
-        "description": "Level 0 spells, cost 0 mana",
+        "description": "Level 0 spells, cost 1 mana",
         "starting_cantrips": {
           "wizard": 3,
           "sorcerer": 4,
@@ -126,15 +138,36 @@
       "verbal": "Requires ability to speak (not silenced)",
       "somatic": "Requires free hand for gestures",
       "material": "Requires component pouch, spellcasting focus, or specific materials",
-      "focus_items": [
-        "component_pouch",
-        "crystal",
-        "wand",
-        "staff",
-        "orb",
-        "holy_symbol",
-        "druidcraft_focus"
-      ]
+      "cantrips": "Cantrips (level 0) have no material component requirements",
+      "focus_items": {
+        "arcane_focus": ["crystal", "wand", "staff", "orb", "rod"],
+        "druidic_focus": ["totem", "wooden-staff", "sprig-of-mistletoe", "yew-wand"],
+        "holy_symbol": ["amulet", "emblem", "reliquary"],
+        "component_pouch": "Contains general spell components"
+      },
+      "focus_provides_unlimited": {
+        "arcane_focus": {
+          "crystal": "quartz-dust",
+          "wand": "arcane-powder",
+          "orb": "ether-essence",
+          "staff": "mana-crystals",
+          "rod": "sulfur"
+        },
+        "druidic_focus": {
+          "totem": "bone-dust",
+          "wooden-staff": "bark-shavings",
+          "sprig-of-mistletoe": "pollen",
+          "yew-wand": "tree-sap"
+        },
+        "holy_symbol": {
+          "amulet": "blessed-incense",
+          "emblem": "sacred-oil",
+          "reliquary": "holy-water"
+        }
+      },
+      "total_components": 24,
+      "components_provided_by_focus": 12,
+      "rare_components": 12
     }
   }
 }

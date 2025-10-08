@@ -350,14 +350,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "bone-dust",
-              "quantity": 2
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "pollen",
+                  "quantity": 3
+                },
+                {
+                  "item": "tree-sap",
+                  "quantity": 2
+                },
+                {
+                  "item": "bone-dust",
+                  "quantity": 2
+                },
+                {
+                  "item": "bark-shavings",
+                  "quantity": 3
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "ash",
+                  "quantity": 3
+                },
+                {
+                  "item": "iron-filings",
+                  "quantity": 2
+                },
+                {
+                  "item": "spider-silk",
+                  "quantity": 2
+                },
+                {
+                  "item": "mushroom-spores",
+                  "quantity": 3
+                }
+              ]
             }
           ]
         }
@@ -376,10 +416,6 @@
         },
         {
           "item": "dagger",
-          "quantity": 1
-        },
-        {
-          "item": "bone-dust",
           "quantity": 1
         }
       ]
@@ -536,14 +572,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "blessed-water",
-              "quantity": 2
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "blessed-incense",
+                  "quantity": 3
+                },
+                {
+                  "item": "sacred-oil",
+                  "quantity": 3
+                },
+                {
+                  "item": "holy-water",
+                  "quantity": 2
+                },
+                {
+                  "item": "blessed-incense",
+                  "quantity": 2
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "holy-water",
+                  "quantity": 3
+                },
+                {
+                  "item": "sacred-oil",
+                  "quantity": 2
+                },
+                {
+                  "item": "blessed-incense",
+                  "quantity": 3
+                },
+                {
+                  "item": "salt",
+                  "quantity": 2
+                }
+              ]
             }
           ]
         }
@@ -558,10 +634,6 @@
       "given_items": [
         {
           "item": "shield",
-          "quantity": 1
-        },
-        {
-          "item": "blessed-water",
           "quantity": 1
         }
       ]
@@ -740,14 +812,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "bone-dust",
+                  "quantity": 3
+                },
+                {
+                  "item": "bark-shavings",
+                  "quantity": 3
+                },
+                {
+                  "item": "pollen",
+                  "quantity": 2
+                },
+                {
+                  "item": "tree-sap",
+                  "quantity": 2
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "blessed-water",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "pollen",
+                  "quantity": 3
+                },
+                {
+                  "item": "tree-sap",
+                  "quantity": 3
+                },
+                {
+                  "item": "bone-dust",
+                  "quantity": 2
+                },
+                {
+                  "item": "mushroom-spores",
+                  "quantity": 2
+                }
+              ]
             }
           ]
         }
@@ -1186,6 +1298,45 @@
               "quantity": 1
             }
           ]
+        },
+        {
+          "description": "",
+          "options": [
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "blessed-incense",
+                  "quantity": 3
+                },
+                {
+                  "item": "sacred-oil",
+                  "quantity": 2
+                },
+                {
+                  "item": "holy-water",
+                  "quantity": 2
+                }
+              ]
+            },
+            {
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "holy-water",
+                  "quantity": 3
+                },
+                {
+                  "item": "blessed-incense",
+                  "quantity": 2
+                },
+                {
+                  "item": "salt",
+                  "quantity": 2
+                }
+              ]
+            }
+          ]
         }
       ],
       "pack_choice": {
@@ -1480,14 +1631,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 3
+                },
+                {
+                  "item": "ether-essence",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 2
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "sulfur",
-              "quantity": 2
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "sulfur",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 2
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 3
+                }
+              ]
             }
           ]
         }
@@ -1503,10 +1694,6 @@
         {
           "item": "dagger",
           "quantity": 2
-        },
-        {
-          "item": "sulfur",
-          "quantity": 1
         }
       ]
     }
@@ -1712,14 +1899,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 3
+                },
+                {
+                  "item": "ether-essence",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 2
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "sulfur",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "sulfur",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 2
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 3
+                }
+              ]
             }
           ]
         }
@@ -1796,14 +2023,54 @@
           "description": "",
           "options": [
             {
-              "type": "single",
-              "item": "component-pouch",
-              "quantity": 1
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 3
+                },
+                {
+                  "item": "ether-essence",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 2
+                }
+              ]
             },
             {
-              "type": "single",
-              "item": "sulfur",
-              "quantity": 2
+              "type": "bundle",
+              "items": [
+                {
+                  "item": "component-pouch",
+                  "quantity": 1
+                },
+                {
+                  "item": "sulfur",
+                  "quantity": 3
+                },
+                {
+                  "item": "arcane-powder",
+                  "quantity": 2
+                },
+                {
+                  "item": "quartz-dust",
+                  "quantity": 2
+                },
+                {
+                  "item": "mana-crystals",
+                  "quantity": 3
+                }
+              ]
             }
           ]
         }

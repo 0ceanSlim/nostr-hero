@@ -6,7 +6,7 @@
   "type": "Spell Component",
   "weight": 0.2,
   "stack": 10,
-  "rarity": "common",
+  "rarity": "uncommon",
   "tags": [
     "spell_component"
   ],

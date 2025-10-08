@@ -7,9 +7,15 @@
   "type": "Spell Component",
   "weight": 0,
   "stack": 5,
-  "rarity": "uncommon",
+  "rarity": "common",
   "tags": [
-    "spell_component"
+    "spell_component",
+    "focus_provided"
+  ],
+  "notes": [
+    "Used for necromancy and summoning magic",
+    "Unlimited when Totem focus is equipped",
+    "Consumed on use if no Totem focus"
   ],
   "range": "null",
   "range-long": "null",

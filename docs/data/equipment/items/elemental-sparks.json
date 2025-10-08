@@ -1,22 +1,20 @@
 {
   "id": "elemental-sparks",
   "name": "Elemental Sparks",
-  "description": "Tiny motes of elemental energy that dance and flicker with primal power. Provided unlimited when using a Rod focus.",
+  "description": "Tiny motes of elemental energy that dance and flicker with primal power.",
   "ai_description": "tiny dancing lights of various colors, floating elemental sparks that flicker between fire, ice, and lightning",
   "price": 150,
   "type": "Spell Component",
   "weight": 0.1,
   "stack": 10,
-  "rarity": "common",
+  "rarity": "uncommon",
   "tags": [
-    "spell_component",
-    "focus_provided"
+    "spell_component"
   ],
   "img": "equipment/spell-component.jpg",
   "notes": [
     "Used for elemental manipulation spells",
-    "Unlimited when Rod focus is equipped",
-    "Consumed on use if no Rod focus"
+    "Must be gathered or purchased"
   ],
   "image": "/res/img/items/elemental-sparks.png"
 }

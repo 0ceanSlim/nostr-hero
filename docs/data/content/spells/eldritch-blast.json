@@ -24,19 +24,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Warlock signature cantrip",
     "Scales with character level",
     "Can be enhanced with invocations"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "void-crystal",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "No focus provides this component - must be obtained"
-  }
+  ]
 }

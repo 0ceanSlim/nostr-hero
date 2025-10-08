@@ -24,19 +24,10 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Bard signature cantrip",
     "Wisdom save or take damage + disadvantage",
     "Target must be able to hear you"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "pollen",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "No focus provides this component - must be obtained"
-  }
+  ]
 }

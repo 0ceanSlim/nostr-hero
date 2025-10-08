@@ -23,21 +23,21 @@
   ],
   "rarity": "common",
   "action_cost": "bonus action",
-  "mana_cost": 1,
+  "mana_cost": 2,
   "notes": [
     "Level 1 spell - costs 1 mana to cast"
   ],
   "material_component": {
     "required": [
       {
-        "component": "spirit-dust",
+        "component": "ether-essence",
         "quantity": 2
       },
       {
-        "component": "bone-dust",
+        "component": "mana-crystals",
         "quantity": 1
       }
     ],
-    "focus_provided": "Totem provides unlimited spirit-dust (still need bone-dust)"
+    "focus_provided": "Orb provides unlimited ether-essence, Staff provides unlimited mana-crystals"
   }
 }

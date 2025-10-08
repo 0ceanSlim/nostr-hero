@@ -25,17 +25,8 @@
   ],
   "rarity": "common",
   "action_cost": "action",
-  "mana_cost": 0,
+  "mana_cost": 1,
   "notes": [
     "Cantrip - can be cast without using spell slots"
-  ],
-  "material_component": {
-    "required": [
-      {
-        "component": "quartz-dust",
-        "quantity": 1
-      }
-    ],
-    "focus_provided": "Crystal provides unlimited quartz-dust"
-  }
+  ]
 }

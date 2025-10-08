@@ -19,10 +19,10 @@
     "focus",
     "equipment"
   ],
-  "provides": "elemental-sparks",
+  "provides": "sulfur",
   "notes": [
     "Can be used as a spellcasting focus for arcane magic",
-    "Provides unlimited Elemental Sparks for elemental manipulation spells"
+    "Provides unlimited Sulfur for fire and explosion spells"
   ],
   "Gear_Slot": "hands",
   "image": "/res/img/items/rod.png"

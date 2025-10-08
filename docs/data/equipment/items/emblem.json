@@ -17,7 +17,11 @@
   "tags": [
     "equipment"
   ],
-  "notes": [],
+  "provides": "sacred-oil",
+  "notes": [
+    "Can be used as a spellcasting focus for divine magic",
+    "Provides unlimited Sacred Oil for healing and blessing spells"
+  ],
   "gear_slot": "necklace",
   "image": "/res/img/items/emblem.png"
 }
