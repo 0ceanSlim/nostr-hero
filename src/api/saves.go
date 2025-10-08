@@ -13,13 +13,28 @@ import (
 )
 
 type SaveFile struct {
-	ID                  string                 `json:"id"`
-	Npub                string                 `json:"npub"`
+	D                   string                 `json:"d"`
 	CreatedAt           string                 `json:"created_at"`
-	LastPlayed          string                 `json:"last_played"`
-	Character           map[string]interface{} `json:"character"`
-	Location            map[string]interface{} `json:"location"`
+	Race                string                 `json:"race"`
+	Class               string                 `json:"class"`
+	Background          string                 `json:"background"`
+	Alignment           string                 `json:"alignment"`
+	Experience          int                    `json:"experience"`
+	HP                  int                    `json:"hp"`
+	MaxHP               int                    `json:"max_hp"`
+	Mana                int                    `json:"mana"`
+	MaxMana             int                    `json:"max_mana"`
+	Fatigue             int                    `json:"fatigue"`
+	Gold                int                    `json:"gold"`
+	Stats               map[string]interface{} `json:"stats"`
+	Location            string                 `json:"location"`
+	Inventory           map[string]interface{} `json:"inventory"`
+	KnownSpells         []string               `json:"known_spells"`
+	SpellSlots          map[string]interface{} `json:"spell_slots"`
+	LocationsDiscovered []string               `json:"locations_discovered"`
 	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
+	InternalID          string                 `json:"-"` // Not serialized, used internally for file naming
+	InternalNpub        string                 `json:"-"` // Not serialized, used internally for directory structure
 }
 
 const SavesDirectory = "data/saves"
@@ -91,25 +106,72 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 
 	log.Printf("✅ Found %d saves for npub: %s", len(saves), npub)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(saves)
+
+	// Convert saves to include id field in JSON output
+	savesWithID := make([]map[string]interface{}, 0, len(saves))
+	for _, save := range saves {
+		saveMap := make(map[string]interface{})
+		saveMap["id"] = save.InternalID
+		saveMap["d"] = save.D
+		saveMap["created_at"] = save.CreatedAt
+		saveMap["race"] = save.Race
+		saveMap["class"] = save.Class
+		saveMap["background"] = save.Background
+		saveMap["alignment"] = save.Alignment
+		saveMap["experience"] = save.Experience
+		saveMap["hp"] = save.HP
+		saveMap["max_hp"] = save.MaxHP
+		saveMap["mana"] = save.Mana
+		saveMap["max_mana"] = save.MaxMana
+		saveMap["fatigue"] = save.Fatigue
+		saveMap["gold"] = save.Gold
+		saveMap["stats"] = save.Stats
+		saveMap["location"] = save.Location
+		saveMap["inventory"] = save.Inventory
+		saveMap["known_spells"] = save.KnownSpells
+		saveMap["spell_slots"] = save.SpellSlots
+		saveMap["locations_discovered"] = save.LocationsDiscovered
+		saveMap["music_tracks_unlocked"] = save.MusicTracksUnlocked
+		savesWithID = append(savesWithID, saveMap)
+	}
+
+	json.NewEncoder(w).Encode(savesWithID)
 }
 
 // Create or update a save
 func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
-	var saveData SaveFile
-	if err := json.NewDecoder(r.Body).Decode(&saveData); err != nil {
+	// First decode into a flexible map to handle any structure
+	var rawData map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&rawData); err != nil {
 		log.Printf("❌ Error decoding save data: %v", err)
 		http.Error(w, "Invalid save data", http.StatusBadRequest)
 		return
 	}
 
-	// Set metadata
-	saveData.Npub = npub
-	saveData.LastPlayed = time.Now().UTC().Format(time.RFC3339)
+	// Log the incoming data for debugging
+	log.Printf("📥 Received save data: %+v", rawData)
 
-	if saveData.ID == "" {
+	// Convert back to JSON and then decode into SaveFile struct
+	jsonData, err := json.Marshal(rawData)
+	if err != nil {
+		log.Printf("❌ Error marshaling save data: %v", err)
+		http.Error(w, "Invalid save data", http.StatusInternalServerError)
+		return
+	}
+
+	var saveData SaveFile
+	if err := json.Unmarshal(jsonData, &saveData); err != nil {
+		log.Printf("❌ Error unmarshaling save data: %v", err)
+		http.Error(w, "Invalid save data", http.StatusBadRequest)
+		return
+	}
+
+	// Set internal metadata (not serialized to JSON)
+	saveData.InternalNpub = npub
+
+	if saveData.InternalID == "" {
 		// Generate new save ID
-		saveData.ID = fmt.Sprintf("save_%d", time.Now().Unix())
+		saveData.InternalID = fmt.Sprintf("save_%d", time.Now().Unix())
 		saveData.CreatedAt = time.Now().UTC().Format(time.RFC3339)
 	}
 
@@ -122,19 +184,19 @@ func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
 	}
 
 	// Write save file
-	savePath := filepath.Join(userSavesDir, saveData.ID+".json")
+	savePath := filepath.Join(userSavesDir, saveData.InternalID+".json")
 	if err := writeSaveFile(savePath, &saveData); err != nil {
 		log.Printf("❌ Error writing save file: %v", err)
 		http.Error(w, "Failed to save file", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("✅ Saved game for npub: %s, save ID: %s", npub, saveData.ID)
+	log.Printf("✅ Saved game for npub: %s, save ID: %s", npub, saveData.InternalID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
-		"save_id": saveData.ID,
+		"save_id": saveData.InternalID,
 		"message": "Game saved successfully",
 	})
 }
@@ -180,6 +242,14 @@ func loadSaveFile(path string) (*SaveFile, error) {
 		return nil, err
 	}
 
+	// Extract internal ID from filename
+	filename := filepath.Base(path)
+	save.InternalID = strings.TrimSuffix(filename, ".json")
+
+	// Extract npub from directory path
+	dir := filepath.Dir(path)
+	save.InternalNpub = filepath.Base(dir)
+
 	return &save, nil
 }
 
@@ -200,13 +270,5 @@ func GetSaveInfo(npub, saveID string) (*SaveFile, error) {
 	}
 
 	// Return save info for listings
-	return &SaveFile{
-		ID:                  save.ID,
-		Npub:                save.Npub,
-		CreatedAt:           save.CreatedAt,
-		LastPlayed:          save.LastPlayed,
-		Character:           save.Character,
-		Location:            save.Location,
-		MusicTracksUnlocked: save.MusicTracksUnlocked,
-	}, nil
+	return save, nil
 }

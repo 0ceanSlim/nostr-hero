@@ -1676,7 +1676,6 @@ async function startAdventure() {
       class: generatedCharacter.class,
       background: generatedCharacter.background,
       alignment: generatedCharacter.alignment,
-      level: generatedCharacter.level,
       experience: generatedCharacter.experience,
       stats: generatedCharacter.stats,
       hp: generatedCharacter.hp,
@@ -1695,15 +1694,25 @@ async function startAdventure() {
     // Create new save file
     const session = window.sessionManager.getSession();
     const saveData = {
-      // Don't set ID - let the backend generate it to avoid undefined issues
-      npub: session.npub,
+      d: finalName,
       created_at: new Date().toISOString(),
-      last_played: new Date().toISOString(),
-      character: finalCharacter,
-      location: {
-        current: generatedCharacter.city || 'kingdom',
-        discovered: [generatedCharacter.city || 'kingdom']
-      },
+      race: finalCharacter.race,
+      class: finalCharacter.class,
+      background: finalCharacter.background,
+      alignment: finalCharacter.alignment,
+      experience: finalCharacter.experience,
+      hp: finalCharacter.hp,
+      max_hp: finalCharacter.max_hp,
+      mana: finalCharacter.mana,
+      max_mana: finalCharacter.max_mana,
+      fatigue: finalCharacter.fatigue,
+      gold: finalCharacter.gold,
+      stats: finalCharacter.stats,
+      location: generatedCharacter.city || 'kingdom',
+      inventory: finalCharacter.inventory,
+      known_spells: finalCharacter.known_spells,
+      spell_slots: finalCharacter.spell_slots,
+      locations_discovered: [generatedCharacter.city || 'kingdom'],
       music_tracks_unlocked: ['character-creation', 'kingdom-theme']
     };
 
