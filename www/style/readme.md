@@ -1,3 +1,5 @@
+# THIS IS ALL OUTDDATED AND WILL UPDATE THIS DIRECTORY WHEN I MAKE THE BUILD SYSTEM
+
 # Information
 
 This repository INCLUDES a minified version of the custom css used to style the web views with themes defined in the input.css. If you want to change anything about the configuration or the input, you will need to rebuild the custom minified css by using the [Tailwind standalone CLI Tool](https://github.com/tailwindlabs/tailwindcss/releases).

@@ -1,129 +1,179 @@
-{{define "title"}}Nostr Hero - Game{{end}}
+{{define "title"}}Nostr Hero - Game{{end}} {{define "view"}}
+<!-- Hidden Game State Storage -->
+<div id="game-state" style="display: none">
+  <div id="character-data">
+    {"hp": 0, "max_hp": 0, "mana": 0, "max_mana": 0, "location": "", "fatigue":
+    0}
+  </div>
+  <div id="inventory-data">[]</div>
+  <div id="equipment-data">{}</div>
+  <div id="spell-data">[]</div>
+  <div id="location-data">{"current": "", "discovered": []}</div>
+  <div id="combat-data">null</div>
+</div>
 
-{{define "view"}}
-    <!-- Hidden Game State Storage -->
-    <div id="game-state" style="display: none;">
-        <div id="character-data">{"hp": 0, "max_hp": 0, "mana": 0, "max_mana": 0, "location": "", "fatigue": 0}</div>
-        <div id="inventory-data">[]</div>
-        <div id="equipment-data">{}</div>
-        <div id="spell-data">[]</div>
-        <div id="location-data">{"current": "", "discovered": []}</div>
-        <div id="combat-data">null</div>
-    </div>
+<!-- Static Game Data Storage -->
+<div id="static-data" style="display: none">
+  <div id="all-items">[]</div>
+  <div id="all-spells">[]</div>
+  <div id="all-monsters">[]</div>
+  <div id="all-locations">[]</div>
+  <div id="all-packs">[]</div>
+</div>
 
-    <!-- Static Game Data Storage -->
-    <div id="static-data" style="display: none;">
-        <div id="all-items">[]</div>
-        <div id="all-spells">[]</div>
-        <div id="all-monsters">[]</div>
-        <div id="all-locations">[]</div>
-        <div id="all-packs">[]</div>
-    </div>
+<!-- Message Area (Fixed Position) -->
+<div
+  id="message-area"
+  class="fixed z-50 max-w-sm space-y-2 top-4 right-4"
+></div>
 
-    <!-- Message Area (Fixed Position) -->
-    <div id="message-area" class="fixed top-4 right-4 max-w-sm space-y-2 z-50"></div>
+<!-- Main Game Container - Full Screen with Dark Win95 Style -->
+<div
+  id="game-app"
+  class="fixed inset-0 flex items-center justify-center overflow-hidden font-mono text-white"
+  style="background: #000000"
+>
+  <!-- Dark Win95 Style Game Window -->
+  <div
+    class="w-full h-full max-w-[1600px] max-h-[900px] flex flex-col"
+    style="
+      background: #2a2a2a;
+      border-top: 2px solid #4a4a4a;
+      border-left: 2px solid #4a4a4a;
+      border-right: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+      box-shadow: inset 1px 1px 0 #3a3a3a, inset -1px -1px 0 #1a1a1a;
+    "
+  >
+    <!-- Main Content Area: 2 columns (75/25 split) -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- LEFT COLUMN (75%) - Scene + Text + Actions -->
+      <div class="w-[75%] flex flex-col">
+        {{template "game/scene.html"}} {{template "game/game-text.html"}}
+        {{template "game/action-buttons.html"}}
+      </div>
 
-    <!-- Main Game Container - Full Screen with Retro Border -->
-    <div id="game-app" class="fixed inset-0 bg-gray-900 text-white font-mono overflow-hidden flex items-center justify-center">
+      <!-- RIGHT COLUMN (25%) - Stats + Content + Tabs -->
+      <div class="w-[25%] flex flex-col">
+        {{template "game/player-stats.html"}}
 
-        <!-- Retro Game Window -->
-        <div class="w-full h-full max-w-[1600px] max-h-[900px] bg-gray-800 flex flex-col" style="border: 2px solid #ca8a04; image-rendering: pixelated; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);">
-
-            <!-- Retro Title Bar -->
-            <div class="bg-gradient-to-b from-yellow-700 to-yellow-800 border-b-2 border-yellow-900 px-4 py-2 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="text-xs font-bold text-black">⚔️ NOSTR HERO v1.0 ⚔️</div>
-                </div>
-                <div class="flex gap-2">
-                    <button class="w-6 h-6 bg-red-600 border-2 border-red-800 hover:bg-red-500 text-xs font-bold">✕</button>
-                </div>
-            </div>
-
-            <!-- Main Content Area: 2 columns (75/25 split) -->
-            <div class="flex flex-1 overflow-hidden">
-
-            <!-- LEFT COLUMN (75%) - Scene + Text + Actions -->
-            <div class="w-[75%] flex flex-col">
-
-                {{template "game/scene.html"}}
-
-                {{template "game/game-text.html"}}
-
-                {{template "game/action-buttons.html"}}
-
-            </div>
-
-            <!-- RIGHT COLUMN (25%) - Stats + Content + Tabs -->
-            <div class="w-[25%] flex flex-col">
-
-                {{template "game/player-stats.html"}}
-
-                <!-- Tabbed Content Area -->
-                <div class="flex-1 bg-gray-800 border-4 border-yellow-800 overflow-hidden flex flex-col" style="clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
-                    <!-- Tab Content -->
-                    <div class="flex-1 overflow-y-auto p-4">
-
-                        {{template "game/tabs/equipment.html"}}
-
-                        {{template "game/tabs/inventory.html"}}
-
-                        {{template "game/tabs/spells.html"}}
-
-                        {{template "game/tabs/stats.html"}}
-
-                        {{template "game/tabs/music.html"}}
-
-                    </div>
-                </div>
-
-                {{template "game/tab-buttons.html"}}
-
-            </div>
-
+        <!-- Tabbed Content Area -->
+        <div
+          class="flex flex-col flex-1 overflow-hidden"
+          style="
+            background: #2a2a2a;
+            border-top: 2px solid #1a1a1a;
+            border-left: 2px solid #1a1a1a;
+            border-right: 2px solid #3a3a3a;
+            border-bottom: 2px solid #3a3a3a;
+            box-shadow: inset -1px -1px 0 #4a4a4a, inset 1px 1px 0 #000000;
+          "
+        >
+          <!-- Tab Content -->
+          <div class="flex-1 p-4 overflow-y-auto">
+            {{template "game/tabs/equipment.html"}} {{template
+            "game/tabs/inventory.html"}} {{template "game/tabs/spells.html"}}
+            {{template "game/tabs/questlog.html"}} {{template
+            "game/tabs/stats.html"}} {{template "game/tabs/music.html"}}
+          </div>
         </div>
 
+        {{template "game/tab-buttons.html"}}
+      </div>
     </div>
+  </div>
 
-    <!-- JavaScript -->
-    <script src="/res/js/session-manager.js"></script>
-    <script src="/res/js/game-ui.js"></script>
-    <script src="/res/js/auth.js"></script>
-    <script src="/res/js/character-generator.js"></script>
-    <script src="/res/js/game-state.js"></script>
-    <script src="/res/js/game-logic.js"></script>
-    <script src="/res/js/save-system.js"></script>
-    <script src="/res/js/startup.js"></script>
+  <!-- JavaScript -->
+  <script src="/res/js/session-manager.js"></script>
+  <script src="/res/js/game-ui.js"></script>
+  <script src="/res/js/auth.js"></script>
+  <script src="/res/js/character-generator.js"></script>
+  <script src="/res/js/game-state.js"></script>
+  <script src="/res/js/game-logic.js"></script>
+  <script src="/res/js/save-system.js"></script>
+  <script src="/res/js/startup.js"></script>
 
-    <script>
-        function switchTab(tabName) {
-            const tabs = ['equipment', 'inventory', 'spells', 'stats', 'music'];
-            const panels = {
-                equipment: document.getElementById('equipment-panel'),
-                inventory: document.getElementById('inventory-panel'),
-                spells: document.getElementById('spells-panel'),
-                stats: document.getElementById('stats-panel'),
-                music: document.getElementById('music-panel')
-            };
-            const buttons = {
-                equipment: document.getElementById('tab-equipment'),
-                inventory: document.getElementById('tab-inventory'),
-                spells: document.getElementById('tab-spells'),
-                stats: document.getElementById('tab-stats'),
-                music: document.getElementById('tab-music')
-            };
+  <script>
+    function switchTab(tabName) {
+      const tabs = [
+        "equipment",
+        "inventory",
+        "spells",
+        "questlog",
+        "stats",
+        "music",
+      ];
+      const panels = {
+        equipment: document.getElementById("equipment-panel"),
+        inventory: document.getElementById("inventory-panel"),
+        spells: document.getElementById("spells-panel"),
+        questlog: document.getElementById("questlog-panel"),
+        stats: document.getElementById("stats-panel"),
+        music: document.getElementById("music-panel"),
+      };
+      const buttons = {
+        equipment: document.getElementById("tab-equipment"),
+        inventory: document.getElementById("tab-inventory"),
+        spells: document.getElementById("tab-spells"),
+        questlog: document.getElementById("tab-questlog"),
+        stats: document.getElementById("tab-stats"),
+        music: document.getElementById("tab-music"),
+      };
 
-            // Update all tabs and panels
-            tabs.forEach(tab => {
-                if (tab === tabName) {
-                    // Active tab
-                    buttons[tab].className = 'flex-1 py-3 bg-gradient-to-b from-yellow-700 to-yellow-900 font-bold text-xs border-r-2 border-gray-900 text-yellow-300';
-                    panels[tab].classList.remove('hidden');
-                } else {
-                    // Inactive tabs
-                    buttons[tab].className = 'flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400';
-                    panels[tab].classList.add('hidden');
-                }
-            });
+      // Update all tabs and panels
+      tabs.forEach((tab) => {
+        if (tab === tabName) {
+          // Active tab - Dark pressed button style
+          buttons[tab].className =
+            "flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white";
+          buttons[tab].style =
+            "background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;";
+          panels[tab].classList.remove("hidden");
+        } else {
+          // Inactive tabs - Dark raised button style
+          buttons[tab].className =
+            "flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white";
+          buttons[tab].style =
+            "background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;";
+          panels[tab].classList.add("hidden");
         }
-    </script>
-{{end}}
+      });
+    }
+
+    // Action button handlers
+    function openBadges() {
+      showMessage("🏆 Badges system coming soon!", "info");
+      // TODO: Implement badges/achievements display
+    }
+
+    function openSettings() {
+      showMessage("⚙️ Settings menu coming soon!", "info");
+      // TODO: Implement settings panel (volume, graphics, etc.)
+    }
+
+    function reportBug() {
+      const bugReportUrl =
+        "https://github.com/0ceanSlim/nostr-hero/issues/new?template=bug_report.md";
+      showMessage("🐛 Opening bug report...", "info");
+      window.open(bugReportUrl, "_blank");
+    }
+
+    function logout() {
+      if (
+        confirm(
+          "Are you sure you want to logout? Any unsaved progress will be lost."
+        )
+      ) {
+        showMessage("🚪 Logging out...", "info");
+        // Clear session and redirect
+        if (window.sessionManager) {
+          window.sessionManager.logout();
+        }
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
+    }
+  </script>
+  {{end}}
+</div>

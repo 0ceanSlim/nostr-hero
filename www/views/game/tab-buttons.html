@@ -1,10 +1,24 @@
 {{define "game/tab-buttons.html"}}
-<!-- Tab Buttons Area -->
-<div class="bg-gray-800 border-4 border-yellow-800 flex" style="clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);">
-    <button id="tab-equipment" onclick="switchTab('equipment')" class="flex-1 py-3 bg-gradient-to-b from-yellow-700 to-yellow-900 font-bold text-xs border-r-2 border-gray-900 text-yellow-300">⚔️ GEAR</button>
-    <button id="tab-inventory" onclick="switchTab('inventory')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">🎒 INV</button>
-    <button id="tab-spells" onclick="switchTab('spells')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">✨ SPELLS</button>
-    <button id="tab-stats" onclick="switchTab('stats')" class="flex-1 py-3 bg-gray-700 font-bold text-xs border-r-2 border-gray-900 text-gray-400">📊 STATS</button>
-    <button id="tab-music" onclick="switchTab('music')" class="flex-1 py-3 bg-gray-700 font-bold text-xs text-gray-400">🎵 MUSIC</button>
+<!-- Button Grid (2 rows x 5 columns) - Dark Win95 Style -->
+<div style="background: #2a2a2a;">
+
+    <!-- Top Row: GEAR | INV | SPELLS | QUEST LOG | BADGES -->
+    <div class="flex">
+        <button id="tab-equipment" onclick="switchTab('equipment')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;">⚔️ GEAR</button>
+        <button id="tab-inventory" onclick="switchTab('inventory')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">🎒 INV</button>
+        <button id="tab-spells" onclick="switchTab('spells')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">✨ SPELLS</button>
+        <button id="tab-questlog" onclick="switchTab('questlog')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">📜 QUESTS</button>
+        <button onclick="openBadges()" class="flex-1 py-3 font-bold text-xs text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">🏆 BADGES</button>
+    </div>
+
+    <!-- Bottom Row: MUSIC | STATS | LOGOUT | SETTINGS | REPORT -->
+    <div class="flex border-t border-gray-700">
+        <button id="tab-music" onclick="switchTab('music')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">🎵 MUSIC</button>
+        <button id="tab-stats" onclick="switchTab('stats')" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">📊 STATS</button>
+        <button onclick="logout()" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">🚪 LOGOUT</button>
+        <button onclick="openSettings()" class="flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">⚙️ SETTINGS</button>
+        <button onclick="reportBug()" class="flex-1 py-3 font-bold text-xs text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">🐛 REPORT</button>
+    </div>
+
 </div>
 {{end}}

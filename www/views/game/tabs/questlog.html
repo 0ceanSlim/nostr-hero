@@ -1,0 +1,27 @@
+{{define "game/tabs/questlog.html"}}
+<!-- Quest Log Panel -->
+<div id="questlog-panel" class="hidden">
+    <div class="text-yellow-400 font-bold text-xs mb-3 border-b border-yellow-800 pb-2">📜 QUEST LOG</div>
+
+    <!-- Active Quests -->
+    <div class="mb-4">
+        <div class="text-gray-400 text-xs mb-2">ACTIVE QUESTS</div>
+        <div id="active-quests" class="space-y-2 text-xs">
+            <div class="bg-gray-700 p-2 rounded border-l-2 border-yellow-600">
+                <div class="text-yellow-400 font-bold">No active quests</div>
+                <div class="text-gray-400 text-[10px] mt-1">Your adventure awaits...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Quests -->
+    <div>
+        <div class="text-gray-400 text-xs mb-2">COMPLETED QUESTS</div>
+        <div id="completed-quests" class="space-y-2 text-xs">
+            <div class="bg-gray-800 p-2 rounded border-l-2 border-green-600 opacity-60">
+                <div class="text-green-400 font-bold">No quests completed yet</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

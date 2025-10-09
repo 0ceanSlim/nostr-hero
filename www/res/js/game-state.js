@@ -226,17 +226,39 @@ async function initializeGame() {
 function initializeFromSave(saveData) {
     console.log('Loading game from save:', saveData);
 
-    // New save structure has character and location at root
-    // Map it to the old DOM structure for compatibility
+    // New save structure is flat with all fields at root level
+    // Map it to the game state structure expected by the UI
     const gameState = {
-        character: saveData.character,
-        location: saveData.location,
-        inventory: saveData.character?.inventory || [],
-        equipment: saveData.character?.inventory?.gear_slots || {},
-        spells: saveData.character?.spells || [],
+        character: {
+            name: saveData.d || 'Unknown',
+            race: saveData.race,
+            class: saveData.class,
+            background: saveData.background,
+            alignment: saveData.alignment,
+            level: saveData.level || 1,
+            experience: saveData.experience || 0,
+            hp: saveData.hp,
+            max_hp: saveData.max_hp,
+            mana: saveData.mana,
+            max_mana: saveData.max_mana,
+            fatigue: saveData.fatigue || 0,
+            gold: saveData.gold || 0,
+            stats: saveData.stats,
+            inventory: saveData.inventory,
+            spells: saveData.known_spells || [],
+            spell_slots: saveData.spell_slots || {}
+        },
+        location: {
+            current: saveData.location || 'kingdom',
+            discovered: saveData.locations_discovered || ['kingdom']
+        },
+        inventory: saveData.inventory?.general_slots || [],
+        equipment: saveData.inventory?.gear_slots || {},
+        spells: saveData.known_spells || [],
         combat: null
     };
 
+    console.log('Mapped game state:', gameState);
     updateGameState(gameState);
 }
 

@@ -18,3 +18,7 @@ game.db
 item-editor-gui.exe
 nostr-hero.exe
 pixellab-gen.exe
+
+.air.toml
+/.claude
+/data
