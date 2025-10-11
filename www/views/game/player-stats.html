@@ -1,34 +1,34 @@
 {{define "game/player-stats.html"}}
 <!-- Player Stats Area - Dark Win95 Style -->
-<div class="p-3 space-y-2" style="background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; box-shadow: inset -1px -1px 0 #4a4a4a, inset 1px 1px 0 #000000;">
+<div class="p-3 space-y-2 win95-inset">
     <!-- Character Name, Level, and Gold -->
     <div class="flex justify-between items-center">
         <div id="char-name" class="text-lg font-bold text-white">Character</div>
         <div class="flex items-center gap-2">
             <div class="text-lg font-bold text-white">Lv. <span id="char-level">1</span></div>
             <div class="flex items-center gap-1">
-                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-4 h-4" style="image-rendering: pixelated;">
+                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-4 h-4">
                 <span class="text-sm font-bold text-white"><span id="char-gold">0</span></span>
             </div>
         </div>
     </div>
 
     <!-- Experience Bar -->
-    <div class="relative w-full h-3 flex items-center justify-center px-1" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;">
-        <div id="exp-bar" class="absolute inset-0 h-3 transition-all" style="width: 0%; background: #4444ff;"></div>
+    <div class="relative w-full h-3 flex items-center justify-center px-1 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
+        <div id="exp-bar" class="absolute inset-0 h-3 transition-all bg-blue-600" style="width: 0%;"></div>
         <span class="relative z-10 text-xs font-bold text-white"><span id="current-exp">0</span>/<span id="exp-to-next">100</span></span>
     </div>
 
     <!-- HP Bar -->
-    <div class="relative w-full h-5 flex items-center justify-between px-2" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;">
-        <div id="hp-bar" class="absolute inset-0 h-5 transition-all" style="width: 100%; background: #cc0000;"></div>
+    <div class="relative w-full h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
+        <div id="hp-bar" class="absolute inset-0 h-5 transition-all bg-red-700" style="width: 100%;"></div>
         <span class="relative z-10 text-xs font-bold text-white">HP</span>
         <span class="relative z-10 text-xs font-bold text-white"><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
     </div>
 
     <!-- Mana Bar -->
-    <div class="relative w-full h-5 flex items-center justify-between px-2" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;">
-        <div id="mana-bar" class="absolute inset-0 h-5 transition-all" style="width: 100%; background: #4444ff;"></div>
+    <div class="relative w-full h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
+        <div id="mana-bar" class="absolute inset-0 h-5 transition-all bg-blue-600" style="width: 100%;"></div>
         <span class="relative z-10 text-xs font-bold text-white">MANA</span>
         <span class="relative z-10 text-xs font-bold text-white"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
     </div>
@@ -36,15 +36,15 @@
     <!-- Fatigue & Weight Bar -->
     <div class="flex gap-1">
         <!-- Fatigue Bar (takes most of space) -->
-        <div class="relative flex-1 h-5 flex items-center justify-between px-2" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;">
+        <div class="relative flex-1 h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
             <div id="fatigue-bar" class="absolute inset-0 h-5 transition-all" style="width: 0%; background: linear-gradient(90deg, #00cc00 0%, #ffff00 50%, #ff8800 75%, #ff0000 100%);"></div>
             <span class="relative z-10 text-xs font-bold text-white">FATIGUE <span id="fatigue-level">0</span>/10</span>
-            <span id="fatigue-status" class="relative z-10 text-xs font-bold text-white" style="font-size: 9px;">FRESH</span>
+            <span id="fatigue-status" class="relative z-10 text-[9px] font-bold text-white">FRESH</span>
         </div>
         <!-- Weight Display -->
-        <div class="relative h-5 flex items-center justify-between px-2" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; min-width: 80px;">
-            <span class="text-xs font-bold text-white" style="font-size: 9px;">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
-            <span id="weight-status" class="text-xs font-bold text-white" style="font-size: 8px;">OK</span>
+        <div class="relative h-5 flex items-center justify-between px-2 min-w-[80px] bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
+            <span class="text-[9px] font-bold text-white">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
+            <span id="weight-status" class="text-[8px] font-bold text-white">OK</span>
         </div>
     </div>
 

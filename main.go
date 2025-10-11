@@ -39,7 +39,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Serve resource files
+	// Serve static files
+	mux.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("www/scripts/"))))
 	mux.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("www/res/"))))
 
 	// Serve data files
@@ -73,6 +74,7 @@ func main() {
 
 	// Existing API endpoints
 	mux.HandleFunc("/api/character", api.CharacterHandler)
+	mux.HandleFunc("/api/profile", api.ProfileHandler)
 
 	port := utils.AppConfig.Server.Port
 	fmt.Printf("Server is running on http://localhost:%d\n", port)

@@ -1,11 +1,27 @@
 {{define "game/action-buttons.html"}}
 <!-- Action Buttons Area - Dark Win95 Style -->
-<div class="p-2 flex-shrink-0 flex-1 overflow-hidden" style="background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; box-shadow: inset -1px -1px 0 #4a4a4a, inset 1px 1px 0 #000000;">
-    <div id="action-buttons" class="grid grid-cols-3 gap-1 h-full">
-        <!-- Navigation buttons column -->
-        <div id="navigation-buttons" class="flex flex-col gap-0.5">
-            <h3 class="text-white text-[10px] font-bold uppercase">Travel</h3>
-            <div class="flex flex-col gap-0.5"></div>
+<div class="p-2 flex-shrink-0 flex-1 overflow-hidden win95-inset">
+    <div id="action-buttons" class="grid grid-cols-3 gap-2 h-full">
+        <!-- Navigation buttons column (D-pad style) -->
+        <div id="navigation-buttons" class="flex flex-col gap-0.5 min-w-0 overflow-hidden">
+            <h3 class="text-white text-[10px] font-bold uppercase mb-1 flex-shrink-0">Travel</h3>
+            <!-- D-pad grid: 3x3 layout for cardinal directions -->
+            <div class="grid grid-cols-3 grid-rows-3 gap-3 flex-1 min-h-0">
+                <!-- Row 1: Empty, North, Empty -->
+                <div></div>
+                <div id="travel-n" class="flex items-center justify-center min-w-0 min-h-0"></div>
+                <div></div>
+
+                <!-- Row 2: West, Center, East -->
+                <div id="travel-w" class="flex items-center justify-center min-w-0 min-h-0"></div>
+                <div id="travel-center" class="flex items-center justify-center min-w-0 min-h-0"></div>
+                <div id="travel-e" class="flex items-center justify-center min-w-0 min-h-0"></div>
+
+                <!-- Row 3: Empty, South, Empty -->
+                <div></div>
+                <div id="travel-s" class="flex items-center justify-center min-w-0 min-h-0"></div>
+                <div></div>
+            </div>
         </div>
 
         <!-- Building buttons column -->

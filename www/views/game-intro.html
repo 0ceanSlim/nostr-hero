@@ -6,12 +6,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 
-<script src="/res/js/session-manager.js"></script>
-<script src="/res/js/character-generator.js"></script>
-<script src="/res/components/continue-button.js"></script>
-<script src="/res/components/back-button.js"></script>
-<script src="/res/js/equipment-selection.js"></script>
-<script src="/res/js/game-intro.js"></script>
+<script src="/scripts/core/session-manager.js"></script>
+<script src="/scripts/systems/character-generator.js"></script>
+<script src="/scripts/components/continue-button.js"></script>
+<script src="/scripts/components/back-button.js"></script>
+<script src="/scripts/systems/equipment-selection.js"></script>
+<script src="/scripts/pages/game-intro.js"></script>
 
 <style>
 /* Scene animations */
@@ -146,156 +146,39 @@
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
-/* Pixelated Continue Button */
+/* Continue Button - uses Win95 button from input.css */
 .pixel-continue-btn {
-  background: #fbbf24;
-  color: #000;
   padding: 1rem 2rem;
   font-size: 1.25rem;
   font-weight: bold;
   margin-top: 2rem;
   cursor: pointer;
-  transition: all 0.3s ease;
   position: relative;
   z-index: 1;
-  text-shadow: none;
-
-  /* Pixelated border effect */
-  box-shadow:
-    0 -2px 0 0 #fbbf24,
-    0 -4px 0 0 #000,
-    2px 0 0 0 #fbbf24,
-    4px 0 0 0 #000,
-    0 2px 0 0 #fbbf24,
-    0 4px 0 0 #000,
-    -2px 0 0 0 #fbbf24,
-    -4px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
 }
 
-.pixel-continue-btn:hover {
-  background: #fcd34d;
-  transform: translateY(-2px);
-  box-shadow:
-    0 -2px 0 0 #fcd34d,
-    0 -4px 0 0 #000,
-    2px 0 0 0 #fcd34d,
-    4px 0 0 0 #000,
-    0 2px 0 0 #fcd34d,
-    0 6px 0 0 #000,
-    -2px 0 0 0 #fcd34d,
-    -4px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
-}
-
-/* Pixelated Back Button */
+/* Back Button - uses Win95 button from input.css */
 .pixel-back-btn {
-  background: #6b7280;
-  color: #000;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
   position: fixed;
   bottom: 1.5rem;
   left: 1.5rem;
   z-index: 100;
-  text-shadow: none;
-
-  /* Pixelated border effect */
-  box-shadow:
-    0 -2px 0 0 #6b7280,
-    0 -3px 0 0 #000,
-    2px 0 0 0 #6b7280,
-    3px 0 0 0 #000,
-    0 2px 0 0 #6b7280,
-    0 3px 0 0 #000,
-    -2px 0 0 0 #6b7280,
-    -3px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
 }
 
-.pixel-back-btn:hover {
-  background: #9ca3af;
-  transform: translateY(-1px);
-  box-shadow:
-    0 -2px 0 0 #9ca3af,
-    0 -3px 0 0 #000,
-    2px 0 0 0 #9ca3af,
-    3px 0 0 0 #000,
-    0 2px 0 0 #9ca3af,
-    0 4px 0 0 #000,
-    -2px 0 0 0 #9ca3af,
-    -3px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
-}
-
-/* Skip Scene Button */
+/* Skip Scene Button - uses Win95 button from input.css */
 .pixel-skip-btn {
-  background: #dc2626;
-  color: #fff;
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
   z-index: 100;
-  text-shadow: none;
-
-  /* Pixelated border effect */
-  box-shadow:
-    0 -2px 0 0 #dc2626,
-    0 -3px 0 0 #000,
-    2px 0 0 0 #dc2626,
-    3px 0 0 0 #000,
-    0 2px 0 0 #dc2626,
-    0 3px 0 0 #000,
-    -2px 0 0 0 #dc2626,
-    -3px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
-}
-
-.pixel-skip-btn:hover {
-  background: #ef4444;
-  transform: translateY(-1px);
-  box-shadow:
-    0 -2px 0 0 #ef4444,
-    0 -3px 0 0 #000,
-    2px 0 0 0 #ef4444,
-    3px 0 0 0 #000,
-    0 2px 0 0 #ef4444,
-    0 4px 0 0 #000,
-    -2px 0 0 0 #ef4444,
-    -3px 0 0 0 #000,
-
-    -2px -2px 0 0 #000,
-    2px -2px 0 0 #000,
-    2px 2px 0 0 #000,
-    -2px 2px 0 0 #000;
 }
 
 /* Item Card Styles */
@@ -310,14 +193,14 @@
 }
 
 [data-option-index]:hover:not(.selected) {
-  border-color: #fbbf24 !important;
+  border-color: var(--color-textHighlighted) !important;
 }
 
 [data-option-index].selected {
-  border-color: #10b981 !important;
+  border-color: var(--color-textHighlighted) !important;
   border-width: 3px !important;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
-  background-color: rgba(16, 185, 129, 0.05) !important;
+  box-shadow: 0 0 20px var(--color-textHighlighted) !important;
+  background-color: var(--color-bgTertiary) !important;
   box-sizing: border-box;
 }
 
@@ -336,14 +219,16 @@
       <input
         type="text"
         id="character-name"
-        class="bg-gray-800 border-2 border-gray-600 rounded-lg px-6 py-3 text-xl text-center text-white focus:border-green-400 focus:outline-none min-w-72"
+        class="win95-inset rounded-lg px-6 py-3 text-xl text-center focus:outline-none min-w-72"
+        style="color: var(--color-textPrimary); background-color: var(--color-bgSecondary);"
         placeholder="Enter your name..."
         maxlength="20"
         onkeydown="if(event.key==='Enter') document.getElementById('continue-btn').click()"
       >
       <button
         id="continue-btn"
-        class="bg-green-600 hover:bg-green-700 text-black px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+        class="win95-button px-8 py-3 rounded-lg font-bold text-lg"
+        style="color: var(--color-textPrimary);"
         onclick="startIntroSequence()"
       >
         Begin Your Story
@@ -359,21 +244,21 @@
 
   <!-- Equipment Selection Screen -->
   <div id="equipment-selection" class="hidden">
-    <div class="bg-gray-800 rounded-2xl p-8 max-w-6xl w-full max-h-full overflow-y-auto">
-      <h2 class="text-3xl font-bold text-center mb-8 text-yellow-400">Choose Your Equipment</h2>
+    <div class="win95-outset rounded-2xl p-8 max-w-6xl w-full max-h-full overflow-y-auto">
+      <h2 class="text-3xl font-bold text-center mb-8" style="color: var(--color-textHighlighted);">Choose Your Equipment</h2>
       <div id="equipment-choices" class="space-y-6"></div>
 
       <div class="mt-6">
-        <h4 class="text-lg font-medium text-gray-300 mb-3">Starting Inventory:</h4>
+        <h4 class="text-lg font-medium mb-3" style="color: var(--color-textSecondary);">Starting Inventory:</h4>
         <div id="starting-inventory" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
       </div>
 
       <div class="text-center mt-8">
         <button
           id="continue-adventure-btn"
-          class="bg-green-600 hover:bg-green-700 text-black px-8 py-4 rounded-lg font-bold text-xl transition-colors"
+          class="win95-button px-8 py-4 rounded-lg font-bold text-xl"
+          style="color: var(--color-textPrimary); display: none;"
           onclick="continueAfterEquipment()"
-          style="display: none;"
         >
           Continue →
         </button>

@@ -712,11 +712,23 @@ function updateSpellsDisplay() {
 // Display current location
 function displayCurrentLocation() {
     const state = getGameState();
-    const currentLocationId = state.location?.current;
+    let currentLocationId = state.location?.current;
 
     if (!currentLocationId) return;
 
-    const locationData = getLocationById(currentLocationId);
+    // If location is just a city name (e.g., "kingdom"), default to center district
+    let locationData = getLocationById(currentLocationId);
+    if (!locationData) {
+        // Try appending -center to get the district
+        const centerLocationId = currentLocationId + '-center';
+        locationData = getLocationById(centerLocationId);
+        if (locationData) {
+            currentLocationId = centerLocationId;
+            // Update the game state to use the correct location
+            updateGameState({ location: { current: currentLocationId, discovered: [currentLocationId] } });
+        }
+    }
+
     console.log('Current location ID:', currentLocationId);
     console.log('Location data:', locationData);
     if (!locationData) return;
@@ -745,11 +757,7 @@ function displayCurrentLocation() {
     const buildingContainer = document.getElementById('building-buttons');
     const npcContainer = document.getElementById('npc-buttons');
 
-    // Clear all containers
-    if (navContainer) {
-        const navButtonContainer = navContainer.querySelector('div');
-        if (navButtonContainer) navButtonContainer.innerHTML = '';
-    }
+    // Clear building and NPC containers (not navigation - that's handled per-slot)
     if (buildingContainer) {
         const buildingButtonContainer = buildingContainer.querySelector('div');
         if (buildingButtonContainer) buildingButtonContainer.innerHTML = '';
@@ -780,29 +788,50 @@ function displayCurrentLocation() {
     const buildings = currentData.buildings || currentData.properties?.buildings;
     const npcs = currentData.npcs || currentData.properties?.npcs;
 
-    // 1. NAVIGATION BUTTONS (connections to other districts/environments)
-    if (connections && navContainer) {
-        const navButtonContainer = navContainer.querySelector('div');
+    // 1. NAVIGATION BUTTONS (D-pad style with cardinal directions)
+    console.log('Navigation connections:', connections);
+    if (connections) {
+        // Clear all D-pad slots first
+        ['travel-n', 'travel-s', 'travel-e', 'travel-w', 'travel-center'].forEach(slotId => {
+            const slot = document.getElementById(slotId);
+            if (slot) slot.innerHTML = '';
+        });
 
         Object.entries(connections).forEach(([direction, connectionId]) => {
+            console.log(`Processing connection: ${direction} -> ${connectionId}`);
             const connectedLocation = getLocationById(connectionId);
-            if (connectedLocation) {
-                const directionEmoji = {
-                    'north': '⬆️',
-                    'south': '⬇️',
-                    'east': '➡️',
-                    'west': '⬅️',
-                    'center': '🏛️'
-                }[direction.toLowerCase()] || '→';
+            console.log(`Found location:`, connectedLocation);
 
-                const button = createLocationButton(
-                    `${directionEmoji} ${connectedLocation.name || direction.toUpperCase()}`,
-                    () => moveToLocation(connectionId),
-                    'navigation'
-                );
-                navButtonContainer.appendChild(button);
+            if (connectedLocation) {
+                // Map direction to D-pad slot
+                const slotMap = {
+                    'north': 'travel-n',
+                    'south': 'travel-s',
+                    'east': 'travel-e',
+                    'west': 'travel-w',
+                    'center': 'travel-center'
+                };
+
+                const slotId = slotMap[direction.toLowerCase()];
+                const slot = document.getElementById(slotId);
+
+                if (slot) {
+                    const button = createLocationButton(
+                        connectedLocation.name || direction.toUpperCase(),
+                        () => moveToLocation(connectionId),
+                        'navigation'
+                    );
+                    button.className += ' w-full h-full';
+                    slot.appendChild(button);
+                } else {
+                    console.warn(`⚠️ No slot found for ${direction} (${slotId})`);
+                }
+            } else {
+                console.warn(`⚠️ No location found for ${direction} -> ${connectionId}`);
             }
         });
+    } else {
+        console.log('No connections found for this location');
     }
 
     // 2. BUILDING BUTTONS
@@ -858,9 +887,14 @@ function createLocationButton(text, onClick, type = 'navigation') {
 
     const colorClass = typeStyles[type] || typeStyles.navigation;
 
-    button.className = `${colorClass} text-white border-2 px-1.5 py-0.5 text-[10px] font-bold transition-all leading-none text-center overflow-hidden text-ellipsis whitespace-nowrap`;
+    button.className = `${colorClass} text-white border-2 px-2 py-1 text-xs font-bold transition-all leading-tight text-center overflow-hidden`;
     button.style.imageRendering = 'pixelated';
     button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
+    button.style.overflowWrap = 'break-word';
+    button.style.hyphens = 'none';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
     button.textContent = text;
     button.addEventListener('click', onClick);
     return button;

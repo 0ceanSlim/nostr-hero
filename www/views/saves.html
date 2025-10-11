@@ -3,91 +3,116 @@
 {{define "view"}}
 <div class="max-w-4xl mx-auto p-6">
   <div class="text-center mb-8">
-    <h1 class="text-4xl font-bold text-yellow-400 mb-2">⚔️ Choose Your Adventure ⚔️</h1>
-    <p class="text-gray-300">Select a save file or start a new journey</p>
+    <h1 class="text-2xl sm:text-4xl font-bold mb-2" style="color: var(--color-textHighlighted);">Choose Your Adventure</h1>
+    <p class="text-sm sm:text-base" style="color: var(--color-textSecondary);">Select a save slot to continue or start a new journey</p>
   </div>
 
   <!-- User Info Display -->
-  <div id="user-info" class="bg-gray-800 rounded-lg p-4 mb-6 text-center">
-    <div class="flex items-center justify-center space-x-4">
-      <div id="user-avatar" class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-        <span class="text-gray-300">👤</span>
+  <div id="user-info" class="win95-outset rounded-lg p-3 sm:p-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <!-- Profile Section (Left) -->
+      <div id="profile-section" class="flex items-center space-x-2 sm:space-x-4">
+        <div id="user-avatar" class="w-12 h-12 sm:w-20 sm:h-20 flex-shrink-0 rounded-full win95-inset flex items-center justify-center overflow-hidden">
+          <span style="color: var(--color-textSecondary); font-size: 1.5rem;" class="sm:text-3xl">👤</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 id="user-name" class="text-base sm:text-2xl font-bold mb-1 sm:mb-2 truncate" style="color: var(--color-textHighlighted);">Loading...</h2>
+          <div class="flex items-center gap-1">
+            <p id="user-npub" class="text-xs truncate" style="color: var(--color-textMuted);">npub...</p>
+            <button
+              onclick="copyNpub()"
+              class="flex-shrink-0 px-1 py-0.5 text-xs rounded hover:opacity-80"
+              style="background: rgb(29, 78, 216) !important; color: white;"
+              title="Copy npub">
+              📋
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <h2 id="user-name" class="text-xl font-bold text-green-400">Loading...</h2>
-        <p id="user-npub" class="text-sm text-gray-400">npub...</p>
+
+      <!-- Character Preview Section (Right) -->
+      <div id="character-preview" class="win95-inset rounded-lg p-2 sm:p-4">
+        <h3 class="text-sm sm:text-lg font-bold mb-2 sm:mb-3 text-center" style="color: var(--color-textHighlighted);">Your Derived Character</h3>
+        <div id="character-loading" class="text-center py-2 sm:py-4">
+          <div class="spinner-border animate-spin inline-block w-6 h-6 border-4 rounded-full" role="status"></div>
+          <p class="mt-2 text-xs sm:text-sm" style="color: var(--color-textMuted);">Deriving character...</p>
+        </div>
+        <div id="character-details" class="hidden space-y-1 sm:space-y-2 text-xs sm:text-sm">
+          <div class="flex justify-between gap-2">
+            <span class="flex-shrink-0" style="color: var(--color-textSecondary);">Race:</span>
+            <span id="char-race" class="font-bold truncate" style="color: var(--color-textHighlighted);"></span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="flex-shrink-0" style="color: var(--color-textSecondary);">Class:</span>
+            <span id="char-class" class="font-bold truncate" style="color: var(--color-textHighlighted);"></span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="flex-shrink-0" style="color: var(--color-textSecondary);">Background:</span>
+            <span id="char-background" class="font-bold truncate" style="color: var(--color-textHighlighted);"></span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span class="flex-shrink-0 text-xs" style="color: var(--color-textSecondary);">Align:</span>
+            <span id="char-alignment" class="font-bold truncate text-xs" style="color: var(--color-textHighlighted);"></span>
+          </div>
+          <div class="border-t border-gray-600 my-1 sm:my-2"></div>
+          <div class="grid grid-cols-3 gap-1 sm:gap-2 text-xs">
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">STR</div>
+              <div id="char-str" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">DEX</div>
+              <div id="char-dex" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">CON</div>
+              <div id="char-con" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">INT</div>
+              <div id="char-int" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">WIS</div>
+              <div id="char-wis" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="text-center">
+              <div style="color: var(--color-textMuted);">CHA</div>
+              <div id="char-cha" class="font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Save Files Section -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-    <!-- New Game Card -->
-    <div class="bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-6 border-2 border-green-600 hover:border-green-400 transition-colors cursor-pointer group"
-         onclick="startNewGame()">
-      <div class="text-center">
-        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">✨</div>
-        <h3 class="text-xl font-bold text-green-400 mb-2">New Adventure</h3>
-        <p class="text-gray-300 text-sm">Begin a fresh journey with a newly generated character</p>
-      </div>
-    </div>
-
-    <!-- Loading Placeholder for Save Files -->
-    <div id="saves-loading" class="col-span-2 text-center py-8">
+  <!-- Save Slots Section -->
+  <div class="space-y-4 mb-8">
+    <!-- Loading Placeholder -->
+    <div id="saves-loading" class="text-center py-8">
       <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
         <span class="visually-hidden"></span>
       </div>
-      <p class="text-gray-400 mt-4">Loading save files...</p>
+      <p class="mt-4" style="color: var(--color-textMuted);">Loading save slots...</p>
     </div>
 
-    <!-- Save files will be populated here -->
-    <div id="save-files-container" class="col-span-2 hidden">
-      <!-- Save files will be inserted here by JavaScript -->
-    </div>
-
-    <!-- No saves message -->
-    <div id="no-saves" class="col-span-2 text-center py-8 hidden">
-      <div class="text-6xl mb-4">📜</div>
-      <h3 class="text-xl font-bold text-gray-400 mb-2">No Save Files Found</h3>
-      <p class="text-gray-500">Start a new adventure to create your first save!</p>
+    <!-- Save Slots Container -->
+    <div id="save-slots-container" class="space-y-4 hidden">
+      <!-- Slots will be populated here by JavaScript -->
     </div>
   </div>
 
   <!-- Back to Home -->
   <div class="text-center">
     <button onclick="goHome()"
-            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors">
+            class="win95-button px-6 py-3 rounded-lg" style="color: var(--color-textPrimary);">
       🏠 Back to Home
     </button>
   </div>
 </div>
 
-<!-- Save File Template (Hidden) -->
-<template id="save-file-template">
-  <div class="bg-gray-800 rounded-lg p-4 border border-gray-600 hover:border-yellow-400 transition-colors cursor-pointer group"
-       onclick="loadSave('{SAVE_ID}')">
-    <div class="flex items-center space-x-4">
-      <div class="flex-shrink-0">
-        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-          <span class="text-2xl">{CHARACTER_ICON}</span>
-        </div>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h3 class="text-lg font-bold text-yellow-400 truncate">{CHARACTER_NAME}</h3>
-        <p class="text-sm text-gray-300">{CHARACTER_RACE} {CHARACTER_CLASS}</p>
-        <p class="text-xs text-gray-400">Level {CHARACTER_LEVEL} • {LOCATION_NAME}</p>
-        <p class="text-xs text-gray-500">Last played: {LAST_PLAYED}</p>
-      </div>
-      <div class="flex-shrink-0 text-right">
-        <div class="text-sm text-green-400">HP: {CURRENT_HP}/{MAX_HP}</div>
-        <div class="text-xs text-gray-400">Fatigue: {FATIGUE}/10</div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script src="/res/js/session-manager.js"></script>
-<script src="/res/js/game-ui.js"></script>
+<script src="/scripts/core/session-manager.js"></script>
+<script src="/scripts/pages/game-ui.js"></script>
 <script>
 // Helper function to show messages (fallback if game-ui.js not loaded yet)
 if (typeof showMessage === 'undefined') {
@@ -95,6 +120,15 @@ if (typeof showMessage === 'undefined') {
     console.log(`[${type.toUpperCase()}] ${text}`);
   }
 }
+
+// Save slot configuration
+const SAVE_SLOTS = [
+  { id: 1, unlockLevel: 0, label: 'Start New Adventure' },
+  { id: 2, unlockLevel: 5, label: 'Save Slot 2' },
+  { id: 3, unlockLevel: 10, label: 'Save Slot 3' },
+  { id: 4, unlockLevel: 15, label: 'Save Slot 4' },
+  { id: 5, unlockLevel: 20, label: 'Save Slot 5' }
+];
 
 // Initialize save selection page
 document.addEventListener('DOMContentLoaded', async function() {
@@ -120,7 +154,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('✅ User authenticated:', session.npub);
 
     displayUserInfo(session);
-    await loadSaveFiles(session.npub);
+    await Promise.all([
+      loadProfileInfo(session.npub),
+      loadCharacterPreview(session.npub),
+      loadSaveSlots(session.npub)
+    ]);
 
   } catch (error) {
     console.error('❌ Failed to initialize save selection:', error);
@@ -136,88 +174,250 @@ function displayUserInfo(session) {
   document.getElementById('user-name').textContent = shortNpub;
 }
 
-async function loadSaveFiles(npub) {
-  console.log('📂 Loading save files for:', npub);
+function copyNpub() {
+  const npub = document.getElementById('user-npub').textContent;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(npub)
+      .then(() => {
+        showMessage('✅ Npub copied to clipboard!', 'success', 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy npub:', err);
+        showMessage('❌ Failed to copy npub', 'error');
+      });
+  } else {
+    showMessage('❌ Clipboard not supported', 'error');
+  }
+}
+
+async function loadProfileInfo(npub) {
+  console.log('👤 Loading profile info for:', npub);
 
   try {
-    const response = await fetch(`/api/saves/${npub}`);
+    const response = await fetch(`/api/profile?npub=${npub}`);
 
-    const loadingEl = document.getElementById('saves-loading');
-    const containerEl = document.getElementById('save-files-container');
-    const noSavesEl = document.getElementById('no-saves');
-
-    loadingEl.classList.add('hidden');
-
-    if (response.ok) {
-      const saves = await response.json();
-
-      if (saves && saves.length > 0) {
-        console.log(`✅ Found ${saves.length} save files`);
-        displaySaveFiles(saves);
-        containerEl.classList.remove('hidden');
-      } else {
-        console.log('📭 No save files found');
-        noSavesEl.classList.remove('hidden');
-      }
-    } else {
-      console.log('📭 No save files found (404)');
-      noSavesEl.classList.remove('hidden');
+    if (!response.ok) {
+      console.warn('⚠️ Could not fetch profile, using defaults');
+      return;
     }
+
+    const data = await response.json();
+    const profile = data.profile;
+
+    console.log('✅ Profile loaded:', profile);
+
+    // Update display name
+    if (profile.display_name || profile.name) {
+      document.getElementById('user-name').textContent = profile.display_name || profile.name;
+    }
+
+    // Update avatar
+    if (profile.picture) {
+      const avatarEl = document.getElementById('user-avatar');
+      avatarEl.innerHTML = `<img src="${profile.picture}" alt="Profile Picture" class="w-full h-full object-cover rounded-full" onerror="this.parentElement.innerHTML='<span style=\\'color: var(--color-textSecondary); font-size: 2rem;\\'>👤</span>'">`;
+    }
+
   } catch (error) {
-    console.error('❌ Error loading save files:', error);
-    const loadingEl = document.getElementById('saves-loading');
+    console.error('❌ Error loading profile:', error);
+    // Keep defaults on error
+  }
+}
+
+async function loadCharacterPreview(npub) {
+  console.log('⚔️ Loading character preview for:', npub);
+
+  try {
+    const response = await fetch(`/api/character?npub=${npub}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to load character data');
+    }
+
+    const data = await response.json();
+    const character = data.character;
+
+    console.log('✅ Character loaded:', character);
+
+    // Update character details
+    document.getElementById('char-race').textContent = character.race || 'Unknown';
+    document.getElementById('char-class').textContent = character.class || 'Unknown';
+    document.getElementById('char-background').textContent = character.background || 'Unknown';
+    document.getElementById('char-alignment').textContent = character.alignment || 'Unknown';
+
+    // Update stats (checking both capitalized and lowercase keys)
+    const stats = character.stats || {};
+    document.getElementById('char-str').textContent = stats.Strength || stats.strength || 10;
+    document.getElementById('char-dex').textContent = stats.Dexterity || stats.dexterity || 10;
+    document.getElementById('char-con').textContent = stats.Constitution || stats.constitution || 10;
+    document.getElementById('char-int').textContent = stats.Intelligence || stats.intelligence || 10;
+    document.getElementById('char-wis').textContent = stats.Wisdom || stats.wisdom || 10;
+    document.getElementById('char-cha').textContent = stats.Charisma || stats.charisma || 10;
+
+    // Show character details, hide loading
+    document.getElementById('character-loading').classList.add('hidden');
+    document.getElementById('character-details').classList.remove('hidden');
+
+  } catch (error) {
+    console.error('❌ Error loading character preview:', error);
+    const loadingEl = document.getElementById('character-loading');
     loadingEl.innerHTML = `
-      <div class="text-center py-8">
-        <div class="text-red-400 text-xl mb-2">❌</div>
-        <p class="text-red-400">Failed to load save files</p>
-        <p class="text-gray-500 text-sm">${error.message}</p>
+      <div class="text-center py-4">
+        <div class="text-xl mb-2" style="color: var(--color-textMuted);">❌</div>
+        <p class="text-sm" style="color: var(--color-textMuted);">Failed to load character preview</p>
       </div>
     `;
   }
 }
 
-function displaySaveFiles(saves) {
-  const container = document.getElementById('save-files-container');
-  const template = document.getElementById('save-file-template');
+async function loadSaveSlots(npub) {
+  console.log('📂 Loading save slots for:', npub);
 
+  try {
+    const response = await fetch(`/api/saves/${npub}`);
+
+    let saves = [];
+    if (response.ok) {
+      saves = await response.json();
+      console.log(`✅ Found ${saves.length} save files`);
+    } else {
+      console.log('📭 No save files found');
+    }
+
+    // Calculate highest level across all saves
+    const highestLevel = calculateHighestLevel(saves);
+    console.log('🎖️ Highest character level:', highestLevel);
+
+    // Display all 5 slots
+    displaySaveSlots(saves, highestLevel);
+
+    document.getElementById('saves-loading').classList.add('hidden');
+    document.getElementById('save-slots-container').classList.remove('hidden');
+
+  } catch (error) {
+    console.error('❌ Error loading save slots:', error);
+    const loadingEl = document.getElementById('saves-loading');
+    loadingEl.innerHTML = `
+      <div class="text-center py-8">
+        <div class="text-xl mb-2" style="color: var(--color-textMuted);">❌</div>
+        <p style="color: var(--color-textMuted);">Failed to load save slots</p>
+        <p class="text-sm" style="color: var(--color-textMuted);">${error.message}</p>
+      </div>
+    `;
+  }
+}
+
+function calculateHighestLevel(saves) {
+  if (!saves || saves.length === 0) return 0;
+
+  return Math.max(...saves.map(save => {
+    const character = save.character || save;
+    const experience = character.experience || save.experience || 0;
+    return Math.floor(experience / 100) + 1;
+  }));
+}
+
+function displaySaveSlots(saves, highestLevel) {
+  const container = document.getElementById('save-slots-container');
   container.innerHTML = '';
 
-  saves.forEach(save => {
-    const saveEl = template.content.cloneNode(true);
+  SAVE_SLOTS.forEach(slot => {
+    const isUnlocked = highestLevel >= slot.unlockLevel;
+    const saveData = saves.find(s => (s.slot_id || 1) === slot.id);
 
-    // Handle both old nested structure and new flattened structure
-    const character = save.character || save; // Fallback to save itself for flattened structure
-    const race = character.race || save.race || 'Unknown';
-    const characterClass = character.class || save.class || 'Adventurer';
-    const name = character.name || save.d || 'Unnamed Hero';
-    const hp = character.hp || save.hp || 0;
-    const maxHp = character.max_hp || save.max_hp || 0;
-    const fatigue = character.fatigue || save.fatigue || 0;
-
-    // Calculate level from experience (100 XP per level)
-    const experience = character.experience || save.experience || 0;
-    const level = Math.floor(experience / 100) + 1;
-
-    // Get location - handle both old (object) and new (string) formats
-    const locationName = typeof save.location === 'string'
-      ? save.location
-      : (save.location?.current || 'Unknown Location');
-
-    const html = saveEl.firstElementChild.outerHTML
-      .replace('{SAVE_ID}', save.id || save.internal_id || 'unknown')
-      .replace('{CHARACTER_ICON}', getCharacterIcon(race, characterClass))
-      .replace('{CHARACTER_NAME}', name)
-      .replace('{CHARACTER_RACE}', race)
-      .replace('{CHARACTER_CLASS}', characterClass)
-      .replace('{CHARACTER_LEVEL}', level)
-      .replace('{LOCATION_NAME}', locationName)
-      .replace('{CURRENT_HP}', hp)
-      .replace('{MAX_HP}', maxHp)
-      .replace('{FATIGUE}', fatigue)
-      .replace('{LAST_PLAYED}', formatDate(save.created_at || save.last_played));
-
-    container.innerHTML += html;
+    const slotEl = createSaveSlot(slot, saveData, isUnlocked);
+    container.appendChild(slotEl);
   });
+}
+
+function createSaveSlot(slot, saveData, isUnlocked) {
+  const div = document.createElement('div');
+
+  if (!isUnlocked) {
+    // Locked slot
+    div.className = 'win95-inset rounded-lg p-6 opacity-60';
+    div.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 rounded-full win95-inset flex items-center justify-center">
+            <span class="text-3xl">🔒</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold" style="color: var(--color-textMuted);">${slot.label}</h3>
+            <p class="text-sm" style="color: var(--color-textMuted);">Reach at least Level ${slot.unlockLevel} on one of your characters to unlock</p>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (!saveData && slot.id === 1) {
+    // First slot - New Adventure
+    div.className = 'win95-button rounded-lg p-6 transition-all cursor-pointer hover:scale-105';
+    div.onclick = () => startNewGame(slot.id);
+    div.innerHTML = `
+      <div class="flex items-center space-x-4">
+        <div class="w-16 h-16 rounded-full win95-inset flex items-center justify-center">
+          <span class="text-3xl">✨</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-bold mb-1" style="color: var(--color-textHighlighted);">Start New Adventure</h3>
+          <p class="text-sm" style="color: var(--color-textSecondary);">Begin a fresh journey with a newly generated character</p>
+        </div>
+      </div>
+    `;
+  } else if (!saveData) {
+    // Empty unlocked slot
+    div.className = 'win95-button rounded-lg p-6 transition-all cursor-pointer hover:scale-105';
+    div.onclick = () => startNewGame(slot.id);
+    div.innerHTML = `
+      <div class="flex items-center space-x-4">
+        <div class="w-16 h-16 rounded-full win95-inset flex items-center justify-center">
+          <span class="text-3xl">➕</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-bold" style="color: var(--color-textHighlighted);">${slot.label}</h3>
+          <p class="text-sm" style="color: var(--color-textMuted);">Empty Slot - Start New Adventure</p>
+        </div>
+      </div>
+    `;
+  } else {
+    // Existing save
+    const character = saveData.character || saveData;
+    const race = character.race || saveData.race || 'Unknown';
+    const characterClass = character.class || saveData.class || 'Adventurer';
+    const name = character.name || saveData.d || 'Unnamed Hero';
+    const hp = character.hp || saveData.hp || 0;
+    const maxHp = character.max_hp || saveData.max_hp || 0;
+    const fatigue = character.fatigue || saveData.fatigue || 0;
+    const experience = character.experience || saveData.experience || 0;
+    const level = Math.floor(experience / 100) + 1;
+    const locationName = typeof saveData.location === 'string'
+      ? saveData.location
+      : (saveData.location?.current || 'Unknown Location');
+
+    div.className = 'win95-outset rounded-lg p-4 hover:opacity-80 transition-all cursor-pointer';
+    div.onclick = () => loadSave(saveData.id || saveData.internal_id);
+    div.innerHTML = `
+      <div class="flex items-center space-x-4">
+        <div class="flex-shrink-0">
+          <div class="w-16 h-16 rounded-full win95-inset flex items-center justify-center">
+            <span class="text-2xl">${getCharacterIcon(race, characterClass)}</span>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-bold truncate" style="color: var(--color-textHighlighted);">${name}</h3>
+          <p class="text-sm" style="color: var(--color-textSecondary);">${race} ${characterClass}</p>
+          <p class="text-xs" style="color: var(--color-textMuted);">Level ${level} • ${locationName}</p>
+          <p class="text-xs" style="color: var(--color-textMuted);">Last played: ${formatDate(saveData.created_at || saveData.last_played)}</p>
+        </div>
+        <div class="flex-shrink-0 text-right">
+          <div class="text-sm" style="color: var(--color-textHighlighted);">HP: ${hp}/${maxHp}</div>
+          <div class="text-xs" style="color: var(--color-textMuted);">Fatigue: ${fatigue}/10</div>
+        </div>
+      </div>
+    `;
+  }
+
+  return div;
 }
 
 function getCharacterIcon(race, characterClass) {
@@ -253,12 +453,12 @@ function formatDate(dateString) {
   return date.toLocaleDateString();
 }
 
-function startNewGame() {
-  console.log('🎮 Starting new game...');
+function startNewGame(slotId) {
+  console.log('🎮 Starting new game in slot:', slotId);
   showMessage('🎮 Starting new adventure...', 'info');
 
-  // Navigate to character generation page
-  window.location.href = '/new-game';
+  // Navigate to character generation page with slot ID
+  window.location.href = `/new-game?slot=${slotId}`;
 }
 
 function loadSave(saveId) {

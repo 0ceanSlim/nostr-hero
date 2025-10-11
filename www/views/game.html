@@ -84,25 +84,9 @@
   </div>
 
   <!-- JavaScript -->
-  <script src="/res/js/session-manager.js"></script>
-  <script src="/res/js/game-ui.js"></script>
-  <script src="/res/js/auth.js"></script>
-  <script src="/res/js/character-generator.js"></script>
-  <script src="/res/js/game-state.js"></script>
-  <script src="/res/js/game-logic.js"></script>
-  <script src="/res/js/save-system.js"></script>
-  <script src="/res/js/startup.js"></script>
-
   <script>
     function switchTab(tabName) {
-      const tabs = [
-        "equipment",
-        "inventory",
-        "spells",
-        "questlog",
-        "stats",
-        "music",
-      ];
+      const tabs = ["equipment", "inventory", "spells", "questlog", "stats", "music"];
       const panels = {
         equipment: document.getElementById("equipment-panel"),
         inventory: document.getElementById("inventory-panel"),
@@ -120,21 +104,12 @@
         music: document.getElementById("tab-music"),
       };
 
-      // Update all tabs and panels
       tabs.forEach((tab) => {
         if (tab === tabName) {
-          // Active tab - Dark pressed button style
-          buttons[tab].className =
-            "flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white";
-          buttons[tab].style =
-            "background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;";
+          buttons[tab].style = "background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a;";
           panels[tab].classList.remove("hidden");
         } else {
-          // Inactive tabs - Dark raised button style
-          buttons[tab].className =
-            "flex-1 py-3 font-bold text-xs border-r border-gray-700 text-white";
-          buttons[tab].style =
-            "background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;";
+          buttons[tab].style = "background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;";
           panels[tab].classList.add("hidden");
         }
       });
@@ -143,29 +118,21 @@
     // Action button handlers
     function openBadges() {
       showMessage("🏆 Badges system coming soon!", "info");
-      // TODO: Implement badges/achievements display
     }
 
     function openSettings() {
       showMessage("⚙️ Settings menu coming soon!", "info");
-      // TODO: Implement settings panel (volume, graphics, etc.)
     }
 
     function reportBug() {
-      const bugReportUrl =
-        "https://github.com/0ceanSlim/nostr-hero/issues/new?template=bug_report.md";
+      const bugReportUrl = "https://github.com/0ceanSlim/nostr-hero/issues/new?template=bug_report.md";
       showMessage("🐛 Opening bug report...", "info");
       window.open(bugReportUrl, "_blank");
     }
 
     function logout() {
-      if (
-        confirm(
-          "Are you sure you want to logout? Any unsaved progress will be lost."
-        )
-      ) {
+      if (confirm("Are you sure you want to logout? Any unsaved progress will be lost.")) {
         showMessage("🚪 Logging out...", "info");
-        // Clear session and redirect
         if (window.sessionManager) {
           window.sessionManager.logout();
         }
@@ -175,5 +142,14 @@
       }
     }
   </script>
+  <script src="/scripts/core/session-manager.js"></script>
+  <script src="/scripts/pages/game-ui.js"></script>
+  <script src="/scripts/core/auth.js"></script>
+  <script src="/scripts/systems/character-generator.js"></script>
+  <script src="/scripts/systems/game-state.js"></script>
+  <script src="/scripts/systems/game-logic.js"></script>
+  <script src="/scripts/systems/save-system.js"></script>
+  <script src="/scripts/pages/startup.js"></script>
+
   {{end}}
 </div>

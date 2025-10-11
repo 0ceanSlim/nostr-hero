@@ -1,182 +1,241 @@
 {{define "nav-play"}}
-<!-- Play Button with Login Dropdown -->
-<div class="relative">
-  <button
-    id="play-btn"
-    onclick="handlePlayClick()"
-    class="relative group rounded-lg px-8 py-3 border-2 border-transparent bg-green-900 text-white text-xl font-bold tracking-wider transition-all duration-500 overflow-hidden hover:shadow-[0_0_12px_2px] hover:shadow-green-600/50"
-  >
-    <span class="relative z-10 flex items-center gap-2">
-      ⚔️ PLAY
-    </span>
+<!-- Login/Logout Button -->
+<button
+  id="login-btn"
+  onclick="handleLoginClick()"
+  class="login-button pixel-clip px-3 py-2 sm:px-8 sm:py-3 font-bold transition-all hover:scale-105"
+  style="font-size: 0.65rem; background: rgb(46, 125, 50) !important;"
+>
+  <span class="flex items-center gap-1 sm:gap-2 sm:text-base" id="login-btn-text">
+    🔑 Login
+  </span>
+</button>
 
-    <!-- Dark base layer -->
-    <span class="absolute inset-0 bg-green-800/80"></span>
-
-    <!-- Animated energy flow -->
-    <span
-      class="absolute inset-0 opacity-60 group-hover:opacity-40 transition-opacity duration-700 animate-liquid-flow bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-600/70 via-transparent to-green-600/50"
-    ></span>
-
-    <!-- Pulsing outline -->
-    <span
-      class="absolute -inset-[2px] rounded-lg border-2 border-green-600 opacity-50 group-hover:opacity-100 transition-opacity duration-300 animate-pulse-glow-green"
-    ></span>
-  </button>
-
-  <!-- Login Dropdown (Hidden by default) -->
+<!-- Login Modal (Hidden by default) -->
+<div
+  id="login-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideLoginModal()"
+>
   <div
-    id="login-dropdown"
-    class="hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 bg-gray-800 border-2 border-green-600 rounded-lg shadow-xl z-50"
+    class="win95-outset pixel-clip w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    style="border: 4px solid var(--color-textPrimary);"
+    onclick="event.stopPropagation()"
   >
-    <div class="p-6">
-      <h3 class="text-xl font-bold text-green-400 mb-4 text-center">Login to Play</h3>
+    <div class="p-6 sm:p-8">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-2" style="color: var(--color-textHighlighted);">⚔️ Nostr Hero ⚔️</h2>
+        <p class="text-sm sm:text-base" style="color: var(--color-textMuted);">Login with your Nostr identity to save your progress</p>
+      </div>
 
       <!-- Login Methods -->
-      <div class="space-y-3">
-        <button
-          onclick="loginWithExtension()"
-          class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-        >
-          🔗 Browser Extension
-        </button>
-
-        <button
-          onclick="loginWithAmber()"
-          class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-        >
-          📱 Amber (Android)
-        </button>
-
-        <button
-          onclick="showPrivateKeyForm()"
-          class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-        >
-          🗝️ Private Key
-        </button>
-
-        <button
-          onclick="generateNewKeys()"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-        >
-          ✨ Generate New Keys
-        </button>
-      </div>
-
-      <!-- Private Key Form (Initially Hidden) -->
-      <div id="private-key-form" class="hidden mt-4 pt-4 border-t border-gray-600">
-        <div class="space-y-3">
-          <input
-            type="password"
-            class="private-key-input w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-green-400 focus:outline-none"
-            placeholder="nsec... or hex private key"
-          />
-          <div class="flex space-x-2">
-            <button
-              onclick="loginWithPrivateKey()"
-              class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onclick="hidePrivateKeyForm()"
-              class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-        <div class="mt-3 text-sm text-gray-400">
-          <p>⚠️ Your key is encrypted and stored securely for this session only.</p>
-        </div>
-      </div>
-
-      <!-- Generated Keys Display (Initially Hidden) -->
-      <div id="generated-keys-display" class="hidden mt-4 pt-4 border-t border-gray-600">
-        <h4 class="text-lg font-bold text-green-400 mb-3">New Keys Generated!</h4>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Public Key (npub)</label>
-            <div class="bg-gray-700 p-2 rounded text-xs font-mono text-green-400 break-all" id="gen-npub">
-              <!-- Will be populated by JavaScript -->
+      <div class="space-y-4 mb-6">
+        <!-- Browser Extension -->
+        <div class="win95-inset p-4">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">🔗</div>
+            <div class="flex-1">
+              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Browser Extension</h4>
+              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Use Alby, nos2x, or other Nostr browser extensions</p>
+              <button
+                onclick="loginWithExtension()"
+                class="blue-button px-6 py-2 font-medium pixel-clip"
+                style="background: rgb(29, 78, 216) !important;"
+              >
+                Connect Extension
+              </button>
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Private Key (nsec)</label>
-            <div class="bg-gray-700 p-2 rounded text-xs font-mono text-red-400 break-all" id="gen-nsec">
-              <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Amber (Android) -->
+        <div class="win95-inset p-4">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">📱</div>
+            <div class="flex-1">
+              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Amber Signer</h4>
+              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Android app for secure key management</p>
+              <button
+                onclick="loginWithAmber()"
+                class="orange-button px-6 py-2 font-medium pixel-clip"
+                style="background: rgb(234, 88, 12) !important;"
+              >
+                Connect Amber
+              </button>
             </div>
           </div>
-          <div class="text-sm text-yellow-400 bg-yellow-900 bg-opacity-20 p-3 rounded">
-            <p><strong>⚠️ IMPORTANT:</strong> Save your private key (nsec) securely! Anyone with this key can control your account.</p>
-          </div>
-          <div class="flex space-x-2">
-            <button
-              onclick="useGeneratedKeys()"
-              class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors"
-            >
-              Use These Keys
-            </button>
-            <button
-              onclick="hideGeneratedKeys()"
-              class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition-colors"
-            >
-              Cancel
-            </button>
+        </div>
+
+        <!-- Private Key -->
+        <div class="win95-inset p-4">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">🗝️</div>
+            <div class="flex-1">
+              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Private Key</h4>
+              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Login with your nsec or hex private key (encrypted with password for session)</p>
+              <button
+                onclick="showPrivateKeyForm()"
+                class="red-button px-6 py-2 font-medium pixel-clip"
+                style="background: rgb(185, 28, 28) !important;"
+              >
+                Enter Private Key
+              </button>
+            </div>
           </div>
         </div>
+
+        <!-- Generate New Keys -->
+        <div class="win95-inset p-4">
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">✨</div>
+            <div class="flex-1">
+              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">New to Nostr?</h4>
+              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Generate a new keypair and start your adventure</p>
+              <button
+                onclick="generateNewKeys()"
+                class="purple-button px-6 py-2 font-medium pixel-clip"
+                style="background: rgb(126, 34, 206) !important;"
+              >
+                Generate New Keys
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Info Section -->
+      <div class="text-xs text-center mb-4" style="color: var(--color-textMuted);">
+        <p>🔐 Your keys are never sent to our servers</p>
+        <p class="mt-1">All signing happens locally in your browser or signer app</p>
       </div>
 
       <!-- Close Button -->
       <button
-        onclick="hideLoginDropdown()"
-        class="mt-4 w-full text-gray-400 hover:text-white text-sm transition-colors"
+        onclick="hideLoginModal()"
+        class="w-full win95-button pixel-clip px-4 py-2 text-sm font-medium"
+        style="color: var(--color-textPrimary);"
       >
-        Cancel
+        Close
       </button>
     </div>
   </div>
 </div>
 
-<style>
-  @keyframes pulse-glow-green {
-    0% {
-      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-      border-width: 2px;
-    }
-    70% {
-      box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-      border-width: 1px;
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-      border-width: 2px;
-    }
-  }
+<!-- Private Key Modal (Initially Hidden) -->
+<div
+  id="private-key-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hidePrivateKeyForm()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-md"
+    style="border: 4px solid var(--color-textPrimary);"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-6">
+      <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-textHighlighted);">🗝️ Enter Private Key</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-textSecondary);">Private Key</label>
+          <input
+            type="password"
+            id="private-key-modal-input"
+            class="w-full win95-inset px-3 py-2 focus:outline-none font-mono text-sm"
+            style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
+            placeholder="nsec1... or hex private key"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-textSecondary);">Encryption Password</label>
+          <input
+            type="password"
+            id="encryption-password-modal-input"
+            class="w-full win95-inset px-3 py-2 focus:outline-none text-sm"
+            style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
+            placeholder="Password to encrypt your key"
+          />
+        </div>
+        <div class="text-xs win95-inset p-3" style="color: var(--color-textMuted);">
+          <p>🔒 Your private key will be encrypted with your password and stored securely for this session only.</p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            onclick="loginWithPrivateKeyAndPassword()"
+            class="flex-1 login-button pixel-clip px-4 py-3 font-medium"
+            style="background: rgb(46, 125, 50) !important;"
+          >
+            Login
+          </button>
+          <button
+            onclick="hidePrivateKeyForm()"
+            class="flex-1 win95-button pixel-clip px-4 py-3"
+            style="color: var(--color-textPrimary);"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  @keyframes liquid-flow {
-    0% {
-      background-position: 0% 50%;
-      background-size: 400% 400%;
-    }
-    50% {
-      background-position: 100% 50%;
-      background-size: 500% 500%;
-    }
-    100% {
-      background-position: 0% 50%;
-      background-size: 400% 400%;
-    }
-  }
-
-  .animate-pulse-glow-green {
-    animation: pulse-glow-green 2s infinite;
-  }
-
-  .animate-liquid-flow {
-    animation: liquid-flow 6s ease infinite;
-  }
-</style>
+<!-- Generated Keys Modal (Initially Hidden) -->
+<div
+  id="generated-keys-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideGeneratedKeys()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    style="border: 4px solid var(--color-textPrimary);"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-6">
+      <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-textHighlighted);">✨ New Keys Generated!</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold mb-2" style="color: rgb(59, 130, 246);">📄 Public Key (npub)</label>
+          <div class="flex gap-2">
+            <div class="flex-1 win95-inset p-3 text-xs font-mono break-all" style="color: rgb(59, 130, 246); background: var(--color-bgPrimary);" id="gen-npub"></div>
+            <button onclick="copyToClipboard('gen-npub', '📄 Public key')" class="blue-button px-4 py-2 pixel-clip text-sm" style="background: rgb(29, 78, 216) !important;">Copy</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-bold mb-2" style="color: rgb(239, 68, 68);">🔒 Private Key (nsec)</label>
+          <div class="flex gap-2">
+            <div class="flex-1 win95-inset p-3 text-xs font-mono break-all" style="color: rgb(239, 68, 68); background: var(--color-bgPrimary);" id="gen-nsec"></div>
+            <button onclick="copyToClipboard('gen-nsec', '🔒 Private key')" class="red-button px-4 py-2 pixel-clip text-sm" style="background: rgb(185, 28, 28) !important;">Copy</button>
+          </div>
+        </div>
+        <div class="text-sm win95-inset p-4" style="background: var(--color-bgTertiary); color: var(--color-textHighlighted);">
+          <p class="font-bold">⚠️ CRITICAL - SAVE YOUR PRIVATE KEY!</p>
+          <p class="mt-2">This is the ONLY way to access your account. Copy and store it in a password manager or write it down securely. Anyone with this key controls your account.</p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            onclick="useGeneratedKeys()"
+            class="flex-1 login-button pixel-clip px-4 py-3 font-medium"
+            style="background: rgb(46, 125, 50) !important;"
+          >
+            I Saved It - Continue
+          </button>
+          <button
+            onclick="hideGeneratedKeys()"
+            class="flex-1 win95-button pixel-clip px-4 py-3"
+            style="color: var(--color-textPrimary);"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // Global variable to store generated private key
@@ -184,60 +243,148 @@ if (typeof generatedPrivateKey === 'undefined') {
   var generatedPrivateKey = null;
 }
 
-function handlePlayClick() {
+function handleLoginClick() {
   // Check if user is already logged in
   if (window.sessionManager && window.sessionManager.isAuthenticated()) {
-    // User is logged in, proceed to save selection
-    showSaveSelection();
+    // User is logged in, logout
+    handleLogoutFromButton();
   } else {
-    // User not logged in, show login dropdown
-    showLoginDropdown();
+    // User not logged in, show login modal
+    showLoginModal();
   }
 }
 
-function showLoginDropdown() {
-  const dropdown = document.getElementById('login-dropdown');
-  dropdown.classList.remove('hidden');
-
-  // Close dropdown when clicking outside
-  setTimeout(() => {
-    const closeDropdown = (event) => {
-      if (!dropdown.contains(event.target) && !document.getElementById('play-btn').contains(event.target)) {
-        hideLoginDropdown();
-        document.removeEventListener('click', closeDropdown);
-      }
-    };
-    document.addEventListener('click', closeDropdown);
-  }, 100);
+// Handle logout from the button
+async function handleLogoutFromButton() {
+  if (window.sessionManager) {
+    try {
+      await window.sessionManager.logout();
+      showMessage('✅ Logged out successfully', 'success');
+      updateLoginButtonState();
+      // Reload or redirect after logout
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    } catch (error) {
+      console.error('Logout error:', error);
+      showMessage('❌ Logout failed: ' + error.message, 'error');
+    }
+  }
 }
 
-function hideLoginDropdown() {
-  document.getElementById('login-dropdown').classList.add('hidden');
+// Update button state based on authentication status
+function updateLoginButtonState() {
+  const button = document.getElementById('login-btn');
+  const buttonText = document.getElementById('login-btn-text');
+
+  if (!button || !buttonText) return;
+
+  if (window.sessionManager && window.sessionManager.isAuthenticated()) {
+    // User is logged in - show logout button
+    button.classList.remove('login-button');
+    button.classList.add('logout-button');
+    button.style.cssText = 'font-size: 0.65rem; background: rgb(183, 28, 28) !important;';
+    buttonText.innerHTML = '🚪 Logout';
+  } else {
+    // User is not logged in - show login button
+    button.classList.remove('logout-button');
+    button.classList.add('login-button');
+    button.style.cssText = 'font-size: 0.65rem; background: rgb(46, 125, 50) !important;';
+    buttonText.innerHTML = '🔑 Login';
+  }
+}
+
+function showLoginModal() {
+  const modal = document.getElementById('login-modal');
+  modal.classList.remove('hidden');
+}
+
+function hideLoginModal() {
+  document.getElementById('login-modal').classList.add('hidden');
   hidePrivateKeyForm();
   hideGeneratedKeys();
 }
 
 function showPrivateKeyForm() {
-  document.getElementById('private-key-form').classList.remove('hidden');
+  hideLoginModal();
+  document.getElementById('private-key-modal').classList.remove('hidden');
 }
 
 function hidePrivateKeyForm() {
-  document.getElementById('private-key-form').classList.add('hidden');
-  document.querySelector('.private-key-input').value = '';
+  document.getElementById('private-key-modal').classList.add('hidden');
+  const input = document.getElementById('private-key-modal-input');
+  const passwordInput = document.getElementById('encryption-password-modal-input');
+  if (input) input.value = '';
+  if (passwordInput) passwordInput.value = '';
+}
+
+// Login with private key and password
+async function loginWithPrivateKeyAndPassword() {
+  if (!window.sessionManager) {
+    showMessage('❌ Session manager not available', 'error');
+    return;
+  }
+
+  const privateKey = document.getElementById('private-key-modal-input')?.value?.trim();
+  const password = document.getElementById('encryption-password-modal-input')?.value?.trim();
+
+  if (!privateKey) {
+    showMessage('❌ Please enter your private key', 'error');
+    return;
+  }
+
+  if (!password) {
+    showMessage('❌ Please enter an encryption password', 'error');
+    return;
+  }
+
+  try {
+    showMessage('🗝️ Logging in with encrypted private key...', 'info');
+
+    // Pass password as metadata for encryption
+    await window.sessionManager.loginWithPrivateKey(privateKey, { password });
+
+    // Clear inputs for security
+    document.getElementById('private-key-modal-input').value = '';
+    document.getElementById('encryption-password-modal-input').value = '';
+
+    hidePrivateKeyForm();
+    // Success handling is done by event listeners in auth.js
+  } catch (error) {
+    console.error('Private key login error:', error);
+    showMessage('❌ Private key login failed: ' + error.message, 'error');
+  }
+}
+
+// Copy to clipboard function
+function copyToClipboard(elementId, label) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const text = element.textContent;
+  if (!text) return;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showMessage(`✅ ${label} copied to clipboard!`, 'success');
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    showMessage('❌ Failed to copy to clipboard', 'error');
+  });
 }
 
 function hideGeneratedKeys() {
-  document.getElementById('generated-keys-display').classList.add('hidden');
+  document.getElementById('generated-keys-modal').classList.add('hidden');
   document.getElementById('gen-npub').textContent = '';
   document.getElementById('gen-nsec').textContent = '';
   generatedPrivateKey = null;
 }
 
 function showGeneratedKeys(keyPair) {
+  hideLoginModal();
   document.getElementById('gen-npub').textContent = keyPair.npub;
   document.getElementById('gen-nsec').textContent = keyPair.nsec;
   generatedPrivateKey = keyPair.nsec;
-  document.getElementById('generated-keys-display').classList.remove('hidden');
+  document.getElementById('generated-keys-modal').classList.remove('hidden');
 }
 
 function useGeneratedKeys() {
@@ -293,7 +440,7 @@ async function loginWithPrivateKey(privateKeyParam) {
       document.querySelector('.private-key-input').value = '';
     }
 
-    hideLoginDropdown();
+    hideLoginModal();
     // Success handling is done by event listeners in auth.js
   } catch (error) {
     console.error('Private key login error:', error);
@@ -304,6 +451,34 @@ async function loginWithPrivateKey(privateKeyParam) {
 function showSaveSelection() {
   // Navigate to save selection page
   window.location.href = '/saves';
+}
+
+// Initialize button state when page loads
+if (typeof window !== 'undefined') {
+  // Update button state on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateLoginButtonState);
+  } else {
+    updateLoginButtonState();
+  }
+
+  // Listen for authentication state changes
+  if (window.sessionManager) {
+    window.sessionManager.on('authenticationSuccess', updateLoginButtonState);
+    window.sessionManager.on('loggedOut', updateLoginButtonState);
+    window.sessionManager.on('sessionReady', updateLoginButtonState);
+  } else {
+    // Wait for session manager to be available
+    const checkSessionManager = setInterval(() => {
+      if (window.sessionManager) {
+        clearInterval(checkSessionManager);
+        window.sessionManager.on('authenticationSuccess', updateLoginButtonState);
+        window.sessionManager.on('loggedOut', updateLoginButtonState);
+        window.sessionManager.on('sessionReady', updateLoginButtonState);
+        updateLoginButtonState();
+      }
+    }, 100);
+  }
 }
 </script>
 {{end}}

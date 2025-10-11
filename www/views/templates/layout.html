@@ -4,17 +4,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--
-    CDNs are used for ease of development. In a Production enviornment, 
-    build a proper minified custom CSS using the Tailwind CLI tool and serve
-    the latest available minified htmx and custom css directly from your server.
-    To download a copy of htmx: https://htmx.org/docs/#download-a-copy
-
-    <link href="/static/tailwind.min.css" rel="stylesheet" />
-    <link href="/static/htmx.min.js">
-    -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="/style/custom.min.css" rel="stylesheet" />
+    <!-- Dogica Font -->
+    <link href="/res/style/fonts.css" rel="stylesheet" />
+    <!-- Tailwind CSS compiled output -->
+    <link href="/res/style/output.css" rel="stylesheet" />
     <link
       rel="stylesheet"
       href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.3.2/build/styles/shades-of-purple.min.css"
@@ -54,19 +47,16 @@
         }
       }
       body {
-        font-family: "Pixelify Sans";
+        font-family: "Dogica", monospace;
+        font-size: 14px;
+        line-height: 1.5;
       }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
     <title>{{template "title"}} - {{.Title}}</title>
   </head>
   <body
-    class="max-w-screen-lg px-4 mx-auto text-center bg-gray-900 md:px-8 text-textPrimary custom-scrollbar"
+    class="max-w-screen-lg px-4 mx-auto text-center md:px-8 custom-scrollbar"
+    style="background-color: var(--color-bgPrimary); color: var(--color-textPrimary);"
   >
     {{template "header" .}}
     <div

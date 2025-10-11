@@ -1,20 +1,13 @@
 {{define "nav-other"}}
-<li class="relative rounded-md group text-textPrimary">
-  <a
-    href="#"
+<div class="relative group">
+  <button
     onclick="toggleDropdown('otherDropdown')"
-    class="flex items-center justify-between p-2 space-x-2 hover:rounded-md hover:text-textHighlighted"
+    class="pixel-button pixel-clip rounded px-2 py-2 sm:px-6 sm:py-3 font-bold flex items-center gap-1 sm:gap-2 hover:scale-105 transition-all"
+    style="color: var(--color-textPrimary); font-size: 0.65rem; border: 4px solid var(--color-textPrimary);"
   >
-    <div class="w-12 h-12 md:w-14 md:h-14">
-      <img
-        class="object-contain w-full h-full"
-        src="/res/img/otherstuff.png"
-        alt="otherstuff icon"
-      />
-    </div>
-    <span class="text-sm md:text-base">Other Stuff</span>
+    <span class="sm:text-base">⚙️ Other Stuff</span>
     <svg
-      class="w-4 h-4 ml-2"
+      class="w-4 h-4"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -27,103 +20,157 @@
         d="M19 9l-7 7-7-7"
       />
     </svg>
-  </a>
+  </button>
 
   <!-- Dropdown container -->
   <div
     id="otherDropdown"
-    class="absolute left-0 hidden mt-2 bg-gray-700 border rounded-md shadow-lg lg:left-auto lg:group-hover:block lg:m-2 border-bgInverted"
-    style="min-width: 12rem; z-index: 10"
+    class="absolute right-0 hidden mt-2 win95-outset pixel-clip shadow-lg"
+    style="min-width: 14rem; z-index: 50; border: 4px solid var(--color-textPrimary);"
   >
-    <!-- Pseudo-element for hover gap -->
-    <div class="absolute w-full h-3 -top-3"></div>
     <ul class="py-2">
       <li>
         <a
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          class="block px-4 py-2 whitespace-nowrap transition-colors hover:bg-opacity-20"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
           hx-trigger="click"
           href="/"
           hx-get="/"
           hx-push-url="/"
           hx-swap="outerHTML"
           hx-target="body"
-          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
+        >
           ⚔️ Home
         </a>
       </li>
-    </ul>
-    <ul class="py-2">
-      <li>{{template "play"}}</li>
-    </ul>
-    <ul class="py-2">
       <li>
         <a
           href="/discover"
           hx-push-url="/discover"
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          class="block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
           hx-trigger="click"
           hx-get="/discover"
           hx-swap="outerHTML"
           hx-target="body"
-          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
+        >
           ⛏️ Discover
         </a>
       </li>
-    </ul>
-    <ul class="py-2">
       <li>
         <a
           href="/alpha-registry"
           hx-push-url="/alpha-registry"
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          class="block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
           hx-trigger="click"
           hx-get="/alpha-registry"
           hx-swap="outerHTML"
           hx-target="body"
-          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" /> 📜
-          Alpha Registry
+        >
+          📜 Alpha Registry
         </a>
       </li>
-    </ul>
-    <ul class="py-2">
       <li>
         <a
           href="/legacy-registry"
           hx-push-url="/legacy-registry"
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
+          class="block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
           hx-trigger="click"
           hx-get="/legacy-registry"
           hx-swap="outerHTML"
           hx-target="body"
-          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" /> 🗡️
-          Legacy Registry
+        >
+          🗡️ Legacy Registry
         </a>
       </li>
-    </ul>
-    <ul class="py-2">
       <li>
         <a
           href="https://github.com/0ceanSlim/nostr-hero"
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
-          ><img
-            class="inline-block h-6 mx-1 align-text-bottom"
-            src="https://images.icon-icons.com/2157/PNG/512/github_git_hub_logo_icon_132878.png"
-          />
-          I'm Open Source !
+          class="block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
+          target="_blank"
+        >
+          💻 GitHub
         </a>
       </li>
-    </ul>
-
-    <ul class="py-2">
       <li>
         <a
           href="https://happytavern.co"
-          class="block px-4 py-2 whitespace-nowrap hover:text-textHighlighted"
-          ><img class="inline-block h-6 mx-1 align-text-bottom" src="" />
-          🍻 Visit Happy Tavern
+          class="block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
+          target="_blank"
+        >
+          🍻 Happy Tavern
         </a>
+      </li>
+      <li id="logout-item" class="hidden">
+        <button
+          onclick="handleLogout()"
+          class="w-full text-left block px-4 py-2 whitespace-nowrap transition-colors"
+          style="color: var(--color-textPrimary);"
+          onmouseover="this.style.backgroundColor='var(--color-textHighlighted)'; this.style.color='var(--color-bgPrimary)'"
+          onmouseout="this.style.backgroundColor=''; this.style.color='var(--color-textPrimary)'"
+        >
+          🚪 Logout
+        </button>
       </li>
     </ul>
   </div>
-</li>
+</div>
+
+<script>
+// Show/hide logout button based on authentication status
+function updateAuthUI() {
+  const logoutItem = document.getElementById('logout-item');
+  if (logoutItem && window.sessionManager && window.sessionManager.isAuthenticated()) {
+    logoutItem.classList.remove('hidden');
+  } else if (logoutItem) {
+    logoutItem.classList.add('hidden');
+  }
+}
+
+// Handle logout
+async function handleLogout() {
+  if (window.sessionManager) {
+    try {
+      await window.sessionManager.logout();
+      showMessage('✅ Logged out successfully', 'success');
+      // Reload or redirect after logout
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    } catch (error) {
+      console.error('Logout error:', error);
+      showMessage('❌ Logout failed: ' + error.message, 'error');
+    }
+  }
+}
+
+// Update UI on page load and auth changes
+if (typeof window !== 'undefined') {
+  // Initial check
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateAuthUI);
+  } else {
+    updateAuthUI();
+  }
+
+  // Listen for auth state changes
+  window.addEventListener('auth-changed', updateAuthUI);
+}
+</script>
 {{end}}

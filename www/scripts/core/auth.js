@@ -162,9 +162,15 @@ function showKeyLogin() {
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Private Key (nsec or hex)</label>
-                    <input type="password" id="private-key-input"
+                    <input type="password" id="auth-private-key-input"
                            class="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-yellow-400"
                            placeholder="nsec1... or hex">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Encryption Password</label>
+                    <input type="password" id="auth-encryption-password-input"
+                           class="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-yellow-400"
+                           placeholder="Password to encrypt your key">
                 </div>
                 <div class="flex space-x-3">
                     <button onclick="loginWithPrivateKey()"
@@ -178,7 +184,7 @@ function showKeyLogin() {
                 </div>
             </div>
             <div class="mt-4 text-sm text-gray-400">
-                <p>⚠️ Your private key will be used for this session only and stored securely.</p>
+                <p>⚠️ Your private key will be encrypted with your password and stored securely for this session only.</p>
             </div>
         </div>
     `;
@@ -199,20 +205,28 @@ async function loginWithPrivateKey() {
         return;
     }
 
-    const privateKeyInput = document.getElementById('private-key-input');
-    const privateKey = privateKeyInput.value.trim();
+    const privateKeyInput = document.getElementById('auth-private-key-input');
+    const passwordInput = document.getElementById('auth-encryption-password-input');
+    const privateKey = privateKeyInput?.value?.trim();
+    const password = passwordInput?.value?.trim();
 
     if (!privateKey) {
         showMessage('❌ Please enter your private key', 'error');
         return;
     }
 
+    if (!password) {
+        showMessage('❌ Please enter an encryption password', 'error');
+        return;
+    }
+
     try {
         showMessage('🗝️ Logging in with private key...', 'info');
-        await window.sessionManager.loginWithPrivateKey(privateKey);
+        await window.sessionManager.loginWithPrivateKey(privateKey, { password });
 
-        // Clear the input for security
+        // Clear the inputs for security
         privateKeyInput.value = '';
+        passwordInput.value = '';
         // Success handling is done by event listeners
     } catch (error) {
         console.error('Private key login error:', error);

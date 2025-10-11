@@ -22,3 +22,7 @@ pixellab-gen.exe
 .air.toml
 /.claude
 /data
+
+/www/res/style/output.css
+
+/.vscode
