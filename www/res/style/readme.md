@@ -37,13 +37,22 @@ tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -
 tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --minify
 ```
 
-### Watch Mode
+### Watch Mode (Standalone)
 
-For manual development without Air:
+For CSS-only development without Air, run the Tailwind watcher:
 
 ```bash
+# From project root
 tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --watch
 ```
+
+This watches for changes in:
+- `www/views/**/*.html`
+- `www/scripts/**/*.js`
+
+And automatically rebuilds `output.css` when you modify HTML or JavaScript files that contain Tailwind classes.
+
+**Note:** The `-c` flag is required to specify the config file location, which tells Tailwind where to find your content files for proper class scanning.
 
 ## Theme System
 
