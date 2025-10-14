@@ -177,11 +177,8 @@ async function handlePackSelection(startingEquipment) {
 
   // Show container with fade-in
   container.classList.remove('hidden', 'fade-out');
-  // First ensure we're not in fade-in state
   container.classList.remove('fade-in');
-  // Force reflow to ensure classes are applied
   void container.offsetHeight;
-  // Now add fade-in to trigger transition
   container.classList.add('fade-in');
 
   if (packChoice) {
@@ -376,22 +373,13 @@ async function handlePackSelection(startingEquipment) {
     });
   }
 
-  // Animate text out first (wipe down)
-  const textElements = content.querySelectorAll('.scene-text, .pixel-continue-btn, .bg-gray-800');
-  textElements.forEach(el => {
-    el.style.animation = 'wipeOut 0.6s ease-in forwards';
-  });
-
-  // Wait for text animation to complete
-  await new Promise(resolve => setTimeout(resolve, 600));
-
-  // Clear content
-  content.innerHTML = '';
-
-  // Then fade out the scene
+  // Fade out the scene
   container.classList.remove('fade-in');
   container.classList.add('fade-out');
   await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Clear content
+  content.innerHTML = '';
 
   // Fully reset container for next scene
   container.classList.remove('fade-in', 'fade-out');
@@ -636,9 +624,11 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
     currentBackButton = backBtn;
   }
 
-  // Show scene with slide in animation (from right if moving forward, from left if coming back)
+  // Ensure container is visible but content is ready before animating
   container.classList.remove('hidden');
   container.style.opacity = '1';
+  // Wait a frame to ensure DOM is ready
+  await new Promise(resolve => requestAnimationFrame(resolve));
   content.style.animation = 'slideInFromRight 0.3s ease-out';
 
   // Wait for confirmation

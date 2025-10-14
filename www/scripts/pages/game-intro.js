@@ -699,17 +699,22 @@ async function showGivenItemsScene(givenItems) {
   continueBtn.textContent = 'Continue →';
   content.appendChild(continueBtn);
 
-  // Show container (no hidden class, just slide in)
-  container.classList.remove('hidden');
-  container.style.opacity = '1';
-  content.style.animation = 'slideInFromRight 0.3s ease-out';
+  // Show container with fade-in
+  container.classList.remove('hidden', 'fade-out');
+  // First ensure we're not in fade-in state
+  container.classList.remove('fade-in');
+  // Force reflow to ensure classes are applied
+  void container.offsetHeight;
+  // Now add fade-in to trigger transition
+  container.classList.add('fade-in');
 
   // Wait for user to click Continue
   await waitForButtonClick(continueBtn);
 
-  // Swipe out to the right
-  content.style.animation = 'wipeRight 0.3s ease-in';
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // Fade out the scene
+  container.classList.remove('fade-in');
+  container.classList.add('fade-out');
+  await new Promise(resolve => setTimeout(resolve, 800));
 
   // Clear content
   content.innerHTML = '';
@@ -818,10 +823,14 @@ async function showStartingSpells(character) {
   continueBtn.textContent = 'Continue →';
   content.appendChild(continueBtn);
 
-  // Show container
-  container.classList.remove('hidden');
-  container.style.opacity = '1';
-  content.style.animation = 'slideInFromRight 0.3s ease-out';
+  // Show container with fade-in
+  container.classList.remove('hidden', 'fade-out');
+  // First ensure we're not in fade-in state
+  container.classList.remove('fade-in');
+  // Force reflow to ensure classes are applied
+  void container.offsetHeight;
+  // Now add fade-in to trigger transition
+  container.classList.add('fade-in');
 
   // Wait for user to click Continue
   await waitForButtonClick(continueBtn);
