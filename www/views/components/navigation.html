@@ -26,11 +26,18 @@
       border: 4px solid var(--color-textPrimary);
     }
   }
+  @media (min-width: 1024px) {
+    #navbar.win95-inset {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+  }
 </style>
 
 <nav
   id="navbar"
-  class="hidden lg:flex flex-col lg:flex-row w-full lg:w-auto win95-inset lg:bg-transparent"
+  class="hidden lg:flex flex-col lg:flex-row w-full lg:w-auto win95-inset"
 >
   <ul
     class="flex flex-col lg:flex-row justify-center items-center lg:space-x-4 space-y-4 lg:space-y-0 px-4 lg:px-0"

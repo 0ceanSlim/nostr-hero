@@ -91,9 +91,11 @@ async function showScene(config) {
     if (config.isQuote) {
       // Quote styling - large, centered, yellow
       textElement.className += ' text-3xl md:text-5xl font-bold text-yellow-400 leading-relaxed';
+      textElement.style.textShadow = '3px 3px 6px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.95), 1px 1px 3px rgba(0, 0, 0, 1)';
     } else {
-      // Normal scene text - slightly larger size
+      // Normal scene text - slightly larger size with dark shadow
       textElement.className += ' text-2xl md:text-3xl leading-relaxed';
+      textElement.style.textShadow = '3px 3px 6px rgba(0, 0, 0, 1), 0 0 12px rgba(0, 0, 0, 0.95), 1px 1px 3px rgba(0, 0, 0, 1)';
     }
 
     textElement.textContent = config.text;
@@ -254,20 +256,23 @@ async function startIntroSequence() {
   // 1. Scene 1 - Rainy Night
   await showScene({
     text: introData.scene1.text,
-    image: introData.scene1.image
+    image: introData.scene1.image,
+    buttonDelay: introData.scene1.duration
   });
 
   // 2. Scene 2 - Caretaker's Home
   await showScene({
     text: introData.scene2.text,
-    image: introData.scene2.image
+    image: introData.scene2.image,
+    buttonDelay: introData.scene2.duration
   });
 
   // 3. Final Words (black screen quote)
   console.log('🎬 Step 3: Final Words');
   await showScene({
     text: introData.final_words.text,
-    isQuote: true
+    isQuote: true,
+    buttonDelay: introData.final_words.duration
   });
 
   // 4. Background Intro - MOVED BEFORE letter intro
@@ -280,7 +285,8 @@ async function startIntroSequence() {
     console.log('🎬 Showing background intro scene');
     await showScene({
       text: bgIntro.text,
-      image: bgIntro.image
+      image: bgIntro.image,
+      buttonDelay: bgIntro.duration
     });
   } else {
     console.warn('⚠️ No background intro found for:', generatedCharacter.background);
@@ -290,7 +296,8 @@ async function startIntroSequence() {
   console.log('🎬 Step 5: Letter Intro');
   await showScene({
     text: introData.letter_intro.text,
-    image: introData.letter_intro.image
+    image: introData.letter_intro.image,
+    buttonDelay: introData.letter_intro.duration
   });
 
   // 6. Letter Reading (scene 4a)
@@ -304,62 +311,61 @@ async function startIntroSequence() {
     await showScene({
       text: bgLetter.text,
       image: bgLetter.image,
-      isLetter: true
+      isLetter: true,
+      buttonDelay: bgLetter.duration
     });
   } else {
     console.warn('⚠️ No background letter found for:', generatedCharacter.background);
   }
 
-  // 7. Equipment Intro (class-based) - narrative + quote
+  // 7. Spell knowledge intro (if spellcaster)
+  if (generatedCharacter.spells && generatedCharacter.spells.length > 0) {
+    await showScene({
+      text: introData.spell_knowledge.text,
+      image: introData.spell_knowledge.image,
+      buttonDelay: introData.spell_knowledge.duration
+    });
+  }
+
+  // 8. Show starting spells (if spellcaster)
+  await showStartingSpells(generatedCharacter);
+
+  // 9. Scene 5 - Equipment ready (AFTER spell scenes)
+  await showScene({
+    text: introData.scene5.text,
+    image: introData.scene5.image,
+    buttonDelay: introData.scene5.duration
+  });
+
+  // 10. Equipment Intro (class-based) - narrative + quote (AFTER scene 5)
   const equipCategory = getEquipmentCategory(generatedCharacter.class);
   const equipIntro = introData.equipment_intros[equipCategory];
   if (equipIntro) {
     // Show narrative
     await showScene({
       text: equipIntro.text,
-      image: equipIntro.image
+      image: equipIntro.image,
+      buttonDelay: equipIntro.duration
     });
 
     // Show quote if exists
     if (equipIntro.quote) {
       await showScene({
         text: equipIntro.quote,
-        isQuote: true
+        isQuote: true,
+        buttonDelay: equipIntro.quote_duration
       });
     }
   }
 
-  // 8. Scene 5 - Equipment ready
-  await showScene({
-    text: introData.scene5.text,
-    image: introData.scene5.image
-  });
+  // 11. Show items provided first
+  await showGivenItemsScene(startingEquipment.inventory);
 
-  // 9. Scene 5a - Preparation
-  await showScene({
-    text: introData.scene5a.text,
-    image: introData.scene5a.image
-  });
-
-  // 10. Spell knowledge intro (if spellcaster)
-  if (generatedCharacter.spells && generatedCharacter.spells.length > 0) {
-    await showScene({
-      text: introData.spell_knowledge.text,
-      image: introData.spell_knowledge.image
-    });
-  }
-
-  // 11. Show starting spells (if spellcaster) - MOVED BEFORE equipment
-  await showStartingSpells(generatedCharacter);
-
-  // 11. Show equipment selection
+  // 12. Show equipment selection
   await startEquipmentSelection(startingEquipment);
 
   // Get selected equipment
   selectedEquipment = getSelectedEquipment();
-
-  // 12. Show items given in addition to choices
-  await showGivenItemsScene(startingEquipment.inventory);
 
   // Continue with remaining scenes
   await continueAfterEquipment();
@@ -371,22 +377,31 @@ async function startIntroSequence() {
  */
 async function continueAfterEquipment() {
 
-  // 12. Scene 6 - Pack note (moved before pack selection)
+  // 12. Scene 5a - Preparation (as dawn approaches) - AFTER equipment selection
+  await showScene({
+    text: introData.scene5a.text,
+    image: introData.scene5a.image,
+    buttonDelay: introData.scene5a.duration
+  });
+
+  // 13. Scene 6 - Pack note (moved before pack selection)
   await showScene({
     text: introData.scene6.text,
-    image: introData.scene6.image
+    image: introData.scene6.image,
+    buttonDelay: introData.scene6.duration
   });
 
-  // 13. Pack selection or display
+  // 14. Pack selection or display
   await handlePackSelection(startingEquipment);
 
-  // 14. Departure
+  // 15. Departure
   await showScene({
     text: introData.departure.text,
-    image: introData.departure.image
+    image: introData.departure.image,
+    buttonDelay: introData.departure.duration
   });
 
-  // 15. Final Text + Begin Journey button
+  // 16. Final Text + Begin Journey button
   await showFinalScene(
     introData.final_text.text,
     'Begin Journey',
@@ -724,30 +739,37 @@ async function showStartingSpells(character) {
   content.innerHTML = '';
   content.style.zIndex = '10';
 
-  // Title
+  // Make content fit viewport with flex layout
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+  content.style.height = '100vh';
+  content.style.padding = '2rem 1rem';
+  content.style.boxSizing = 'border-box';
+
+  // Title - smaller
   const title = document.createElement('h2');
-  title.className = 'text-4xl mb-4 text-center';
+  title.className = 'text-2xl mb-2 text-center';
   title.textContent = 'Your Magical Arsenal';
   content.appendChild(title);
 
-  // Description
+  // Description - smaller and more compact
   const description = document.createElement('div');
-  description.className = 'text-lg mb-6 text-center max-w-3xl mx-auto';
-  description.innerHTML = `As a ${character.class}, you begin your journey with knowledge of these spells. You can prepare them for use in your spell slots.`;
+  description.className = 'text-sm mb-3 text-center max-w-3xl mx-auto';
+  description.innerHTML = `As a ${character.class}, you begin your journey with knowledge of these spells.`;
   content.appendChild(description);
 
-  // Spell Slots Info
+  // Spell Slots Info - more compact
   if (character.spell_slots) {
     const slotsInfo = document.createElement('div');
-    slotsInfo.className = 'bg-gray-800 rounded-lg p-4 mb-6 max-w-2xl mx-auto border-2 border-purple-600';
+    slotsInfo.className = 'bg-gray-800 rounded-lg p-2 mb-3 max-w-2xl mx-auto border-2 border-purple-600';
 
     const slotsTitle = document.createElement('div');
-    slotsTitle.className = 'text-xl font-bold mb-2 text-purple-400 text-center';
+    slotsTitle.className = 'text-sm font-bold mb-1 text-purple-400 text-center';
     slotsTitle.textContent = 'Spell Slots Available';
     slotsInfo.appendChild(slotsTitle);
 
     const slotsGrid = document.createElement('div');
-    slotsGrid.className = 'flex justify-center gap-4 text-sm';
+    slotsGrid.className = 'flex justify-center gap-3 text-xs';
 
     // spell_slots is now an object of arrays, not numbers
     Object.entries(character.spell_slots).forEach(([level, slots]) => {
@@ -755,7 +777,7 @@ async function showStartingSpells(character) {
         const slotDiv = document.createElement('div');
         slotDiv.className = 'text-center';
         const levelName = level === 'cantrips' ? 'Cantrips' : `Level ${level.replace('level_', '')}`;
-        slotDiv.innerHTML = `<div class="text-gray-400">${levelName}</div><div class="text-2xl font-bold text-purple-300">${slots.length}</div>`;
+        slotDiv.innerHTML = `<div class="text-gray-400 text-xs">${levelName}</div><div class="text-lg font-bold text-purple-300">${slots.length}</div>`;
         slotsGrid.appendChild(slotDiv);
       }
     });
@@ -764,10 +786,11 @@ async function showStartingSpells(character) {
     content.appendChild(slotsInfo);
   }
 
-  // Spells container - scrollable with max height
+  // Spells container - flexible height to fill remaining space
   const spellsContainer = document.createElement('div');
-  spellsContainer.className = 'flex flex-wrap justify-center gap-4 mb-6 max-w-5xl mx-auto overflow-y-auto';
-  spellsContainer.style.maxHeight = '400px';
+  spellsContainer.className = 'flex flex-wrap justify-center gap-3 mb-3 max-w-5xl mx-auto overflow-y-auto';
+  spellsContainer.style.flex = '1';
+  spellsContainer.style.minHeight = '0';
 
   // Load and display each spell
   console.log(`Loading ${character.spells.length} spells for display`);
@@ -803,12 +826,20 @@ async function showStartingSpells(character) {
   // Wait for user to click Continue
   await waitForButtonClick(continueBtn);
 
-  // Swipe out
-  content.style.animation = 'wipeRight 0.3s ease-in';
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // Fade out
+  container.classList.remove('fade-in');
+  container.classList.add('fade-out');
+  await new Promise(resolve => setTimeout(resolve, 800));
 
   // Clear content
   content.innerHTML = '';
+
+  // Reset content styles
+  content.style.display = '';
+  content.style.flexDirection = '';
+  content.style.height = '';
+  content.style.padding = '';
+  content.style.boxSizing = '';
 
   // Reset container
   container.classList.remove('fade-in', 'fade-out');
@@ -891,7 +922,9 @@ async function createSpellCard(spellId) {
     const emoji = damageEmojis[damageType] || '⚔️';
 
     const damageBadge = document.createElement('div');
-    damageBadge.className = 'absolute top-1 right-1 bg-red-700 text-red-100 font-bold text-xs px-2 py-1 rounded';
+    damageBadge.className = 'absolute top-1 right-1 bg-red-700 text-red-100 font-bold px-1 py-0.5 rounded';
+    damageBadge.style.fontSize = '7px';
+    damageBadge.style.lineHeight = '1';
     damageBadge.textContent = `${spell.damage} ${emoji}`;
     card.appendChild(damageBadge);
   }
@@ -940,7 +973,9 @@ async function createSpellCard(spellId) {
 
   // Bottom: Spell name
   const nameDiv = document.createElement('div');
-  nameDiv.className = 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-80 text-purple-200 text-xs font-bold text-center py-1 px-1 truncate';
+  nameDiv.className = 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-80 text-purple-200 font-bold text-center py-1 px-1 truncate';
+  nameDiv.style.fontSize = '10px';
+  nameDiv.style.lineHeight = '1.1';
   nameDiv.textContent = spell.name || spellId;
   nameDiv.title = spell.name || spellId;
   card.appendChild(nameDiv);
