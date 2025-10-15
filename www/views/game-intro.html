@@ -1,10 +1,11 @@
-{{define "title"}}Nostr Hero - New Adventure{{end}}
-
-{{define "view"}}
+{{define "title"}}Nostr Hero - New Adventure{{end}} {{define "view"}}
 <!-- Google Fonts - Handwritten font for letter -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
 
 <script src="/scripts/core/session-manager.js"></script>
 <script src="/scripts/systems/character-generator.js"></script>
@@ -14,221 +15,239 @@
 <script src="/scripts/pages/game-intro.js"></script>
 
 <style>
-/* Scene animations */
-@keyframes wipeIn {
-  from {
+  /* Scene animations */
+  @keyframes wipeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes wipeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fadeInSentence {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Equipment selection wipe animations */
+  @keyframes wipeRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes wipeLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .scene-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
-    transform: translateY(20px);
+    transition: opacity 0.8s ease-in-out;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@keyframes wipeOut {
-  from {
+  .scene-container.fade-in {
     opacity: 1;
-    transform: translateY(0);
   }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-}
 
-/* Equipment selection wipe animations */
-@keyframes wipeRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
+  .scene-container.fade-out {
     opacity: 0;
   }
-}
 
-@keyframes wipeLeft {
-  from {
-    transform: translateX(0);
-    opacity: 1;
+  .scene-background {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    transition: opacity 0.8s ease-in-out;
   }
-  to {
-    transform: translateX(-100%);
+
+  .scene-text {
     opacity: 0;
+    animation: wipeIn 0.8s ease-out forwards;
+    animation-delay: 1s;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9),
+      -1px -1px 4px rgba(0, 0, 0, 0.8);
   }
-}
 
-@keyframes slideInFromLeft {
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
+  .letter-container {
+    position: absolute;
+    color: #1a1a1a;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+    font-family: "Caveat", cursive;
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1;
+    text-align: left;
+    z-index: 1;
+    /* Position to match the black letter area in the background */
+    top: 54%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Size to fit within the letter area - narrower for better fit, taller for more text */
+    width: 28vw;
+    max-width: 380px;
+    min-width: 280px;
+    height: 58vh;
+    max-height: 580px;
+    /* Transparent background to show the letter texture beneath */
+    background: transparent;
+    /* Ensure text is readable */
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
   }
-  to {
-    transform: translateX(0);
-    opacity: 1;
+
+  /* Continue Button - uses Win95 button from input.css */
+  .pixel-continue-btn {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-top: 2rem;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
-}
 
-@keyframes slideInFromRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
+  /* Back Button - uses Win95 button from input.css */
+  .pixel-back-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 100;
   }
-  to {
-    transform: translateX(0);
-    opacity: 1;
+
+  /* Skip Scene Button - uses Win95 button from input.css */
+  .pixel-skip-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
   }
-}
 
-.scene-container {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.8s ease-in-out;
-}
+  /* Item Card Styles */
+  .item-card {
+    border: none;
+  }
 
-.scene-container.fade-in {
-  opacity: 1;
-}
+  /* Container selection styles (for bundle and simple item containers) */
+  [data-option-index] {
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
 
-.scene-container.fade-out {
-  opacity: 0;
-}
+  [data-option-index]:hover:not(.selected) {
+    border-color: var(--color-textHighlighted) !important;
+  }
 
-.scene-background {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  z-index: 0;
-  transition: opacity 0.8s ease-in-out;
-}
+  [data-option-index].selected {
+    border-color: var(--color-textHighlighted) !important;
+    border-width: 3px !important;
+    box-shadow: 0 0 20px var(--color-textHighlighted) !important;
+    background-color: var(--color-bgTertiary) !important;
+    box-sizing: border-box;
+  }
 
-.scene-text {
-  opacity: 0;
-  animation: wipeIn 0.8s ease-out forwards;
-  animation-delay: 1s;
-  position: relative;
-  z-index: 1;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9),
-               -1px -1px 4px rgba(0, 0, 0, 0.8);
-}
-
-.letter-container {
-  position: absolute;
-  color: #1a1a1a;
-  padding: 1.5rem 2rem;
-  overflow-y: auto;
-  font-family: 'Caveat', cursive;
-  font-weight: 400;
-  font-size: 1.5rem;
-  line-height: 1;
-  text-align: left;
-  z-index: 1;
-  /* Position to match the black letter area in the background */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* Size to fit within the letter area - narrower for better fit, taller for more text */
-  width: 28vw;
-  max-width: 380px;
-  min-width: 280px;
-  height: 50vh;
-  max-height: 500px;
-  /* Transparent background to show the letter texture beneath */
-  background: transparent;
-  /* Ensure text is readable */
-  text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
-}
-
-/* Continue Button - uses Win95 button from input.css */
-.pixel-continue-btn {
-  padding: 1rem 2rem;
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-top: 2rem;
-  cursor: pointer;
-  position: relative;
-  z-index: 1;
-}
-
-/* Back Button - uses Win95 button from input.css */
-.pixel-back-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: bold;
-  cursor: pointer;
-  position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  z-index: 100;
-}
-
-/* Skip Scene Button - uses Win95 button from input.css */
-.pixel-skip-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
-  font-weight: bold;
-  cursor: pointer;
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 100;
-}
-
-/* Item Card Styles */
-.item-card {
-  border: none;
-}
-
-/* Container selection styles (for bundle and simple item containers) */
-[data-option-index] {
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-[data-option-index]:hover:not(.selected) {
-  border-color: var(--color-textHighlighted) !important;
-}
-
-[data-option-index].selected {
-  border-color: var(--color-textHighlighted) !important;
-  border-width: 3px !important;
-  box-shadow: 0 0 20px var(--color-textHighlighted) !important;
-  background-color: var(--color-bgTertiary) !important;
-  box-sizing: border-box;
-}
-
-[data-option-index].selected .info-btn {
-  pointer-events: auto !important;
-}
+  [data-option-index].selected .info-btn {
+    pointer-events: auto !important;
+  }
 </style>
 
 <!-- Full-screen black background -->
-<div class="fixed inset-0 bg-black text-white z-50">
-
+<div class="fixed inset-0 z-50 text-white bg-black">
   <!-- Initial name input screen -->
-  <div id="name-screen" class="flex flex-col items-center justify-center h-full relative z-10">
-    <div id="typed-question" class="text-xl md:text-2xl text-center mb-8 px-4">What is your name?</div>
+  <div
+    id="name-screen"
+    class="relative z-10 flex flex-col items-center justify-center h-full"
+  >
+    <div id="typed-question" class="px-4 mb-8 text-xl text-center md:text-2xl">
+      What is your name?
+    </div>
     <div id="name-input-container" class="flex flex-col items-center space-y-4">
       <input
         type="text"
         id="character-name"
-        class="win95-inset rounded-lg px-6 py-3 text-xl text-center focus:outline-none min-w-72"
-        style="color: var(--color-textPrimary); background-color: var(--color-bgSecondary);"
+        class="px-6 py-3 text-xl text-center rounded-lg win95-inset focus:outline-none min-w-72"
+        style="
+          color: var(--color-textPrimary);
+          background-color: var(--color-bgSecondary);
+        "
         placeholder="Enter your name..."
         maxlength="20"
         onkeydown="if(event.key==='Enter') document.getElementById('continue-btn').click()"
-      >
+      />
       <button
         id="continue-btn"
-        class="win95-button px-8 py-3 rounded-lg font-bold text-lg"
-        style="color: var(--color-textPrimary);"
+        class="px-8 py-3 text-lg font-bold rounded-lg win95-button"
+        style="color: var(--color-textPrimary)"
         onclick="startIntroSequence()"
       >
         Begin Your Story
@@ -237,27 +256,42 @@
   </div>
 
   <!-- Universal Scene Container -->
-  <div id="scene-container" class="scene-container hidden">
+  <div id="scene-container" class="hidden scene-container">
     <div id="scene-background" class="scene-background"></div>
-    <div id="scene-content" class="px-8 text-center max-w-4xl"></div>
+    <div id="scene-content" class="max-w-4xl px-8 text-center"></div>
   </div>
 
   <!-- Equipment Selection Screen -->
   <div id="equipment-selection" class="hidden">
-    <div class="win95-outset rounded-2xl p-8 max-w-6xl w-full max-h-full overflow-y-auto">
-      <h2 class="text-3xl font-bold text-center mb-8" style="color: var(--color-textHighlighted);">Choose Your Equipment</h2>
+    <div
+      class="w-full max-w-6xl max-h-full p-8 overflow-y-auto win95-outset rounded-2xl"
+    >
+      <h2
+        class="mb-8 text-3xl font-bold text-center"
+        style="color: var(--color-textHighlighted)"
+      >
+        Choose Your Equipment
+      </h2>
       <div id="equipment-choices" class="space-y-6"></div>
 
       <div class="mt-6">
-        <h4 class="text-lg font-medium mb-3" style="color: var(--color-textSecondary);">Starting Inventory:</h4>
-        <div id="starting-inventory" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
+        <h4
+          class="mb-3 text-lg font-medium"
+          style="color: var(--color-textSecondary)"
+        >
+          Starting Inventory:
+        </h4>
+        <div
+          id="starting-inventory"
+          class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3"
+        ></div>
       </div>
 
-      <div class="text-center mt-8">
+      <div class="mt-8 text-center">
         <button
           id="continue-adventure-btn"
-          class="win95-button px-8 py-4 rounded-lg font-bold text-xl"
-          style="color: var(--color-textPrimary); display: none;"
+          class="px-8 py-4 text-xl font-bold rounded-lg win95-button"
+          style="color: var(--color-textPrimary); display: none"
           onclick="continueAfterEquipment()"
         >
           Continue →
@@ -265,16 +299,21 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- Audio elements -->
 <audio id="intro-music">
-  <source src="/res/aud/newgame1_medieval-lofi-nokron-the-eternal-city.mp3" type="audio/mpeg">
+  <source
+    src="/res/aud/newgame1_medieval-lofi-nokron-the-eternal-city.mp3"
+    type="audio/mpeg"
+  />
 </audio>
 
 <audio id="game-music">
-  <source src="/res/aud/load_medieval-lofi-cycle-of-life.mp3" type="audio/mpeg">
+  <source
+    src="/res/aud/load_medieval-lofi-cycle-of-life.mp3"
+    type="audio/mpeg"
+  />
 </audio>
 
 {{end}}

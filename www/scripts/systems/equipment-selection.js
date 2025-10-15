@@ -93,11 +93,13 @@ async function startEquipmentSelection(equipment) {
  */
 async function showFinalConfirmation() {
   const container = document.getElementById('scene-container');
+  const background = document.getElementById('scene-background');
   const content = document.getElementById('scene-content');
 
-  // Wipe out current content
-  content.style.animation = 'wipeRight 0.3s ease-in';
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // Set dark background for confirmation screen
+  background.style.backgroundImage = 'none';
+  background.style.backgroundColor = '#111827';
+
   content.innerHTML = '';
 
   // Show confirmation dialog
@@ -136,8 +138,11 @@ async function showFinalConfirmation() {
   confirmDialog.appendChild(buttonContainer);
   content.appendChild(confirmDialog);
 
-  // Slide in
-  content.style.animation = 'slideInFromRight 0.3s ease-out';
+  // Show container with fade-in (matching showScene pattern)
+  container.classList.remove('hidden', 'fade-out');
+  container.classList.remove('fade-in');
+  void container.offsetHeight; // Force reflow
+  container.classList.add('fade-in');
 
   // Wait for user choice
   const userChoice = await new Promise(resolve => {
@@ -145,10 +150,29 @@ async function showFinalConfirmation() {
     backBtn.onclick = () => resolve(false);
   });
 
-  // Wipe out confirmation dialog
-  content.style.animation = 'wipeRight 0.3s ease-in';
+  // Animate text out first before fading container
+  const allElements = content.querySelectorAll('*');
+  allElements.forEach(el => {
+    el.style.transition = 'opacity 0.3s ease-out';
+    el.style.opacity = '0';
+  });
   await new Promise(resolve => setTimeout(resolve, 300));
+
+  // Clear content
   content.innerHTML = '';
+
+  // Fade out the scene (matching showScene pattern)
+  container.classList.remove('fade-in');
+  container.classList.add('fade-out');
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  // Fully reset container for next scene (matching showScene pattern)
+  container.classList.remove('fade-in', 'fade-out');
+  container.classList.add('hidden');
+
+  // Reset any leftover styles from equipment selection
+  container.style.opacity = '';
+  background.style.backgroundColor = '';
 
   return userChoice;
 }
@@ -174,12 +198,6 @@ async function handlePackSelection(startingEquipment) {
   background.style.backgroundColor = '#111827';
   content.innerHTML = '';
   content.style.zIndex = '10';
-
-  // Show container with fade-in
-  container.classList.remove('hidden', 'fade-out');
-  container.classList.remove('fade-in');
-  void container.offsetHeight;
-  container.classList.add('fade-in');
 
   if (packChoice) {
     // Player chooses pack
@@ -294,6 +312,12 @@ async function handlePackSelection(startingEquipment) {
     confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
     content.appendChild(confirmBtn);
 
+    // Show container with fade-in (matching showScene pattern)
+    container.classList.remove('hidden', 'fade-out');
+    container.classList.remove('fade-in');
+    void container.offsetHeight;
+    container.classList.add('fade-in');
+
     // Wait for selection
     await new Promise(resolve => {
       confirmBtn.onclick = () => {
@@ -368,20 +392,26 @@ async function handlePackSelection(startingEquipment) {
     continueBtn.textContent = 'Continue';
     content.appendChild(continueBtn);
 
+    // Show container with fade-in (matching showScene pattern)
+    container.classList.remove('hidden', 'fade-out');
+    container.classList.remove('fade-in');
+    void container.offsetHeight;
+    container.classList.add('fade-in');
+
     await new Promise(resolve => {
       continueBtn.onclick = resolve;
     });
   }
 
-  // Fade out the scene
+  // Clear content
+  content.innerHTML = '';
+
+  // Fade out the scene (matching showScene pattern)
   container.classList.remove('fade-in');
   container.classList.add('fade-out');
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  // Clear content
-  content.innerHTML = '';
-
-  // Fully reset container for next scene
+  // Fully reset container for next scene (matching showScene pattern)
   container.classList.remove('fade-in', 'fade-out');
   container.classList.add('hidden');
 }
@@ -645,11 +675,19 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
     content.style.animation = 'wipeLeft 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
     content.innerHTML = '';
+
+    // Ensure container is fully hidden before returning
+    container.style.opacity = '0';
+    container.classList.add('hidden');
     return true; // Signal to go back
   } else {
     content.style.animation = 'wipeRight 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
     content.innerHTML = '';
+
+    // DON'T hide the container - let the next scene manage the fade in/out
+    // Just reset the content and animation
+    content.style.animation = '';
   }
 
   // Store selection
@@ -779,11 +817,19 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
     content.style.animation = 'wipeLeft 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
     content.innerHTML = '';
+
+    // Ensure container is fully hidden before returning
+    container.style.opacity = '0';
+    container.classList.add('hidden');
     return true; // Signal to go back
   } else {
     content.style.animation = 'wipeRight 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
     content.innerHTML = '';
+
+    // DON'T hide the container - let the next scene manage the fade in/out
+    // Just reset the content and animation
+    content.style.animation = '';
   }
 
   // Step 2: Now show weapon selection for each slot in the chosen configuration
@@ -950,12 +996,20 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
   if (userClickedBack) {
     content.style.animation = 'wipeLeft 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
+    content.innerHTML = '';
+
+    // Ensure container is fully hidden before returning
+    container.style.opacity = '0';
+    container.classList.add('hidden');
   } else {
     content.style.animation = 'wipeRight 0.3s ease-in';
     await new Promise(resolve => setTimeout(resolve, 300));
-  }
+    content.innerHTML = '';
 
-  content.innerHTML = '';
+    // DON'T hide the container - let the next scene manage the fade in/out
+    // Just reset the content and animation
+    content.style.animation = '';
+  }
 
   return {
     selectedWeapon: selectedWeapon,
