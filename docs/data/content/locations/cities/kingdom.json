@@ -3,7 +3,7 @@
   "name": "The Royal Kingdom",
   "type": "kingdom",
   "image": "/res/img/locations/kingdom.png",
-  "music": "/res/aud/locations/kingdom.mp3",
+  "music": "/res/aud/kingdom - A Just King.wav",
   "description": "The grand capital city stands as the heart of the realm, its towering spires and bustling streets a testament to prosperity and order.",
   "connections": {
     "north": "kingdom-north",
@@ -125,7 +125,12 @@
           "type": "inn",
           "description": "A cozy inn catering to merchants and adventurers from distant lands.",
           "accessible": true,
-          "actions": ["rent_room", "buy_food", "talk_to_patrons", "listen_to_rumors"]
+          "actions": [
+            "rent_room",
+            "buy_food",
+            "talk_to_patrons",
+            "listen_to_rumors"
+          ]
         },
         {
           "id": "stable",
@@ -155,7 +160,12 @@
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
           "accessible": true,
           "shop_type": "weapons_armor",
-          "actions": ["buy_weapons", "buy_armor", "repair_equipment", "commission_items"]
+          "actions": [
+            "buy_weapons",
+            "buy_armor",
+            "repair_equipment",
+            "commission_items"
+          ]
         },
         {
           "id": "artisan_quarter",
@@ -171,7 +181,12 @@
           "type": "bank",
           "description": "The kingdom's financial center where merchants store wealth and exchange currency.",
           "accessible": true,
-          "actions": ["deposit_gold", "withdraw_gold", "exchange_currency", "check_balance"]
+          "actions": [
+            "deposit_gold",
+            "withdraw_gold",
+            "exchange_currency",
+            "check_balance"
+          ]
         }
       ],
       "npcs": ["master_smith", "bank_clerk", "artisan_leader"],
@@ -201,7 +216,12 @@
           "type": "tavern",
           "description": "A popular tavern where merchants, adventurers, and locals gather to drink and share news.",
           "accessible": true,
-          "actions": ["buy_drinks", "talk_to_patrons", "listen_to_music", "gather_information"],
+          "actions": [
+            "buy_drinks",
+            "talk_to_patrons",
+            "listen_to_music",
+            "gather_information"
+          ],
           "special_features": ["vip_section_for_happytavern_nip5"]
         },
         {
