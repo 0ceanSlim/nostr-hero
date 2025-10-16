@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -35,6 +36,11 @@ func InitDatabase() error {
 
 	log.Printf("Connected to SQLite database at %s", dbPath)
 
+	// Run migrations first
+	if err = runMigrations(); err != nil {
+		return fmt.Errorf("failed to run migrations: %v", err)
+	}
+
 	// Create tables
 	if err = createTables(); err != nil {
 		return fmt.Errorf("failed to create tables: %v", err)
@@ -53,6 +59,37 @@ func Close() error {
 	if db != nil {
 		return db.Close()
 	}
+	return nil
+}
+
+// runMigrations runs database schema migrations
+func runMigrations() error {
+	// Check if locations table exists and has the image/music columns
+	var columnCount int
+	err := db.QueryRow(`
+		SELECT COUNT(*)
+		FROM pragma_table_info('locations')
+		WHERE name IN ('image', 'music')
+	`).Scan(&columnCount)
+
+	if err == nil && columnCount < 2 {
+		log.Println("Running migration: Adding image and music columns to locations table")
+
+		// Add image column if it doesn't exist
+		_, err = db.Exec("ALTER TABLE locations ADD COLUMN image TEXT")
+		if err != nil && !strings.Contains(err.Error(), "duplicate column") {
+			return fmt.Errorf("failed to add image column: %v", err)
+		}
+
+		// Add music column if it doesn't exist
+		_, err = db.Exec("ALTER TABLE locations ADD COLUMN music TEXT")
+		if err != nil && !strings.Contains(err.Error(), "duplicate column") {
+			return fmt.Errorf("failed to add music column: %v", err)
+		}
+
+		log.Println("Successfully added image and music columns to locations table")
+	}
+
 	return nil
 }
 
@@ -101,6 +138,8 @@ func createTables() error {
 			name TEXT NOT NULL,
 			location_type TEXT,
 			description TEXT,
+			image TEXT,
+			music TEXT,
 			properties TEXT,
 			connections TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP

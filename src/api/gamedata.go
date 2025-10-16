@@ -59,6 +59,8 @@ type Location struct {
 	Name         string                 `json:"name"`
 	LocationType string                 `json:"location_type"`
 	Description  string                 `json:"description"`
+	Image        string                 `json:"image,omitempty"`
+	Music        string                 `json:"music,omitempty"`
 	Properties   map[string]interface{} `json:"properties"`
 	Connections  []string               `json:"connections"`
 }
@@ -348,7 +350,7 @@ func LoadAllMonsters(database *sql.DB) ([]Monster, error) {
 }
 
 func LoadAllLocations(database *sql.DB) ([]Location, error) {
-	rows, err := database.Query("SELECT id, name, COALESCE(location_type, ''), COALESCE(description, ''), COALESCE(properties, ''), COALESCE(connections, '') FROM locations")
+	rows, err := database.Query("SELECT id, name, COALESCE(location_type, ''), COALESCE(description, ''), COALESCE(image, ''), COALESCE(music, ''), COALESCE(properties, ''), COALESCE(connections, '') FROM locations")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query locations: %v", err)
 	}
@@ -360,7 +362,7 @@ func LoadAllLocations(database *sql.DB) ([]Location, error) {
 		var propertiesJSON, connectionsJSON string
 
 		err := rows.Scan(&location.ID, &location.Name, &location.LocationType, &location.Description,
-			&propertiesJSON, &connectionsJSON)
+			&location.Image, &location.Music, &propertiesJSON, &connectionsJSON)
 		if err != nil {
 			log.Printf("Error scanning location row: %v", err)
 			continue

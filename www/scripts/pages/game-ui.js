@@ -98,68 +98,12 @@ async function getItemByIdAsync(itemId) {
   }
 }
 
-// Message system - resilient version that works during initialization
+// Message system - DISABLED for work-in-progress UI
 window.showMessage = function showMessage(text, type = 'info', duration = 5000) {
+    // Only log to console, don't show UI notifications
     console.log(`📝 ${type.toUpperCase()}: ${text}`);
-
-    // Try to find message area, if not found, create a temporary one or use console
-    let messageArea = document.getElementById('message-area');
-
-    if (!messageArea) {
-        // Try to find or create a temporary message container
-        messageArea = document.getElementById('temp-message-area');
-        if (!messageArea) {
-            // Create temporary message area if we're in the middle of initialization
-            messageArea = document.createElement('div');
-            messageArea.id = 'temp-message-area';
-            messageArea.className = 'fixed top-4 right-4 max-w-sm space-y-2 z-50';
-            document.body.appendChild(messageArea);
-        }
-    }
-
-    if (!messageArea) {
-        // Fallback to console if no DOM element can be created
-        console.warn('No message area available, using console:', text);
-        return;
-    }
-
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `p-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
-
-    // Set color based on type
-    switch (type) {
-        case 'error':
-            messageDiv.className += ' bg-red-600 text-white';
-            break;
-        case 'success':
-            messageDiv.className += ' bg-green-600 text-white';
-            break;
-        case 'warning':
-            messageDiv.className += ' bg-yellow-600 text-gray-900';
-            break;
-        case 'info':
-        default:
-            messageDiv.className += ' bg-blue-600 text-white';
-            break;
-    }
-
-    messageDiv.textContent = text;
-    messageArea.appendChild(messageDiv);
-
-    // Animate in
-    setTimeout(() => {
-        messageDiv.classList.remove('translate-x-full');
-    }, 10);
-
-    // Auto-remove after duration
-    setTimeout(() => {
-        messageDiv.classList.add('translate-x-full');
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 300);
-    }, duration);
+    // All notifications are disabled during work-in-progress phase
+    return;
 }
 
 /**
@@ -697,6 +641,33 @@ function updateSpellsDisplay() {
     }
 }
 
+// Current location music player
+let currentLocationMusic = null;
+
+/**
+ * Play location-specific music
+ */
+function playLocationMusic(musicPath) {
+    // Stop current music if playing
+    if (currentLocationMusic) {
+        currentLocationMusic.pause();
+        currentLocationMusic.currentTime = 0;
+    }
+
+    // Create new audio element
+    currentLocationMusic = new Audio(musicPath);
+    currentLocationMusic.loop = true;
+    currentLocationMusic.volume = 0.5; // Adjust volume as needed
+
+    // Play the music
+    currentLocationMusic.play().catch(err => {
+        console.log('Music autoplay prevented:', err);
+        // User interaction may be required to start audio
+    });
+
+    console.log('Playing location music:', musicPath);
+}
+
 // Display current location
 function displayCurrentLocation() {
     const state = getGameState();
@@ -721,11 +692,28 @@ function displayCurrentLocation() {
     console.log('Location data:', locationData);
     if (!locationData) return;
 
-    // Update scene image
+    // Get the parent city data to use its image and music
+    let cityData = locationData;
+
+    // If this is a district, find the parent city
+    if (currentLocationId.includes('-')) {
+        const cityId = currentLocationId.split('-')[0]; // e.g., "kingdom" from "kingdom-north"
+        const parentCity = getLocationById(cityId);
+        if (parentCity) {
+            cityData = parentCity;
+        }
+    }
+
+    // Update scene image (use city's image for all districts)
     const sceneImage = document.getElementById('scene-image');
-    if (sceneImage && locationData.image) {
-        sceneImage.src = locationData.image;
-        sceneImage.alt = locationData.name;
+    if (sceneImage && cityData.image) {
+        sceneImage.src = cityData.image;
+        sceneImage.alt = cityData.name;
+    }
+
+    // Update music (use city's music for all districts)
+    if (cityData.music) {
+        playLocationMusic(cityData.music);
     }
 
     // Update scene title
@@ -804,10 +792,13 @@ function displayCurrentLocation() {
                 const slot = document.getElementById(slotId);
 
                 if (slot) {
+                    // Determine button type based on location_type
+                    const buttonType = connectedLocation.location_type === 'environment' ? 'environment' : 'navigation';
+
                     const button = createLocationButton(
                         connectedLocation.name || direction.toUpperCase(),
                         () => moveToLocation(connectionId),
-                        'navigation'
+                        buttonType
                     );
                     button.className += ' w-full h-full';
                     slot.appendChild(button);
@@ -868,7 +859,8 @@ function createLocationButton(text, onClick, type = 'navigation') {
 
     // Different colors for different types
     const typeStyles = {
-        navigation: 'bg-blue-700 hover:bg-blue-600 border-blue-900',
+        navigation: 'bg-blue-700 hover:bg-blue-600 border-blue-900',      // City districts - blue
+        environment: 'bg-red-700 hover:bg-red-600 border-red-900',        // Outside city - red
         building: 'bg-green-700 hover:bg-green-600 border-green-900',
         npc: 'bg-purple-700 hover:bg-purple-600 border-purple-900'
     };

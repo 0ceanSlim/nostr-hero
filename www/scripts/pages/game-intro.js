@@ -219,18 +219,22 @@ async function showFinalScene(text, buttonText, buttonAction) {
   const content = document.getElementById("scene-content");
 
   background.style.backgroundImage = "";
+  background.style.backgroundColor = "#000000";
 
-  content.innerHTML = `
-    <div class="scene-text text-2xl md:text-4xl font-bold text-yellow-400 leading-relaxed mb-8">
-      ${text}
-    </div>
-    <button
-      onclick="${buttonAction}"
-      class="bg-green-600 hover:bg-green-700 text-black px-8 py-4 rounded-lg font-bold text-xl transition-colors mt-8"
-    >
-      ${buttonText}
-    </button>
-  `;
+  // Create text element
+  const textElement = document.createElement("div");
+  textElement.className = "scene-text text-2xl md:text-4xl font-bold text-yellow-400 leading-relaxed mb-8";
+  textElement.textContent = text;
+
+  // Create button with delay using the continue button component
+  const button = createContinueButton(7000, buttonText);
+  button.onclick = () => {
+    eval(buttonAction);
+  };
+
+  content.innerHTML = "";
+  content.appendChild(textElement);
+  content.appendChild(button);
 
   container.classList.remove("hidden", "fade-out");
   // Force reflow to ensure hidden is removed before fade-in
@@ -1980,6 +1984,33 @@ async function startAdventure() {
 // INITIALIZATION
 // ============================================================================
 
+/**
+ * Request fullscreen mode (mobile optimization)
+ */
+function requestFullscreen() {
+  const elem = document.documentElement;
+
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch(err => {
+      console.log("Fullscreen request failed:", err);
+    });
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen();
+  } else if (elem.mozRequestFullScreen) { // Firefox
+    elem.mozRequestFullScreen();
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen();
+  }
+}
+
+/**
+ * Check if device is mobile
+ */
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         (window.innerWidth <= 768);
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("🎮 Initializing game intro...");
 
@@ -2029,6 +2060,23 @@ document.addEventListener("DOMContentLoaded", async function () {
       },
       { once: true }
     );
+
+    // Request fullscreen on mobile when user interacts with name input
+    if (isMobileDevice()) {
+      nameInput.addEventListener(
+        "click",
+        () => {
+          requestFullscreen();
+        },
+        { once: true }
+      );
+
+      // Also try on Begin Your Story button
+      const continueBtn = document.getElementById("continue-btn");
+      continueBtn.addEventListener("click", () => {
+        requestFullscreen();
+      });
+    }
   } catch (error) {
     console.error("❌ Initialization failed:", error);
     alert("Failed to initialize: " + error.message);

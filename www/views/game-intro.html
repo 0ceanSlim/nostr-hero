@@ -15,6 +15,219 @@
 <script src="/scripts/pages/game-intro.js"></script>
 
 <style>
+  /* Mobile landscape orientation lock */
+  @media screen and (max-width: 768px) {
+    /* Force landscape orientation message for portrait mode */
+    body::before {
+      content: "";
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+    }
+
+    body::after {
+      content: "Please rotate your device to landscape mode";
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      color: #fff;
+      font-size: 1.5rem;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      padding: 2rem;
+      font-family: "Dogica", monospace;
+    }
+
+    /* Show rotation message in portrait mode */
+    @media (orientation: portrait) {
+      body::before,
+      body::after {
+        display: flex;
+      }
+
+      /* Hide all content in portrait mode */
+      body > *:not(::before):not(::after) {
+        display: none !important;
+      }
+    }
+
+    /* Landscape mode optimizations */
+    @media (orientation: landscape) {
+      /* Scale down text and elements for mobile landscape */
+      .scene-text {
+        font-size: 1rem !important;
+        max-width: 90vw;
+      }
+
+      .letter-container {
+        width: 25vw !important;
+        min-width: 200px !important;
+        max-width: 280px !important;
+        height: 70vh !important;
+        font-size: 0.875rem !important;
+        padding: 1rem !important;
+        line-height: 1.2 !important;
+      }
+
+      #typed-question {
+        font-size: 1.25rem !important;
+      }
+
+      #character-name {
+        font-size: 1rem !important;
+        padding: 0.5rem 1rem !important;
+        min-width: auto !important;
+        width: 80vw !important;
+        max-width: 300px !important;
+      }
+
+      #continue-btn,
+      .pixel-continue-btn {
+        font-size: 1rem !important;
+        padding: 0.75rem 1.5rem !important;
+        margin-top: 1rem !important;
+      }
+
+      .pixel-skip-btn {
+        font-size: 0.625rem !important;
+        padding: 0.4rem 0.8rem !important;
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+      }
+
+      /* Equipment selection mobile adjustments */
+      #equipment-selection > div {
+        padding: 1rem !important;
+        max-height: 90vh !important;
+      }
+
+      #equipment-selection h2 {
+        font-size: 1.5rem !important;
+        margin-bottom: 1rem !important;
+      }
+
+      #equipment-selection h4 {
+        font-size: 1rem !important;
+      }
+
+      /* Item cards in equipment selection - smaller on mobile */
+      .item-card {
+        width: 70px !important;
+        height: 70px !important;
+      }
+
+      /* Adjust item card text for smaller size */
+      .item-card .item-name {
+        font-size: 0.5rem !important;
+        line-height: 0.6rem !important;
+        padding: 0.25rem 0.125rem !important;
+      }
+
+      .item-card img {
+        padding: 0.5rem !important;
+      }
+
+      .item-card .info-btn {
+        font-size: 12px !important;
+        bottom: 0.25rem !important;
+        right: 0.25rem !important;
+      }
+
+      /* Scene content titles for equipment choices */
+      #scene-content .text-xl,
+      #scene-content .text-2xl {
+        font-size: 1rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+
+      /* Scrollable containers in equipment scenes */
+      #scene-content .overflow-y-auto {
+        max-height: calc(100vh - 150px) !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+
+      /* Bundle and pack containers */
+      #scene-content [data-option-index] {
+        padding: 0.5rem !important;
+      }
+
+      /* Bundle labels */
+      #scene-content .text-xs {
+        font-size: 0.625rem !important;
+      }
+
+      /* Item grids in equipment selection */
+      #scene-content .grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 0.5rem !important;
+      }
+
+      /* Flex containers for items */
+      #scene-content .flex-wrap {
+        gap: 0.5rem !important;
+      }
+
+      /* Pack/bundle titles */
+      #scene-content .text-yellow-400.font-bold {
+        font-size: 0.875rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      #scene-content .text-green-400.font-bold {
+        font-size: 0.875rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      /* Separator text (OR) */
+      #scene-content .text-yellow-400.text-xl {
+        font-size: 0.875rem !important;
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+      }
+
+      /* Confirm/Continue buttons in equipment selection */
+      #scene-content .pixel-continue-btn {
+        font-size: 0.875rem !important;
+        padding: 0.6rem 1.2rem !important;
+        margin-top: 0.75rem !important;
+      }
+
+      /* Back button */
+      .pixel-back-btn {
+        font-size: 0.625rem !important;
+        padding: 0.4rem 0.8rem !important;
+        bottom: 0.5rem !important;
+        left: 0.5rem !important;
+      }
+
+      /* Weapon slot descriptions */
+      #scene-content .space-y-2 > div {
+        font-size: 0.75rem !important;
+      }
+
+      /* Configuration containers */
+      #scene-content .p-6 {
+        padding: 0.75rem !important;
+      }
+
+      /* Final confirmation screen */
+      #scene-content .max-w-md {
+        font-size: 0.875rem !important;
+      }
+
+      #continue-adventure-btn {
+        font-size: 1rem !important;
+        padding: 0.75rem 1.5rem !important;
+      }
+    }
+  }
+
   /* Scene animations */
   @keyframes wipeIn {
     from {
@@ -158,8 +371,9 @@
     text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
   }
 
-  /* Continue Button - uses Win95 button from input.css */
+  /* Continue Button - Pixelated yellow button */
   .pixel-continue-btn {
+    display: inline-block;
     padding: 1rem 2rem;
     font-size: 1.25rem;
     font-weight: bold;
@@ -167,6 +381,36 @@
     cursor: pointer;
     position: relative;
     z-index: 1;
+    background: #ffd700;
+    color: #000000;
+    border: none;
+    text-shadow: none;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    /* Pixelated corners using clip-path */
+    clip-path: polygon(
+      0 4px, 4px 4px, 4px 0,
+      calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+      4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+    );
+    box-shadow:
+      inset 2px 2px 0 #ffed4e,
+      inset -2px -2px 0 #cc9900,
+      4px 4px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .pixel-continue-btn:hover {
+    background: #ffed4e;
+  }
+
+  .pixel-continue-btn:active {
+    box-shadow:
+      inset -2px -2px 0 #ffed4e,
+      inset 2px 2px 0 #cc9900,
+      2px 2px 0 rgba(0, 0, 0, 0.3);
+    transform: translate(2px, 2px);
   }
 
   /* Back Button - uses Win95 button from input.css */

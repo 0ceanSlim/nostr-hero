@@ -386,14 +386,16 @@ func migrateLocationFile(filePath, locationType string) error {
 
 	name, _ := location["name"].(string)
 	description, _ := location["description"].(string)
+	image, _ := location["image"].(string)
+	music, _ := location["music"].(string)
 
 	// Serialize all properties as JSON
 	propertiesJSON, _ := json.Marshal(location)
 	connectionsJSON, _ := json.Marshal(location["connections"])
 
-	stmt := `INSERT INTO locations (id, name, location_type, description, properties, connections)
-			 VALUES (?, ?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, locationType, description, string(propertiesJSON), string(connectionsJSON))
+	stmt := `INSERT INTO locations (id, name, location_type, description, image, music, properties, connections)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err = db.Exec(stmt, id, name, locationType, description, image, music, string(propertiesJSON), string(connectionsJSON))
 	return err
 }
 

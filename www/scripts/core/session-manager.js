@@ -262,53 +262,152 @@ class SessionManager {
         try {
             this.emit('authenticationStarted', 'amber');
 
-            // This will be handled by the existing Amber integration
-            // The callback will trigger session creation
+            // Set up callback listener BEFORE opening Amber
+            this.setupAmberCallbackListener();
+
+            // Use proper NIP-55 nostrsigner URL format
             const amberUrl = this.createAmberLoginURL();
-            const amberWindow = window.open(amberUrl, 'amber_login', 'width=400,height=600');
+
+            console.log('Opening Amber with URL:', amberUrl);
+
+            // Try multiple approaches for opening the nostrsigner protocol (mobile-first)
+            let protocolOpened = false;
+
+            // Method 1: Create anchor element and click it (most reliable on mobile)
+            try {
+                const anchor = document.createElement('a');
+                anchor.href = amberUrl;
+                anchor.target = '_blank';
+                anchor.style.display = 'none';
+                document.body.appendChild(anchor);
+
+                // Trigger click to open Amber
+                anchor.click();
+                protocolOpened = true;
+
+                // Clean up anchor element
+                setTimeout(() => {
+                    if (document.body.contains(anchor)) {
+                        document.body.removeChild(anchor);
+                    }
+                }, 100);
+
+                console.log('Amber protocol opened via anchor click');
+            } catch (anchorError) {
+                console.warn('Anchor method failed:', anchorError);
+            }
+
+            // Method 2: Fallback to window.location.href if anchor didn't work
+            if (!protocolOpened) {
+                try {
+                    window.location.href = amberUrl;
+                    protocolOpened = true;
+                    console.log('Amber protocol opened via window.location.href');
+                } catch (locationError) {
+                    console.warn('Window location method failed:', locationError);
+                }
+            }
+
+            if (!protocolOpened) {
+                throw new Error('Unable to open Amber protocol');
+            }
 
             return new Promise((resolve, reject) => {
-                const messageHandler = (event) => {
-                    if (event.data?.type === 'amber_success') {
-                        window.removeEventListener('message', messageHandler);
-                        amberWindow.close();
-                        // Session should be created by callback, so check it
-                        setTimeout(async () => {
-                            try {
-                                const isActive = await this.checkExistingSession();
-                                if (isActive) {
-                                    this.currentStatus = this.SessionStatus.ACTIVE;
-                                    this.startSessionMonitoring();
-                                    this.emit('authenticationSuccess', 'amber');
-                                    resolve(this.sessionData);
-                                } else {
-                                    reject(new Error('Amber login succeeded but session not found'));
-                                }
-                            } catch (error) {
-                                reject(error);
-                            }
-                        }, 1000);
-                    } else if (event.data?.type === 'amber_error') {
-                        window.removeEventListener('message', messageHandler);
-                        amberWindow.close();
-                        reject(new Error(event.data.error));
-                    }
-                };
+                // Store resolve/reject for callback handler
+                window._amberLoginPromise = { resolve, reject };
 
-                window.addEventListener('message', messageHandler);
-
-                // Check if window was closed without completing login
-                const checkClosed = setInterval(() => {
-                    if (amberWindow.closed) {
-                        clearInterval(checkClosed);
-                        window.removeEventListener('message', messageHandler);
-                        reject(new Error('Amber login window was closed'));
+                // Set timeout in case user doesn't complete the flow
+                setTimeout(() => {
+                    if (window._amberLoginPromise) {
+                        window._amberLoginPromise = null;
+                        reject(new Error('Amber connection timed out. Make sure Amber is installed and try again.'));
                     }
-                }, 1000);
+                }, 60000); // 60 seconds timeout
             });
         } catch (error) {
             this.emit('authenticationFailed', { method: 'amber', error: error.message });
             throw error;
+        }
+    }
+
+    // Set up Amber callback listener
+    setupAmberCallbackListener() {
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                setTimeout(() => this.checkForAmberCallback(), 500);
+            }
+        };
+
+        const handleFocus = () => {
+            setTimeout(() => this.checkForAmberCallback(), 500);
+        };
+
+        // Add listeners
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', handleFocus);
+
+        // Check immediately
+        setTimeout(() => this.checkForAmberCallback(), 1000);
+
+        // Clean up listeners after timeout
+        setTimeout(() => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+        }, 65000);
+    }
+
+    // Check for Amber callback
+    async checkForAmberCallback() {
+        const currentUrl = new URL(window.location.href);
+
+        // Check if this is the amber-callback page or has event parameter
+        if (currentUrl.pathname === '/api/auth/amber-callback' || currentUrl.searchParams.has('event')) {
+            try {
+                // Session should be created by backend, check it
+                const isActive = await this.checkExistingSession();
+                if (isActive && window._amberLoginPromise) {
+                    this.currentStatus = this.SessionStatus.ACTIVE;
+                    this.startSessionMonitoring();
+                    this.emit('authenticationSuccess', 'amber');
+                    window._amberLoginPromise.resolve(this.sessionData);
+                    window._amberLoginPromise = null;
+                }
+            } catch (error) {
+                if (window._amberLoginPromise) {
+                    window._amberLoginPromise.reject(error);
+                    window._amberLoginPromise = null;
+                }
+            }
+        }
+
+        // Check localStorage for callback result
+        const amberResult = localStorage.getItem('amber_callback_result');
+        if (amberResult && window._amberLoginPromise) {
+            try {
+                localStorage.removeItem('amber_callback_result');
+                const data = JSON.parse(amberResult);
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Check session
+                const isActive = await this.checkExistingSession();
+                if (isActive) {
+                    this.currentStatus = this.SessionStatus.ACTIVE;
+                    this.startSessionMonitoring();
+                    this.emit('authenticationSuccess', 'amber');
+                    window._amberLoginPromise.resolve(this.sessionData);
+                    window._amberLoginPromise = null;
+                } else {
+                    throw new Error('Amber login succeeded but session not found');
+                }
+            } catch (error) {
+                if (window._amberLoginPromise) {
+                    window._amberLoginPromise.reject(error);
+                    window._amberLoginPromise = null;
+                }
+            }
         }
     }
 

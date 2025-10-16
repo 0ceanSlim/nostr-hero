@@ -159,6 +159,71 @@ class NostrHeroStartup {
         }));
 
         console.log('🎮 Nostr Hero is ready to play!');
+
+        // Show welcome popup after a short delay (every time)
+        setTimeout(() => this.showWelcomePopup(), 1000);
+    }
+
+    showWelcomePopup() {
+        // Create modal backdrop
+        const backdrop = document.createElement('div');
+        backdrop.id = 'welcome-popup-backdrop';
+        backdrop.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999]';
+        backdrop.style.fontFamily = '"Dogica", monospace';
+
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'bg-gray-800 rounded-lg p-8 max-w-2xl mx-4 relative';
+        modal.style.border = '4px solid #ffd700';
+        modal.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.5)';
+
+        modal.innerHTML = `
+            <h2 class="text-2xl font-bold text-yellow-400 mb-6 text-center">Welcome to Nostr Hero!</h2>
+
+            <div class="text-gray-300 space-y-4 text-sm leading-relaxed">
+                <p class="text-center text-lg text-yellow-300">
+                    I hope you enjoyed the intro!
+                </p>
+
+                <div class="bg-gray-900 border-2 border-yellow-600 rounded p-4 my-4">
+                    <p class="text-yellow-200 font-bold mb-2">⚠️ Work in Progress</p>
+                    <p>This is a work-in-progress game UI that only serves to pull data from your save and is <strong class="text-red-400">not interactable at the moment</strong>.</p>
+                </div>
+
+                <p>
+                    Please <span class="text-green-400 font-bold">share your experience</span> with others and see the differences in your introductions!
+                </p>
+
+                <div class="bg-gray-900 border border-gray-600 rounded p-3 text-xs">
+                    <p class="text-gray-400 mb-1">📍 The game UI is not functional except to travel different parts of the city</p>
+                    <p class="text-gray-400">🏗️ NPC and building locations are just placeholders</p>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button
+                    id="welcome-close-btn"
+                    class="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded-lg transition-colors"
+                    style="font-size: 1rem;">
+                    Got it, let's explore!
+                </button>
+            </div>
+        `;
+
+        backdrop.appendChild(modal);
+        document.body.appendChild(backdrop);
+
+        // Close button handler
+        document.getElementById('welcome-close-btn').onclick = () => {
+            backdrop.remove();
+        };
+
+        // Close on backdrop click
+        backdrop.onclick = (e) => {
+            if (e.target === backdrop) {
+                backdrop.remove();
+            }
+        };
     }
 
     onInitializationFailed(error) {

@@ -2,6 +2,8 @@
   "id": "city-east",
   "name": "Goldenhaven City",
   "type": "city",
+  "image": "/res/img/locations/kingdom.png",
+  "music": "/res/aud/goldhaven - God of Dreams.wav",
   "description": "A prosperous trading city where merchant ships dock at busy harbors and exotic goods from distant lands fill the markets. Golden banners flutter from tall buildings built with wealth from maritime commerce.",
   "connections": {
     "west": "city-east-west",

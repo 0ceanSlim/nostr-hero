@@ -2,6 +2,8 @@
   "id": "kingdom",
   "name": "The Royal Kingdom",
   "type": "kingdom",
+  "image": "/res/img/locations/kingdom.png",
+  "music": "/res/aud/locations/kingdom.mp3",
   "description": "The grand capital city stands as the heart of the realm, its towering spires and bustling streets a testament to prosperity and order.",
   "connections": {
     "north": "kingdom-north",
