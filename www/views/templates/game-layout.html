@@ -4,12 +4,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Dogica Font -->
+    <link href="/res/style/fonts.css" rel="stylesheet" />
     <link href="/res/style/output.css" rel="stylesheet" />
-    <link href="/style/custom.min.css" rel="stylesheet" />
     <link rel="icon" type="image/x-icon" href="/res/img/favicon.ico" />
     <style>
       body {
-        font-family: "Pixelify Sans";
+        font-family: "Dogica", monospace;
         margin: 0;
         padding: 0;
         overflow: hidden;
@@ -38,13 +39,35 @@
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #6b7280;
       }
+
+      /* Hide tabs when not active - MUST come first */
+      .tab-panel.hidden {
+        display: none !important;
+      }
+
+      /* Fix inventory slots from being squished - only when visible */
+      #inventory-panel:not(.hidden) {
+        display: block !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        padding: 0 4px !important;
+      }
+
+      #general-slots {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-rows: 1fr !important;
+        gap: 2px !important;
+        margin-bottom: 2px !important;
+      }
+
+      #backpack-slots {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-rows: repeat(5, 1fr) !important;
+        gap: 2px !important;
+      }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
     <title>{{template "title"}} - {{.Title}}</title>
   </head>
   <body class="bg-gray-900 text-white">

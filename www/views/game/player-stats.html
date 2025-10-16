@@ -1,78 +1,79 @@
 {{define "game/player-stats.html"}}
 <!-- Player Stats Area - Dark Win95 Style -->
-<div class="p-3 space-y-2 win95-inset">
+<div class="p-1 space-y-1" style="flex-shrink: 0; font-size: 7px;">
     <!-- Character Name, Level, and Gold -->
-    <div class="flex justify-between items-center">
-        <div id="char-name" class="text-lg font-bold text-white">Character</div>
-        <div class="flex items-center gap-2">
-            <div class="text-lg font-bold text-white">Lv. <span id="char-level">1</span></div>
-            <div class="flex items-center gap-1">
-                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-4 h-4">
-                <span class="text-sm font-bold text-white"><span id="char-gold">0</span></span>
+    <div class="flex flex-col gap-0.5">
+        <div class="flex items-center justify-between font-bold text-white" style="font-size: 8px;">
+            <div class="truncate">
+                <span id="char-name">Character</span> Lv.<span id="char-level">1</span>
+            </div>
+            <div class="flex items-center gap-0.5 flex-shrink-0">
+                <span id="char-gold">0</span>
+                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-3 h-3">
             </div>
         </div>
     </div>
 
     <!-- Experience Bar -->
-    <div class="relative w-full h-3 flex items-center justify-center px-1 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
-        <div id="exp-bar" class="absolute inset-0 h-3 transition-all bg-blue-600" style="width: 0%;"></div>
-        <span class="relative z-10 text-xs font-bold text-white"><span id="current-exp">0</span>/<span id="exp-to-next">100</span></span>
+    <div class="relative w-full flex items-center justify-center px-1 bg-win95-bgDark border border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight" style="height: 12px;">
+        <div id="exp-bar" class="absolute inset-0 transition-all bg-blue-600" style="width: 0%; height: 12px;"></div>
+        <span class="relative z-10 text-white" style="font-size: 6px;"><span id="current-exp">0</span>/<span id="exp-to-next">100</span></span>
     </div>
 
     <!-- HP Bar -->
-    <div class="relative w-full h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
-        <div id="hp-bar" class="absolute inset-0 h-5 transition-all bg-red-700" style="width: 100%;"></div>
-        <span class="relative z-10 text-xs font-bold text-white">HP</span>
-        <span class="relative z-10 text-xs font-bold text-white"><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
+    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a;">
+        <div id="hp-bar" class="absolute inset-0 transition-all bg-red-700" style="width: 100%; height: 14px;"></div>
+        <span class="relative z-10 text-[8px] font-bold text-white">HP</span>
+        <span class="relative z-10 text-[8px] font-bold text-white"><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
     </div>
 
     <!-- Mana Bar -->
-    <div class="relative w-full h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
-        <div id="mana-bar" class="absolute inset-0 h-5 transition-all bg-blue-600" style="width: 100%;"></div>
-        <span class="relative z-10 text-xs font-bold text-white">MANA</span>
-        <span class="relative z-10 text-xs font-bold text-white"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
+    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a;">
+        <div id="mana-bar" class="absolute inset-0 transition-all bg-blue-600" style="width: 100%; height: 14px;"></div>
+        <span class="relative z-10 text-[8px] font-bold text-white">MP</span>
+        <span class="relative z-10 text-[8px] font-bold text-white"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
     </div>
 
-    <!-- Fatigue & Weight Bar -->
-    <div class="flex gap-1">
-        <!-- Fatigue Bar (takes most of space) -->
-        <div class="relative flex-1 h-5 flex items-center justify-between px-2 bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
-            <div id="fatigue-bar" class="absolute inset-0 h-5 transition-all" style="width: 0%; background: linear-gradient(90deg, #00cc00 0%, #ffff00 50%, #ff8800 75%, #ff0000 100%);"></div>
-            <span class="relative z-10 text-xs font-bold text-white">FATIGUE <span id="fatigue-level">0</span>/10</span>
-            <span id="fatigue-status" class="relative z-10 text-[9px] font-bold text-white">FRESH</span>
+    <!-- Fatigue & Weight Row -->
+    <div class="flex gap-0.5">
+        <!-- Fatigue Bar (65% width) -->
+        <div class="relative h-3 flex items-center justify-between px-1 bg-win95-bgDark border border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight" style="flex: 0.65;">
+            <div id="fatigue-bar" class="absolute inset-0 h-3 transition-all" style="width: 0%; background: linear-gradient(90deg, #00cc00 0%, #ffff00 50%, #ff8800 75%, #ff0000 100%);"></div>
+            <span class="relative z-10 text-white" style="font-size: 6px;">FTG <span id="fatigue-level">0</span>/10</span>
+            <span id="fatigue-status" class="relative z-10 text-white" style="font-size: 6px;">FRESH</span>
         </div>
-        <!-- Weight Display -->
-        <div class="relative h-5 flex items-center justify-between px-2 min-w-[80px] bg-win95-bgDark border-2 border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight">
-            <span class="text-[9px] font-bold text-white">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
-            <span id="weight-status" class="text-[8px] font-bold text-white">OK</span>
+        <!-- Weight Display (35% width, no border) -->
+        <div class="h-3 flex items-center justify-between px-1" style="flex: 0.35;">
+            <span class="text-white" style="font-size: 6px;">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
+            <span id="weight-status" class="text-white" style="font-size: 6px;">OK</span>
         </div>
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-6 gap-2 text-center text-xs pt-2">
+    <div class="grid grid-cols-6 gap-0.5 text-center text-[8px]">
         <div>
             <div class="text-gray-400">STR</div>
-            <div id="stat-str" class="font-bold">10</div>
+            <div id="stat-str" class="font-bold text-white">10</div>
         </div>
         <div>
             <div class="text-gray-400">DEX</div>
-            <div id="stat-dex" class="font-bold">10</div>
+            <div id="stat-dex" class="font-bold text-white">10</div>
         </div>
         <div>
             <div class="text-gray-400">CON</div>
-            <div id="stat-con" class="font-bold">10</div>
+            <div id="stat-con" class="font-bold text-white">10</div>
         </div>
         <div>
             <div class="text-gray-400">INT</div>
-            <div id="stat-int" class="font-bold">10</div>
+            <div id="stat-int" class="font-bold text-white">10</div>
         </div>
         <div>
             <div class="text-gray-400">WIS</div>
-            <div id="stat-wis" class="font-bold">10</div>
+            <div id="stat-wis" class="font-bold text-white">10</div>
         </div>
         <div>
             <div class="text-gray-400">CHA</div>
-            <div id="stat-cha" class="font-bold">10</div>
+            <div id="stat-cha" class="font-bold text-white">10</div>
         </div>
     </div>
 </div>

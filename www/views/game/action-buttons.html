@@ -1,12 +1,12 @@
 {{define "game/action-buttons.html"}}
 <!-- Action Buttons Area - Dark Win95 Style -->
-<div class="p-2 flex-shrink-0 flex-1 overflow-hidden win95-inset">
-    <div id="action-buttons" class="grid grid-cols-3 gap-2 h-full">
+<div class="p-1 flex-shrink-0" style="height: 125px;">
+    <div id="action-buttons" class="grid grid-cols-3 gap-1 h-full">
         <!-- Navigation buttons column (D-pad style) -->
         <div id="navigation-buttons" class="flex flex-col gap-0.5 min-w-0 overflow-hidden">
-            <h3 class="text-white text-[10px] font-bold uppercase mb-1 flex-shrink-0">Travel</h3>
+            <h3 class="text-white text-[8px] font-bold uppercase mb-0.5 flex-shrink-0">Travel</h3>
             <!-- D-pad grid: 3x3 layout for cardinal directions -->
-            <div class="grid grid-cols-3 grid-rows-3 gap-3 flex-1 min-h-0">
+            <div class="grid grid-cols-3 grid-rows-3 gap-0.5 flex-1 min-h-0">
                 <!-- Row 1: Empty, North, Empty -->
                 <div></div>
                 <div id="travel-n" class="flex items-center justify-center min-w-0 min-h-0"></div>
@@ -26,14 +26,14 @@
 
         <!-- Building buttons column -->
         <div id="building-buttons" class="flex flex-col gap-0.5">
-            <h3 class="text-white text-[10px] font-bold uppercase">Buildings</h3>
-            <div class="flex flex-col gap-0.5"></div>
+            <h3 class="text-white text-[8px] font-bold uppercase mb-0.5">Buildings</h3>
+            <div class="flex flex-col gap-0.5 overflow-y-auto"></div>
         </div>
 
         <!-- NPC buttons column -->
         <div id="npc-buttons" class="flex flex-col gap-0.5">
-            <h3 class="text-white text-[10px] font-bold uppercase">People</h3>
-            <div class="flex flex-col gap-0.5"></div>
+            <h3 class="text-white text-[8px] font-bold uppercase mb-0.5">People</h3>
+            <div class="flex flex-col gap-0.5 overflow-y-auto"></div>
         </div>
     </div>
 </div>

@@ -497,8 +497,8 @@ async function updateCharacterDisplay() {
             for (let i = 0; i < 4; i++) {
                 const slot = character.inventory.general_slots[i];
                 const slotDiv = document.createElement('div');
-                slotDiv.className = 'bg-gray-700 relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
-                slotDiv.style.cssText = 'width: 56px; height: 56px; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);';
+                slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
+                slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
 
                 if (slot && slot.item) {
                     // Create image container
@@ -520,12 +520,6 @@ async function updateCharacterDisplay() {
                         quantityLabel.textContent = `x${slot.quantity}`;
                         slotDiv.appendChild(quantityLabel);
                     }
-                } else {
-                    // Empty slot
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.className = 'w-full h-full flex items-center justify-center text-gray-600';
-                    emptyDiv.innerHTML = '<svg class="w-8 h-8" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="16" width="32" height="32" fill="none" stroke="#4B5563" stroke-width="2"/></svg>';
-                    slotDiv.appendChild(emptyDiv);
                 }
 
                 generalSlotsDiv.appendChild(slotDiv);
@@ -546,8 +540,8 @@ async function updateCharacterDisplay() {
             for (let i = 0; i < 20; i++) {
                 const slot = contents[i];
                 const slotDiv = document.createElement('div');
-                slotDiv.className = 'bg-gray-700 relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
-                slotDiv.style.cssText = 'width: 56px; height: 56px; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);';
+                slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
+                slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
 
                 if (slot && slot.item) {
                     itemCount++;
@@ -571,12 +565,6 @@ async function updateCharacterDisplay() {
                         quantityLabel.textContent = `x${slot.quantity}`;
                         slotDiv.appendChild(quantityLabel);
                     }
-                } else {
-                    // Empty slot
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.className = 'w-full h-full flex items-center justify-center text-gray-600';
-                    emptyDiv.innerHTML = '<svg class="w-8 h-8" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="16" width="32" height="32" fill="none" stroke="#4B5563" stroke-width="2"/></svg>';
-                    slotDiv.appendChild(emptyDiv);
                 }
 
                 backpackDiv.appendChild(slotDiv);
@@ -887,7 +875,8 @@ function createLocationButton(text, onClick, type = 'navigation') {
 
     const colorClass = typeStyles[type] || typeStyles.navigation;
 
-    button.className = `${colorClass} text-white border-2 px-2 py-1 text-xs font-bold transition-all leading-tight text-center overflow-hidden`;
+    button.className = `${colorClass} text-white border-2 px-2 py-1 font-bold transition-all leading-tight text-center overflow-hidden`;
+    button.style.fontSize = '7px';
     button.style.imageRendering = 'pixelated';
     button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
     button.style.overflowWrap = 'break-word';

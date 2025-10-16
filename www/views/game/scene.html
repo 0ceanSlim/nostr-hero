@@ -1,10 +1,10 @@
 {{define "game/scene.html"}}
-<!-- Scene Image Area (16:9 aspect ratio, centered) - Win95 Style -->
-<div class="w-full flex-shrink-0 flex items-center justify-center p-4" style="height: 40vh; background: #000000; border-top: 2px solid #808080; border-left: 2px solid #808080; border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff; box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #000000;">
+<!-- Scene Image Area (4:3 ratio, 347x347px) - Win95 Style -->
+<div class="w-full h-full flex-shrink-0" style="background: #000000; border-top: 2px solid #808080; border-left: 2px solid #808080; border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff; box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #000000;">
     <div class="relative w-full h-full flex items-center justify-center">
-        <img id="scene-image" src="/res/img/locations/kingdom.png" alt="Scene" class="max-w-full max-h-full object-contain" style="aspect-ratio: 16/9; image-rendering: pixelated;">
-        <div class="absolute top-0 left-0 right-0 text-center p-3" style="background: linear-gradient(180deg, rgba(192,192,192,0.9) 0%, rgba(192,192,192,0) 100%);">
-            <h2 id="scene-title" class="text-2xl font-bold text-black">Kingdom</h2>
+        <img id="scene-image" src="/res/img/locations/kingdom.png" alt="Scene" class="w-full h-full object-cover" style="image-rendering: pixelated;">
+        <div class="absolute top-0 left-0 right-0 text-center p-2" style="background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
+            <h2 id="scene-title" class="text-sm font-bold text-white">Kingdom</h2>
         </div>
     </div>
 </div>

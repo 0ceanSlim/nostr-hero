@@ -30,37 +30,54 @@
 <!-- Main Game Container - Full Screen with Dark Win95 Style -->
 <div
   id="game-app"
-  class="fixed inset-0 flex items-center justify-center overflow-hidden font-mono text-white"
+  class="fixed inset-0 flex items-start justify-start overflow-hidden text-white"
   style="background: #000000"
 >
-  <!-- Dark Win95 Style Game Window -->
+  <!-- Dark Win95 Style Game Window - Fixed 756x503 base size, scaled to fit -->
   <div
-    class="w-full h-full max-w-[1600px] max-h-[900px] flex flex-col"
+    id="game-window"
+    class="flex flex-col"
     style="
+      width: 756px;
+      height: 503px;
       background: #2a2a2a;
       border-top: 2px solid #4a4a4a;
       border-left: 2px solid #4a4a4a;
       border-right: 2px solid #000000;
       border-bottom: 2px solid #000000;
       box-shadow: inset 1px 1px 0 #3a3a3a, inset -1px -1px 0 #1a1a1a;
+      transform-origin: top left;
     "
   >
-    <!-- Main Content Area: 2 columns (75/25 split) -->
+    <!-- Main Content Area: 2 columns (556px left, 200px right) -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- LEFT COLUMN (75%) - Scene + Text + Actions -->
-      <div class="w-[75%] flex flex-col">
-        {{template "game/scene.html"}} {{template "game/game-text.html"}}
+      <!-- LEFT COLUMN (556px) - Scene/Text side-by-side + Actions below -->
+      <div style="width: 556px;" class="flex flex-col">
+        <!-- Scene and Text Box Row -->
+        <div class="flex" style="height: 347px;">
+          <!-- Text Box -->
+          <div style="width: 209px;">
+            {{template "game/game-text.html"}}
+          </div>
+          <!-- Scene (4:3 ratio) -->
+          <div style="width: 347px;">
+            {{template "game/scene.html"}}
+          </div>
+        </div>
+        <!-- Action Buttons -->
         {{template "game/action-buttons.html"}}
       </div>
 
-      <!-- RIGHT COLUMN (25%) - Stats + Content + Tabs -->
-      <div class="w-[25%] flex flex-col">
+      <!-- RIGHT COLUMN (200px) - Character Info + Inventory + Menu Buttons -->
+      <div style="width: 200px;" class="flex flex-col">
         {{template "game/player-stats.html"}}
 
-        <!-- Tabbed Content Area -->
+        <!-- Tabbed Content Area (Inventory/Equipment) -->
         <div
-          class="flex flex-col flex-1 overflow-hidden"
+          class="flex flex-col overflow-hidden"
           style="
+            flex: 1;
+            min-height: 0;
             background: #2a2a2a;
             border-top: 2px solid #1a1a1a;
             border-left: 2px solid #1a1a1a;
@@ -70,11 +87,13 @@
           "
         >
           <!-- Tab Content -->
-          <div class="flex-1 p-4 overflow-y-auto">
-            {{template "game/tabs/equipment.html"}} {{template
-            "game/tabs/inventory.html"}} {{template "game/tabs/spells.html"}}
-            {{template "game/tabs/questlog.html"}} {{template
-            "game/tabs/stats.html"}} {{template "game/tabs/music.html"}}
+          <div style="flex: 1; min-height: 0; padding: 4px; overflow-y: auto;">
+            {{template "game/tabs/equipment.html"}}
+            {{template "game/tabs/inventory.html"}}
+            {{template "game/tabs/spells.html"}}
+            {{template "game/tabs/questlog.html"}}
+            {{template "game/tabs/stats.html"}}
+            {{template "game/tabs/music.html"}}
           </div>
         </div>
 
@@ -114,6 +133,50 @@
         }
       });
     }
+
+    // Game UI Scaling System
+    function scaleGameUI() {
+      const gameWindow = document.getElementById('game-window');
+      if (!gameWindow) return;
+
+      const baseWidth = 756;
+      const baseHeight = 503;
+      const baseRatio = baseWidth / baseHeight; // ~1.503
+
+      // Get viewport dimensions
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const viewportRatio = viewportWidth / viewportHeight;
+
+      let scaleX, scaleY;
+
+      // First, scale uniformly to fit within viewport (maintaining aspect ratio)
+      const uniformScale = Math.min(viewportWidth / baseWidth, viewportHeight / baseHeight);
+
+      // Then stretch to fill the remaining space
+      if (viewportRatio > baseRatio) {
+        // Viewport is wider - scale height uniformly, then stretch width to fill
+        scaleY = uniformScale;
+        scaleX = viewportWidth / baseWidth;
+      } else {
+        // Viewport is taller - scale width uniformly, then stretch height to fill
+        scaleX = uniformScale;
+        scaleY = viewportHeight / baseHeight;
+      }
+
+      // Apply the transform
+      gameWindow.style.transform = `scale(${scaleX}, ${scaleY})`;
+    }
+
+    // Initialize scaling on page load
+    window.addEventListener('load', () => {
+      scaleGameUI();
+      // Set equipment tab as default
+      switchTab('equipment');
+    });
+
+    // Re-scale when window is resized
+    window.addEventListener('resize', scaleGameUI);
 
     // Action button handlers
     function openBadges() {
