@@ -1,0 +1,62 @@
+{
+  "id": "royal-custodian",
+  "name": "Marcus Goldvault",
+  "title": "Royal Custodian",
+  "race": "Human",
+  "location": "kingdom",
+  "building": "vault_of_crowns",
+  "description": "A distinguished older man in fine royal livery, Marcus oversees the kingdom's official storage facility with meticulous care. His ledgers are impeccable and his reputation for discretion is legendary.",
+  "greeting": {
+    "first_time": "Welcome to the Vault of Crowns, traveler. I am Marcus Goldvault, Royal Custodian appointed by His Majesty to safeguard the possessions of citizens and honored guests alike.",
+    "returning": "Ah, welcome back. Your belongings remain secure, as always.",
+    "native_race": "Good day, citizen. As a resident of the kingdom, your storage rights are guaranteed by royal decree."
+  },
+  "dialogue": {
+    "about_service": {
+      "text": "The Vault of Crowns is funded by the crown to encourage trade and prosperity. Citizens of the kingdom—Humans, Half-Elves, Half-Orcs, and Tieflings—may store their belongings here freely. Others must pay a one-time Royal Seal Fee to register their chest.",
+      "options": ["ask_about_fee", "use_storage", "goodbye"]
+    },
+    "ask_about_fee": {
+      "text": "The Royal Seal Fee grants you permanent storage rights in this facility. Once paid, you may come and go as you please, storing and retrieving items at your convenience. The fee is 50 gold pieces—a modest sum for the peace of mind it provides.",
+      "requirements": {
+        "not_native": true,
+        "not_registered": true
+      },
+      "options": ["pay_fee", "maybe_later"]
+    },
+    "pay_fee": {
+      "text": "Excellent. Let me inscribe your name in the royal ledger... There. You are now registered. Your chest awaits in the vault. May it serve you well.",
+      "action": "register_storage",
+      "cost": 50,
+      "requirements": {
+        "gold": 50,
+        "not_registered": true
+      },
+      "success": "You have been registered at the Vault of Crowns. You may now store items here freely.",
+      "failure": "I'm afraid you need 50 gold to pay the Royal Seal Fee.",
+      "options": ["use_storage", "goodbye"]
+    },
+    "use_storage": {
+      "text": "Right this way. Your chest is secure and waiting.",
+      "action": "open_storage",
+      "requirements": {
+        "registered": true
+      },
+      "options": ["goodbye"]
+    },
+    "maybe_later": {
+      "text": "Of course. The Vault of Crowns will be here when you're ready. Safe travels.",
+      "options": ["goodbye"]
+    },
+    "goodbye": {
+      "text": "May the crown's protection follow you on your journey.",
+      "action": "end_dialogue"
+    }
+  },
+  "storage_config": {
+    "free_for_races": ["Human", "Half-Elf", "Half-Orc", "Tiefling"],
+    "registration_fee": 50,
+    "storage_slots": 40,
+    "slot_type": "standard"
+  }
+}

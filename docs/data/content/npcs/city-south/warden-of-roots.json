@@ -1,0 +1,62 @@
+{
+  "id": "warden-of-roots",
+  "name": "Silvanthir Moonbough",
+  "title": "Warden of Roots",
+  "race": "Elf",
+  "location": "city-south",
+  "building": "glade_of_safekeeping",
+  "description": "An ancient elf with bark-like skin and eyes the color of spring leaves. Silvanthir tends the enchanted trees that serve as living vaults, speaking to them in the old tongue.",
+  "greeting": {
+    "first_time": "Peace upon you, wanderer. I am Silvanthir, Warden of the Sacred Roots. The trees here have kept the treasures of our people for a thousand years.",
+    "returning": "The roots remember you. Welcome back.",
+    "native_race": "Elani mellon. Your hollow awaits, child of the forest."
+  },
+  "dialogue": {
+    "about_service": {
+      "text": "The Glade of Safekeeping is blessed by the eldest trees of this enclave. They store belongings within their hollow roots, keeping them safe from fire, rot, and thieves. Those born under the green canopy may use this gift freely. Others must offer a binding to attune a new hollow to their essence.",
+      "options": ["ask_about_offering", "use_storage", "goodbye"]
+    },
+    "ask_about_offering": {
+      "text": "The Offering of Binding requires a gift of 60 gold or an equivalent in mana crystals. With this offering, I will sing the old songs and the trees will hollow a space for you, bound to your spirit alone. Once bound, you may return whenever the need arises.",
+      "requirements": {
+        "not_native": true,
+        "not_registered": true
+      },
+      "options": ["pay_offering", "maybe_later"]
+    },
+    "pay_offering": {
+      "text": "The trees accept your offering. Listen... can you hear them? They sing your name now. A hollow has been prepared. Come, I will show you.",
+      "action": "register_storage",
+      "cost": 60,
+      "requirements": {
+        "gold": 60,
+        "not_registered": true
+      },
+      "success": "The trees have bound a hollow to your spirit. You may store items in the Glade of Safekeeping.",
+      "failure": "I sense your pockets are light. The offering requires 60 gold, friend.",
+      "options": ["use_storage", "goodbye"]
+    },
+    "use_storage": {
+      "text": "Place your hand upon the bark. The tree will open for you.",
+      "action": "open_storage",
+      "requirements": {
+        "registered": true
+      },
+      "options": ["goodbye"]
+    },
+    "maybe_later": {
+      "text": "The forest is patient. We will be here when you are ready.",
+      "options": ["goodbye"]
+    },
+    "goodbye": {
+      "text": "May the canopy shelter you, and may your path be ever green.",
+      "action": "end_dialogue"
+    }
+  },
+  "storage_config": {
+    "free_for_races": ["Elf"],
+    "registration_fee": 60,
+    "storage_slots": 40,
+    "slot_type": "standard"
+  }
+}

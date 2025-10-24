@@ -1,0 +1,69 @@
+{
+  "id": "nature-supplier",
+  "name": "Thalindra Greenleaf",
+  "title": "Nature's Provisioner",
+  "race": "Elf",
+  "location": "city-south",
+  "building": "verdant_supplies",
+  "description": "A graceful elf with vine-woven hair and earth-toned garments. Her shop smells of fresh herbs and treated leather, offering supplies that work in harmony with nature.",
+  "greeting": {
+    "first_time": "Anor a'maelamin. Welcome to my shop. I provide supplies for those who respect the balance of nature.",
+    "returning": "You return. The forest remembers you. What do you need today?",
+    "low_gold": "My purse grows light like autumn leaves. I cannot purchase much more until the next dawn."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "How may the forest provide for you?",
+      "options": ["browse_shop", "sell_items", "ask_about_goods", "goodbye"]
+    },
+    "browse_shop": {
+      "text": "All my wares are crafted with respect for the natural world. Please, look upon them.",
+      "action": "open_shop",
+      "options": ["main_menu"]
+    },
+    "sell_items": {
+      "text": "I will trade for goods of value, especially those gathered from nature, if my coin allows.",
+      "action": "open_sell",
+      "requirements": {
+        "shop_gold": 1
+      },
+      "failure": "The wind has carried away my coin today. Return when the sun rises anew.",
+      "options": ["main_menu"]
+    },
+    "ask_about_goods": {
+      "text": "I work with local artisans who understand the old ways. Nothing is taken from the forest without gratitude, and nothing is wasted.",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "May the leaves guide your path. Farewell, wanderer.",
+      "action": "end_dialogue"
+    }
+  },
+  "shop_config": {
+    "shop_type": "general",
+    "buys_items": true,
+    "buy_price_multiplier": 0.5,
+    "sell_price_multiplier": 1.0,
+    "starting_gold": 600,
+    "max_gold": 1200,
+    "gold_regen_rate": 120,
+    "gold_regen_interval": "daily",
+    "inventory": [
+      {"item_id": "rope-hemp", "stock": 12, "max_stock": 12, "restock_rate": 8, "restock_interval": "daily"},
+      {"item_id": "torch", "stock": 18, "max_stock": 18, "restock_rate": 15, "restock_interval": "daily"},
+      {"item_id": "rations", "stock": 35, "max_stock": 35, "restock_rate": 30, "restock_interval": "daily"},
+      {"item_id": "waterskin", "stock": 18, "max_stock": 18, "restock_rate": 12, "restock_interval": "daily"},
+      {"item_id": "backpack", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "bedroll", "stock": 10, "max_stock": 10, "restock_rate": 7, "restock_interval": "daily"},
+      {"item_id": "tinderbox", "stock": 12, "max_stock": 12, "restock_rate": 8, "restock_interval": "daily"},
+      {"item_id": "oil-flask", "stock": 10, "max_stock": 10, "restock_rate": 8, "restock_interval": "daily"},
+      {"item_id": "antitoxin", "stock": 4, "max_stock": 4, "restock_rate": 2, "restock_interval": "daily"},
+      {"item_id": "healers-kit", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "herbalism-kit", "stock": 3, "max_stock": 3, "restock_rate": 2, "restock_interval": "daily"},
+      {"item_id": "hunting-trap", "stock": 4, "max_stock": 4, "restock_rate": 3, "restock_interval": "daily"},
+      {"item_id": "net", "stock": 5, "max_stock": 5, "restock_rate": 3, "restock_interval": "daily"},
+      {"item_id": "quiver", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
+      {"item_id": "arrows", "stock": 40, "max_stock": 40, "restock_rate": 30, "restock_interval": "daily"}
+    ]
+  }
+}

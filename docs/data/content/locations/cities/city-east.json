@@ -35,6 +35,25 @@
       },
       "buildings": [
         {
+          "id": "ember_vault",
+          "name": "The Ember Vault",
+          "type": "house_of_keeping",
+          "description": "A place of fire and honor where dragonborn clan relics are preserved in magically sealed chests heated by dragonfire. The vaults are guarded by ancient draconic magic.",
+          "accessible": true,
+          "npc": "scalekeeper",
+          "actions": ["talk_to_scalekeeper", "access_storage", "undergo_flamebinding"]
+        },
+        {
+          "id": "goldenhaven_trade_goods",
+          "name": "Goldscale Trading House",
+          "type": "shop",
+          "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
+          "accessible": true,
+          "shop_type": "general",
+          "npc": "trade-merchant",
+          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
+        },
+        {
           "id": "grand_exchange",
           "name": "Grand Exchange",
           "type": "bank",
@@ -60,7 +79,7 @@
           "actions": ["apply_for_license", "check_trade_routes", "negotiate_contracts"]
         }
       ],
-      "npcs": ["guild_prince", "exchange_master", "luxury_dealer"]
+      "npcs": ["scalekeeper", "trade-merchant"]
     },
     "west": {
       "id": "city-east-west",
@@ -88,7 +107,7 @@
           "actions": ["rent_room", "stable_animals", "hire_guards", "plan_routes"]
         }
       ],
-      "npcs": ["customs_officer", "caravan_innkeeper"],
+      "npcs": [],
       "exit_to_environment": "urban-kingdom"
     },
     "north": {
@@ -110,7 +129,7 @@
           "actions": ["buy_gems", "sell_ore", "hire_prospectors"]
         }
       ],
-      "npcs": ["ore_broker"],
+      "npcs": [],
       "exit_to_environment": "mountain-northeast"
     },
     "east": {
@@ -134,12 +153,21 @@
           "id": "sailors_tavern",
           "name": "The Salty Anchor",
           "type": "tavern",
-          "description": "A rowdy tavern where sailors share tales of distant lands.",
+          "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
           "accessible": true,
-          "actions": ["buy_drinks", "listen_to_tales", "hire_crew"]
+          "npcs": ["port-innkeeper", "port-doorman"],
+          "actions": [
+            "talk_to_innkeeper",
+            "rent_room",
+            "buy_drinks",
+            "talk_to_doorman",
+            "book_performance",
+            "listen_to_tales",
+            "hire_crew"
+          ]
         }
       ],
-      "npcs": ["harbor_master", "ship_captain"],
+      "npcs": ["port-innkeeper", "port-doorman"],
       "exit_to_environment": "desert-city"
     }
   }

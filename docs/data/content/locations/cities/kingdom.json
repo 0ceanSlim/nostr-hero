@@ -37,6 +37,15 @@
       },
       "buildings": [
         {
+          "id": "vault_of_crowns",
+          "name": "The Vault of Crowns",
+          "type": "house_of_keeping",
+          "description": "The kingdom's official storage facility, funded by the crown to encourage trade and travel. Citizens and allies store goods freely as a royal right.",
+          "accessible": true,
+          "npc": "royal-custodian",
+          "actions": ["talk_to_custodian", "access_storage", "register"]
+        },
+        {
           "id": "royal_palace",
           "name": "Royal Palace",
           "type": "landmark",
@@ -45,13 +54,14 @@
           "actions": ["observe", "approach_guards"]
         },
         {
-          "id": "grand_market",
+          "id": "kingdom_general_store",
           "name": "Grand Market",
           "type": "shop",
-          "description": "The largest marketplace in the kingdom, filled with merchants from distant lands.",
+          "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
           "accessible": true,
           "shop_type": "general",
-          "actions": ["browse", "buy", "sell", "talk_to_merchants"]
+          "npc": "general-merchant",
+          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
         },
         {
           "id": "adventurers_guild",
@@ -62,7 +72,7 @@
           "actions": ["register", "check_contracts", "talk_to_adventurers"]
         }
       ],
-      "npcs": ["royal_guard", "merchant_leader", "guild_master"]
+      "npcs": ["royal-custodian", "general-merchant"]
     },
     "north": {
       "id": "kingdom-north",
@@ -99,7 +109,7 @@
           "actions": ["buy_spells", "identify_items", "talk_to_mages"]
         }
       ],
-      "npcs": ["court_wizard", "librarian", "noble_messenger"],
+      "npcs": [],
       "exit_to_environment": "swamp-kingdom"
     },
     "south": {
@@ -141,7 +151,7 @@
           "actions": ["hire_cart", "check_routes", "talk_to_drivers"]
         }
       ],
-      "npcs": ["gate_captain", "innkeeper", "cart_driver"],
+      "npcs": [],
       "exit_to_environment": "forest-kingdom"
     },
     "east": {
@@ -189,7 +199,7 @@
           ]
         }
       ],
-      "npcs": ["master_smith", "bank_clerk", "artisan_leader"],
+      "npcs": [],
       "exit_to_environment": "urban-kingdom"
     },
     "west": {
@@ -214,15 +224,18 @@
           "id": "tavern_golden_griffin",
           "name": "The Golden Griffin Tavern",
           "type": "tavern",
-          "description": "A popular tavern where merchants, adventurers, and locals gather to drink and share news.",
+          "description": "A popular upscale tavern where merchants, adventurers, and locals gather for fine drinks, live music, and news. Gareth Thornfield runs a refined establishment with quality entertainment.",
           "accessible": true,
+          "npcs": ["tavern-keeper", "tavern-doorman"],
           "actions": [
+            "talk_to_innkeeper",
+            "rent_room",
             "buy_drinks",
-            "talk_to_patrons",
-            "listen_to_music",
-            "gather_information"
+            "talk_to_doorman",
+            "book_performance",
+            "listen_to_music"
           ],
-          "special_features": ["vip_section_for_happytavern_nip5"]
+          "special_features": ["vip_section_for_happytavern_nip5", "live_music_nightly"]
         },
         {
           "id": "caravan_office",
@@ -233,7 +246,7 @@
           "actions": ["join_caravan", "hire_guards", "check_trade_routes"]
         }
       ],
-      "npcs": ["caravan_master", "tavern_keeper", "exotic_trader"],
+      "npcs": ["tavern-keeper", "tavern-doorman"],
       "exit_to_environment": "hill-kingdom"
     }
   }

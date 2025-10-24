@@ -54,7 +54,7 @@
           "actions": ["pray_for_water", "leave_offering", "ask_for_blessing"]
         }
       ],
-      "npcs": ["village_elder", "desert_guide", "water_keeper"]
+      "npcs": []
     },
     "west": {
       "id": "village-southeast-west",
@@ -74,7 +74,7 @@
           "actions": ["join_caravan", "hire_protection", "buy_camels"]
         }
       ],
-      "npcs": ["caravan_master"],
+      "npcs": [],
       "exit_to_environment": "desert-city"
     }
   }

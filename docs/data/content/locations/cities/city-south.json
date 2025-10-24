@@ -35,6 +35,15 @@
       },
       "buildings": [
         {
+          "id": "glade_of_safekeeping",
+          "name": "The Glade of Safekeeping",
+          "type": "house_of_keeping",
+          "description": "Enchanted trees store belongings within hollow roots, kept safe by ancient elven magic. The eldest trees of the enclave offer this blessing to their kin and those who earn it.",
+          "accessible": true,
+          "npc": "warden-of-roots",
+          "actions": ["talk_to_warden", "access_storage", "offer_binding"]
+        },
+        {
           "id": "great_library",
           "name": "The Verdant Archives",
           "type": "library",
@@ -51,6 +60,16 @@
           "actions": ["learn_druid_magic", "commune_with_nature", "seek_wisdom"]
         },
         {
+          "id": "verdant_supplies",
+          "name": "Greenleaf Provisions",
+          "type": "shop",
+          "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
+          "accessible": true,
+          "shop_type": "general",
+          "npc": "nature-supplier",
+          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
+        },
+        {
           "id": "herb_market",
           "name": "Garden of Remedies",
           "type": "shop",
@@ -58,9 +77,25 @@
           "accessible": true,
           "shop_type": "herbalism",
           "actions": ["buy_herbs", "sell_plants", "learn_recipes"]
+        },
+        {
+          "id": "moonlit_glade_inn",
+          "name": "The Moonlit Glade",
+          "type": "inn",
+          "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
+          "accessible": true,
+          "npcs": ["forest-innkeeper", "forest-doorman"],
+          "actions": [
+            "talk_to_innkeeper",
+            "rent_room",
+            "buy_herbal_tea",
+            "talk_to_doorman",
+            "book_performance",
+            "meditate_in_garden"
+          ]
         }
       ],
-      "npcs": ["chief_druid", "master_herbalist", "nature_scholar"]
+      "npcs": ["warden-of-roots", "nature-supplier", "forest-innkeeper", "forest-doorman"]
     },
     "north": {
       "id": "city-south-north",
@@ -80,7 +115,7 @@
           "actions": ["hire_guide", "report_dangers", "learn_tracking"]
         }
       ],
-      "npcs": ["ranger_captain"],
+      "npcs": [],
       "exit_to_environment": "forest-kingdom"
     },
     "west": {
@@ -101,7 +136,7 @@
           "actions": ["commission_staff", "buy_natural_armor", "learn_woodcraft"]
         }
       ],
-      "npcs": ["master_woodcarver"],
+      "npcs": [],
       "exit_to_environment": "swamp-south"
     },
     "south": {
@@ -123,7 +158,7 @@
           "actions": ["buy_sea_goods", "sell_forest_products", "arrange_shipping"]
         }
       ],
-      "npcs": ["coastal_trader"],
+      "npcs": [],
       "exit_to_environment": "coastal-south"
     }
   }

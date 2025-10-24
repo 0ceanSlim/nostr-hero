@@ -33,12 +33,40 @@
       },
       "buildings": [
         {
+          "id": "stonevault",
+          "name": "The Stonevault",
+          "type": "house_of_keeping",
+          "description": "Ancient dwarven vaults carved deep into the mountain by the first settlers. Massive underground chambers where clan members store their wealth and heirlooms.",
+          "accessible": true,
+          "npc": "vaultwright",
+          "actions": ["talk_to_vaultwright", "access_storage", "request_engraving"]
+        },
+        {
           "id": "miners_inn",
           "name": "The Pickaxe & Pint",
           "type": "inn",
-          "description": "A rowdy inn where miners gather after long shifts underground.",
+          "description": "A rowdy inn run by the sturdy dwarf Helga Stonebrew, where miners gather after long shifts underground. Loud rhythmic music echoes through the halls.",
           "accessible": true,
-          "actions": ["rent_room", "buy_ale", "listen_to_mining_stories", "hire_miners"]
+          "npcs": ["miners-innkeeper", "miners-doorman"],
+          "actions": [
+            "talk_to_innkeeper",
+            "rent_room",
+            "buy_ale",
+            "talk_to_doorman",
+            "book_performance",
+            "listen_to_mining_stories",
+            "hire_miners"
+          ]
+        },
+        {
+          "id": "ironpeak_general_supplies",
+          "name": "Ironhand's Supplies",
+          "type": "shop",
+          "description": "Brogni Ironhand's no-nonsense supply shop, stocked with durable gear built to survive the harsh mountains.",
+          "accessible": true,
+          "shop_type": "general",
+          "npc": "mining-supplier",
+          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
         },
         {
           "id": "ore_exchange",
@@ -58,7 +86,7 @@
           "actions": ["register_claim", "check_mining_rights", "hire_expedition"]
         }
       ],
-      "npcs": ["guild_foreman", "ore_merchant", "tavern_keeper"]
+      "npcs": ["vaultwright", "mining-supplier", "miners-innkeeper", "miners-doorman"]
     },
     "south": {
       "id": "town-northeast-south",
@@ -78,7 +106,7 @@
           "actions": ["hire_cart", "check_routes", "load_cargo"]
         }
       ],
-      "npcs": ["cart_master"],
+      "npcs": [],
       "exit_to_environment": "mountain-northeast"
     }
   }

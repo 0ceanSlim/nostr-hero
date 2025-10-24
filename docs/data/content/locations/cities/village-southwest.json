@@ -31,21 +31,40 @@
       },
       "buildings": [
         {
+          "id": "warhoard",
+          "name": "The Warhoard",
+          "type": "house_of_keeping",
+          "description": "Communal caches where orcs store spoils of war. Battle-scarred vaults in the lower levels, guarded fiercely by the clan's most trusted warriors.",
+          "accessible": true,
+          "npc": "hoardkeeper",
+          "actions": ["talk_to_hoardkeeper", "access_storage", "pay_tribute"]
+        },
+        {
           "id": "marsh_inn",
           "name": "The Glowing Lantern",
           "type": "inn",
-          "description": "A cozy inn built over the water where travelers can rest safely above the swamp.",
+          "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
           "accessible": true,
-          "actions": ["rent_room", "buy_swamp_stew", "listen_to_stories", "hire_boat"]
+          "npcs": ["swamp-innkeeper", "swamp-doorman"],
+          "actions": [
+            "talk_to_innkeeper",
+            "rent_room",
+            "buy_swamp_stew",
+            "talk_to_doorman",
+            "book_performance",
+            "listen_to_stories",
+            "hire_boat"
+          ]
         },
         {
           "id": "bog_trader",
           "name": "Swamp Treasures",
           "type": "shop",
-          "description": "A shop dealing in swamp resources and protective gear.",
+          "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
           "accessible": true,
-          "shop_type": "swamp_gear",
-          "actions": ["buy_waders", "sell_moss", "trade_bog_iron"]
+          "shop_type": "general",
+          "npc": "swamp-trader",
+          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
         },
         {
           "id": "spirit_shrine",
@@ -56,7 +75,7 @@
           "actions": ["pray_for_protection", "leave_offering", "speak_to_shaman"]
         }
       ],
-      "npcs": ["village_shaman", "bog_trader", "marsh_guide"]
+      "npcs": ["hoardkeeper", "swamp-trader", "swamp-innkeeper", "swamp-doorman"]
     },
     "east": {
       "id": "village-southwest-east",
@@ -76,7 +95,7 @@
           "actions": ["rent_boat", "hire_guide", "buy_supplies"]
         }
       ],
-      "npcs": ["boat_keeper"],
+      "npcs": [],
       "exit_to_environment": "swamp-south"
     }
   }

@@ -54,7 +54,7 @@
           "actions": ["pray_for_safe_voyage", "leave_offering", "seek_blessing"]
         }
       ],
-      "npcs": ["harbor_master", "old_fisherman", "sea_priest"]
+      "npcs": []
     },
     "north": {
       "id": "village-south-north",
@@ -75,7 +75,7 @@
           "actions": ["trade_goods", "store_cargo", "arrange_transport"]
         }
       ],
-      "npcs": ["trade_merchant"],
+      "npcs": [],
       "exit_to_environment": "coastal-south"
     }
   }

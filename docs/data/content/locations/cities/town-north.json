@@ -56,7 +56,7 @@
           "actions": ["speak_to_elder", "check_notices", "report_problems"]
         }
       ],
-      "npcs": ["town_elder", "fur_trader", "tavern_keeper"]
+      "npcs": []
     },
     "south": {
       "id": "town-north-south",
@@ -76,7 +76,7 @@
           "actions": ["talk_to_guards", "report_crime", "seek_protection"]
         }
       ],
-      "npcs": ["guard_captain"],
+      "npcs": [],
       "exit_to_environment": "swamp-kingdom"
     }
   }
