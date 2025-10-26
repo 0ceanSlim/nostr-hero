@@ -1,0 +1,23 @@
+{{define "game/tabs/settings.html"}}
+<!-- Settings Panel -->
+<div id="settings-panel" class="hidden h-full overflow-y-auto text-white" style="font-size: 11px;">
+    <div class="p-2 space-y-3">
+        <!-- Save Section -->
+        <div class="border border-gray-600 p-2" style="background: #1a1a1a;">
+            <h3 class="font-bold text-yellow-400 mb-2">Save Game</h3>
+            <button id="manual-save-btn" onclick="manualSaveGame()" class="w-full py-2 px-3 font-bold text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">
+                💾 Save Now
+            </button>
+            <div id="save-status" class="mt-2 text-xs text-gray-400"></div>
+        </div>
+
+        <!-- Debug Section -->
+        <div class="border border-gray-600 p-2" style="background: #1a1a1a;">
+            <h3 class="font-bold text-yellow-400 mb-2">Debug</h3>
+            <button onclick="console.log(getGameState())" class="w-full py-2 px-3 font-bold text-white mb-2" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">
+                📋 Log Game State
+            </button>
+        </div>
+    </div>
+</div>
+{{end}}
