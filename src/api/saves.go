@@ -27,14 +27,19 @@ type SaveFile struct {
 	Fatigue             int                    `json:"fatigue"`
 	Gold                int                    `json:"gold"`
 	Stats               map[string]interface{} `json:"stats"`
-	Location            string                 `json:"location"`
+	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
+	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
+	Building            string                 `json:"building"`     // Building ID or empty for outdoors
 	Inventory           map[string]interface{} `json:"inventory"`
+	Vault               map[string]interface{} `json:"vault"`
 	KnownSpells         []string               `json:"known_spells"`
 	SpellSlots          map[string]interface{} `json:"spell_slots"`
 	LocationsDiscovered []string               `json:"locations_discovered"`
 	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
-	InternalID          string                 `json:"-"` // Not serialized, used internally for file naming
-	InternalNpub        string                 `json:"-"` // Not serialized, used internally for directory structure
+	CurrentDay          int                    `json:"current_day"`
+	TimeOfDay           string                 `json:"time_of_day"` // "day" or "night"
+	InternalID          string                 `json:"-"`           // Not serialized, used internally for file naming
+	InternalNpub        string                 `json:"-"`           // Not serialized, used internally for directory structure
 }
 
 const SavesDirectory = "data/saves"
@@ -127,11 +132,16 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["gold"] = save.Gold
 		saveMap["stats"] = save.Stats
 		saveMap["location"] = save.Location
+		saveMap["district"] = save.District
+		saveMap["building"] = save.Building
 		saveMap["inventory"] = save.Inventory
+		saveMap["vault"] = save.Vault
 		saveMap["known_spells"] = save.KnownSpells
 		saveMap["spell_slots"] = save.SpellSlots
 		saveMap["locations_discovered"] = save.LocationsDiscovered
 		saveMap["music_tracks_unlocked"] = save.MusicTracksUnlocked
+		saveMap["current_day"] = save.CurrentDay
+		saveMap["time_of_day"] = save.TimeOfDay
 		savesWithID = append(savesWithID, saveMap)
 	}
 
@@ -148,8 +158,6 @@ func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
 		return
 	}
 
-	// Log the incoming data for debugging
-	log.Printf("📥 Received save data: %+v", rawData)
 
 	// Convert back to JSON and then decode into SaveFile struct
 	jsonData, err := json.Marshal(rawData)
@@ -169,10 +177,15 @@ func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
 	// Set internal metadata (not serialized to JSON)
 	saveData.InternalNpub = npub
 
-	if saveData.InternalID == "" {
-		// Generate new save ID
+	// Check if 'id' was provided in the request (for overwrites)
+	if id, ok := rawData["id"].(string); ok && id != "" {
+		saveData.InternalID = id
+		log.Printf("📝 Overwriting existing save: %s", id)
+	} else if saveData.InternalID == "" {
+		// Generate new save ID only if none provided
 		saveData.InternalID = fmt.Sprintf("save_%d", time.Now().Unix())
 		saveData.CreatedAt = time.Now().UTC().Format(time.RFC3339)
+		log.Printf("✨ Creating new save: %s", saveData.InternalID)
 	}
 
 	// Ensure saves directory exists for this user

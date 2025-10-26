@@ -404,6 +404,9 @@ async function updateCharacterDisplay() {
                 console.log(`Equipment slot ${slotName}:`, itemId);
 
                 if (itemId) {
+                    // Add data-item-id attribute to the slot for interaction system
+                    slotEl.setAttribute('data-item-id', itemId);
+
                     // Fetch item data
                     const itemData = await getItemByIdAsync(itemId);
                     console.log(`Item data for ${itemId}:`, itemData);
@@ -419,6 +422,9 @@ async function updateCharacterDisplay() {
                         }
                     }
                 } else {
+                    // Remove data-item-id attribute if slot is empty
+                    slotEl.removeAttribute('data-item-id');
+
                     // Reset to placeholder if empty
                     const imageContainer = slotEl.querySelector('.w-10.h-10');
                     const placeholderIcon = slotEl.querySelector('.placeholder-icon');
@@ -431,94 +437,127 @@ async function updateCharacterDisplay() {
         }
     }
 
-    // Update general slots (4x1 grid)
-    if (character.inventory && character.inventory.general_slots) {
-        const generalSlotsDiv = document.getElementById('general-slots');
-        if (generalSlotsDiv) {
-            generalSlotsDiv.innerHTML = '';
+    // Update general slots (4x1 grid) - ALWAYS create slots even if empty
+    const generalSlotsDiv = document.getElementById('general-slots');
+    if (generalSlotsDiv) {
+        generalSlotsDiv.innerHTML = '';
 
-            // Create all 4 general slots
-            for (let i = 0; i < 4; i++) {
-                const slot = character.inventory.general_slots[i];
-                const slotDiv = document.createElement('div');
-                slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
-                slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+        // Ensure inventory structure exists
+        if (!character.inventory) {
+            character.inventory = {};
+        }
+        if (!character.inventory.general_slots) {
+            character.inventory.general_slots = [];
+        }
 
-                if (slot && slot.item) {
-                    // Create image container
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
-                    const img = document.createElement('img');
-                    img.src = `/res/img/items/${slot.item}.png`;
-                    img.alt = slot.item;
-                    img.className = 'w-full h-full object-contain';
-                    img.style.imageRendering = 'pixelated';
-                    imgDiv.appendChild(img);
-                    slotDiv.appendChild(imgDiv);
+        // Create all 4 general slots
+        for (let i = 0; i < 4; i++) {
+            const slot = character.inventory.general_slots[i];
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
+            slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
 
-                    // Add quantity label if > 1
-                    if (slot.quantity > 1) {
-                        const quantityLabel = document.createElement('div');
-                        quantityLabel.className = 'absolute bottom-0 right-0 text-blue-400 font-bold';
-                        quantityLabel.style.fontSize = '10px';
-                        quantityLabel.textContent = `x${slot.quantity}`;
-                        slotDiv.appendChild(quantityLabel);
-                    }
+            // Add data attributes for interaction system
+            slotDiv.setAttribute('data-item-slot', i);
+
+            if (slot && slot.item) {
+                slotDiv.setAttribute('data-item-id', slot.item);
+
+                // Create image container
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+                const img = document.createElement('img');
+                img.src = `/res/img/items/${slot.item}.png`;
+                img.alt = slot.item;
+                img.className = 'w-full h-full object-contain';
+                img.style.imageRendering = 'pixelated';
+                imgDiv.appendChild(img);
+                slotDiv.appendChild(imgDiv);
+
+                // Add quantity label if > 1
+                if (slot.quantity > 1) {
+                    const quantityLabel = document.createElement('div');
+                    quantityLabel.className = 'absolute bottom-0 right-0 text-blue-400 font-bold';
+                    quantityLabel.style.fontSize = '10px';
+                    quantityLabel.textContent = `x${slot.quantity}`;
+                    slotDiv.appendChild(quantityLabel);
                 }
-
-                generalSlotsDiv.appendChild(slotDiv);
             }
+
+            generalSlotsDiv.appendChild(slotDiv);
         }
     }
 
-    // Update backpack items (4x5 grid = 20 slots)
-    if (character.inventory && character.inventory.gear_slots?.bag?.contents) {
-        const backpackDiv = document.getElementById('backpack-slots');
-        if (backpackDiv) {
-            const contents = character.inventory.gear_slots.bag.contents;
-            backpackDiv.innerHTML = '';
+    // Update backpack items (4x5 grid = 20 slots) - ALWAYS create slots even if empty
+    const backpackDiv = document.getElementById('backpack-slots');
+    if (backpackDiv) {
+        backpackDiv.innerHTML = '';
 
-            let itemCount = 0;
-
-            // Create all 20 backpack slots
-            for (let i = 0; i < 20; i++) {
-                const slot = contents[i];
-                const slotDiv = document.createElement('div');
-                slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
-                slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
-
-                if (slot && slot.item) {
-                    itemCount++;
-
-                    // Create image container
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
-                    const img = document.createElement('img');
-                    img.src = `/res/img/items/${slot.item}.png`;
-                    img.alt = slot.item;
-                    img.className = 'w-full h-full object-contain';
-                    img.style.imageRendering = 'pixelated';
-                    imgDiv.appendChild(img);
-                    slotDiv.appendChild(imgDiv);
-
-                    // Add quantity label if > 1
-                    if (slot.quantity > 1) {
-                        const quantityLabel = document.createElement('div');
-                        quantityLabel.className = 'absolute bottom-0 right-0 text-blue-400 font-bold';
-                        quantityLabel.style.fontSize = '10px';
-                        quantityLabel.textContent = `x${slot.quantity}`;
-                        slotDiv.appendChild(quantityLabel);
-                    }
-                }
-
-                backpackDiv.appendChild(slotDiv);
-            }
-
-            const bagCountEl = document.getElementById('bag-count');
-            if (bagCountEl) {
-                bagCountEl.textContent = itemCount;
-            }
+        // Ensure inventory structure exists
+        if (!character.inventory) {
+            character.inventory = {};
         }
+        if (!character.inventory.gear_slots) {
+            character.inventory.gear_slots = {};
+        }
+        if (!character.inventory.gear_slots.bag) {
+            character.inventory.gear_slots.bag = {};
+        }
+        if (!character.inventory.gear_slots.bag.contents) {
+            character.inventory.gear_slots.bag.contents = [];
+        }
+
+        const contents = character.inventory.gear_slots.bag.contents;
+        let itemCount = 0;
+
+        // Create all 20 backpack slots
+        for (let i = 0; i < 20; i++) {
+            const slot = contents[i];
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
+            slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+
+            // Add data attributes for interaction system
+            slotDiv.setAttribute('data-item-slot', i);
+
+            if (slot && slot.item) {
+                itemCount++;
+                slotDiv.setAttribute('data-item-id', slot.item);
+
+                // Create image container
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+                const img = document.createElement('img');
+                img.src = `/res/img/items/${slot.item}.png`;
+                img.alt = slot.item;
+                img.className = 'w-full h-full object-contain';
+                img.style.imageRendering = 'pixelated';
+                imgDiv.appendChild(img);
+                slotDiv.appendChild(imgDiv);
+
+                // Add quantity label if > 1
+                if (slot.quantity > 1) {
+                    const quantityLabel = document.createElement('div');
+                    quantityLabel.className = 'absolute bottom-0 right-0 text-blue-400 font-bold';
+                    quantityLabel.style.fontSize = '10px';
+                    quantityLabel.textContent = `x${slot.quantity}`;
+                    slotDiv.appendChild(quantityLabel);
+                }
+            }
+
+            backpackDiv.appendChild(slotDiv);
+        }
+
+        const bagCountEl = document.getElementById('bag-count');
+        if (bagCountEl) {
+            bagCountEl.textContent = itemCount;
+        }
+    }
+
+    // Rebind inventory interactions after rendering slots
+    // This ensures events are always attached, regardless of where updateCharacterDisplay() is called from
+    if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
+        window.inventoryInteractions.bindInventoryEvents();
     }
 }
 
@@ -671,38 +710,33 @@ function playLocationMusic(musicPath) {
 // Display current location
 function displayCurrentLocation() {
     const state = getGameState();
-    let currentLocationId = state.location?.current;
+    const cityId = state.location?.current;
+    const districtKey = state.location?.district || 'center';
 
-    if (!currentLocationId) return;
+    if (!cityId) return;
 
-    // If location is just a city name (e.g., "kingdom"), default to center district
-    let locationData = getLocationById(currentLocationId);
+    // Construct full district ID from city + district (e.g., "village-west-east")
+    const districtId = `${cityId}-${districtKey}`;
+    const currentLocationId = districtId;  // For compatibility with rest of function
+
+    console.log('📍 Display location:', { cityId, districtKey, districtId });
+
+    // Get the city data (for image, music)
+    const cityData = getLocationById(cityId);
+    if (!cityData) {
+        console.error('❌ City not found:', cityId);
+        return;
+    }
+
+    // Get the district data (for description, buildings, connections)
+    const locationData = getLocationById(districtId);
     if (!locationData) {
-        // Try appending -center to get the district
-        const centerLocationId = currentLocationId + '-center';
-        locationData = getLocationById(centerLocationId);
-        if (locationData) {
-            currentLocationId = centerLocationId;
-            // Update the game state to use the correct location
-            updateGameState({ location: { current: currentLocationId, discovered: [currentLocationId] } });
-        }
+        console.error('❌ District not found:', districtId);
+        return;
     }
 
-    console.log('Current location ID:', currentLocationId);
-    console.log('Location data:', locationData);
-    if (!locationData) return;
-
-    // Get the parent city data to use its image and music
-    let cityData = locationData;
-
-    // If this is a district, find the parent city
-    if (currentLocationId.includes('-')) {
-        const cityId = currentLocationId.split('-')[0]; // e.g., "kingdom" from "kingdom-north"
-        const parentCity = getLocationById(cityId);
-        if (parentCity) {
-            cityData = parentCity;
-        }
-    }
+    console.log('✅ City data:', cityData);
+    console.log('✅ District data:', locationData);
 
     // Update scene image (use city's image for all districts)
     const sceneImage = document.getElementById('scene-image');

@@ -2,7 +2,7 @@
 // Core gameplay mechanics following the DOM state management approach
 
 // Movement and exploration functions
-function moveToLocation(locationId) {
+async function moveToLocation(locationId) {
     console.log('Moving to location:', locationId);
 
     const state = getGameState();
@@ -19,10 +19,18 @@ function moveToLocation(locationId) {
         return;
     }
 
+    // Parse the locationId to extract city and district
+    // Format: "city-id-districtKey" (e.g., "village-west-center")
+    const { cityId, districtKey } = parseCityAndDistrict(locationId);
+
+    console.log('📍 Parsed location:', { locationId, cityId, districtKey });
+
     // Allow travel within city (districts)
-    // Update location state
+    // Update location state with parsed city and district
     const newLocationState = {
-        current: locationId,
+        current: cityId,         // Store just the city ID
+        district: districtKey,   // Store just the district key
+        building: '',            // Default to outdoors
         discovered: [...state.location.discovered]
     };
 
@@ -43,6 +51,27 @@ function moveToLocation(locationId) {
     // Update display
     displayCurrentLocation();
     showMessage('📍 Moved to ' + locationData.name, 'info');
+
+    // Save the location change to backend
+    if (window.saveGameToLocal) {
+        await window.saveGameToLocal();
+    }
+}
+
+// Parse location ID to extract city ID and district key
+// Format: "city-id-districtKey" → {cityId: "city-id", districtKey: "districtKey"}
+function parseCityAndDistrict(locationId) {
+    // Handle simple city IDs (no district)
+    if (!locationId.includes('-')) {
+        return { cityId: locationId, districtKey: 'center' };
+    }
+
+    // Find the last hyphen to separate district key
+    const lastHyphenIndex = locationId.lastIndexOf('-');
+    const cityId = locationId.substring(0, lastHyphenIndex);
+    const districtKey = locationId.substring(lastHyphenIndex + 1);
+
+    return { cityId, districtKey };
 }
 
 // Show popup when trying to travel (work-in-progress feature)

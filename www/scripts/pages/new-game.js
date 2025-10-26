@@ -519,22 +519,47 @@ async function startAdventure() {
 
     console.log('Final character:', finalCharacter);
 
-    // Create new save file
+    // Generate starting vault (40 slots, empty, city-based)
+    const startingCity = generatedCharacter.city || 'kingdom';
+    const startingVault = generateStartingVault(startingCity);
+    console.log('✅ Generated vault for', startingCity, ':', startingVault);
+
+    // Convert location IDs to display names for save file
+    const displayNames = await getDisplayNamesForLocation(startingCity, 'center', '');
+    console.log('✅ Display names:', displayNames);
+
+
+    // Create new save file with FLAT structure (backend expects flat, not nested)
     const session = window.sessionManager.getSession();
     const saveData = {
-      id: `save_${Math.floor(Date.now() / 1000)}`,
-      npub: session.npub,
-      created_at: new Date().toISOString(),
-      last_played: new Date().toISOString(),
-      character: finalCharacter,
-      gameState: {
-        location: {
-          current: generatedCharacter.city || 'kingdom',
-          discovered: [generatedCharacter.city || 'kingdom'],
-          music_tracks_unlocked: ['character-creation', 'kingdom-theme']
-        }
-      }
+      d: finalName,
+      race: generatedCharacter.race,
+      class: generatedCharacter.class,
+      background: generatedCharacter.background,
+      alignment: generatedCharacter.alignment,
+      experience: generatedCharacter.experience || 0,
+      hp: generatedCharacter.hp,
+      max_hp: generatedCharacter.max_hp,
+      mana: generatedCharacter.mana,
+      max_mana: generatedCharacter.max_mana,
+      fatigue: generatedCharacter.fatigue || 0,
+      gold: generatedCharacter.gold,
+      stats: generatedCharacter.stats,
+      location: displayNames.location,
+      district: displayNames.district,
+      building: displayNames.building || '',
+      inventory: inventory,
+      vault: startingVault,
+      known_spells: generatedCharacter.spells || [],
+      spell_slots: {},
+      locations_discovered: [startingCity],
+      music_tracks_unlocked: ['character-creation', 'kingdom-theme'],
+      current_day: 1,
+      time_of_day: 'day'
     };
+
+    console.log('💾 Creating save with data:', saveData);
+
 
     const response = await fetch(`/api/saves/${session.npub}`, {
       method: 'POST',
@@ -998,6 +1023,104 @@ async function unpackItem(packId) {
     console.warn(`🎒 Could not unpack: ${packId}`, error);
   }
   return null;
+}
+
+// Generate starting vault (40 slots, empty, city-based)
+function generateStartingVault(location) {
+  // Create 40 empty slots
+  const vaultSlots = [];
+  for (let i = 0; i < 40; i++) {
+    vaultSlots.push({
+      slot: i,
+      item: null,
+      quantity: 0
+    });
+  }
+
+  return {
+    location: location,                          // City ID
+    building: getVaultBuildingForLocation(location), // Building ID for house_of_keeping
+    slots: vaultSlots
+  };
+}
+
+// Get vault building ID for a given location
+function getVaultBuildingForLocation(location) {
+  // Map cities to their house_of_keeping building IDs
+  const vaultBuildings = {
+    'kingdom': 'vault_of_crowns',
+    'village-west': 'burrowlock',
+    'village-south': 'halfling_burrows',
+    'village-southeast': 'secure_cellars',
+    'village-southwest': 'stone_vaults',
+    'town-north': 'northwatch_vault',
+    'town-northeast': 'stormhold_storage',
+    'city-east': 'shadowhaven_vaults',
+    'city-south': 'coastal_storage',
+    'forest-kingdom': 'silverwood_treasury',
+    'hill-kingdom': 'ironforge_vaults',
+    'mountain-northeast': 'draconis_hoard',
+    'swamp-kingdom': 'mire_keep_storage'
+  };
+
+  return vaultBuildings[location] || 'vault_of_crowns';
+}
+
+// Convert location/district/building IDs to display names for saving
+async function getDisplayNamesForLocation(locationId, districtKey, buildingId) {
+  try {
+    // Fetch location data directly from API
+    const response = await fetch('/api/locations');
+    if (!response.ok) {
+      console.warn('Failed to fetch locations from API');
+      return { location: locationId, district: districtKey, building: buildingId };
+    }
+
+    const allLocations = await response.json();
+    console.log('🔍 Fetched', allLocations.length, 'locations from API');
+
+    // Find the location
+    const location = allLocations.find(loc => loc.id === locationId);
+    if (!location) {
+      console.warn('❌ Location not found:', locationId);
+      return { location: locationId, district: districtKey, building: buildingId };
+    }
+
+    const locationName = location.name || locationId;
+
+    // Find the district (check both location.districts and location.properties.districts)
+    const districts = location.districts || location.properties?.districts;
+    let districtName = districtKey;
+    if (districts && districts[districtKey]) {
+      districtName = districts[districtKey].name || districtKey;
+    }
+
+    // Find the building
+    let buildingName = buildingId || '';
+    if (buildingId && districts && districts[districtKey]) {
+      const district = districts[districtKey];
+      if (district.buildings) {
+        const building = district.buildings.find(b => b.id === buildingId);
+        if (building) {
+          buildingName = building.name || buildingId;
+        }
+      }
+    }
+
+    console.log('✅ Converted location:', {
+      from: { locationId, districtKey, buildingId },
+      to: { locationName, districtName, buildingName }
+    });
+
+    return {
+      location: locationName,
+      district: districtName,
+      building: buildingName
+    };
+  } catch (error) {
+    console.error('❌ Error getting display names:', error);
+    return { location: locationId, district: districtKey, building: buildingId };
+  }
 }
 
 console.log('🎮 New game scripts loaded');

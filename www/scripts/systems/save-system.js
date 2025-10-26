@@ -35,29 +35,69 @@ async function loadSaveData() {
 
         console.log('✅ Loaded save data:', saveData);
 
-        // Update DOM with loaded data (new structure)
-        if (saveData.character) {
-            document.getElementById('character-data').textContent = JSON.stringify(saveData.character);
+        // Convert display names to IDs for game logic
+        console.log('🔄 Converting location display names to IDs...');
+        const locationIds = await window.getIdsFromDisplayNames(
+            saveData.location || 'The Royal Kingdom',
+            saveData.district || 'Kingdom Center',
+            saveData.building || ''
+        );
+        console.log('✅ Converted to IDs:', locationIds);
+
+        // The save data is flat, so we need to map it to the DOM structure
+        // Character data includes vault, spell_slots, time tracking
+        const characterData = {
+            name: saveData.d || 'Unknown',
+            race: saveData.race,
+            class: saveData.class,
+            background: saveData.background,
+            alignment: saveData.alignment,
+            level: saveData.level || 1,
+            experience: saveData.experience || 0,
+            hp: saveData.hp,
+            max_hp: saveData.max_hp,
+            mana: saveData.mana,
+            max_mana: saveData.max_mana,
+            fatigue: saveData.fatigue || 0,
+            gold: saveData.gold || 0,
+            stats: saveData.stats,
+            vault: saveData.vault || {},
+            spell_slots: saveData.spell_slots || {},
+            current_day: saveData.current_day || 1,
+            time_of_day: saveData.time_of_day || 'day'
+        };
+
+        document.getElementById('character-data').textContent = JSON.stringify(characterData);
+
+        // Location uses IDs (converted from display names)
+        const locationData = {
+            current: locationIds.locationId,
+            district: locationIds.districtKey,
+            building: locationIds.buildingId || '',
+            discovered: saveData.locations_discovered || []
+        };
+        console.log('✅ Location data for state:', locationData);
+        document.getElementById('location-data').textContent = JSON.stringify(locationData);
+
+        // Inventory general slots
+        if (saveData.inventory && saveData.inventory.general_slots) {
+            document.getElementById('inventory-data').textContent = JSON.stringify(saveData.inventory.general_slots);
+        } else {
+            document.getElementById('inventory-data').textContent = '[]';
         }
 
-        // Location from new structure
-        if (saveData.location) {
-            document.getElementById('location-data').textContent = JSON.stringify(saveData.location);
+        // Spells (known_spells)
+        if (saveData.known_spells) {
+            document.getElementById('spell-data').textContent = JSON.stringify(saveData.known_spells);
+        } else {
+            document.getElementById('spell-data').textContent = '[]';
         }
 
-        // Inventory is now inside character object
-        if (saveData.character && saveData.character.inventory) {
-            document.getElementById('inventory-data').textContent = JSON.stringify(saveData.character.inventory);
-        }
-
-        // Spells are now inside character object
-        if (saveData.character && saveData.character.spells) {
-            document.getElementById('spell-data').textContent = JSON.stringify(saveData.character.spells);
-        }
-
-        // Equipment is now inside character.inventory.gear_slots
-        if (saveData.character && saveData.character.inventory && saveData.character.inventory.gear_slots) {
-            document.getElementById('equipment-data').textContent = JSON.stringify(saveData.character.inventory.gear_slots);
+        // Equipment (gear_slots)
+        if (saveData.inventory && saveData.inventory.gear_slots) {
+            document.getElementById('equipment-data').textContent = JSON.stringify(saveData.inventory.gear_slots);
+        } else {
+            document.getElementById('equipment-data').textContent = '{}';
         }
 
         // Combat data (default to null if not present)
@@ -100,21 +140,53 @@ async function saveGameToLocal() {
 
         const session = window.sessionManager.getSession();
         const gameState = getGameState();
+        const character = gameState.character;
 
-        // Prepare save data
+        // Convert location IDs to display names for save file
+        const displayNames = await window.getDisplayNamesForLocation(
+            gameState.location?.current || 'kingdom',
+            gameState.location?.district || 'center',
+            gameState.location?.building || ''
+        );
+
+        // Prepare save data in the flat structure the backend expects (with display names)
         const saveData = {
-            character: gameState.character,
-            gameState: gameState,
-            location: gameState.location.current,
+            d: character.name || '',
+            race: character.race || '',
+            class: character.class || '',
+            background: character.background || '',
+            alignment: character.alignment || '',
+            experience: character.experience || 0,
+            hp: character.hp || 0,
+            max_hp: character.max_hp || 0,
+            mana: character.mana || 0,
+            max_mana: character.max_mana || 0,
+            fatigue: character.fatigue || 0,
+            gold: character.gold || 0,
+            stats: character.stats || {},
+            location: displayNames.location,
+            district: displayNames.district,
+            building: displayNames.building,
+            inventory: character.inventory || {},
+            vault: character.vault || {},
+            known_spells: character.spells || [],
+            spell_slots: character.spell_slots || {},
+            locations_discovered: gameState.location?.discovered || [],
+            music_tracks_unlocked: character.music_tracks_unlocked || [],
+            current_day: character.current_day || 1,
+            time_of_day: character.time_of_day || 'day'
         };
 
-        // Get current save ID from URL if loading existing save
+        // ALWAYS get the save ID from URL - we only overwrite, never create new saves
         const urlParams = new URLSearchParams(window.location.search);
         const currentSaveID = urlParams.get('save');
 
-        if (currentSaveID) {
-            saveData.id = currentSaveID;
+        if (!currentSaveID) {
+            throw new Error('No save file loaded. Cannot save without an active save.');
         }
+
+        // Always use the existing save ID (overwrite mode)
+        saveData.id = currentSaveID;
 
         // Send save request
         const response = await fetch(`/api/saves/${session.npub}`, {
@@ -133,15 +205,6 @@ async function saveGameToLocal() {
 
         if (result.success) {
             showMessage('✅ Game saved successfully!', 'success');
-
-            // Update URL with save ID if this was a new save
-            if (!currentSaveID && result.save_id) {
-                const newUrl = new URL(window.location);
-                newUrl.searchParams.set('save', result.save_id);
-                newUrl.searchParams.delete('new');
-                window.history.replaceState({}, '', newUrl);
-            }
-
             return true;
         } else {
             throw new Error(result.message || 'Save failed');
@@ -190,21 +253,25 @@ function stopAutoSave() {
 // Track if save data has been loaded to prevent early auto-saves
 let saveDataLoaded = false;
 
-// Save before leaving page
-window.addEventListener('beforeunload', async (event) => {
-    if (saveDataLoaded && window.sessionManager && window.sessionManager.isAuthenticated()) {
-        // Attempt quick save (though it may not complete due to page unload)
-        saveGameToLocal();
-    }
-});
+// DISABLED: Auto-save on page unload/hide
+// These were creating blank save files because the page might not be fully loaded
+// Users can use Ctrl+S or the manual save button in settings instead
 
-// Save on page visibility change (when tab becomes hidden)
-document.addEventListener('visibilitychange', async () => {
-    if (saveDataLoaded && document.hidden && window.sessionManager && window.sessionManager.isAuthenticated()) {
-        console.log('👁️ Page hidden, saving game...');
-        await saveGameToLocal();
-    }
-});
+// // Save before leaving page
+// window.addEventListener('beforeunload', async (event) => {
+//     if (saveDataLoaded && window.sessionManager && window.sessionManager.isAuthenticated()) {
+//         // Attempt quick save (though it may not complete due to page unload)
+//         saveGameToLocal();
+//     }
+// });
+
+// // Save on page visibility change (when tab becomes hidden)
+// document.addEventListener('visibilitychange', async () => {
+//     if (saveDataLoaded && document.hidden && window.sessionManager && window.sessionManager.isAuthenticated()) {
+//         console.log('👁️ Page hidden, saving game...');
+//         await saveGameToLocal();
+//     }
+// });
 
 // Export save functionality
 async function exportSave() {
@@ -248,5 +315,9 @@ document.addEventListener('keydown', (event) => {
         saveGameToLocal();
     }
 });
+
+// Alias for manual save button
+window.saveGame = saveGameToLocal;
+window.saveGameToLocal = saveGameToLocal;  // Explicit alias for other modules
 
 console.log('💾 Save system loaded');

@@ -94,6 +94,7 @@
             {{template "game/tabs/questlog.html"}}
             {{template "game/tabs/stats.html"}}
             {{template "game/tabs/music.html"}}
+            {{template "game/tabs/settings.html"}}
           </div>
         </div>
 
@@ -105,7 +106,7 @@
   <!-- JavaScript -->
   <script>
     function switchTab(tabName) {
-      const tabs = ["equipment", "inventory", "spells", "questlog", "stats", "music"];
+      const tabs = ["equipment", "inventory", "spells", "questlog", "stats", "music", "settings"];
       const panels = {
         equipment: document.getElementById("equipment-panel"),
         inventory: document.getElementById("inventory-panel"),
@@ -113,6 +114,7 @@
         questlog: document.getElementById("questlog-panel"),
         stats: document.getElementById("stats-panel"),
         music: document.getElementById("music-panel"),
+        settings: document.getElementById("settings-panel"),
       };
       const buttons = {
         equipment: document.getElementById("tab-equipment"),
@@ -121,6 +123,7 @@
         questlog: document.getElementById("tab-questlog"),
         stats: document.getElementById("tab-stats"),
         music: document.getElementById("tab-music"),
+        settings: document.getElementById("btn-settings"),
       };
 
       tabs.forEach((tab) => {
@@ -171,8 +174,8 @@
     // Initialize scaling on page load
     window.addEventListener('load', () => {
       scaleGameUI();
-      // Set equipment tab as default
-      switchTab('equipment');
+      // Set inventory tab as default
+      switchTab('inventory');
     });
 
     // Re-scale when window is resized
@@ -184,7 +187,38 @@
     }
 
     function openSettings() {
-      showMessage("⚙️ Settings menu coming soon!", "info");
+      switchTab('settings');
+    }
+
+    function manualSaveGame() {
+      // Confirm before overwriting
+      if (!confirm('⚠️ This will overwrite your existing save file. Are you sure you want to continue?')) {
+        return;
+      }
+
+      const saveBtn = document.getElementById('manual-save-btn');
+      const saveStatus = document.getElementById('save-status');
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = '💾 Saving...';
+      saveStatus.textContent = 'Overwriting save file...';
+      saveStatus.className = 'mt-2 text-xs text-yellow-400';
+
+      saveGame().then(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Now';
+        saveStatus.textContent = '✅ Save file overwritten successfully!';
+        saveStatus.className = 'mt-2 text-xs text-green-400';
+
+        setTimeout(() => {
+          saveStatus.textContent = '';
+        }, 3000);
+      }).catch((error) => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Now';
+        saveStatus.textContent = '❌ Save failed: ' + error.message;
+        saveStatus.className = 'mt-2 text-xs text-red-400';
+      });
     }
 
     function reportBug() {
@@ -205,14 +239,15 @@
       }
     }
   </script>
-  <script src="/scripts/core/session-manager.js"></script>
-  <script src="/scripts/pages/game-ui.js"></script>
-  <script src="/scripts/core/auth.js"></script>
-  <script src="/scripts/systems/character-generator.js"></script>
-  <script src="/scripts/systems/game-state.js"></script>
-  <script src="/scripts/systems/game-logic.js"></script>
-  <script src="/scripts/systems/save-system.js"></script>
-  <script src="/scripts/pages/startup.js"></script>
+  <script src="/scripts/core/session-manager.js?v=20251025h"></script>
+  <script src="/scripts/pages/game-ui.js?v=20251025h"></script>
+  <script src="/scripts/core/auth.js?v=20251025h"></script>
+  <script src="/scripts/systems/character-generator.js?v=20251025h"></script>
+  <script src="/scripts/systems/game-state.js?v=20251025h"></script>
+  <script src="/scripts/systems/game-logic.js?v=20251025h"></script>
+  <script src="/scripts/systems/save-system.js?v=20251025h"></script>
+  <script src="/scripts/systems/inventory-interactions.js?v=20251025h"></script>
+  <script src="/scripts/pages/startup.js?v=20251025h"></script>
 
   {{end}}
 </div>

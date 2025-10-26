@@ -1919,9 +1919,17 @@ async function startAdventure() {
       spell_slots: generatedCharacter.spell_slots || {},
     };
 
-    console.log("Final character:", finalCharacter);
 
-    // Create new save file
+    // Generate starting vault (40 slots, empty, city-based)
+    const startingCity = generatedCharacter.city || "kingdom";
+    const startingVault = generateStartingVault(startingCity);
+    console.log("✅ Generated vault for", startingCity, ":", startingVault);
+
+    // Convert location IDs to display names for save file
+    const displayNames = await getDisplayNamesForLocation(startingCity, "center", "");
+    console.log("✅ Display names:", displayNames);
+
+    // Create new save file with ALL required fields
     const session = window.sessionManager.getSession();
     const saveData = {
       d: finalName,
@@ -1930,22 +1938,28 @@ async function startAdventure() {
       class: finalCharacter.class,
       background: finalCharacter.background,
       alignment: finalCharacter.alignment,
-      experience: finalCharacter.experience,
+      experience: finalCharacter.experience || 0,
       hp: finalCharacter.hp,
       max_hp: finalCharacter.max_hp,
       mana: finalCharacter.mana,
       max_mana: finalCharacter.max_mana,
-      fatigue: finalCharacter.fatigue,
+      fatigue: finalCharacter.fatigue || 0,
       gold: finalCharacter.gold,
       stats: finalCharacter.stats,
-      location: generatedCharacter.city || "kingdom",
+      location: displayNames.location,
+      district: displayNames.district,
+      building: displayNames.building || "",
       inventory: finalCharacter.inventory,
+      vault: startingVault,
       known_spells: finalCharacter.known_spells,
       spell_slots: finalCharacter.spell_slots,
-      locations_discovered: [generatedCharacter.city || "kingdom"],
+      locations_discovered: [startingCity],
       music_tracks_unlocked: ["character-creation", "kingdom-theme"],
+      current_day: 1,
+      time_of_day: "day"
     };
 
+    console.log("💾 Creating save with data:", saveData);
     const response = await fetch(`/api/saves/${session.npub}`, {
       method: "POST",
       headers: {
@@ -2082,3 +2096,88 @@ document.addEventListener("DOMContentLoaded", async function () {
     alert("Failed to initialize: " + error.message);
   }
 });
+
+// Generate starting vault (40 slots, empty, city-based)
+function generateStartingVault(location) {
+  const vaultSlots = [];
+  for (let i = 0; i < 40; i++) {
+    vaultSlots.push({
+      slot: i,
+      item: null,
+      quantity: 0
+    });
+  }
+
+  return {
+    location: location,
+    building: getVaultBuildingForLocation(location),
+    slots: vaultSlots
+  };
+}
+
+// Get vault building ID for a given location
+function getVaultBuildingForLocation(location) {
+  const vaultBuildings = {
+    'kingdom': 'vault_of_crowns',
+    'village-west': 'burrowlock',
+    'village-south': 'halfling_burrows',
+    'village-southeast': 'secure_cellars',
+    'village-southwest': 'stone_vaults',
+    'town-north': 'northwatch_vault',
+    'town-northeast': 'stormhold_storage',
+    'city-east': 'shadowhaven_vaults',
+    'city-south': 'coastal_storage',
+    'forest-kingdom': 'silverwood_treasury',
+    'hill-kingdom': 'ironforge_vaults',
+    'mountain-northeast': 'draconis_hoard',
+    'swamp-kingdom': 'mire_keep_storage'
+  };
+
+  return vaultBuildings[location] || 'vault_of_crowns';
+}
+
+// Convert location/district/building IDs to display names for saving
+async function getDisplayNamesForLocation(locationId, districtKey, buildingId) {
+  try {
+    const response = await fetch('/api/locations');
+    if (!response.ok) {
+      console.warn('Failed to fetch locations from API');
+      return { location: locationId, district: districtKey, building: buildingId };
+    }
+
+    const allLocations = await response.json();
+    const location = allLocations.find(loc => loc.id === locationId);
+    if (!location) {
+      console.warn('❌ Location not found:', locationId);
+      return { location: locationId, district: districtKey, building: buildingId };
+    }
+
+    const locationName = location.name || locationId;
+
+    const districts = location.districts || location.properties?.districts;
+    let districtName = districtKey;
+    if (districts && districts[districtKey]) {
+      districtName = districts[districtKey].name || districtKey;
+    }
+
+    let buildingName = buildingId || '';
+    if (buildingId && districts && districts[districtKey]) {
+      const district = districts[districtKey];
+      if (district.buildings) {
+        const building = district.buildings.find(b => b.id === buildingId);
+        if (building) {
+          buildingName = building.name || buildingId;
+        }
+      }
+    }
+
+    return {
+      location: locationName,
+      district: districtName,
+      building: buildingName
+    };
+  } catch (error) {
+    console.error('❌ Error getting display names:', error);
+    return { location: locationId, district: districtKey, building: buildingId };
+  }
+}

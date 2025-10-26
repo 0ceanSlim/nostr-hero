@@ -171,7 +171,7 @@ async function initializeGame() {
 
                     if (save) {
                         // New save structure: character and location are at root level
-                        initializeFromSave(save);
+                        await initializeFromSave(save);
                         showMessage('✅ Save file loaded successfully!', 'success');
                     } else {
                         throw new Error('Save file not found');
@@ -223,11 +223,18 @@ async function initializeGame() {
 }
 
 // Initialize game state from a loaded save
-function initializeFromSave(saveData) {
+async function initializeFromSave(saveData) {
     console.log('Loading game from save:', saveData);
 
+    // Convert display names back to IDs for internal game logic
+    const ids = await getIdsFromDisplayNames(
+        saveData.location || 'The Royal Kingdom',
+        saveData.district || 'Kingdom Center',
+        saveData.building || ''
+    );
+
     // New save structure is flat with all fields at root level
-    // Map it to the game state structure expected by the UI
+    // Map it to the game state structure expected by the UI (using IDs internally)
     const gameState = {
         character: {
             name: saveData.d || 'Unknown',
@@ -245,12 +252,17 @@ function initializeFromSave(saveData) {
             gold: saveData.gold || 0,
             stats: saveData.stats,
             inventory: saveData.inventory,
+            vault: saveData.vault || {},
             spells: saveData.known_spells || [],
-            spell_slots: saveData.spell_slots || {}
+            spell_slots: saveData.spell_slots || {},
+            current_day: saveData.current_day || 1,
+            time_of_day: saveData.time_of_day || 'day'
         },
         location: {
-            current: saveData.location || 'kingdom',
-            discovered: saveData.locations_discovered || ['kingdom']
+            current: ids.locationId,
+            district: ids.districtKey,
+            building: ids.buildingId || null,
+            discovered: saveData.locations_discovered || [ids.locationId]
         },
         inventory: saveData.inventory?.general_slots || [],
         equipment: saveData.inventory?.gear_slots || {},
@@ -261,6 +273,9 @@ function initializeFromSave(saveData) {
     console.log('Mapped game state:', gameState);
     updateGameState(gameState);
 }
+
+// Global variable to store initial state during character creation
+let pendingCharacterState = null;
 
 // Create a new character for a given npub
 async function createNewCharacter(npub) {
@@ -283,8 +298,13 @@ async function createNewCharacter(npub) {
         const startingLocation = getStartingLocation(characterData.race);
 
         // Initialize complete character with all required fields
+        // DO NOT include vault, current_day, time_of_day here - they go in character object below
         const fullCharacter = {
-            ...characterData,
+            race: characterData.race,
+            class: characterData.class,
+            background: characterData.background,
+            alignment: characterData.alignment,
+            stats: characterData.stats,
             name: generateCharacterName(characterData.race, characterData.background),
             level: 1,
             experience: 0,
@@ -294,27 +314,63 @@ async function createNewCharacter(npub) {
             max_mana: maxMana,
             fatigue: 0,
             gold: generateStartingGold(characterData.class, characterData.background),
-            starting_location: startingLocation
+            starting_location: startingLocation,
+            music_tracks_unlocked: []
         };
+
+        console.log('🔍 fullCharacter:', fullCharacter);
 
         // Generate starting equipment
         const startingEquipment = generateStartingEquipment(characterData.class);
 
+        // Add slot numbers to inventory items
+        const inventoryWithSlots = startingEquipment.inventory.map((item, index) => ({
+            ...item,
+            slot: index
+        }));
+
+        // Generate starting vault (40 slots, empty)
+        const startingVault = generateStartingVault(startingLocation);
+        console.log('🔍 Generated starting vault:', startingVault);
+
+        // Extract district from location
+        const district = getDistrictFromLocation(startingLocation);
+        console.log('🔍 Starting location and district:', startingLocation, district);
+
         // Initialize fresh game state
+        const characterObject = {
+            ...fullCharacter,
+            current_day: 1,
+            time_of_day: 'day',
+            vault: startingVault,
+            spell_slots: generateSpellSlots(characterData.class)
+        };
+
+        console.log('🔍 characterObject with vault/time:', {
+            vault: characterObject.vault,
+            current_day: characterObject.current_day,
+            time_of_day: characterObject.time_of_day
+        });
+
         const initialState = {
-            character: fullCharacter,
-            inventory: startingEquipment.inventory,
+            character: characterObject,
+            inventory: inventoryWithSlots,
             equipment: startingEquipment.equipped,
             spells: generateStartingSpells(characterData.class),
             location: {
                 current: startingLocation,
+                district: district,
+                building: null,  // Start outdoors in the center district
                 discovered: [startingLocation]
             },
             combat: null
         };
 
-        updateGameState(initialState);
-        console.log('Initialized game state:', initialState);
+        // Store state globally for beginAdventure to use
+        pendingCharacterState = initialState;
+
+        console.log('🔍 Initialized game state:', initialState);
+        console.log('🔍 Character vault in state:', initialState.character.vault);
 
         // Show character intro before starting the game
         showCharacterIntro(fullCharacter);
@@ -509,11 +565,33 @@ function generateStartingSpells(characterClass) {
     return startingSpells;
 }
 
+// Generate spell slots based on class
+function generateSpellSlots(characterClass) {
+    // Basic spell slot structure for level 1 spellcasters
+    const spellcasterSlots = {
+        'Wizard': { cantrip: 2, level1: 2 },
+        'Sorcerer': { cantrip: 2, level1: 2 },
+        'Warlock': { cantrip: 2, level1: 1 },
+        'Bard': { cantrip: 2, level1: 2 },
+        'Cleric': { cantrip: 3, level1: 2 },
+        'Druid': { cantrip: 2, level1: 2 },
+        'Paladin': { level1: 0 }, // Get slots at level 2
+        'Ranger': { level1: 0 }   // Get slots at level 2
+    };
+
+    return spellcasterSlots[characterClass] || {};
+}
+
 // Event listeners for game state changes
-document.addEventListener('gameStateChange', function(event) {
-    updateCharacterDisplay();
+document.addEventListener('gameStateChange', async function(event) {
+    await updateCharacterDisplay();  // Wait for character display to finish
     updateInventoryDisplay();
     updateSpellsDisplay();
+
+    // Rebind inventory interactions after UI is updated
+    if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
+        window.inventoryInteractions.bindInventoryEvents();
+    }
 
     // Update combat interface if in combat
     const state = getGameState();
@@ -717,14 +795,126 @@ function showCharacterIntro(character) {
 }
 
 // Begin the actual adventure (show main game interface)
-function beginAdventure() {
+async function beginAdventure() {
     console.log('🎮 Beginning adventure...');
+
+    // Use the stored state from character creation
+    if (!pendingCharacterState) {
+        console.error('No pending character state found!');
+        showMessage('❌ Error: Character state not found', 'error');
+        return;
+    }
+
+    const gameState = pendingCharacterState;
+    console.log('🔍 PENDING STATE:', JSON.stringify({
+        vault: gameState.character.vault,
+        current_day: gameState.character.current_day,
+        time_of_day: gameState.character.time_of_day,
+        location: gameState.location
+    }, null, 2));
+
+    // Save the initial game state to create save file
+    try {
+        const session = window.sessionManager.getSession();
+
+        // Structure inventory properly (combining general slots and gear slots)
+        const inventoryStructure = {
+            general_slots: gameState.inventory || [],
+            gear_slots: gameState.equipment || {}
+        };
+
+        // Convert location IDs to display names for save file
+        console.log('🔍 Converting location IDs:', {
+            locationId: gameState.location?.current,
+            districtKey: gameState.location?.district,
+            buildingId: gameState.location?.building
+        });
+
+        const displayNames = await getDisplayNamesForLocation(
+            gameState.location?.current || 'kingdom',
+            gameState.location?.district || 'center',
+            gameState.location?.building || ''
+        );
+
+        console.log('🔍 Display names:', displayNames);
+        console.log('🔍 Vault data:', gameState.character.vault);
+
+        // DEBUG: Check values before creating save data
+        const debugInfo = {
+            raw_vault: gameState.character.vault,
+            raw_current_day: gameState.character.current_day,
+            raw_time_of_day: gameState.character.time_of_day,
+            raw_district: gameState.location?.district
+        };
+
+        // Prepare save data with all required fields (using display names)
+        const saveData = {
+            d: gameState.character.name || '',
+            race: gameState.character.race || '',
+            class: gameState.character.class || '',
+            background: gameState.character.background || '',
+            alignment: gameState.character.alignment || '',
+            experience: gameState.character.experience || 0,
+            hp: gameState.character.hp || 0,
+            max_hp: gameState.character.max_hp || 0,
+            mana: gameState.character.mana || 0,
+            max_mana: gameState.character.max_mana || 0,
+            fatigue: gameState.character.fatigue || 0,
+            gold: gameState.character.gold || 0,
+            stats: gameState.character.stats || {},
+            location: displayNames.location,
+            district: displayNames.district,
+            building: displayNames.building || '',  // Empty string for outdoors
+            inventory: inventoryStructure,
+            vault: gameState.character.vault || null,
+            known_spells: gameState.spells || [],
+            spell_slots: gameState.character.spell_slots || {},
+            locations_discovered: gameState.location?.discovered || [],
+            music_tracks_unlocked: gameState.character.music_tracks_unlocked || [],
+            current_day: gameState.character.current_day !== undefined ? gameState.character.current_day : 1,
+            time_of_day: gameState.character.time_of_day || 'day',
+            _debug: debugInfo  // Temporary debug field
+        };
+
+        console.log('💾 Creating initial save file:', saveData);
+
+        // Create the save file
+        const response = await fetch(`/api/saves/${session.npub}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to create save file: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Initial save file created:', result);
+
+        // Update URL to include save ID
+        const saveID = result.save_id;
+        const newURL = `/game?save=${saveID}`;
+        window.history.replaceState({}, '', newURL);
+
+        showMessage('💾 Game saved! Your adventure begins!', 'success');
+
+        // Now update the game state in DOM with the saved state
+        updateGameState(gameState);
+
+        // Clear pending state
+        pendingCharacterState = null;
+
+    } catch (error) {
+        console.error('❌ Failed to create initial save:', error);
+        showMessage('⚠️ Warning: Failed to create save file. Progress may not be saved.', 'warning');
+    }
 
     // Show main game interface
     displayCurrentLocation();
     updateAllDisplays();
-
-    showMessage('🎉 Your adventure begins!', 'success');
 }
 
 // Helper function to get character icon (matching the saves page)
@@ -744,5 +934,171 @@ function getCharacterIcon(race, characterClass) {
 
     return raceIcons[race] || '⚔️';
 }
+
+// Generate starting vault (40 slots, empty, city-based)
+function generateStartingVault(location) {
+    // Create 40 empty slots
+    const vaultSlots = [];
+    for (let i = 0; i < 40; i++) {
+        vaultSlots.push({
+            slot: i,
+            item: null,
+            quantity: 0
+        });
+    }
+
+    return {
+        location: location,                          // City ID
+        building: getVaultBuildingForLocation(location), // Building ID for house_of_keeping
+        slots: vaultSlots
+    };
+}
+
+// Extract district from location
+function getDistrictFromLocation(location) {
+    // All characters start in the center district of their starting city
+    return 'center';
+}
+
+// Get vault building ID for a given location
+function getVaultBuildingForLocation(location) {
+    // Map cities to their house_of_keeping building IDs
+    const vaultBuildings = {
+        'kingdom': 'vault_of_crowns',
+        'village-west': 'burrowlock',
+        'village-south': 'halfling_burrows',
+        'village-southeast': 'secure_cellars',
+        'village-southwest': 'stone_vaults',
+        'town-north': 'northwatch_vault',
+        'town-northeast': 'stormhold_storage',
+        'city-east': 'shadowhaven_vaults',
+        'city-south': 'coastal_storage',
+        'forest-kingdom': 'silverwood_treasury',
+        'hill-kingdom': 'ironforge_vaults',
+        'mountain-northeast': 'draconis_hoard',
+        'swamp-kingdom': 'mire_keep_storage'
+    };
+
+    return vaultBuildings[location] || 'vault_of_crowns'; // Default to kingdom vault
+}
+
+// Convert location/district/building IDs to display names for saving
+async function getDisplayNamesForLocation(locationId, districtKey, buildingId) {
+    try {
+        // Fetch location data directly from API instead of DOM (DOM gets wiped by intro screen)
+        const response = await fetch('/api/locations');
+        if (!response.ok) {
+            console.warn('Failed to fetch locations from API');
+            return { location: locationId, district: districtKey, building: buildingId };
+        }
+
+        const allLocations = await response.json();
+        console.log('🔍 Fetched', allLocations.length, 'locations from API');
+        console.log('🔍 Looking for locationId:', locationId);
+
+        // Find the location
+        const location = allLocations.find(loc => loc.id === locationId);
+        if (!location) {
+            console.warn('❌ Location not found:', locationId);
+            return { location: locationId, district: districtKey, building: buildingId };
+        }
+
+        const locationName = location.name || locationId;
+        console.log('✅ Found location name:', locationName);
+
+        // Find the district (check both location.districts and location.properties.districts)
+        const districts = location.districts || location.properties?.districts;
+        let districtName = districtKey;
+        if (districts && districts[districtKey]) {
+            districtName = districts[districtKey].name || districtKey;
+            console.log('✅ Found district name:', districtName);
+        } else {
+            console.warn('❌ District not found:', districtKey, 'Available districts:', districts ? Object.keys(districts) : 'none');
+        }
+
+        // Find the building
+        let buildingName = buildingId || '';
+        if (buildingId && districts && districts[districtKey]) {
+            const district = districts[districtKey];
+            if (district.buildings) {
+                const building = district.buildings.find(b => b.id === buildingId);
+                if (building) {
+                    buildingName = building.name || buildingId;
+                }
+            }
+        }
+
+        const result = {
+            location: locationName,
+            district: districtName,
+            building: buildingName
+        };
+        console.log('🔍 Final display names:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Error getting display names:', error);
+        return { location: locationId, district: districtKey, building: buildingId };
+    }
+}
+
+// Convert display names back to IDs for game logic
+async function getIdsFromDisplayNames(locationName, districtName, buildingName) {
+    try {
+        // Fetch location data directly from API
+        const response = await fetch('/api/locations');
+        if (!response.ok) {
+            console.warn('Failed to fetch locations from API');
+            return { locationId: locationName, districtKey: districtName, buildingId: buildingName };
+        }
+
+        const allLocations = await response.json();
+
+        // Find location by name
+        const location = allLocations.find(loc => loc.name === locationName);
+        if (!location) {
+            console.warn('Location not found by name:', locationName);
+            return { locationId: locationName, districtKey: districtName, buildingId: buildingName };
+        }
+
+        const locationId = location.id;
+
+        // Find district by name (check both location.districts and location.properties.districts)
+        const districts = location.districts || location.properties?.districts;
+        let districtKey = districtName;
+        if (districts) {
+            for (const [key, district] of Object.entries(districts)) {
+                if (district.name === districtName) {
+                    districtKey = key;
+                    break;
+                }
+            }
+        }
+
+        // Find building by name
+        let buildingId = buildingName || '';
+        if (buildingName && districts && districts[districtKey]) {
+            const district = districts[districtKey];
+            if (district.buildings) {
+                const building = district.buildings.find(b => b.name === buildingName);
+                if (building) {
+                    buildingId = building.id;
+                }
+            }
+        }
+
+        return {
+            locationId: locationId,
+            districtKey: districtKey,
+            buildingId: buildingId
+        };
+    } catch (error) {
+        console.error('Error getting IDs from display names:', error);
+        return { locationId: locationName, districtKey: districtName, buildingId: buildingName };
+    }
+}
+
+// Export helper functions globally for use in other modules
+window.getDisplayNamesForLocation = getDisplayNamesForLocation;
+window.getIdsFromDisplayNames = getIdsFromDisplayNames;
 
 console.log('Game state management loaded');

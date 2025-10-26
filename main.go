@@ -72,6 +72,10 @@ func main() {
 	// Save/load API endpoints
 	mux.HandleFunc("/api/saves/", api.SavesHandler)
 
+	// Inventory API endpoints
+	mux.HandleFunc("/api/inventory/action", api.InventoryHandler)
+	mux.HandleFunc("/api/inventory/actions", api.ItemActionsHandler)
+
 	// Existing API endpoints
 	mux.HandleFunc("/api/character", api.CharacterHandler)
 	mux.HandleFunc("/api/profile", api.ProfileHandler)
