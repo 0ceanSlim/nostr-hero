@@ -160,6 +160,11 @@ class NostrHeroStartup {
 
         console.log('🎮 Nostr Hero is ready to play!');
 
+        // Add initial welcome message to game log
+        if (window.addGameLog) {
+            window.addGameLog('Welcome to Nostr Hero! Your adventure begins...');
+        }
+
         // Show welcome popup after a short delay (every time)
         setTimeout(() => this.showWelcomePopup(), 1000);
     }

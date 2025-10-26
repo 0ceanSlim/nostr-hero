@@ -3,11 +3,23 @@
 <div class="w-full h-full flex-shrink-0" style="background: #000000; border-top: 2px solid #808080; border-left: 2px solid #808080; border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff; box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #000000;">
     <div class="relative w-full h-full flex items-center justify-center">
         <img id="scene-image" src="/res/img/locations/kingdom.png" alt="Scene" class="w-full h-full object-cover" style="image-rendering: pixelated;">
+        <!-- City name at top -->
         <div class="absolute top-0 left-0 right-0 text-center p-2" style="background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
-            <h2 id="scene-title" class="text-sm font-bold text-white">Kingdom</h2>
+            <h2 id="city-name" class="text-sm font-bold text-white">Kingdom</h2>
+        </div>
+        <!-- District name at bottom with ground button -->
+        <div class="absolute bottom-0 left-0 right-0 flex items-center justify-between p-2" style="background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
+            <!-- Ground button (left) -->
+            <button id="check-ground-btn" onclick="openGroundModal()" class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white font-bold" style="font-size: 8px; border: 1px solid #4a4a4a;">
+                GROUND
+            </button>
+            <!-- District name (center) -->
+            <h3 id="district-name" class="text-xs font-bold text-white flex-1 text-center">Kingdom Center</h3>
+            <!-- Empty space (right for symmetry) -->
+            <div style="width: 48px;"></div>
         </div>
         <!-- Action text display (bottom-right corner) -->
-        <div id="action-text" class="absolute bottom-0 right-0 p-2 text-white text-xs font-bold" style="background: rgba(0,0,0,0.7); min-width: 100px; display: none;">
+        <div id="action-text" class="absolute bottom-0 right-0 p-3 text-xs font-bold text-right" style="min-width: 100px; display: none;">
             Info
         </div>
     </div>

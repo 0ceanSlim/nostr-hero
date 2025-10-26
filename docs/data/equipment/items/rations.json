@@ -5,7 +5,7 @@
   "price": 50,
   "type": "Adventuring Gear",
   "weight": 2,
-  "stack": 1,
+  "stack": 10,
   "ac": null,
   "damage": null,
   "heal": null,

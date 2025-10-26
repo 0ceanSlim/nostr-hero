@@ -1101,4 +1101,98 @@ async function getIdsFromDisplayNames(locationName, districtName, buildingName) 
 window.getDisplayNamesForLocation = getDisplayNamesForLocation;
 window.getIdsFromDisplayNames = getIdsFromDisplayNames;
 
+// ========================================
+// Ground Items System (Session-only storage)
+// ========================================
+
+// Ground items storage: { "locationId-districtKey": [{item, droppedAt, droppedDay}, ...] }
+const groundItems = {};
+
+/**
+ * Get location key for ground storage
+ */
+function getGroundLocationKey() {
+    const state = getGameState();
+    const cityId = state.location?.current || 'unknown';
+    const districtKey = state.location?.district || 'center';
+    return `${cityId}-${districtKey}`;
+}
+
+/**
+ * Add item to ground at current location
+ */
+function addItemToGround(itemId, quantity = 1) {
+    const locationKey = getGroundLocationKey();
+    const state = getGameState();
+    const currentDay = state.character?.current_day || 1;
+
+    if (!groundItems[locationKey]) {
+        groundItems[locationKey] = [];
+    }
+
+    groundItems[locationKey].push({
+        item: itemId,
+        quantity: quantity,
+        droppedAt: Date.now(),
+        droppedDay: currentDay
+    });
+
+    console.log(`📍 Item ${itemId} dropped at ${locationKey}`);
+    cleanupOldGroundItems();
+}
+
+/**
+ * Remove item from ground at current location
+ */
+function removeItemFromGround(itemId) {
+    const locationKey = getGroundLocationKey();
+
+    if (!groundItems[locationKey]) {
+        return null;
+    }
+
+    const index = groundItems[locationKey].findIndex(ground => ground.item === itemId);
+    if (index === -1) {
+        return null;
+    }
+
+    const removed = groundItems[locationKey].splice(index, 1)[0];
+    console.log(`✅ Picked up ${itemId} from ${locationKey}`);
+    return removed;
+}
+
+/**
+ * Get all items on ground at current location
+ */
+function getGroundItems() {
+    const locationKey = getGroundLocationKey();
+    cleanupOldGroundItems();
+    return groundItems[locationKey] || [];
+}
+
+/**
+ * Clean up items older than 1 game day
+ */
+function cleanupOldGroundItems() {
+    const state = getGameState();
+    const currentDay = state.character?.current_day || 1;
+
+    for (const locationKey in groundItems) {
+        groundItems[locationKey] = groundItems[locationKey].filter(ground => {
+            const daysPassed = currentDay - ground.droppedDay;
+            return daysPassed < 1; // Keep items for less than 1 day
+        });
+
+        // Remove empty locations
+        if (groundItems[locationKey].length === 0) {
+            delete groundItems[locationKey];
+        }
+    }
+}
+
+// Export ground functions globally
+window.addItemToGround = addItemToGround;
+window.removeItemFromGround = removeItemFromGround;
+window.getGroundItems = getGroundItems;
+
 console.log('Game state management loaded');

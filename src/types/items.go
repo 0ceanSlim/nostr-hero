@@ -23,16 +23,14 @@ type InventoryItem struct {
 
 // EquipmentSlots represents all equipment slots
 type EquipmentSlots struct {
-	MainHand *InventoryItem `json:"mainHand"`
-	OffHand  *InventoryItem `json:"offHand"`
-	Armor    *InventoryItem `json:"armor"`
-	Helmet   *InventoryItem `json:"helmet"`
-	Boots    *InventoryItem `json:"boots"`
-	Gloves   *InventoryItem `json:"gloves"`
-	Ring1    *InventoryItem `json:"ring1"`
-	Ring2    *InventoryItem `json:"ring2"`
-	Necklace *InventoryItem `json:"necklace"`
-	Cloak    *InventoryItem `json:"cloak"`
+	Neck      *InventoryItem `json:"neck"`
+	LeftHand  *InventoryItem `json:"left_hand"`
+	RightHand *InventoryItem `json:"right_hand"`
+	Armor     *InventoryItem `json:"armor"`
+	Ring      *InventoryItem `json:"ring"`
+	Clothes   *InventoryItem `json:"clothes"`
+	Ammo      *InventoryItem `json:"ammo"`
+	Bag       *InventoryItem `json:"bag"`
 }
 
 // Inventory represents the complete inventory structure
@@ -160,26 +158,25 @@ func GetItemActions(itemType string, isEquipped bool) []ItemAction {
 }
 
 // DetermineEquipmentSlot determines which equipment slot an item should go into
+// Note: Items should have a gear_slot property that specifies the exact slot
 func DetermineEquipmentSlot(itemType string) string {
 	switch itemType {
 	case "Weapon", "Melee Weapon", "Ranged Weapon", "Simple Weapon", "Martial Weapon":
-		return "mainHand"
+		return "right_hand" // Default to right hand for weapons
 	case "Shield":
-		return "offHand"
+		return "left_hand"
 	case "Armor", "Light Armor", "Medium Armor", "Heavy Armor":
 		return "armor"
-	case "Helmet", "Hat":
-		return "helmet"
-	case "Boots":
-		return "boots"
-	case "Gloves":
-		return "gloves"
 	case "Ring":
-		return "ring1" // Will need logic to choose ring1 or ring2
+		return "ring"
 	case "Necklace", "Amulet":
-		return "necklace"
-	case "Cloak", "Cape":
-		return "cloak"
+		return "neck"
+	case "Clothing", "Robe", "Outfit":
+		return "clothes"
+	case "Ammunition", "Arrows", "Bolts":
+		return "ammo"
+	case "Bag", "Backpack", "Pouch":
+		return "bag"
 	default:
 		return "" // Not equippable
 	}

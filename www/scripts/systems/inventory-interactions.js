@@ -180,17 +180,42 @@ async function handleDrop(e, toSlotType, toSlotIndex) {
 
     if (!draggedItem) return;
 
+    // Check if dropping on the same slot (do nothing)
+    if (draggedFromType === toSlotType && draggedFromSlot === toSlotIndex) {
+        console.log('🚫 Cannot drop item on itself');
+        return;
+    }
+
     // If dragging from equipment to inventory
     if (draggedFromType === 'equipment') {
         await performAction('unequip', draggedItem, draggedFromSlot);
     }
-    // If moving within inventory (pass slot types to backend)
-    else if (draggedFromType === toSlotType) {
-        await performAction('move', draggedItem, draggedFromSlot, toSlotIndex, draggedFromType, toSlotType);
-    }
-    // If moving between inventory types (general to backpack or vice versa)
+    // If dropping on an inventory slot
     else {
-        await performAction('move', draggedItem, draggedFromSlot, toSlotIndex, draggedFromType, toSlotType);
+        // Check if destination slot has an item
+        const state = getGameState();
+        let destItem = null;
+
+        // Get destination slot item
+        if (toSlotType === 'general') {
+            if (state.character.inventory?.general_slots?.[toSlotIndex]) {
+                destItem = state.character.inventory.general_slots[toSlotIndex];
+            }
+        } else if (toSlotType === 'inventory') {
+            if (state.character.inventory?.gear_slots?.bag?.contents?.[toSlotIndex]) {
+                destItem = state.character.inventory.gear_slots.bag.contents[toSlotIndex];
+            }
+        }
+
+        // If destination has an item and it's the same type, try to stack
+        if (destItem && destItem.item === draggedItem) {
+            console.log(`📦 Attempting to stack ${draggedItem}`);
+            await performAction('stack', draggedItem, draggedFromSlot, toSlotIndex, draggedFromType, toSlotType);
+        }
+        // Otherwise, move/swap as normal
+        else {
+            await performAction('move', draggedItem, draggedFromSlot, toSlotIndex, draggedFromType, toSlotType);
+        }
     }
 }
 
@@ -224,13 +249,16 @@ async function handleLeftClick(e, itemId, slotType, slotIndex) {
         return;
     }
 
-    // Determine default action based on item type
-    const action = getDefaultAction(itemData.type || itemData.item_type, slotType === 'equipment');
+    // Determine default action based on item data
+    const action = getDefaultAction(itemData, slotType === 'equipment');
 
     console.log(`🖱️ Left click: ${itemId} -> ${action}`);
 
     // Perform the default action
-    if (action) {
+    if (action === 'equip' && itemData.gear_slot) {
+        // For equip action, pass the gear_slot as the target
+        await performAction(action, itemId, slotIndex, itemData.gear_slot);
+    } else if (action) {
         await performAction(action, itemId, slotIndex);
     }
 }
@@ -252,7 +280,7 @@ function handleRightClick(e, itemId, slotType, slotIndex) {
 
     // Get available actions
     const isEquipped = slotType === 'equipment';
-    const actions = getItemActions(itemData.type || itemData.item_type, isEquipped);
+    const actions = getItemActions(itemData, isEquipped);
 
     console.log(`📋 Showing context menu with ${actions.length} actions`);
 
@@ -261,13 +289,20 @@ function handleRightClick(e, itemId, slotType, slotIndex) {
 }
 
 /**
- * Get default action for an item type
+ * Get default action for an item
  */
-function getDefaultAction(itemType, isEquipped) {
+function getDefaultAction(itemData, isEquipped) {
     if (isEquipped) {
         return 'unequip';
     }
 
+    // Check if item has "equipment" tag - this is the primary indicator
+    if (itemData.tags && itemData.tags.includes('equipment')) {
+        return 'equip';
+    }
+
+    // Fallback: Check item type for backwards compatibility
+    const itemType = itemData.type || itemData.item_type;
     const weaponTypes = ['Weapon', 'Melee Weapon', 'Ranged Weapon', 'Simple Weapon', 'Martial Weapon'];
     const armorTypes = ['Armor', 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shield'];
     const wearableTypes = ['Ring', 'Necklace', 'Amulet', 'Cloak', 'Boots', 'Gloves', 'Helmet', 'Hat'];
@@ -287,29 +322,45 @@ function getDefaultAction(itemType, isEquipped) {
 /**
  * Get available actions for an item
  */
-function getItemActions(itemType, isEquipped) {
+function getItemActions(itemData, isEquipped) {
     const actions = [];
-
-    const weaponTypes = ['Weapon', 'Melee Weapon', 'Ranged Weapon', 'Simple Weapon', 'Martial Weapon'];
-    const armorTypes = ['Armor', 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shield'];
-    const wearableTypes = ['Ring', 'Necklace', 'Amulet', 'Cloak', 'Boots', 'Gloves', 'Helmet', 'Hat'];
-    const consumableTypes = ['Potion', 'Consumable', 'Food'];
 
     if (isEquipped) {
         actions.push({ action: 'unequip', label: 'Unequip' });
     } else {
-        if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType)) {
+        // Check for equipment tag first
+        if (itemData.tags && itemData.tags.includes('equipment')) {
             actions.push({ action: 'equip', label: 'Equip' });
+        } else {
+            // Fallback to type checking
+            const itemType = itemData.type || itemData.item_type;
+            const weaponTypes = ['Weapon', 'Melee Weapon', 'Ranged Weapon', 'Simple Weapon', 'Martial Weapon'];
+            const armorTypes = ['Armor', 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shield'];
+            const wearableTypes = ['Ring', 'Necklace', 'Amulet', 'Cloak', 'Boots', 'Gloves', 'Helmet', 'Hat'];
+
+            if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType)) {
+                actions.push({ action: 'equip', label: 'Equip' });
+            }
         }
 
+        // Check for consumables
+        const consumableTypes = ['Potion', 'Consumable', 'Food'];
+        const itemType = itemData.type || itemData.item_type;
         if (consumableTypes.includes(itemType)) {
             actions.push({ action: 'use', label: 'Use' });
         }
 
-        actions.push({ action: 'drop', label: 'Drop' });
+        // Add split action for stackable items (quantity > 1)
+        if (itemData.quantity && itemData.quantity > 1) {
+            actions.push({ action: 'split', label: 'Split' });
+        }
     }
 
+    // Examine is always available
     actions.push({ action: 'examine', label: 'Examine' });
+
+    // Drop is always last
+    actions.push({ action: 'drop', label: 'Drop' });
 
     return actions;
 }
@@ -374,7 +425,13 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         return;
     }
 
-    // Get current game state
+    // Special case: split stack
+    if (action === 'split') {
+        await handleSplitStack(itemId, fromSlot, fromSlotType);
+        return;
+    }
+
+    // Get current game state for request building
     const npub = getCurrentNpub();
     const saveId = getSaveId();
 
@@ -399,6 +456,58 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         quantity: 1
     };
 
+    // Special case: drop (add to ground, then remove from inventory)
+    if (action === 'drop') {
+        // Get item data from inventory to check current quantity
+        const state = getGameState();
+        let inventoryItem = null;
+
+        // Find the item in inventory to get actual quantity
+        if (state.character.inventory?.general_slots) {
+            inventoryItem = state.character.inventory.general_slots.find(slot => slot && slot.item === itemId);
+        }
+        if (!inventoryItem && state.character.inventory?.gear_slots?.bag?.contents) {
+            inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot => slot && slot.item === itemId);
+        }
+
+        const currentQuantity = inventoryItem?.quantity || 1;
+
+        // If quantity > 1, show prompt for how many to drop
+        if (currentQuantity > 1) {
+            const itemData = getItemById(itemId);
+            const dropQuantity = await promptDropQuantity(itemData?.name || itemId, currentQuantity);
+
+            if (dropQuantity === null || dropQuantity <= 0) {
+                // User cancelled or entered invalid amount
+                return;
+            }
+
+            // Add to ground storage
+            window.addItemToGround(itemId, dropQuantity);
+            window.addGameLog(`Dropped ${dropQuantity}x ${itemData?.name || itemId} on the ground.`);
+
+            // Refresh ground modal if it's open
+            if (window.refreshGroundModal) {
+                window.refreshGroundModal();
+            }
+
+            // Set the drop quantity in the request
+            request.quantity = dropQuantity;
+        } else {
+            // Single item, just drop it
+            const itemData = getItemById(itemId);
+            window.addItemToGround(itemId, 1);
+            window.addGameLog(`Dropped ${itemData?.name || itemId} on the ground.`);
+
+            // Refresh ground modal if it's open
+            if (window.refreshGroundModal) {
+                window.refreshGroundModal();
+            }
+        }
+
+        // Continue with normal drop action (which removes from inventory)
+    }
+
     try {
         const response = await fetch('/api/inventory/action', {
             method: 'POST',
@@ -417,7 +526,11 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             // Update game state with new inventory
             if (result.newState) {
                 const currentState = getGameState();
+                // Update character.inventory (full structure)
                 currentState.character.inventory = result.newState;
+                // Also update the separate inventory and equipment fields
+                currentState.inventory = result.newState.general_slots || [];
+                currentState.equipment = result.newState.gear_slots || {};
                 updateGameState(currentState);
             }
         } else {
@@ -428,6 +541,292 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         console.error('❌ Error performing action:', error);
         showMessage('Failed to perform action', 'error');
     }
+}
+
+/**
+ * Prompt user for quantity to drop
+ */
+async function promptDropQuantity(itemName, maxQuantity) {
+    return new Promise((resolve) => {
+        // Create modal backdrop
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.background = 'rgba(0, 0, 0, 0.8)';
+        modal.style.zIndex = '100';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        // Create dialog box
+        const dialog = document.createElement('div');
+        dialog.style.background = '#2a2a2a';
+        dialog.style.border = '2px solid #4a4a4a';
+        dialog.style.padding = '20px';
+        dialog.style.minWidth = '300px';
+        dialog.style.boxShadow = 'inset 1px 1px 0 #3a3a3a, inset -1px -1px 0 #000000';
+
+        dialog.innerHTML = `
+            <div style="color: white; font-size: 12px;">
+                <h3 style="margin: 0 0 15px 0; font-weight: bold;">Drop ${itemName}</h3>
+                <p style="margin: 0 0 10px 0; color: #ccc;">How many do you want to drop? (Max: ${maxQuantity})</p>
+                <input type="number" id="drop-quantity-input" min="1" max="${maxQuantity}" value="${maxQuantity}"
+                    style="width: 100%; padding: 5px; background: #1a1a1a; color: white; border: 2px solid #4a4a4a; font-size: 12px;" />
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="drop-cancel-btn" style="padding: 5px 15px; background: #3a3a3a; color: white; border: 2px solid #4a4a4a; cursor: pointer; font-size: 11px;">Cancel</button>
+                    <button id="drop-confirm-btn" style="padding: 5px 15px; background: #4a4a4a; color: white; border: 2px solid #6a6a6a; cursor: pointer; font-size: 11px;">Drop</button>
+                </div>
+            </div>
+        `;
+
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+
+        const input = document.getElementById('drop-quantity-input');
+        const cancelBtn = document.getElementById('drop-cancel-btn');
+        const confirmBtn = document.getElementById('drop-confirm-btn');
+
+        // Focus and select input
+        input.focus();
+        input.select();
+
+        // Event handlers
+        const cleanup = () => {
+            modal.remove();
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(null);
+        };
+
+        confirmBtn.onclick = () => {
+            const quantity = parseInt(input.value);
+            if (quantity > 0 && quantity <= maxQuantity) {
+                cleanup();
+                resolve(quantity);
+            } else {
+                input.style.borderColor = '#ff0000';
+            }
+        };
+
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                confirmBtn.click();
+            } else if (e.key === 'Escape') {
+                cancelBtn.click();
+            }
+        };
+
+        // Click outside to cancel
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cancelBtn.click();
+            }
+        };
+    });
+}
+
+/**
+ * Handle splitting a stack into two stacks
+ */
+async function handleSplitStack(itemId, fromSlot, fromSlotType) {
+    // Get item data from inventory to check current quantity
+    const state = getGameState();
+    let inventoryItem = null;
+
+    // Find the item in inventory to get actual quantity
+    if (fromSlotType === 'general' && state.character.inventory?.general_slots) {
+        inventoryItem = state.character.inventory.general_slots[fromSlot];
+    } else if (fromSlotType === 'inventory' && state.character.inventory?.gear_slots?.bag?.contents) {
+        inventoryItem = state.character.inventory.gear_slots.bag.contents[fromSlot];
+    }
+
+    if (!inventoryItem || inventoryItem.quantity <= 1) {
+        window.addGameLog('Cannot split a stack of 1 item.');
+        return;
+    }
+
+    const currentQuantity = inventoryItem.quantity;
+    const itemData = getItemById(itemId);
+
+    // Show prompt for how many to split
+    const splitQuantity = await promptSplitQuantity(itemData?.name || itemId, currentQuantity);
+
+    if (splitQuantity === null || splitQuantity <= 0 || splitQuantity >= currentQuantity) {
+        // User cancelled or entered invalid amount
+        return;
+    }
+
+    // Find an empty slot in inventory
+    let emptySlotIndex = -1;
+    let emptySlotType = '';
+
+    // Check general slots first
+    if (state.character.inventory?.general_slots) {
+        const generalSlots = state.character.inventory.general_slots;
+        const nonEmptyCount = generalSlots.filter(slot => slot !== null).length;
+        if (nonEmptyCount < 4) {
+            emptySlotIndex = generalSlots.length;
+            emptySlotType = 'general';
+        }
+    }
+
+    // If no empty general slot, check backpack
+    if (emptySlotIndex === -1 && state.character.inventory?.gear_slots?.bag?.contents) {
+        const backpackSlots = state.character.inventory.gear_slots.bag.contents;
+        const nonEmptyCount = backpackSlots.filter(slot => slot !== null).length;
+        if (nonEmptyCount < 20) {
+            emptySlotIndex = backpackSlots.length;
+            emptySlotType = 'inventory';
+        }
+    }
+
+    // If no empty slot, show error
+    if (emptySlotIndex === -1) {
+        window.addGameLog('❌ Inventory full - cannot split stack');
+        window.showMessage('Inventory full - cannot split stack', 'error');
+        return;
+    }
+
+    // Call backend to split the stack
+    const npub = getCurrentNpub();
+    const saveId = getSaveId();
+
+    if (!npub || !saveId) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/inventory/action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                npub: npub,
+                save_id: saveId,
+                item_id: itemId,
+                action: 'split',
+                from_slot: fromSlot,
+                to_slot: emptySlotIndex,
+                from_slot_type: fromSlotType,
+                to_slot_type: emptySlotType,
+                quantity: splitQuantity
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            const currentState = getGameState();
+            // Update character.inventory (full structure)
+            currentState.character.inventory = result.newState;
+            // Also update the separate inventory and equipment fields
+            currentState.inventory = result.newState.general_slots || [];
+            currentState.equipment = result.newState.gear_slots || {};
+            updateGameState(currentState);
+
+            window.addGameLog(`Split ${splitQuantity} from stack of ${itemData?.name || itemId}`);
+        } else {
+            window.showMessage(result.error || 'Failed to split stack', 'error');
+        }
+    } catch (error) {
+        window.showMessage('Error splitting stack: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Prompt user for quantity to split from stack
+ */
+async function promptSplitQuantity(itemName, maxQuantity) {
+    const maxSplit = maxQuantity - 1; // Can't split all items
+    const defaultSplit = Math.floor(maxQuantity / 2);
+
+    return new Promise((resolve) => {
+        // Create modal backdrop
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.background = 'rgba(0, 0, 0, 0.8)';
+        modal.style.zIndex = '100';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        // Create dialog box
+        const dialog = document.createElement('div');
+        dialog.style.background = '#2a2a2a';
+        dialog.style.border = '2px solid #4a4a4a';
+        dialog.style.padding = '20px';
+        dialog.style.minWidth = '300px';
+        dialog.style.boxShadow = 'inset 1px 1px 0 #3a3a3a, inset -1px -1px 0 #000000';
+
+        dialog.innerHTML = `
+            <div style="color: white; font-size: 12px;">
+                <h3 style="margin: 0 0 15px 0; font-weight: bold;">Split ${itemName}</h3>
+                <p style="margin: 0 0 10px 0; color: #ccc;">How many to split into new stack? (Max: ${maxSplit})</p>
+                <input type="number" id="split-quantity-input" min="1" max="${maxSplit}" value="${defaultSplit}"
+                    style="width: 100%; padding: 5px; background: #1a1a1a; color: white; border: 2px solid #4a4a4a; font-size: 12px;" />
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="split-cancel-btn" style="padding: 5px 15px; background: #3a3a3a; color: white; border: 2px solid #4a4a4a; cursor: pointer; font-size: 11px;">Cancel</button>
+                    <button id="split-confirm-btn" style="padding: 5px 15px; background: #4a4a4a; color: white; border: 2px solid #6a6a6a; cursor: pointer; font-size: 11px;">Split</button>
+                </div>
+            </div>
+        `;
+
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+
+        const input = document.getElementById('split-quantity-input');
+        const cancelBtn = document.getElementById('split-cancel-btn');
+        const confirmBtn = document.getElementById('split-confirm-btn');
+
+        // Focus and select input
+        input.focus();
+        input.select();
+
+        // Event handlers
+        const cleanup = () => {
+            modal.remove();
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(null);
+        };
+
+        confirmBtn.onclick = () => {
+            const quantity = parseInt(input.value);
+            if (quantity > 0 && quantity <= maxSplit) {
+                cleanup();
+                resolve(quantity);
+            } else {
+                input.style.borderColor = '#ff0000';
+            }
+        };
+
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                confirmBtn.click();
+            } else if (e.key === 'Escape') {
+                cancelBtn.click();
+            }
+        };
+
+        // Click outside to cancel
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cancelBtn.click();
+            }
+        };
+    });
 }
 
 /**
@@ -484,7 +883,7 @@ function showItemTooltip(e, itemId, slotType) {
 
     // Determine default action
     const isEquipped = slotType === 'equipment';
-    const defaultAction = getDefaultAction(itemData.type || itemData.item_type, isEquipped);
+    const defaultAction = getDefaultAction(itemData, isEquipped);
 
     // Action display names (simple text)
     const actionNames = {
@@ -495,12 +894,23 @@ function showItemTooltip(e, itemId, slotType) {
         'drop': 'Drop'
     };
 
+    // Action colors
+    const actionColors = {
+        'equip': '#4a9eff',      // Blue for equip
+        'unequip': '#ff8c00',    // Orange for unequip
+        'use': '#00ff00',        // Green for use
+        'examine': '#ff8c00',    // Orange for info
+        'drop': '#ff0000'        // Red for drop
+    };
+
     const actionName = actionNames[defaultAction] || 'Info';
+    const actionColor = actionColors[defaultAction] || '#ff8c00';
 
     // Update action text in bottom-right corner
     const actionText = document.getElementById('action-text');
     if (actionText) {
         actionText.textContent = actionName;
+        actionText.style.color = actionColor;
         actionText.style.display = 'block';
     } else {
         console.warn('⚠️ action-text element not found!');

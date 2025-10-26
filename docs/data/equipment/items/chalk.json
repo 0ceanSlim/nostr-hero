@@ -6,7 +6,7 @@
   "price": 1,
   "type": "Adventuring Gear",
   "weight": 0.05,
-  "stack": 1,
+  "stack": 10,
   "gear_slot": "",
   "rarity": "common",
   "tags": [],
