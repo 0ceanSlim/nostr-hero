@@ -2,6 +2,8 @@
   "id": "village-west",
   "name": "Millhaven Village",
   "type": "village",
+  "image": "/res/img/locations/millhaven.png",
+  "music": "/res/aud/millhaven - Healing.wav",
   "description": "A peaceful farming village nestled in rolling hills, where windmills turn lazily in the breeze and fields of grain stretch to the horizon.",
   "connections": {
     "east": "village-west-east"
@@ -73,7 +75,12 @@
           "actions": ["pray", "leave_offering", "talk_to_priest"]
         }
       ],
-      "npcs": ["keywarden", "village-shopkeeper", "village-innkeeper", "village-doorman"]
+      "npcs": [
+        "keywarden",
+        "village-shopkeeper",
+        "village-innkeeper",
+        "village-doorman"
+      ]
     },
     "east": {
       "id": "village-west-east",

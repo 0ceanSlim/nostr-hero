@@ -576,9 +576,32 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			fromInventory = append(fromInventory, emptySlot)
 		}
 
-		// Get source and destination slot objects
-		fromSlotObj := fromInventory[req.FromSlot].(map[string]interface{})
-		toSlotObj := fromInventory[req.ToSlot].(map[string]interface{})
+		// Get source and destination slot objects (handle nil slots)
+		var fromSlotObj map[string]interface{}
+		if fromInventory[req.FromSlot] != nil {
+			fromSlotObj = fromInventory[req.FromSlot].(map[string]interface{})
+		} else {
+			// Create empty slot object if nil
+			fromSlotObj = map[string]interface{}{
+				"item":     nil,
+				"quantity": 0,
+				"slot":     req.FromSlot,
+			}
+			fromInventory[req.FromSlot] = fromSlotObj
+		}
+
+		var toSlotObj map[string]interface{}
+		if fromInventory[req.ToSlot] != nil {
+			toSlotObj = fromInventory[req.ToSlot].(map[string]interface{})
+		} else {
+			// Create empty slot object if nil
+			toSlotObj = map[string]interface{}{
+				"item":     nil,
+				"quantity": 0,
+				"slot":     req.ToSlot,
+			}
+			fromInventory[req.ToSlot] = toSlotObj
+		}
 
 		// Swap item and quantity, but keep slot numbers correct
 		fromSlotObj["item"], toSlotObj["item"] = toSlotObj["item"], fromSlotObj["item"]
@@ -648,7 +671,15 @@ func handleAddItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 	generalCount := 0
 	for _, slot := range generalInventory {
 		if slot != nil {
-			generalCount++
+			// Check if the slot has an actual item (not just a slot object with item: nil)
+			if slotMap, ok := slot.(map[string]interface{}); ok {
+				if itemID := slotMap["item"]; itemID != nil && itemID != "" {
+					generalCount++
+				}
+			} else {
+				// If it's not a map, count it as occupied
+				generalCount++
+			}
 		}
 	}
 
@@ -703,7 +734,15 @@ func handleAddItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 	backpackCount := 0
 	for _, slot := range contents {
 		if slot != nil {
-			backpackCount++
+			// Check if the slot has an actual item (not just a slot object with item: nil)
+			if slotMap, ok := slot.(map[string]interface{}); ok {
+				if itemID := slotMap["item"]; itemID != nil && itemID != "" {
+					backpackCount++
+				}
+			} else {
+				// If it's not a map, count it as occupied
+				backpackCount++
+			}
 		}
 	}
 
@@ -875,25 +914,16 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 			bag["contents"] = toInventory
 		}
 	} else {
-		// Remove source item (stack fully merged)
+		// Remove source item (stack fully merged) - set to nil to preserve indices
+		fromInventory[req.FromSlot] = nil
+
+		// Save source inventory
 		if fromSlotType == "general" {
-			newInventory := make([]interface{}, 0, len(fromInventory)-1)
-			for i, item := range fromInventory {
-				if i != req.FromSlot {
-					newInventory = append(newInventory, item)
-				}
-			}
-			save.Inventory["general_slots"] = newInventory
+			save.Inventory["general_slots"] = fromInventory
 		} else if fromSlotType == "inventory" {
-			newInventory := make([]interface{}, 0, len(fromInventory)-1)
-			for i, item := range fromInventory {
-				if i != req.FromSlot {
-					newInventory = append(newInventory, item)
-				}
-			}
 			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 			bag := gearSlots["bag"].(map[string]interface{})
-			bag["contents"] = newInventory
+			bag["contents"] = fromInventory
 		}
 
 		// Save destination inventory

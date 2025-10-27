@@ -1412,6 +1412,9 @@ async function pickupGroundItem(itemId) {
                 currentState.inventory = result.newState.general_slots || [];
                 currentState.equipment = result.newState.gear_slots || {};
                 updateGameState(currentState);
+
+                // Refresh inventory UI to show the picked up item
+                await updateCharacterDisplay();
             }
 
             // Refresh modal

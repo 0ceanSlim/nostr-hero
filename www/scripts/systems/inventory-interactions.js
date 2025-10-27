@@ -456,7 +456,8 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         quantity: 1
     };
 
-    // Special case: drop (add to ground, then remove from inventory)
+    // Special case: drop - prompt for quantity, but only add to ground after API success
+    let dropInfo = null;  // Store drop details for later
     if (action === 'drop') {
         // Get item data from inventory to check current quantity
         const state = getGameState();
@@ -471,10 +472,10 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         }
 
         const currentQuantity = inventoryItem?.quantity || 1;
+        const itemData = getItemById(itemId);
 
         // If quantity > 1, show prompt for how many to drop
         if (currentQuantity > 1) {
-            const itemData = getItemById(itemId);
             const dropQuantity = await promptDropQuantity(itemData?.name || itemId, currentQuantity);
 
             if (dropQuantity === null || dropQuantity <= 0) {
@@ -482,30 +483,26 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
                 return;
             }
 
-            // Add to ground storage
-            window.addItemToGround(itemId, dropQuantity);
-            window.addGameLog(`Dropped ${dropQuantity}x ${itemData?.name || itemId} on the ground.`);
-
-            // Refresh ground modal if it's open
-            if (window.refreshGroundModal) {
-                window.refreshGroundModal();
-            }
-
             // Set the drop quantity in the request
             request.quantity = dropQuantity;
+
+            // Store drop info for after successful API call
+            dropInfo = {
+                itemId: itemId,
+                quantity: dropQuantity,
+                itemName: itemData?.name || itemId
+            };
         } else {
-            // Single item, just drop it
-            const itemData = getItemById(itemId);
-            window.addItemToGround(itemId, 1);
-            window.addGameLog(`Dropped ${itemData?.name || itemId} on the ground.`);
+            // Single item
+            request.quantity = 1;
 
-            // Refresh ground modal if it's open
-            if (window.refreshGroundModal) {
-                window.refreshGroundModal();
-            }
+            // Store drop info for after successful API call
+            dropInfo = {
+                itemId: itemId,
+                quantity: 1,
+                itemName: itemData?.name || itemId
+            };
         }
-
-        // Continue with normal drop action (which removes from inventory)
     }
 
     try {
@@ -532,6 +529,17 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
                 currentState.inventory = result.newState.general_slots || [];
                 currentState.equipment = result.newState.gear_slots || {};
                 updateGameState(currentState);
+            }
+
+            // If this was a drop action, NOW add to ground (after successful API call)
+            if (action === 'drop' && dropInfo) {
+                window.addItemToGround(dropInfo.itemId, dropInfo.quantity);
+                window.addGameLog(`Dropped ${dropInfo.quantity}x ${dropInfo.itemName} on the ground.`);
+
+                // Refresh ground modal if it's open
+                if (window.refreshGroundModal) {
+                    window.refreshGroundModal();
+                }
             }
         } else {
             console.error('❌ Action failed:', result.error);
