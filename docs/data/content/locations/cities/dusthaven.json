@@ -1,11 +1,8 @@
 {
-  "id": "village-southeast",
+  "id": "dusthaven",
   "name": "Dusthaven Village",
   "type": "village",
   "description": "A small oasis village that serves as the last outpost before the great desert. Adobe buildings cluster around a precious well, and date palms provide shade from the harsh sun.",
-  "connections": {
-    "west": "village-southeast-west"
-  },
   "starting_races": [],
   "racial_entry_fees": {
     "Human": 2,
@@ -21,11 +18,11 @@
   },
   "districts": {
     "center": {
-      "id": "village-southeast-center",
+      "id": "dusthaven-center",
       "name": "Oasis Center",
       "description": "The heart of the village centers around the life-giving well. Villagers in desert robes go about their daily tasks while keeping watchful eyes on the horizon for sandstorms.",
       "connections": {
-        "west": "village-southeast-west"
+        "west": "dusthaven-west"
       },
       "buildings": [
         {
@@ -57,12 +54,12 @@
       "npcs": []
     },
     "west": {
-      "id": "village-southeast-west",
+      "id": "dusthaven-west",
       "name": "Western Edge",
       "description": "The western edge of the village where the last shade gives way to the open desert. Caravans assemble here before making the dangerous journey.",
       "connections": {
-        "center": "village-southeast-center",
-        "west": "desert-city"
+        "center": "dusthaven-center",
+        "west": "sunscorch-desert"
       },
       "buildings": [
         {
@@ -75,7 +72,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "desert-city"
+      "exit_to_environment": "sunscorch-desert"
     }
   }
 }

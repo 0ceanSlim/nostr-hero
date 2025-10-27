@@ -1,9 +1,9 @@
 {
-  "id": "desert-city",
+  "id": "sunscorch-desert",
   "name": "Sunscorch Desert",
   "type": "environment",
   "environment_type": "desert",
-  "connects": ["city-east-east", "village-southeast-west"],
+  "connects": ["goldenhaven-east", "dusthaven-west"],
   "description": "Endless dunes of golden sand stretch to the horizon under a merciless sun. The air shimmers with heat waves, and only the hardiest creatures survive in this harsh wasteland. Ancient ruins occasionally emerge from the shifting sands.",
   "travel_time": 4,
   "travel_difficulty": "very_hard",

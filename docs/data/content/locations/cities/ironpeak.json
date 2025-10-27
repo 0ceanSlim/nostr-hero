@@ -1,14 +1,10 @@
 {
-  "id": "town-northeast",
+  "id": "ironpeak",
   "name": "Ironpeak Town",
   "type": "town",
   "image": "/res/img/locations/ironpeak.png",
   "music": "/res/aud/ironpeak - Breath Of The Mountains.wav",
   "description": "A mining town built into the foothills of towering mountains. The constant ring of hammers on metal echoes through the valleys as miners extract precious ores from the rocky peaks.",
-  "connections": {
-    "south": "town-northeast-south",
-    "west": "town-northeast-west"
-  },
   "starting_races": ["Dwarf"],
   "racial_entry_fees": {
     "Human": 3,
@@ -24,12 +20,12 @@
   },
   "districts": {
     "center": {
-      "id": "town-northeast-center",
+      "id": "ironpeak-center",
       "name": "Miners' Plaza",
       "description": "The town center bustles with activity as miners emerge from the mountain tunnels. Carts loaded with ore rumble over cobblestone streets toward the smelting district.",
       "connections": {
-        "south": "town-northeast-south",
-        "west": "town-northeast-west"
+        "south": "ironpeak-south",
+        "west": "ironpeak-west"
       },
       "buildings": [
         {
@@ -89,12 +85,12 @@
       "npcs": ["vaultwright", "mining-supplier", "miners-innkeeper", "miners-doorman"]
     },
     "south": {
-      "id": "town-northeast-south",
+      "id": "ironpeak-south",
       "name": "Valley Approach",
       "description": "The southern approach to the mining town winds through rocky valleys carved by ancient glaciers. Mine cart tracks run alongside the main road.",
       "connections": {
-        "center": "town-northeast-center",
-        "south": "mountain-northeast"
+        "center": "ironpeak-center",
+        "south": "cragspire-mountains"
       },
       "buildings": [
         {
@@ -107,7 +103,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "mountain-northeast"
+      "exit_to_environment": "cragspire-mountains"
     }
   }
 }

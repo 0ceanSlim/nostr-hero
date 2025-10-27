@@ -1,9 +1,9 @@
 {
-  "id": "coastal-south",
+  "id": "suncrest-coastlands",
   "name": "Suncrest Coastlands",
   "type": "environment",
   "environment_type": "coastal",
-  "connects": ["city-south-south", "village-south-north"],
+  "connects": ["verdant-south", "saltwind-north"],
   "description": "Rocky cliffs and sandy beaches stretch along the azure sea. Seabirds wheel overhead while waves crash against weathered stone. Hidden coves and tide pools reveal treasures from the deep.",
   "travel_time": 2,
   "travel_difficulty": "moderate",

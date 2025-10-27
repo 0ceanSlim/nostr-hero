@@ -1,9 +1,9 @@
 {
-  "id": "hill-kingdom",
+  "id": "windswept-hills",
   "name": "Windswept Hills",
   "type": "environment",
   "environment_type": "hill",
-  "connects": ["kingdom-west", "village-west-east"],
+  "connects": ["kingdom-west", "millhaven-east"],
   "description": "Rolling green hills stretch as far as the eye can see, dotted with clusters of wildflowers and ancient standing stones. The wind carries the scent of wild grass and distant rain.",
   "travel_time": 2,
   "travel_difficulty": "easy",

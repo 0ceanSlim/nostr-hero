@@ -1,15 +1,10 @@
 {
-  "id": "city-south",
+  "id": "verdant",
   "name": "Verdant City",
   "type": "city",
   "image": "/res/img/locations/verdant.png",
   "music": "/res/aud/verdant - Folklore.wav",
   "description": "A lush city built where the great forest meets fertile farmlands. Green terraced gardens rise up the hillsides, and the scent of blooming flowers fills the air. This is a center of learning and nature magic.",
-  "connections": {
-    "north": "city-south-north",
-    "west": "city-south-west",
-    "south": "city-south-south"
-  },
   "starting_races": ["Elf"],
   "racial_entry_fees": {
     "Human": 3,
@@ -25,13 +20,13 @@
   },
   "districts": {
     "center": {
-      "id": "city-south-center",
+      "id": "verdant-center",
       "name": "Garden Plaza",
       "description": "The city center is a magnificent botanical garden with fountains, rare flowers, and ancient trees. Scholars and druids walk peaceful paths between schools and libraries.",
       "connections": {
-        "north": "city-south-north",
-        "west": "city-south-west",
-        "south": "city-south-south"
+        "north": "verdant-north",
+        "west": "verdant-west",
+        "south": "verdant-south"
       },
       "buildings": [
         {
@@ -98,12 +93,12 @@
       "npcs": ["warden-of-roots", "nature-supplier", "forest-innkeeper", "forest-doorman"]
     },
     "north": {
-      "id": "city-south-north",
+      "id": "verdant-north",
       "name": "Forest Quarter",
       "description": "The northern district blends seamlessly with the great forest. Tree-houses and elevated walkways connect buildings built among the ancient trees.",
       "connections": {
-        "center": "city-south-center",
-        "north": "forest-kingdom"
+        "center": "verdant-center",
+        "north": "darkwood-forest"
       },
       "buildings": [
         {
@@ -116,15 +111,15 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "forest-kingdom"
+      "exit_to_environment": "darkwood-forest"
     },
     "west": {
-      "id": "city-south-west",
+      "id": "verdant-west",
       "name": "Artisan Quarter",
       "description": "The western district houses craftsmen who work with natural materials. Woodcarvers, weavers, and botanical alchemists create beautiful and useful items.",
       "connections": {
-        "center": "city-south-center",
-        "west": "swamp-south"
+        "center": "verdant-center",
+        "west": "shadowmere-wetlands"
       },
       "buildings": [
         {
@@ -137,15 +132,15 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "swamp-south"
+      "exit_to_environment": "shadowmere-wetlands"
     },
     "south": {
-      "id": "city-south-south",
+      "id": "verdant-south",
       "name": "Coastal Road",
       "description": "The southern district opens onto the road leading to the coast. Sea breezes carry the salt scent inland, mixing with the forest aromas.",
       "connections": {
-        "center": "city-south-center",
-        "south": "coastal-south"
+        "center": "verdant-center",
+        "south": "suncrest-coastlands"
       },
       "buildings": [
         {
@@ -159,7 +154,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "coastal-south"
+      "exit_to_environment": "suncrest-coastlands"
     }
   }
 }

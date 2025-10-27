@@ -1,12 +1,8 @@
 {
-  "id": "town-north",
+  "id": "frosthold",
   "name": "Frosthold Town",
   "type": "town",
   "description": "A hardy northern town built to withstand the harsh arctic winds. Stone buildings with thick walls and small windows cluster around a central square dominated by a massive bonfire that never goes out.",
-  "connections": {
-    "south": "town-north-south",
-    "north": "arctic-north-town"
-  },
   "starting_races": [],
   "racial_entry_fees": {
     "Human": 3,
@@ -22,12 +18,12 @@
   },
   "districts": {
     "center": {
-      "id": "town-north-center",
+      "id": "frosthold-center",
       "name": "Hearth Square",
       "description": "The town center is dominated by the Great Hearth, a massive stone fire pit that provides warmth and light. Fur-clad residents gather here to trade news and warm themselves.",
       "connections": {
-        "south": "town-north-south",
-        "north": "arctic-north-town"
+        "south": "frosthold-south",
+        "north": "frozen-wastes"
       },
       "buildings": [
         {
@@ -59,12 +55,12 @@
       "npcs": []
     },
     "south": {
-      "id": "town-north-south",
+      "id": "frosthold-south",
       "name": "Southern Gate",
       "description": "The southern entrance to town, where travelers arrive from warmer lands. Guard towers flank a sturdy gate built to keep out both bandits and arctic beasts.",
       "connections": {
-        "center": "town-north-center",
-        "south": "swamp-kingdom"
+        "center": "frosthold-center",
+        "south": "mistmarsh-swamplands"
       },
       "buildings": [
         {
@@ -77,7 +73,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "swamp-kingdom"
+      "exit_to_environment": "mistmarsh-swamplands"
     }
   }
 }

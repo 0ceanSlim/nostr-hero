@@ -1,13 +1,10 @@
 {
-  "id": "village-west",
+  "id": "millhaven",
   "name": "Millhaven Village",
   "type": "village",
   "image": "/res/img/locations/millhaven.png",
   "music": "/res/aud/millhaven - Healing.wav",
   "description": "A peaceful farming village nestled in rolling hills, where windmills turn lazily in the breeze and fields of grain stretch to the horizon.",
-  "connections": {
-    "east": "village-west-east"
-  },
   "starting_races": ["Halfling", "Gnome"],
   "racial_entry_fees": {
     "Human": 2,
@@ -23,11 +20,11 @@
   },
   "districts": {
     "center": {
-      "id": "village-west-center",
+      "id": "millhaven-center",
       "name": "Village Center",
       "description": "The small village square centers around an ancient well. Farmers and their families go about their daily business with unhurried contentment.",
       "connections": {
-        "east": "village-west-east"
+        "east": "millhaven-east"
       },
       "buildings": [
         {
@@ -83,12 +80,12 @@
       ]
     },
     "east": {
-      "id": "village-west-east",
+      "id": "millhaven-east",
       "name": "Eastern Farms",
       "description": "The eastern edge of the village gives way to rolling farmland. A well-traveled road leads toward the distant hills.",
       "connections": {
-        "center": "village-west-center",
-        "east": "hill-kingdom"
+        "center": "millhaven-center",
+        "east": "windswept-hills"
       },
       "buildings": [
         {
@@ -109,7 +106,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "hill-kingdom"
+      "exit_to_environment": "windswept-hills"
     }
   }
 }

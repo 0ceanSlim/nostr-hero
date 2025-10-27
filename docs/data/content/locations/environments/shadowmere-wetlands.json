@@ -1,9 +1,9 @@
 {
-  "id": "swamp-south",
+  "id": "shadowmere-wetlands",
   "name": "Shadowmere Wetlands",
   "type": "environment",
   "environment_type": "swamp",
-  "connects": ["city-south-west", "village-southwest-east"],
+  "connects": ["verdant-west", "marshlight-east"],
   "description": "These southern wetlands are darker and more mysterious than their northern cousins. Ancient willow trees droop their branches into black water, and phosphorescent fungi cast an eerie glow in the perpetual twilight.",
   "travel_time": 3,
   "travel_difficulty": "hard",

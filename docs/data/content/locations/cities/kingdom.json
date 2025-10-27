@@ -5,12 +5,6 @@
   "image": "/res/img/locations/kingdom.png",
   "music": "/res/aud/kingdom - A Just King.wav",
   "description": "The grand capital city stands as the heart of the realm, its towering spires and bustling streets a testament to prosperity and order.",
-  "connections": {
-    "north": "kingdom-north",
-    "south": "kingdom-south",
-    "east": "kingdom-east",
-    "west": "kingdom-west"
-  },
   "starting_races": ["Human", "Half-Elf", "Half-Orc", "Tiefling"],
   "racial_entry_fees": {
     "Human": 0,
@@ -80,7 +74,7 @@
       "description": "The northern district houses the city's scholars and nobility, with well-maintained gardens and elegant architecture.",
       "connections": {
         "center": "kingdom-center",
-        "north": "swamp-kingdom"
+        "north": "mistmarsh-swamplands"
       },
       "buildings": [
         {
@@ -110,7 +104,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "swamp-kingdom"
+      "exit_to_environment": "mistmarsh-swamplands"
     },
     "south": {
       "id": "kingdom-south",
@@ -118,7 +112,7 @@
       "description": "The southern district serves as the main gate to the kingdom, bustling with travelers, merchants, and guards.",
       "connections": {
         "center": "kingdom-center",
-        "south": "forest-kingdom"
+        "south": "darkwood-forest"
       },
       "buildings": [
         {
@@ -152,7 +146,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "forest-kingdom"
+      "exit_to_environment": "darkwood-forest"
     },
     "east": {
       "id": "kingdom-east",
@@ -160,7 +154,7 @@
       "description": "The industrial heart of the kingdom, filled with workshops, forges, and the organized chaos of craftsmen.",
       "connections": {
         "center": "kingdom-center",
-        "east": "urban-kingdom"
+        "east": "merchants-highway"
       },
       "buildings": [
         {
@@ -200,7 +194,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "urban-kingdom"
+      "exit_to_environment": "merchants-highway"
     },
     "west": {
       "id": "kingdom-west",
@@ -208,7 +202,7 @@
       "description": "The market district thrums with commercial activity as traders from across the realm conduct business.",
       "connections": {
         "center": "kingdom-center",
-        "west": "hill-kingdom"
+        "west": "windswept-hills"
       },
       "buildings": [
         {
@@ -247,7 +241,7 @@
         }
       ],
       "npcs": ["tavern-keeper", "tavern-doorman"],
-      "exit_to_environment": "hill-kingdom"
+      "exit_to_environment": "windswept-hills"
     }
   }
 }

@@ -1,11 +1,8 @@
 {
-  "id": "village-south",
+  "id": "saltwind",
   "name": "Saltwind Village",
   "type": "village",
   "description": "A picturesque fishing village perched on coastal cliffs overlooking the sea. Boats bob in the protected harbor while nets dry in the salty breeze. The villagers make their living from the bounty of the ocean.",
-  "connections": {
-    "north": "village-south-north"
-  },
   "starting_races": [],
   "racial_entry_fees": {
     "Human": 1,
@@ -21,11 +18,11 @@
   },
   "districts": {
     "center": {
-      "id": "village-south-center",
+      "id": "saltwind-center",
       "name": "Harbor Square",
       "description": "The village center overlooks the busy fishing harbor. Weathered fishermen mend nets while seabirds call overhead. The square smells of salt air and fresh catch.",
       "connections": {
-        "north": "village-south-north"
+        "north": "saltwind-north"
       },
       "buildings": [
         {
@@ -57,12 +54,12 @@
       "npcs": []
     },
     "north": {
-      "id": "village-south-north",
+      "id": "saltwind-north",
       "name": "Cliff Road",
       "description": "The northern edge of the village where the coast road winds up into the hills. Merchant wagons arrive here carrying goods from inland cities.",
       "connections": {
-        "center": "village-south-center",
-        "north": "coastal-south"
+        "center": "saltwind-center",
+        "north": "suncrest-coastlands"
       },
       "buildings": [
         {
@@ -76,7 +73,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "coastal-south"
+      "exit_to_environment": "suncrest-coastlands"
     }
   }
 }

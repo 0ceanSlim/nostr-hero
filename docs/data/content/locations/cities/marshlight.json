@@ -1,13 +1,10 @@
 {
-  "id": "village-southwest",
+  "id": "marshlight",
   "name": "Marshlight Village",
   "type": "village",
   "image": "/res/img/locations/marshlight.png",
   "music": "/res/aud/marshlight - Mellow Times.wav",
   "description": "A small village built on raised platforms over the wetlands. The residents have learned to live in harmony with the swamp, using its resources while respecting its dangers.",
-  "connections": {
-    "east": "village-southwest-east"
-  },
   "starting_races": ["Orc"],
   "racial_entry_fees": {
     "Human": 2,
@@ -23,11 +20,11 @@
   },
   "districts": {
     "center": {
-      "id": "village-southwest-center",
+      "id": "marshlight-center",
       "name": "Stilt Houses",
       "description": "The village consists of houses built on stilts connected by wooden walkways. Lanterns filled with phosphorescent moss provide an eerie but practical light source.",
       "connections": {
-        "east": "village-southwest-east"
+        "east": "marshlight-east"
       },
       "buildings": [
         {
@@ -78,12 +75,12 @@
       "npcs": ["hoardkeeper", "swamp-trader", "swamp-innkeeper", "swamp-doorman"]
     },
     "east": {
-      "id": "village-southwest-east",
+      "id": "marshlight-east",
       "name": "Eastern Dock",
       "description": "A small dock where boats can be hired for safer passage through the treacherous swamplands.",
       "connections": {
-        "center": "village-southwest-center",
-        "east": "swamp-south"
+        "center": "marshlight-center",
+        "east": "shadowmere-wetlands"
       },
       "buildings": [
         {
@@ -96,7 +93,7 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "swamp-south"
+      "exit_to_environment": "shadowmere-wetlands"
     }
   }
 }

@@ -1,15 +1,10 @@
 {
-  "id": "city-east",
+  "id": "goldenhaven",
   "name": "Goldenhaven City",
   "type": "city",
   "image": "/res/img/locations/kingdom.png",
   "music": "/res/aud/goldhaven - God of Dreams.wav",
   "description": "A prosperous trading city where merchant ships dock at busy harbors and exotic goods from distant lands fill the markets. Golden banners flutter from tall buildings built with wealth from maritime commerce.",
-  "connections": {
-    "west": "city-east-west",
-    "north": "city-east-north",
-    "east": "city-east-east"
-  },
   "starting_races": ["Dragonborn"],
   "racial_entry_fees": {
     "Human": 5,
@@ -25,13 +20,13 @@
   },
   "districts": {
     "center": {
-      "id": "city-east-center",
+      "id": "goldenhaven-center",
       "name": "Golden Square",
       "description": "The magnificent city center features a golden fountain surrounded by the finest shops and guildhalls. Wealthy merchants and nobles conduct business in the shadow of the Grand Exchange building.",
       "connections": {
-        "west": "city-east-west",
-        "north": "city-east-north",
-        "east": "city-east-east"
+        "west": "goldenhaven-west",
+        "north": "goldenhaven-north",
+        "east": "goldenhaven-east"
       },
       "buildings": [
         {
@@ -82,12 +77,12 @@
       "npcs": ["scalekeeper", "trade-merchant"]
     },
     "west": {
-      "id": "city-east-west",
+      "id": "goldenhaven-west",
       "name": "Western Gate",
       "description": "The main entrance from the kingdom highway, fortified with impressive gates and guard towers. Merchant caravans line up for inspection before entering the city.",
       "connections": {
-        "center": "city-east-center",
-        "west": "urban-kingdom"
+        "center": "goldenhaven-center",
+        "west": "merchants-highway"
       },
       "buildings": [
         {
@@ -108,15 +103,15 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "urban-kingdom"
+      "exit_to_environment": "merchants-highway"
     },
     "north": {
-      "id": "city-east-north",
+      "id": "goldenhaven-north",
       "name": "Mountain District",
       "description": "The northern district built against the foothills, where miners and mountain traders conduct business. The air is cleaner here and mountain springs provide fresh water.",
       "connections": {
-        "center": "city-east-center",
-        "north": "mountain-northeast"
+        "center": "goldenhaven-center",
+        "north": "cragspire-mountains"
       },
       "buildings": [
         {
@@ -130,15 +125,15 @@
         }
       ],
       "npcs": [],
-      "exit_to_environment": "mountain-northeast"
+      "exit_to_environment": "cragspire-mountains"
     },
     "east": {
-      "id": "city-east-east",
+      "id": "goldenhaven-east",
       "name": "Eastern Port",
       "description": "The bustling harbor district where ships from distant lands dock. The salty air carries the sounds of creaking rigging and merchant auctions.",
       "connections": {
-        "center": "city-east-center",
-        "east": "desert-city"
+        "center": "goldenhaven-center",
+        "east": "sunscorch-desert"
       },
       "buildings": [
         {
@@ -168,7 +163,7 @@
         }
       ],
       "npcs": ["port-innkeeper", "port-doorman"],
-      "exit_to_environment": "desert-city"
+      "exit_to_environment": "sunscorch-desert"
     }
   }
 }
