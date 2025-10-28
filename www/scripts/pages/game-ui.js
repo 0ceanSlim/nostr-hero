@@ -462,10 +462,23 @@ async function updateCharacterDisplay() {
 
                     // Reset to placeholder if empty
                     const imageContainer = slotEl.querySelector('.w-10.h-10');
-                    const placeholderIcon = slotEl.querySelector('.placeholder-icon');
-                    if (imageContainer && placeholderIcon) {
-                        // Placeholder is already there, just make sure it's visible
-                        placeholderIcon.style.display = 'block';
+                    if (imageContainer) {
+                        // Check if placeholder exists
+                        let placeholderIcon = slotEl.querySelector('.placeholder-icon');
+                        if (placeholderIcon) {
+                            // Placeholder exists, make sure it's visible
+                            placeholderIcon.style.display = 'block';
+                            // Remove any item image
+                            const itemImg = imageContainer.querySelector('img');
+                            if (itemImg) {
+                                itemImg.remove();
+                            }
+                        } else {
+                            // Placeholder was removed, restore it from the original HTML
+                            // Get the slot-specific placeholder based on slot name
+                            const placeholderHTML = getPlaceholderSVG(slotName);
+                            imageContainer.innerHTML = placeholderHTML;
+                        }
                     }
                 }
             }

@@ -473,11 +473,13 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         save_id: saveId,
         item_id: itemId,
         action: action,
-        from_slot: fromSlot,
+        // For equipment slots, fromSlot is a string name like "left_arm", not an integer
+        // So we only use it for from_slot when it's not equipment
+        from_slot: fromSlotType === 'equipment' ? -1 : (typeof fromSlot === 'number' ? fromSlot : -1),
         to_slot: typeof toSlotOrType === 'number' ? toSlotOrType : -1,
         from_slot_type: fromSlotType || '',
         to_slot_type: toSlotType || '',
-        from_equip: draggedFromType === 'equipment' ? fromSlot : '',
+        from_equip: fromSlotType === 'equipment' ? fromSlot : '',
         to_equip: typeof toSlotOrType === 'string' ? toSlotOrType : '',
         quantity: 1
     };
