@@ -1,6 +1,122 @@
 // Save System for Nostr Hero
 // Handles saving game state to local JSON files
 
+// Migration map for old location IDs to new semantic IDs
+const LOCATION_ID_MIGRATION = {
+    // Cities
+    'city-east': 'goldenhaven',
+    'city-south': 'verdant',
+    'town-northeast': 'ironpeak',
+    'town-north': 'frosthold',
+    'village-south': 'saltwind',
+    'village-southwest': 'marshlight',
+    'village-southeast': 'dusthaven',
+    'village-west': 'millhaven',
+
+    // Environments
+    'arctic-north-town': 'frozen-wastes',
+    'desert-city': 'sunscorch-desert',
+    'coastal-south': 'suncrest-coastlands',
+    'forest-kingdom': 'darkwood-forest',
+    'swamp-kingdom': 'mistmarsh-swamplands',
+    'mountain-northeast': 'cragspire-mountains',
+    'hill-kingdom': 'windswept-hills',
+    'urban-kingdom': 'merchants-highway',
+    'swamp-south': 'shadowmere-wetlands',
+
+    // Districts - city-east
+    'city-east-center': 'goldenhaven-center',
+    'city-east-west': 'goldenhaven-west',
+    'city-east-north': 'goldenhaven-north',
+    'city-east-east': 'goldenhaven-east',
+
+    // Districts - city-south
+    'city-south-center': 'verdant-center',
+    'city-south-north': 'verdant-north',
+    'city-south-west': 'verdant-west',
+    'city-south-south': 'verdant-south',
+
+    // Districts - town-northeast
+    'town-northeast-center': 'ironpeak-center',
+    'town-northeast-south': 'ironpeak-south',
+    'town-northeast-west': 'ironpeak-west',
+
+    // Districts - town-north
+    'town-north-center': 'frosthold-center',
+    'town-north-south': 'frosthold-south',
+
+    // Districts - village-south
+    'village-south-center': 'saltwind-center',
+    'village-south-north': 'saltwind-north',
+
+    // Districts - village-southwest
+    'village-southwest-center': 'marshlight-center',
+    'village-southwest-east': 'marshlight-east',
+
+    // Districts - village-southeast
+    'village-southeast-center': 'dusthaven-center',
+    'village-southeast-west': 'dusthaven-west',
+
+    // Districts - village-west
+    'village-west-center': 'millhaven-center',
+    'village-west-east': 'millhaven-east'
+};
+
+/**
+ * Migrate old location IDs to new semantic IDs
+ * @param {string} oldId - The old location/district ID
+ * @returns {string} - The new ID, or the original if no migration exists
+ */
+function migrateLocationId(oldId) {
+    if (!oldId) return oldId;
+    return LOCATION_ID_MIGRATION[oldId] || oldId;
+}
+
+/**
+ * Migrate save data from old location IDs to new ones
+ * @param {Object} saveData - The save data to migrate
+ * @returns {Object} - The migrated save data
+ */
+function migrateSaveData(saveData) {
+    console.log('🔄 Checking if save data needs migration...');
+
+    // Migrate main location
+    if (saveData.location && LOCATION_ID_MIGRATION[saveData.location]) {
+        console.log(`🔄 Migrating location: ${saveData.location} → ${LOCATION_ID_MIGRATION[saveData.location]}`);
+        saveData.location = LOCATION_ID_MIGRATION[saveData.location];
+    }
+
+    // Migrate district
+    if (saveData.district && LOCATION_ID_MIGRATION[saveData.district]) {
+        console.log(`🔄 Migrating district: ${saveData.district} → ${LOCATION_ID_MIGRATION[saveData.district]}`);
+        saveData.district = LOCATION_ID_MIGRATION[saveData.district];
+    }
+
+    // Migrate locations_discovered array
+    if (saveData.locations_discovered && Array.isArray(saveData.locations_discovered)) {
+        saveData.locations_discovered = saveData.locations_discovered.map(loc => {
+            const newLoc = migrateLocationId(loc);
+            if (newLoc !== loc) {
+                console.log(`🔄 Migrating discovered location: ${loc} → ${newLoc}`);
+            }
+            return newLoc;
+        });
+    }
+
+    // Migrate vault location
+    if (saveData.vault && saveData.vault.location) {
+        const oldVaultLoc = saveData.vault.location;
+        const newVaultLoc = migrateLocationId(oldVaultLoc);
+        if (newVaultLoc !== oldVaultLoc) {
+            console.log(`🔄 Migrating vault location: ${oldVaultLoc} → ${newVaultLoc}`);
+            saveData.vault.location = newVaultLoc;
+        }
+    }
+
+    console.log('✅ Save data migration complete');
+    return saveData;
+}
+
 // Load save data when game starts
 async function loadSaveData() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -35,14 +151,35 @@ async function loadSaveData() {
 
         console.log('✅ Loaded save data:', saveData);
 
-        // Convert display names to IDs for game logic
-        console.log('🔄 Converting location display names to IDs...');
-        const locationIds = await window.getIdsFromDisplayNames(
-            saveData.location || 'The Royal Kingdom',
-            saveData.district || 'Kingdom Center',
-            saveData.building || ''
-        );
-        console.log('✅ Converted to IDs:', locationIds);
+        // FIRST: Migrate old location IDs to new semantic IDs
+        saveData = migrateSaveData(saveData);
+
+        // Now check if location/district are IDs or display names
+        // After migration, they should be IDs (new semantic IDs)
+        let locationIds;
+
+        // If location looks like an ID (lowercase, dashes), use it directly
+        // Otherwise treat it as a display name and convert
+        const locationLooksLikeId = saveData.location && /^[a-z-]+$/.test(saveData.location);
+
+        if (locationLooksLikeId) {
+            console.log('📍 Location appears to be an ID, using directly');
+            // Extract district key from full district ID if needed
+            const districtKey = saveData.district ? saveData.district.split('-').pop() : 'center';
+            locationIds = {
+                locationId: saveData.location,
+                districtKey: districtKey,
+                buildingId: saveData.building || ''
+            };
+        } else {
+            console.log('🔄 Location appears to be a display name, converting to IDs...');
+            locationIds = await window.getIdsFromDisplayNames(
+                saveData.location || 'The Royal Kingdom',
+                saveData.district || 'Kingdom Center',
+                saveData.building || ''
+            );
+        }
+        console.log('✅ Final location IDs:', locationIds);
 
         // The save data is flat, so we need to map it to the DOM structure
         // Character data includes vault, spell_slots, time tracking
@@ -106,12 +243,17 @@ async function loadSaveData() {
         console.log('✅ Save data loaded into DOM successfully');
 
         // Trigger UI update
+        console.log('🎨 Calling updateCharacterDisplay()...');
         if (typeof updateCharacterDisplay === 'function') {
-            updateCharacterDisplay();
+            await updateCharacterDisplay();
+            console.log('✅ updateCharacterDisplay() completed');
+        } else {
+            console.error('❌ updateCharacterDisplay is not a function!');
         }
 
         // Mark save data as loaded to enable auto-saves
         saveDataLoaded = true;
+        console.log('✅ Save loading complete, UI should be updated');
 
     } catch (error) {
         console.error('❌ Failed to load save data:', error);
@@ -142,12 +284,21 @@ async function saveGameToLocal() {
         const gameState = getGameState();
         const character = gameState.character;
 
+        console.log('💾 Current game state:', {
+            location: gameState.location,
+            vault: character.vault,
+            gold: character.gold,
+            hp: character.hp
+        });
+
         // Convert location IDs to display names for save file
         const displayNames = await window.getDisplayNamesForLocation(
             gameState.location?.current || 'kingdom',
             gameState.location?.district || 'center',
             gameState.location?.building || ''
         );
+
+        console.log('💾 Display names for save:', displayNames);
 
         // Prepare save data in the flat structure the backend expects (with display names)
         const saveData = {
@@ -188,6 +339,14 @@ async function saveGameToLocal() {
         // Always use the existing save ID (overwrite mode)
         saveData.id = currentSaveID;
 
+        console.log('💾 Saving to file:', {
+            saveID: currentSaveID,
+            location: saveData.location,
+            district: saveData.district,
+            vault: saveData.vault,
+            gold: saveData.gold
+        });
+
         // Send save request
         const response = await fetch(`/api/saves/${session.npub}`, {
             method: 'POST',
@@ -217,29 +376,16 @@ async function saveGameToLocal() {
     }
 }
 
-// Auto-save functionality
+// DISABLED Auto-save functionality
+// The game should only save when manually triggered (Ctrl+S or Save button)
+// This prevents unintended overwrites of save files
 let autoSaveInterval = null;
-const AUTO_SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const AUTO_SAVE_INTERVAL = 5 * 60 * 1000; // 5 minutes (not used)
 
 function startAutoSave() {
-    if (autoSaveInterval) {
-        clearInterval(autoSaveInterval);
-    }
-
-    // Delay auto-save start to allow save data to load first
-    setTimeout(() => {
-        autoSaveInterval = setInterval(async () => {
-            if (saveDataLoaded) {
-                console.log('🔄 Auto-saving game...');
-                const success = await saveGameToLocal();
-                if (success) {
-                    console.log('✅ Auto-save complete');
-                }
-            }
-        }, AUTO_SAVE_INTERVAL);
-
-        console.log('⏰ Auto-save enabled (every 5 minutes)');
-    }, 3000); // Reduced delay since we're using saveDataLoaded flag
+    console.log('⚠️ Auto-save is DISABLED - save manually with Ctrl+S or the Save button');
+    // Auto-save is intentionally disabled
+    // Users should manually save with Ctrl+S or the save button
 }
 
 function stopAutoSave() {

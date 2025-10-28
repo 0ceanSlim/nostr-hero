@@ -252,10 +252,22 @@ async function calculateAndDisplayWeight(character) {
 
 // Update full character display from save data
 async function updateCharacterDisplay() {
+    console.log('🎨 updateCharacterDisplay() starting...');
     const state = getGameState();
     const character = state.character;
 
-    if (!character) return;
+    console.log('🎨 Character data:', {
+        hasInventory: !!character.inventory,
+        hasGeneralSlots: !!(character.inventory?.general_slots),
+        generalSlotsCount: character.inventory?.general_slots?.length,
+        hasBag: !!(character.inventory?.gear_slots?.bag),
+        bagContentsCount: character.inventory?.gear_slots?.bag?.contents?.length
+    });
+
+    if (!character) {
+        console.error('❌ No character data found!');
+        return;
+    }
 
     // Update character info
     if (document.getElementById('char-name')) {
@@ -462,6 +474,7 @@ async function updateCharacterDisplay() {
 
     // Update general slots (4x1 grid) - ALWAYS create slots even if empty
     const generalSlotsDiv = document.getElementById('general-slots');
+    console.log('🎨 Rendering general slots, element found:', !!generalSlotsDiv);
     if (generalSlotsDiv) {
         generalSlotsDiv.innerHTML = '';
 
@@ -473,9 +486,22 @@ async function updateCharacterDisplay() {
             character.inventory.general_slots = [];
         }
 
+        // Create a map of slot index to item data (respecting the "slot" field)
+        const slotMap = {};
+        character.inventory.general_slots.forEach(item => {
+            if (item && item.item) {
+                const slotIndex = item.slot;
+                // Only use valid slot indices (0-3)
+                if (slotIndex >= 0 && slotIndex < 4) {
+                    slotMap[slotIndex] = item;
+                }
+            }
+        });
+        console.log('🎨 General slot map:', slotMap);
+
         // Create all 4 general slots
         for (let i = 0; i < 4; i++) {
-            const slot = character.inventory.general_slots[i];
+            const slot = slotMap[i];
             const slotDiv = document.createElement('div');
             slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
             slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
@@ -513,6 +539,7 @@ async function updateCharacterDisplay() {
 
     // Update backpack items (4x5 grid = 20 slots) - ALWAYS create slots even if empty
     const backpackDiv = document.getElementById('backpack-slots');
+    console.log('🎨 Rendering backpack slots, element found:', !!backpackDiv);
     if (backpackDiv) {
         backpackDiv.innerHTML = '';
 
@@ -531,11 +558,25 @@ async function updateCharacterDisplay() {
         }
 
         const contents = character.inventory.gear_slots.bag.contents;
+
+        // Create a map of slot index to item data (respecting the "slot" field)
+        const bagSlotMap = {};
+        contents.forEach(item => {
+            if (item && item.item) {
+                const slotIndex = item.slot;
+                // Only use valid slot indices (0-19 for 20-slot backpack)
+                if (slotIndex >= 0 && slotIndex < 20) {
+                    bagSlotMap[slotIndex] = item;
+                }
+            }
+        });
+        console.log('🎨 Backpack slot map has', Object.keys(bagSlotMap).length, 'items');
+
         let itemCount = 0;
 
         // Create all 20 backpack slots
         for (let i = 0; i < 20; i++) {
-            const slot = contents[i];
+            const slot = bagSlotMap[i];
             const slotDiv = document.createElement('div');
             slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
             slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;

@@ -43,24 +43,28 @@ function initializeInventoryInteractions() {
 function bindInventoryEvents() {
     // General slots (quick access)
     const generalSlots = document.querySelectorAll('#general-slots [data-item-slot]');
-    generalSlots.forEach((slot, index) => {
+    generalSlots.forEach((slot) => {
         // Skip if already bound (check for a marker attribute)
         if (slot.hasAttribute('data-events-bound')) {
             return;
         }
         slot.setAttribute('data-events-bound', 'true');
-        bindSlotEvents(slot, 'general', index);
+        // Get actual slot index from attribute, not forEach index
+        const slotIndex = parseInt(slot.getAttribute('data-item-slot'), 10);
+        bindSlotEvents(slot, 'general', slotIndex);
     });
 
     // Backpack slots
     const backpackSlots = document.querySelectorAll('#backpack-slots [data-item-slot]');
-    backpackSlots.forEach((slot, index) => {
+    backpackSlots.forEach((slot) => {
         // Skip if already bound
         if (slot.hasAttribute('data-events-bound')) {
             return;
         }
         slot.setAttribute('data-events-bound', 'true');
-        bindSlotEvents(slot, 'inventory', index);
+        // Get actual slot index from attribute, not forEach index
+        const slotIndex = parseInt(slot.getAttribute('data-item-slot'), 10);
+        bindSlotEvents(slot, 'inventory', slotIndex);
     });
 
     // Equipment slots
@@ -188,7 +192,7 @@ async function handleDrop(e, toSlotType, toSlotIndex) {
 
     // If dragging from equipment to inventory
     if (draggedFromType === 'equipment') {
-        await performAction('unequip', draggedItem, draggedFromSlot);
+        await performAction('unequip', draggedItem, draggedFromSlot, undefined, 'equipment');
     }
     // If dropping on an inventory slot
     else {
@@ -231,7 +235,7 @@ async function handleDropOnEquipment(e, equipSlotName) {
 
     // Only allow equipping from inventory
     if (draggedFromType === 'inventory' || draggedFromType === 'general') {
-        await performAction('equip', draggedItem, draggedFromSlot, equipSlotName);
+        await performAction('equip', draggedItem, draggedFromSlot, equipSlotName, draggedFromType);
     }
 }
 
@@ -257,9 +261,9 @@ async function handleLeftClick(e, itemId, slotType, slotIndex) {
     // Perform the default action
     if (action === 'equip' && itemData.gear_slot) {
         // For equip action, pass the gear_slot as the target
-        await performAction(action, itemId, slotIndex, itemData.gear_slot);
+        await performAction(action, itemId, slotIndex, itemData.gear_slot, slotType);
     } else if (action) {
-        await performAction(action, itemId, slotIndex);
+        await performAction(action, itemId, slotIndex, undefined, slotType);
     }
 }
 
@@ -271,16 +275,36 @@ function handleRightClick(e, itemId, slotType, slotIndex) {
     e.preventDefault();
     e.stopPropagation();
 
-    // Get item data
+    // Get item data template
     const itemData = getItemById(itemId);
     if (!itemData) {
         console.warn(`Item ${itemId} not found`);
         return;
     }
 
+    // Get actual inventory item to check current quantity
+    const state = getGameState();
+    let inventoryItem = null;
+
+    if (slotType === 'general' && state.character.inventory?.general_slots) {
+        inventoryItem = state.character.inventory.general_slots.find(slot =>
+            slot && slot.slot === slotIndex && slot.item === itemId
+        );
+    } else if (slotType === 'inventory' && state.character.inventory?.gear_slots?.bag?.contents) {
+        inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot =>
+            slot && slot.slot === slotIndex && slot.item === itemId
+        );
+    }
+
+    // Merge template data with actual inventory quantity
+    const itemWithQuantity = {
+        ...itemData,
+        quantity: inventoryItem?.quantity || 1
+    };
+
     // Get available actions
     const isEquipped = slotType === 'equipment';
-    const actions = getItemActions(itemData, isEquipped);
+    const actions = getItemActions(itemWithQuantity, isEquipped);
 
     console.log(`📋 Showing context menu with ${actions.length} actions`);
 
@@ -385,7 +409,9 @@ function showContextMenu(x, y, itemId, slotIndex, slotType, actions) {
         item.className = 'context-menu-item px-3 py-2 hover:bg-gray-700 cursor-pointer text-sm text-white';
         item.textContent = label;
         item.addEventListener('click', async () => {
-            await performAction(action, itemId, slotIndex, slotType);
+            // Pass parameters correctly: action, itemId, fromSlot, toSlotOrType, fromSlotType, toSlotType
+            // For context menu actions (drop, examine, etc), we need fromSlot and fromSlotType
+            await performAction(action, itemId, slotIndex, undefined, slotType, undefined);
             closeContextMenu();
         });
         menu.appendChild(item);
@@ -463,12 +489,13 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         const state = getGameState();
         let inventoryItem = null;
 
-        // Find the item in inventory to get actual quantity
-        if (state.character.inventory?.general_slots) {
-            inventoryItem = state.character.inventory.general_slots.find(slot => slot && slot.item === itemId);
-        }
-        if (!inventoryItem && state.character.inventory?.gear_slots?.bag?.contents) {
-            inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot => slot && slot.item === itemId);
+        // Find the SPECIFIC item at the clicked slot (use fromSlot, not find())
+        if (fromSlotType === 'general' && state.character.inventory?.general_slots) {
+            // Find by matching the slot index
+            inventoryItem = state.character.inventory.general_slots.find(slot => slot && slot.slot === fromSlot && slot.item === itemId);
+        } else if (fromSlotType === 'inventory' && state.character.inventory?.gear_slots?.bag?.contents) {
+            // Find by matching the slot index
+            inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot => slot && slot.slot === fromSlot && slot.item === itemId);
         }
 
         const currentQuantity = inventoryItem?.quantity || 1;
@@ -673,23 +700,31 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
     let emptySlotIndex = -1;
     let emptySlotType = '';
 
-    // Check general slots first
-    if (state.character.inventory?.general_slots) {
-        const generalSlots = state.character.inventory.general_slots;
-        const nonEmptyCount = generalSlots.filter(slot => slot !== null).length;
-        if (nonEmptyCount < 4) {
-            emptySlotIndex = generalSlots.length;
-            emptySlotType = 'general';
+    // Check backpack first (more space)
+    if (state.character.inventory?.gear_slots?.bag?.contents) {
+        const backpackSlots = state.character.inventory.gear_slots.bag.contents;
+        for (let i = 0; i < 20; i++) {
+            // Check if slot is empty (null or item: null)
+            if (i >= backpackSlots.length || backpackSlots[i] === null ||
+                (backpackSlots[i].item === null || backpackSlots[i].item === '')) {
+                emptySlotIndex = i;
+                emptySlotType = 'inventory';
+                break;
+            }
         }
     }
 
-    // If no empty general slot, check backpack
-    if (emptySlotIndex === -1 && state.character.inventory?.gear_slots?.bag?.contents) {
-        const backpackSlots = state.character.inventory.gear_slots.bag.contents;
-        const nonEmptyCount = backpackSlots.filter(slot => slot !== null).length;
-        if (nonEmptyCount < 20) {
-            emptySlotIndex = backpackSlots.length;
-            emptySlotType = 'inventory';
+    // If no empty backpack slot, check general slots
+    if (emptySlotIndex === -1 && state.character.inventory?.general_slots) {
+        const generalSlots = state.character.inventory.general_slots;
+        for (let i = 0; i < 4; i++) {
+            // Check if slot is empty (null or item: null)
+            if (i >= generalSlots.length || generalSlots[i] === null ||
+                (generalSlots[i].item === null || generalSlots[i].item === '')) {
+                emptySlotIndex = i;
+                emptySlotType = 'general';
+                break;
+            }
         }
     }
 

@@ -260,66 +260,139 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 
 // handleDropItem removes an item from inventory (or reduces quantity if partial drop)
 func handleDropItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
-	// Check both general_slots and backpack for the item
-	var foundInGeneral bool
-	var foundInBackpack bool
-	var itemSlot int = -1
+	log.Printf("🗑️ Drop item: %s from %s[%d], quantity: %d", req.ItemID, req.FromSlotType, req.FromSlot, req.Quantity)
+
+	// Determine which inventory we're dropping from using FromSlotType
+	fromSlotType := req.FromSlotType
+	if fromSlotType == "" {
+		// Default to general if not specified (backward compatibility)
+		fromSlotType = "general"
+	}
+
+	var inventory []interface{}
+	var itemSlot int = req.FromSlot
 	var currentQuantity int = 1
 
-	// Try general_slots first
-	generalInventory, ok := save.Inventory["general_slots"].([]interface{})
-	if ok {
-		for i, item := range generalInventory {
-			if itemMap, ok := item.(map[string]interface{}); ok {
-				if itemMap["item"] == req.ItemID {
-					itemSlot = i
-					foundInGeneral = true
-					// Get current quantity
-					if qty, ok := itemMap["quantity"].(float64); ok {
-						currentQuantity = int(qty)
-					} else if qty, ok := itemMap["quantity"].(int); ok {
-						currentQuantity = qty
-					}
-					break
-				}
+	// Get the correct inventory array
+	if fromSlotType == "general" {
+		generalInventory, ok := save.Inventory["general_slots"].([]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Invalid general_slots structure",
 			}
 		}
-	}
+		inventory = generalInventory
 
-	// If not found in general, try backpack
-	var backpackInventory []interface{}
-	if !foundInGeneral {
+		// Validate slot index
+		if itemSlot < 0 || itemSlot >= len(inventory) {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("Invalid slot index: %d", itemSlot),
+			}
+		}
+
+		// Get the item at the specific slot
+		if inventory[itemSlot] == nil {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Slot is empty",
+			}
+		}
+
+		itemMap, ok := inventory[itemSlot].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Invalid slot structure",
+			}
+		}
+
+		// Verify it's the correct item
+		if itemMap["item"] != req.ItemID {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("Slot %d contains %v, not %s", itemSlot, itemMap["item"], req.ItemID),
+			}
+		}
+
+		// Get quantity
+		if qty, ok := itemMap["quantity"].(float64); ok {
+			currentQuantity = int(qty)
+		} else if qty, ok := itemMap["quantity"].(int); ok {
+			currentQuantity = qty
+		}
+
+	} else if fromSlotType == "inventory" {
+		// Get backpack contents
 		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
-		if ok {
-			bag, ok := gearSlots["bag"].(map[string]interface{})
-			if ok {
-				contents, ok := bag["contents"].([]interface{})
-				if ok {
-					backpackInventory = contents
-					for i, item := range backpackInventory {
-						if itemMap, ok := item.(map[string]interface{}); ok {
-							if itemMap["item"] == req.ItemID {
-								itemSlot = i
-								foundInBackpack = true
-								// Get current quantity
-								if qty, ok := itemMap["quantity"].(float64); ok {
-									currentQuantity = int(qty)
-								} else if qty, ok := itemMap["quantity"].(int); ok {
-									currentQuantity = qty
-								}
-								break
-							}
-						}
-					}
-				}
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Invalid gear_slots structure",
 			}
 		}
-	}
 
-	if itemSlot == -1 {
+		bag, ok := gearSlots["bag"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "No backpack found",
+			}
+		}
+
+		backpackInventory, ok := bag["contents"].([]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Invalid backpack contents",
+			}
+		}
+		inventory = backpackInventory
+
+		// Validate slot index
+		if itemSlot < 0 || itemSlot >= len(inventory) {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("Invalid slot index: %d", itemSlot),
+			}
+		}
+
+		// Get the item at the specific slot
+		if inventory[itemSlot] == nil {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Slot is empty",
+			}
+		}
+
+		itemMap, ok := inventory[itemSlot].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Invalid slot structure",
+			}
+		}
+
+		// Verify it's the correct item
+		if itemMap["item"] != req.ItemID {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("Slot %d contains %v, not %s", itemSlot, itemMap["item"], req.ItemID),
+			}
+		}
+
+		// Get quantity
+		if qty, ok := itemMap["quantity"].(float64); ok {
+			currentQuantity = int(qty)
+		} else if qty, ok := itemMap["quantity"].(int); ok {
+			currentQuantity = qty
+		}
+
+	} else {
 		return &types.ItemActionResponse{
 			Success: false,
-			Error:   "Item not found in inventory",
+			Error:   "Invalid slot type: " + fromSlotType,
 		}
 	}
 
@@ -329,47 +402,31 @@ func handleDropItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		dropQuantity = currentQuantity
 	}
 
+	log.Printf("🗑️ Dropping %d of %d from %s[%d]", dropQuantity, currentQuantity, fromSlotType, itemSlot)
+
 	// Handle partial vs full drop
 	if dropQuantity >= currentQuantity {
-		// Drop entire stack - remove item completely
-		if foundInGeneral {
-			newInventory := make([]interface{}, 0, len(generalInventory)-1)
-			for i, item := range generalInventory {
-				if i != itemSlot {
-					newInventory = append(newInventory, item)
-				}
-			}
-			save.Inventory["general_slots"] = newInventory
-		} else if foundInBackpack {
-			newInventory := make([]interface{}, 0, len(backpackInventory)-1)
-			for i, item := range backpackInventory {
-				if i != itemSlot {
-					newInventory = append(newInventory, item)
-				}
-			}
-			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
-			bag := gearSlots["bag"].(map[string]interface{})
-			bag["contents"] = newInventory
+		// Drop entire stack - set slot to null (preserve array indices)
+		inventory[itemSlot] = map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+			"slot":     itemSlot,
 		}
 	} else {
 		// Drop partial stack - reduce quantity
 		newQuantity := currentQuantity - dropQuantity
-
-		if foundInGeneral {
-			if itemMap, ok := generalInventory[itemSlot].(map[string]interface{}); ok {
-				itemMap["quantity"] = newQuantity
-			}
-			// Save updated inventory back
-			save.Inventory["general_slots"] = generalInventory
-		} else if foundInBackpack {
-			if itemMap, ok := backpackInventory[itemSlot].(map[string]interface{}); ok {
-				itemMap["quantity"] = newQuantity
-			}
-			// Save updated backpack back
-			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
-			bag := gearSlots["bag"].(map[string]interface{})
-			bag["contents"] = backpackInventory
+		if itemMap, ok := inventory[itemSlot].(map[string]interface{}); ok {
+			itemMap["quantity"] = newQuantity
 		}
+	}
+
+	// Save the updated inventory back to the save file
+	if fromSlotType == "general" {
+		save.Inventory["general_slots"] = inventory
+	} else {
+		gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
+		bag := gearSlots["bag"].(map[string]interface{})
+		bag["contents"] = inventory
 	}
 
 	return &types.ItemActionResponse{
@@ -621,16 +678,40 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 
 		// Extend destination array if needed
 		for len(toInventory) <= req.ToSlot {
-			toInventory = append(toInventory, nil)
+			// Create proper empty slot object instead of nil
+			emptySlot := map[string]interface{}{
+				"item":     nil,
+				"quantity": 0,
+				"slot":     len(toInventory),
+			}
+			toInventory = append(toInventory, emptySlot)
 		}
 
 		// If destination slot has an item, swap them
 		if req.ToSlot < len(toInventory) && toInventory[req.ToSlot] != nil {
-			fromInventory[req.FromSlot], toInventory[req.ToSlot] = toInventory[req.ToSlot], fromInventory[req.FromSlot]
+			// Check if destination slot actually has an item
+			if destSlot, ok := toInventory[req.ToSlot].(map[string]interface{}); ok {
+				if destSlot["item"] != nil && destSlot["item"] != "" {
+					// Swap the items
+					fromInventory[req.FromSlot], toInventory[req.ToSlot] = toInventory[req.ToSlot], fromInventory[req.FromSlot]
+				} else {
+					// Destination is empty, just move
+					toInventory[req.ToSlot] = item
+					fromInventory[req.FromSlot] = map[string]interface{}{
+						"item":     nil,
+						"quantity": 0,
+						"slot":     req.FromSlot,
+					}
+				}
+			}
 		} else {
 			// Just move the item
 			toInventory[req.ToSlot] = item
-			fromInventory[req.FromSlot] = nil
+			fromInventory[req.FromSlot] = map[string]interface{}{
+				"item":     nil,
+				"quantity": 0,
+				"slot":     req.FromSlot,
+			}
 		}
 
 		// Save both arrays back
@@ -660,116 +741,240 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 
 // handleAddItem adds an item to inventory (for picking up from ground)
 func handleAddItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
-	// Get general_slots inventory from save
+	// Get item's stack limit from database
+	database := db.GetDB()
+	if database == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Database not available"}
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", req.ItemID).Scan(&propertiesJSON)
+	if err != nil {
+		log.Printf("⚠️ Could not find item %s in database, assuming stack limit 1", req.ItemID)
+		propertiesJSON = "{}"
+	}
+
+	// Parse properties to get stack limit
+	var properties map[string]interface{}
+	stackLimit := 1 // Default stack limit
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err == nil {
+		if limit, ok := properties["stack_limit"].(float64); ok {
+			stackLimit = int(limit)
+		} else if limit, ok := properties["stack"].(float64); ok {
+			stackLimit = int(limit)
+		}
+	}
+
+	log.Printf("📦 Adding %s (quantity: %d, stack limit: %d)", req.ItemID, req.Quantity, stackLimit)
+
+	// Get general_slots and backpack inventories
 	generalInventory, ok := save.Inventory["general_slots"].([]interface{})
 	if !ok {
 		generalInventory = make([]interface{}, 0, 4)
 		save.Inventory["general_slots"] = generalInventory
 	}
 
-	// Count non-empty general slots
-	generalCount := 0
-	for _, slot := range generalInventory {
-		if slot != nil {
-			// Check if the slot has an actual item (not just a slot object with item: nil)
-			if slotMap, ok := slot.(map[string]interface{}); ok {
-				if itemID := slotMap["item"]; itemID != nil && itemID != "" {
-					generalCount++
-				}
-			} else {
-				// If it's not a map, count it as occupied
-				generalCount++
-			}
-		}
-	}
-
-	log.Printf("📦 Add item: general slots count = %d/%d (array length: %d)", generalCount, 4, len(generalInventory))
-
-	// Try to add to general_slots first (max 4 slots)
-	if generalCount < 4 {
-		// Create new inventory item
-		newItem := map[string]interface{}{
-			"item":     req.ItemID,
-			"quantity": req.Quantity,
-			"slot":     len(generalInventory),
-		}
-
-		generalInventory = append(generalInventory, newItem)
-		save.Inventory["general_slots"] = generalInventory
-
-		log.Printf("✅ Added %s to general slot %d", req.ItemID, len(generalInventory)-1)
-		return &types.ItemActionResponse{
-			Success:  true,
-			Message:  fmt.Sprintf("Picked up %s", req.ItemID),
-			NewState: save.Inventory,
-		}
-	}
-
-	// If general slots are full, try to add to backpack
 	gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 	if !ok {
-		log.Printf("❌ No gear_slots found")
 		return &types.ItemActionResponse{
 			Success: false,
-			Error:   "Inventory is full (general slots full, no backpack)",
+			Error:   "Your inventory is full",
 		}
 	}
 
 	bag, ok := gearSlots["bag"].(map[string]interface{})
 	if !ok {
-		log.Printf("❌ No bag found in gear_slots")
 		return &types.ItemActionResponse{
 			Success: false,
-			Error:   "Inventory is full (general slots full, no backpack)",
+			Error:   "Your inventory is full",
 		}
 	}
 
-	contents, ok := bag["contents"].([]interface{})
+	backpackContents, ok := bag["contents"].([]interface{})
 	if !ok {
-		log.Printf("⚠️ No contents in bag, creating empty array")
-		contents = make([]interface{}, 0, 20)
+		backpackContents = make([]interface{}, 0, 20)
+		bag["contents"] = backpackContents
 	}
 
-	// Count non-empty backpack slots
-	backpackCount := 0
-	for _, slot := range contents {
-		if slot != nil {
-			// Check if the slot has an actual item (not just a slot object with item: nil)
-			if slotMap, ok := slot.(map[string]interface{}); ok {
-				if itemID := slotMap["item"]; itemID != nil && itemID != "" {
-					backpackCount++
+	remainingQuantity := req.Quantity
+
+	// STEP 1: Try to stack with existing items (if stackable and not at max)
+	if stackLimit > 1 {
+		// Check backpack first (most items are here)
+		for i, slot := range backpackContents {
+			if slot != nil {
+				if slotMap, ok := slot.(map[string]interface{}); ok {
+					if slotMap["item"] == req.ItemID {
+						// Found matching item - check if we can add to it
+						currentQty := 1
+						if qty, ok := slotMap["quantity"].(float64); ok {
+							currentQty = int(qty)
+						} else if qty, ok := slotMap["quantity"].(int); ok {
+							currentQty = qty
+						}
+
+						if currentQty < stackLimit {
+							// Can add to this stack
+							spaceInStack := stackLimit - currentQty
+							addAmount := remainingQuantity
+							if addAmount > spaceInStack {
+								addAmount = spaceInStack
+							}
+
+							slotMap["quantity"] = currentQty + addAmount
+							remainingQuantity -= addAmount
+
+							log.Printf("✅ Added %d to existing backpack stack at slot %d (now %d/%d)", addAmount, i, currentQty+addAmount, stackLimit)
+
+							if remainingQuantity <= 0 {
+								return &types.ItemActionResponse{
+									Success:  true,
+									Message:  fmt.Sprintf("Picked up %s", req.ItemID),
+									NewState: save.Inventory,
+								}
+							}
+						}
+					}
 				}
-			} else {
-				// If it's not a map, count it as occupied
-				backpackCount++
+			}
+		}
+
+		// Check general slots too
+		for i, slot := range generalInventory {
+			if slot != nil {
+				if slotMap, ok := slot.(map[string]interface{}); ok {
+					if slotMap["item"] == req.ItemID {
+						currentQty := 1
+						if qty, ok := slotMap["quantity"].(float64); ok {
+							currentQty = int(qty)
+						} else if qty, ok := slotMap["quantity"].(int); ok {
+							currentQty = qty
+						}
+
+						if currentQty < stackLimit {
+							spaceInStack := stackLimit - currentQty
+							addAmount := remainingQuantity
+							if addAmount > spaceInStack {
+								addAmount = spaceInStack
+							}
+
+							slotMap["quantity"] = currentQty + addAmount
+							remainingQuantity -= addAmount
+
+							log.Printf("✅ Added %d to existing general stack at slot %d (now %d/%d)", addAmount, i, currentQty+addAmount, stackLimit)
+
+							if remainingQuantity <= 0 {
+								return &types.ItemActionResponse{
+									Success:  true,
+									Message:  fmt.Sprintf("Picked up %s", req.ItemID),
+									NewState: save.Inventory,
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 
-	log.Printf("📦 Add item: backpack slots count = %d/%d (array length: %d)", backpackCount, 20, len(contents))
+	// STEP 2: If still have quantity remaining, find empty slots
+	// Try backpack first (slots 0-19)
+	for remainingQuantity > 0 {
+		// Find first empty slot in backpack
+		emptySlotIndex := -1
+		for i := 0; i < 20; i++ {
+			// Extend array if needed
+			if i >= len(backpackContents) {
+				backpackContents = append(backpackContents, map[string]interface{}{
+					"item":     nil,
+					"quantity": 0,
+					"slot":     i,
+				})
+			}
 
-	// Check if backpack is full (max 20 slots)
-	if backpackCount >= 20 {
-		log.Printf("❌ Backpack is full: %d/%d slots used", backpackCount, 20)
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   "Inventory is full (both general slots and backpack are full)",
+			if backpackContents[i] == nil {
+				emptySlotIndex = i
+				break
+			}
+
+			if slotMap, ok := backpackContents[i].(map[string]interface{}); ok {
+				if slotMap["item"] == nil || slotMap["item"] == "" {
+					emptySlotIndex = i
+					break
+				}
+			}
+		}
+
+		if emptySlotIndex == -1 {
+			// No empty backpack slots, try general slots
+			emptySlotIndex = -1
+			for i := 0; i < 4; i++ {
+				if i >= len(generalInventory) {
+					generalInventory = append(generalInventory, map[string]interface{}{
+						"item":     nil,
+						"quantity": 0,
+						"slot":     i,
+					})
+				}
+
+				if generalInventory[i] == nil {
+					emptySlotIndex = i
+					break
+				}
+
+				if slotMap, ok := generalInventory[i].(map[string]interface{}); ok {
+					if slotMap["item"] == nil || slotMap["item"] == "" {
+						emptySlotIndex = i
+						break
+					}
+				}
+			}
+
+			if emptySlotIndex == -1 {
+				// Inventory is completely full
+				return &types.ItemActionResponse{
+					Success: false,
+					Error:   "Your inventory is full",
+				}
+			}
+
+			// Add to general slot
+			addAmount := remainingQuantity
+			if addAmount > stackLimit {
+				addAmount = stackLimit
+			}
+
+			generalInventory[emptySlotIndex] = map[string]interface{}{
+				"item":     req.ItemID,
+				"quantity": addAmount,
+				"slot":     emptySlotIndex,
+			}
+			save.Inventory["general_slots"] = generalInventory
+			remainingQuantity -= addAmount
+
+			log.Printf("✅ Added %d to general slot %d", addAmount, emptySlotIndex)
+		} else {
+			// Add to backpack slot
+			addAmount := remainingQuantity
+			if addAmount > stackLimit {
+				addAmount = stackLimit
+			}
+
+			backpackContents[emptySlotIndex] = map[string]interface{}{
+				"item":     req.ItemID,
+				"quantity": addAmount,
+				"slot":     emptySlotIndex,
+			}
+			bag["contents"] = backpackContents
+			remainingQuantity -= addAmount
+
+			log.Printf("✅ Added %d to backpack slot %d", addAmount, emptySlotIndex)
 		}
 	}
 
-	// Add to backpack
-	newItem := map[string]interface{}{
-		"item":     req.ItemID,
-		"quantity": req.Quantity,
-		"slot":     len(contents),
-	}
-
-	contents = append(contents, newItem)
-	bag["contents"] = contents
-
 	return &types.ItemActionResponse{
 		Success:  true,
-		Message:  fmt.Sprintf("Picked up %s (added to backpack)", req.ItemID),
+		Message:  fmt.Sprintf("Picked up %s", req.ItemID),
 		NewState: save.Inventory,
 	}
 }
@@ -914,8 +1119,12 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 			bag["contents"] = toInventory
 		}
 	} else {
-		// Remove source item (stack fully merged) - set to nil to preserve indices
-		fromInventory[req.FromSlot] = nil
+		// Remove source item (stack fully merged) - create proper empty slot
+		fromInventory[req.FromSlot] = map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+			"slot":     req.FromSlot,
+		}
 
 		// Save source inventory
 		if fromSlotType == "general" {
@@ -1029,7 +1238,13 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	}
 
 	for len(toInventory) <= req.ToSlot && len(toInventory) < maxSlots {
-		toInventory = append(toInventory, nil)
+		// Create proper empty slot object instead of nil
+		emptySlot := map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+			"slot":     len(toInventory),
+		}
+		toInventory = append(toInventory, emptySlot)
 	}
 
 	// Validate destination slot is empty
