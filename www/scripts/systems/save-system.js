@@ -201,7 +201,8 @@ async function loadSaveData() {
             vault: saveData.vault || {},
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day || 'day'
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6,
+            movement_counter: saveData.movement_counter || 0
         };
 
         document.getElementById('character-data').textContent = JSON.stringify(characterData);
@@ -325,7 +326,8 @@ async function saveGameToLocal() {
             locations_discovered: gameState.location?.discovered || [],
             music_tracks_unlocked: character.music_tracks_unlocked || [],
             current_day: character.current_day || 1,
-            time_of_day: character.time_of_day || 'day'
+            time_of_day: character.time_of_day !== undefined ? character.time_of_day : 6,
+            movement_counter: character.movement_counter || 0
         };
 
         // ALWAYS get the save ID from URL - we only overwrite, never create new saves

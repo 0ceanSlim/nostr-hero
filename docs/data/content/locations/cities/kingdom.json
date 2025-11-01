@@ -33,9 +33,8 @@
         {
           "id": "vault_of_crowns",
           "name": "The Vault of Crowns",
-          "type": "house_of_keeping",
+          "type": "vault",
           "description": "The kingdom's official storage facility, funded by the crown to encourage trade and travel. Citizens and allies store goods freely as a royal right.",
-          "accessible": true,
           "npc": "royal-custodian",
           "actions": ["talk_to_custodian", "access_storage", "register"]
         },
@@ -52,7 +51,6 @@
           "name": "Grand Market",
           "type": "shop",
           "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
-          "accessible": true,
           "shop_type": "general",
           "npc": "general-merchant",
           "actions": ["talk_to_merchant", "browse", "buy", "sell"]
@@ -62,7 +60,6 @@
           "name": "Adventurers Guild",
           "type": "guild",
           "description": "A sturdy stone building where heroes gather to share tales and seek employment.",
-          "accessible": true,
           "actions": ["register", "check_contracts", "talk_to_adventurers"]
         }
       ],
@@ -82,7 +79,6 @@
           "name": "Royal Library",
           "type": "library",
           "description": "A towering repository of knowledge containing tomes from across the realm.",
-          "accessible": true,
           "actions": ["research", "read", "talk_to_scholars"]
         },
         {
@@ -98,7 +94,6 @@
           "name": "Mage Tower",
           "type": "magic_shop",
           "description": "A crystalline spire where court wizards study the arcane arts.",
-          "accessible": true,
           "shop_type": "magic",
           "actions": ["buy_spells", "identify_items", "talk_to_mages"]
         }
@@ -120,7 +115,6 @@
           "name": "Main Gate",
           "type": "gate",
           "description": "The grand entrance to the kingdom, flanked by imposing guard towers.",
-          "accessible": true,
           "actions": ["exit_city", "talk_to_guards", "observe_travelers"]
         },
         {
@@ -128,7 +122,6 @@
           "name": "The Wayward Traveler Inn",
           "type": "inn",
           "description": "A cozy inn catering to merchants and adventurers from distant lands.",
-          "accessible": true,
           "actions": [
             "rent_room",
             "buy_food",
@@ -141,7 +134,6 @@
           "name": "Royal Stables",
           "type": "transport",
           "description": "Well-maintained stables offering cart services to other cities.",
-          "accessible": true,
           "actions": ["hire_cart", "check_routes", "talk_to_drivers"]
         }
       ],
@@ -162,7 +154,6 @@
           "name": "Grand Forge",
           "type": "blacksmith",
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
-          "accessible": true,
           "shop_type": "weapons_armor",
           "actions": [
             "buy_weapons",
@@ -176,7 +167,6 @@
           "name": "Artisan Quarter",
           "type": "crafting",
           "description": "Workshops and studios where skilled craftsmen ply their trades.",
-          "accessible": true,
           "actions": ["browse_crafts", "learn_techniques", "buy_supplies"]
         },
         {
@@ -184,7 +174,6 @@
           "name": "Royal Mint",
           "type": "bank",
           "description": "The kingdom's financial center where merchants store wealth and exchange currency.",
-          "accessible": true,
           "actions": [
             "deposit_gold",
             "withdraw_gold",
@@ -210,7 +199,6 @@
           "name": "Western Trading Post",
           "type": "shop",
           "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
-          "accessible": true,
           "shop_type": "exotic",
           "actions": ["buy_rare_items", "sell_valuables", "trade_goods"]
         },
@@ -219,7 +207,6 @@
           "name": "The Golden Griffin Tavern",
           "type": "tavern",
           "description": "A popular upscale tavern where merchants, adventurers, and locals gather for fine drinks, live music, and news. Gareth Thornfield runs a refined establishment with quality entertainment.",
-          "accessible": true,
           "npcs": ["tavern-keeper", "tavern-doorman"],
           "actions": [
             "talk_to_innkeeper",
@@ -229,14 +216,16 @@
             "book_performance",
             "listen_to_music"
           ],
-          "special_features": ["vip_section_for_happytavern_nip5", "live_music_nightly"]
+          "special_features": [
+            "vip_section_for_happytavern_nip5",
+            "live_music_nightly"
+          ]
         },
         {
           "id": "caravan_office",
           "name": "Caravan Guild Office",
           "type": "transport",
           "description": "The headquarters for organizing merchant caravans and long-distance travel.",
-          "accessible": true,
           "actions": ["join_caravan", "hire_guards", "check_trade_routes"]
         }
       ],

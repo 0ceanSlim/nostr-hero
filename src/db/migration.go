@@ -265,6 +265,11 @@ func migrateContentData() error {
 		return fmt.Errorf("failed to migrate locations: %v", err)
 	}
 
+	// Migrate NPCs
+	if err := migrateNPCs(); err != nil {
+		return fmt.Errorf("failed to migrate NPCs: %v", err)
+	}
+
 	return nil
 }
 
@@ -396,6 +401,73 @@ func migrateLocationFile(filePath, locationType string) error {
 	stmt := `INSERT INTO locations (id, name, location_type, description, image, music, properties, connections)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 	_, err = db.Exec(stmt, id, name, locationType, description, image, music, string(propertiesJSON), string(connectionsJSON))
+	return err
+}
+
+// migrateNPCs migrates all NPC JSON files from all location subdirectories
+func migrateNPCs() error {
+	npcsPath := filepath.Join("docs", "data", "content", "npcs")
+
+	// Clear existing NPCs
+	if _, err := db.Exec("DELETE FROM npcs"); err != nil {
+		return fmt.Errorf("failed to clear npcs table: %v", err)
+	}
+
+	count := 0
+
+	// Walk through all subdirectories (kingdom, millhaven, etc.)
+	err := filepath.WalkDir(npcsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(path, ".json") {
+			if err := migrateNPCFile(path); err != nil {
+				log.Printf("Warning: failed to migrate NPC file %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk NPCs directory: %v", err)
+	}
+
+	log.Printf("Migrated %d NPCs", count)
+	return nil
+}
+
+// migrateNPCFile migrates a single NPC JSON file
+func migrateNPCFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var npc map[string]interface{}
+	if err := json.Unmarshal(data, &npc); err != nil {
+		return err
+	}
+
+	// Extract base filename as ID
+	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
+
+	// Convert NPC data to required fields
+	name, _ := npc["name"].(string)
+	title, _ := npc["title"].(string)
+	race, _ := npc["race"].(string)
+	location, _ := npc["location"].(string)
+	building, _ := npc["building"].(string)
+	description, _ := npc["description"].(string)
+
+	// Serialize all properties as JSON
+	propertiesJSON, _ := json.Marshal(npc)
+
+	stmt := `INSERT INTO npcs (id, name, title, race, location, building, description, properties)
+	         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err = db.Exec(stmt, id, name, title, race, location, building, description, string(propertiesJSON))
 	return err
 }
 

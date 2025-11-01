@@ -72,6 +72,18 @@ type Pack struct {
 	Items []interface{} `json:"items"`
 }
 
+// NPC represents non-player characters
+type NPC struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Title       string                 `json:"title,omitempty"`
+	Race        string                 `json:"race,omitempty"`
+	Location    string                 `json:"location,omitempty"`
+	Building    string                 `json:"building,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Properties  map[string]interface{} `json:"properties"`
+}
+
 // GameDataHandler serves all game data in one request for efficient loading
 func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
@@ -252,6 +264,24 @@ func LocationsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(locations)
 }
 
+func NPCsHandler(w http.ResponseWriter, r *http.Request) {
+	database := db.GetDB()
+	if database == nil {
+		http.Error(w, "Database not available", http.StatusInternalServerError)
+		return
+	}
+
+	npcs, err := LoadAllNPCs(database)
+	if err != nil {
+		log.Printf("Error loading NPCs: %v", err)
+		http.Error(w, "Failed to load NPCs", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(npcs)
+}
+
 // Database loading functions
 func LoadAllItems(database *sql.DB) ([]Item, error) {
 	rows, err := database.Query("SELECT id, name, description, item_type, properties, tags, rarity FROM items")
@@ -407,4 +437,51 @@ func LoadAllPacks(database *sql.DB) ([]Pack, error) {
 	}
 
 	return packs, nil
+}
+
+func LoadAllNPCs(database *sql.DB) ([]NPC, error) {
+	rows, err := database.Query("SELECT id, name, title, race, location, building, description, properties FROM npcs")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query NPCs: %v", err)
+	}
+	defer rows.Close()
+
+	var npcs []NPC
+	for rows.Next() {
+		var npc NPC
+		var propertiesJSON string
+		var title, race, location, building, description sql.NullString
+
+		err := rows.Scan(&npc.ID, &npc.Name, &title, &race, &location, &building, &description, &propertiesJSON)
+		if err != nil {
+			log.Printf("Error scanning NPC row: %v", err)
+			continue
+		}
+
+		// Handle nullable fields
+		if title.Valid {
+			npc.Title = title.String
+		}
+		if race.Valid {
+			npc.Race = race.String
+		}
+		if location.Valid {
+			npc.Location = location.String
+		}
+		if building.Valid {
+			npc.Building = building.String
+		}
+		if description.Valid {
+			npc.Description = description.String
+		}
+
+		// Parse JSON field
+		if propertiesJSON != "" {
+			json.Unmarshal([]byte(propertiesJSON), &npc.Properties)
+		}
+
+		npcs = append(npcs, npc)
+	}
+
+	return npcs, nil
 }

@@ -30,54 +30,33 @@
         {
           "id": "burrowlock",
           "name": "The Burrowlock",
-          "type": "house_of_keeping",
+          "type": "vault",
           "description": "Each family in Millhaven maintains shared storage burrows beneath their villages. Cozy underground chambers lined with cedar, each secured with unique brass locks.",
-          "accessible": true,
           "npc": "keywarden",
-          "actions": ["talk_to_keywarden", "access_storage", "request_key"]
+          "open": "always",
+          "close": null
         },
         {
           "id": "village_inn",
           "name": "The Grain & Grape Inn",
           "type": "inn",
           "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
-          "accessible": true,
           "npcs": ["village-innkeeper", "village-doorman"],
-          "actions": [
-            "talk_to_innkeeper",
-            "rent_room",
-            "buy_food",
-            "talk_to_doorman",
-            "book_performance",
-            "talk_to_locals",
-            "hear_gossip"
-          ]
+          "open": 7,
+          "close": 4
         },
         {
           "id": "general_store",
           "name": "Haversham's General Store",
           "type": "shop",
           "description": "Pip Haversham's tidy family shop, offering honest prices on essential supplies for village life and adventuring.",
-          "accessible": true,
           "shop_type": "general",
           "npc": "village-shopkeeper",
-          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
-        },
-        {
-          "id": "village_shrine",
-          "name": "Shrine of the Harvest",
-          "type": "shrine",
-          "description": "A modest shrine dedicated to the gods of harvest and fertility.",
-          "accessible": true,
-          "actions": ["pray", "leave_offering", "talk_to_priest"]
+          "open": 3,
+          "close": 8
         }
       ],
-      "npcs": [
-        "keywarden",
-        "village-shopkeeper",
-        "village-innkeeper",
-        "village-doorman"
-      ]
+      "npcs": []
     },
     "east": {
       "id": "millhaven-east",
@@ -87,25 +66,7 @@
         "center": "millhaven-center",
         "east": "windswept-hills"
       },
-      "buildings": [
-        {
-          "id": "farmhouse",
-          "name": "Millwright's Farm",
-          "type": "farm",
-          "description": "A prosperous farm with a large windmill that grinds grain for the village.",
-          "accessible": true,
-          "actions": ["buy_grain", "talk_to_farmer", "help_with_chores"]
-        },
-        {
-          "id": "crossroads_marker",
-          "name": "Crossroads Stone",
-          "type": "landmark",
-          "description": "An old milestone marking the distance to various cities and towns.",
-          "accessible": true,
-          "actions": ["read_directions", "rest", "leave_message"]
-        }
-      ],
-      "npcs": [],
+      "buildings": [],
       "exit_to_environment": "windswept-hills"
     }
   }

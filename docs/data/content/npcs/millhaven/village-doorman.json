@@ -3,7 +3,6 @@
   "name": "Tobias Underhill",
   "title": "Entertainment Coordinator",
   "race": "Halfling",
-  "location": "village-west",
   "building": "village_inn",
   "description": "A friendly halfling with a warm smile and an open mind. He welcomes all performers, believing music brings the community together.",
   "greeting": {
@@ -14,7 +13,12 @@
   "dialogue": {
     "main_menu": {
       "text": "How can I help you?",
-      "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]
+      "options": [
+        "ask_about_performing",
+        "book_performance",
+        "ask_about_rates",
+        "goodbye"
+      ]
     },
     "ask_about_performing": {
       "text": "We welcome all musicians here—doesn't matter what you play! Music brings people together, and that's what village life is all about. We pay once a day, and your charm with the crowd makes a difference in tips!",
@@ -44,15 +48,15 @@
     "venue_type": "village_inn",
     "performances_per_day": 1,
     "accepted_instruments": {
-      "flute": {"base_pay": 10, "allowed": true},
-      "pan-flute": {"base_pay": 10, "allowed": true},
-      "lute": {"base_pay": 9, "allowed": true},
-      "drum": {"base_pay": 8, "allowed": true},
-      "lyre": {"base_pay": 8, "allowed": true},
-      "horn": {"base_pay": 7, "allowed": true},
-      "viol": {"base_pay": 7, "allowed": true},
-      "bagpipe": {"base_pay": 6, "allowed": true},
-      "shawm": {"base_pay": 6, "allowed": true}
+      "flute": { "base_pay": 10, "allowed": true },
+      "pan-flute": { "base_pay": 10, "allowed": true },
+      "lute": { "base_pay": 9, "allowed": true },
+      "drum": { "base_pay": 8, "allowed": true },
+      "lyre": { "base_pay": 8, "allowed": true },
+      "horn": { "base_pay": 7, "allowed": true },
+      "viol": { "base_pay": 7, "allowed": true },
+      "bagpipe": { "base_pay": 6, "allowed": true },
+      "shawm": { "base_pay": 6, "allowed": true }
     },
     "charisma_bonus": {
       "formula": "(charisma - 10) * 2"

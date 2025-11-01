@@ -30,15 +30,18 @@
           "name": "The Anchor's Rest",
           "type": "inn",
           "description": "A cozy inn serving fresh seafood and providing rooms for traveling merchants and sailors.",
-          "accessible": true,
-          "actions": ["rent_room", "buy_fresh_fish", "listen_to_sea_tales", "book_passage"]
+          "actions": [
+            "rent_room",
+            "buy_fresh_fish",
+            "listen_to_sea_tales",
+            "book_passage"
+          ]
         },
         {
           "id": "net_and_tackle",
           "name": "Nets & Hooks",
           "type": "shop",
           "description": "A shop selling fishing gear and maritime supplies.",
-          "accessible": true,
           "shop_type": "maritime",
           "actions": ["buy_fishing_gear", "sell_fish", "repair_nets"]
         },
@@ -47,7 +50,6 @@
           "name": "Shrine to the Sea Mother",
           "type": "shrine",
           "description": "A shrine dedicated to the goddess of the sea, where fishermen pray for safe voyages.",
-          "accessible": true,
           "actions": ["pray_for_safe_voyage", "leave_offering", "seek_blessing"]
         }
       ],
@@ -67,7 +69,6 @@
           "name": "Coastal Trading Post",
           "type": "shop",
           "description": "A warehouse where inland goods are traded for sea products.",
-          "accessible": true,
           "shop_type": "trade",
           "actions": ["trade_goods", "store_cargo", "arrange_transport"]
         }

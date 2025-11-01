@@ -80,6 +80,11 @@ function getPackById(packId) {
     return allPacks.find(pack => pack.id === packId);
 }
 
+function getNPCById(npcId) {
+    const allNPCs = JSON.parse(document.getElementById('all-npcs').textContent || '[]');
+    return allNPCs.find(npc => npc.id === npcId);
+}
+
 // Helper functions for inventory and spell management
 function findInInventory(inventory, itemId) {
     return inventory.find(item => item.item === itemId);
@@ -152,6 +157,14 @@ async function initializeGame() {
         document.getElementById('all-monsters').textContent = JSON.stringify(gameData.monsters || []);
         document.getElementById('all-locations').textContent = JSON.stringify(gameData.locations || []);
         document.getElementById('all-packs').textContent = JSON.stringify(gameData.packs || []);
+
+        // Load NPCs separately
+        const npcsResponse = await fetch('/api/npcs');
+        if (npcsResponse.ok) {
+            const npcs = await npcsResponse.json();
+            document.getElementById('all-npcs').textContent = JSON.stringify(npcs || []);
+            console.log(`Loaded ${npcs?.length || 0} NPCs`);
+        }
 
         console.log(`Loaded game data: ${gameData.items?.length || 0} items, ${gameData.spells?.length || 0} spells, ${gameData.monsters?.length || 0} monsters, ${gameData.locations?.length || 0} locations`);
 
@@ -256,7 +269,8 @@ async function initializeFromSave(saveData) {
             spells: saveData.known_spells || [],
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day || 'day'
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6,  // Default to highnoon (0-11 index)
+            movement_counter: saveData.movement_counter || 0  // For fatigue tracking
         },
         location: {
             current: ids.locationId,
@@ -341,7 +355,8 @@ async function createNewCharacter(npub) {
         const characterObject = {
             ...fullCharacter,
             current_day: 1,
-            time_of_day: 'day',
+            time_of_day: 6,  // Start at highnoon (0-11 index)
+            movement_counter: 0,  // For fatigue tracking
             vault: startingVault,
             spell_slots: generateSpellSlots(characterData.class)
         };
@@ -872,7 +887,7 @@ async function beginAdventure() {
             locations_discovered: gameState.location?.discovered || [],
             music_tracks_unlocked: gameState.character.music_tracks_unlocked || [],
             current_day: gameState.character.current_day !== undefined ? gameState.character.current_day : 1,
-            time_of_day: gameState.character.time_of_day || 'day',
+            time_of_day: gameState.character.time_of_day !== undefined ? gameState.character.time_of_day : 6,  // Default to highnoon
             _debug: debugInfo  // Temporary debug field
         };
 

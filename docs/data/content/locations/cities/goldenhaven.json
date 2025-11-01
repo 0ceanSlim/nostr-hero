@@ -32,18 +32,20 @@
         {
           "id": "ember_vault",
           "name": "The Ember Vault",
-          "type": "house_of_keeping",
+          "type": "vault",
           "description": "A place of fire and honor where dragonborn clan relics are preserved in magically sealed chests heated by dragonfire. The vaults are guarded by ancient draconic magic.",
-          "accessible": true,
           "npc": "scalekeeper",
-          "actions": ["talk_to_scalekeeper", "access_storage", "undergo_flamebinding"]
+          "actions": [
+            "talk_to_scalekeeper",
+            "access_storage",
+            "undergo_flamebinding"
+          ]
         },
         {
           "id": "goldenhaven_trade_goods",
           "name": "Goldscale Trading House",
           "type": "shop",
           "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
-          "accessible": true,
           "shop_type": "general",
           "npc": "trade-merchant",
           "actions": ["talk_to_merchant", "browse", "buy", "sell"]
@@ -53,15 +55,18 @@
           "name": "Grand Exchange",
           "type": "bank",
           "description": "The financial heart of the city where currencies are exchanged and large transactions occur.",
-          "accessible": true,
-          "actions": ["exchange_currency", "deposit_large_sums", "arrange_loans", "check_rates"]
+          "actions": [
+            "exchange_currency",
+            "deposit_large_sums",
+            "arrange_loans",
+            "check_rates"
+          ]
         },
         {
           "id": "luxury_market",
           "name": "Golden Bazaar",
           "type": "shop",
           "description": "An upscale market selling rare and exotic goods from across the world.",
-          "accessible": true,
           "shop_type": "luxury",
           "actions": ["buy_exotic_goods", "sell_rarities", "browse_luxuries"]
         },
@@ -70,8 +75,11 @@
           "name": "Merchant Princes Guild",
           "type": "guild",
           "description": "The most powerful guild in the city, controlling trade routes and merchant licenses.",
-          "accessible": true,
-          "actions": ["apply_for_license", "check_trade_routes", "negotiate_contracts"]
+          "actions": [
+            "apply_for_license",
+            "check_trade_routes",
+            "negotiate_contracts"
+          ]
         }
       ],
       "npcs": ["scalekeeper", "trade-merchant"]
@@ -90,7 +98,6 @@
           "name": "Customs House",
           "type": "civic",
           "description": "Where all goods entering the city are inspected and taxed.",
-          "accessible": true,
           "actions": ["pay_customs", "declare_goods", "speak_to_officials"]
         },
         {
@@ -98,8 +105,12 @@
           "name": "Caravan Rest Inn",
           "type": "inn",
           "description": "A large inn designed to accommodate merchant caravans and their guards.",
-          "accessible": true,
-          "actions": ["rent_room", "stable_animals", "hire_guards", "plan_routes"]
+          "actions": [
+            "rent_room",
+            "stable_animals",
+            "hire_guards",
+            "plan_routes"
+          ]
         }
       ],
       "npcs": [],
@@ -119,7 +130,6 @@
           "name": "Mountain Ore Exchange",
           "type": "shop",
           "description": "A major trading post for ores, gems, and mining equipment.",
-          "accessible": true,
           "shop_type": "mining",
           "actions": ["buy_gems", "sell_ore", "hire_prospectors"]
         }
@@ -141,7 +151,6 @@
           "name": "Harbor Master's Office",
           "type": "transport",
           "description": "Where ship passages are booked and cargo is registered.",
-          "accessible": true,
           "actions": ["book_passage", "hire_ship", "check_schedules"]
         },
         {
@@ -149,7 +158,6 @@
           "name": "The Salty Anchor",
           "type": "tavern",
           "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
-          "accessible": true,
           "npcs": ["port-innkeeper", "port-doorman"],
           "actions": [
             "talk_to_innkeeper",

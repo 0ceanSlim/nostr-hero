@@ -839,6 +839,9 @@ function displayCurrentLocation() {
         districtName.textContent = locationData.name;
     }
 
+    // Update time of day display
+    updateTimeDisplay();
+
     // Add location description to game log
     if (locationData.description) {
         addGameLog(locationData.description);
@@ -877,8 +880,31 @@ function displayCurrentLocation() {
 
     // Get connections - check both direct and properties.connections
     const connections = currentData.connections || currentData.properties?.connections;
-    const buildings = currentData.buildings || currentData.properties?.buildings;
-    const npcs = currentData.npcs || currentData.properties?.npcs;
+    let buildings = currentData.buildings || currentData.properties?.buildings;
+    let npcs = currentData.npcs || currentData.properties?.npcs;
+
+    // Check if we're inside a building
+    const currentBuildingId = state.location?.building;
+    if (currentBuildingId && buildings) {
+        // Find the current building data
+        const currentBuilding = buildings.find(b => b.id === currentBuildingId);
+
+        if (currentBuilding) {
+            console.log('📍 Inside building:', currentBuilding);
+
+            // Get NPCs from the building
+            if (currentBuilding.npcs) {
+                npcs = currentBuilding.npcs;  // Array of NPC IDs
+            } else if (currentBuilding.npc) {
+                npcs = [currentBuilding.npc];  // Single NPC
+            } else {
+                npcs = [];  // No NPCs in building
+            }
+
+            // Override buildings to show only "Exit Building" button
+            buildings = [{ id: '__exit__', name: 'Exit Building', isExit: true }];
+        }
+    }
 
     // 1. NAVIGATION BUTTONS (D-pad style with cardinal directions)
     console.log('Navigation connections:', connections);
@@ -930,33 +956,77 @@ function displayCurrentLocation() {
     }
 
     // 2. BUILDING BUTTONS
-    if (buildings && buildingContainer) {
+    if (buildingContainer) {
         const buildingButtonContainer = buildingContainer.querySelector('div');
 
-        buildings.forEach(building => {
-            if (building.accessible) {
-                const button = createLocationButton(
-                    building.name,
-                    () => enterBuilding(building.id),
-                    'building'
-                );
-                buildingButtonContainer.appendChild(button);
-            }
-        });
+        if (buildings && buildings.length > 0) {
+            // Get current time of day from game state
+            const currentTime = state.character?.time_of_day !== undefined ? state.character.time_of_day : 6;
+
+            buildings.forEach(building => {
+                // Check if this is the special "Exit Building" button
+                if (building.isExit) {
+                    const button = createLocationButton(
+                        building.name,
+                        () => exitBuilding(),
+                        'building'  // Use green for exit button
+                    );
+                    buildingButtonContainer.appendChild(button);
+                    return;
+                }
+
+                // Check if building is currently open
+                const isOpen = isBuildingOpen(building, currentTime);
+
+                if (isOpen) {
+                    // Open building - normal styling
+                    const button = createLocationButton(
+                        building.name,
+                        () => enterBuilding(building.id),
+                        'building'
+                    );
+                    buildingButtonContainer.appendChild(button);
+                } else {
+                    // Closed building - grey styling with different click handler
+                    const button = createLocationButton(
+                        building.name,
+                        () => showBuildingClosedMessage(building),
+                        'building-closed'
+                    );
+                    buildingButtonContainer.appendChild(button);
+                }
+            });
+        } else {
+            // No buildings in this district
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'text-gray-400 text-xs p-2 text-center italic';
+            emptyMessage.textContent = 'No buildings here.';
+            buildingButtonContainer.appendChild(emptyMessage);
+        }
     }
 
-    // 3. NPC BUTTONS
-    if (npcs && npcContainer) {
+    // 3. NPC BUTTONS (only district-level NPCs, not building NPCs)
+    if (npcContainer) {
         const npcButtonContainer = npcContainer.querySelector('div');
 
-        npcs.forEach(npcId => {
-            const button = createLocationButton(
-                `${npcId.replace(/_/g, ' ')}`,
-                () => talkToNPC(npcId),
-                'npc'
-            );
-            npcButtonContainer.appendChild(button);
-        });
+        if (npcs && npcs.length > 0) {
+            npcs.forEach(npcId => {
+                const npcData = getNPCById(npcId);
+                const displayName = npcData ? npcData.name : npcId.replace(/_/g, ' ');
+                const button = createLocationButton(
+                    displayName,
+                    () => talkToNPC(npcId),
+                    'npc'
+                );
+                npcButtonContainer.appendChild(button);
+            });
+        } else {
+            // Show message when no NPCs in district (they're all in buildings)
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'text-gray-400 text-xs p-2 text-center italic';
+            emptyMessage.textContent = 'No one here. Check buildings.';
+            npcButtonContainer.appendChild(emptyMessage);
+        }
     }
 }
 
@@ -977,13 +1047,17 @@ function createLocationButton(text, onClick, type = 'navigation') {
     const typeStyles = {
         navigation: 'bg-blue-700 hover:bg-blue-600 border-blue-900',      // City districts - blue
         environment: 'bg-red-700 hover:bg-red-600 border-red-900',        // Outside city - red
-        building: 'bg-green-700 hover:bg-green-600 border-green-900',
+        building: 'bg-green-700 hover:bg-green-600 border-green-900',     // Open buildings - green
+        'building-closed': 'bg-gray-500 hover:bg-gray-600 border-gray-700 text-black',  // Closed buildings - grey with black text
         npc: 'bg-purple-700 hover:bg-purple-600 border-purple-900'
     };
 
     const colorClass = typeStyles[type] || typeStyles.navigation;
 
-    button.className = `${colorClass} text-white border-2 px-2 py-1 font-bold transition-all leading-tight text-center overflow-hidden`;
+    // For closed buildings, text color is already in colorClass, otherwise default to white
+    const textColor = type === 'building-closed' ? '' : 'text-white';
+
+    button.className = `${colorClass} ${textColor} border-2 px-2 py-1 font-bold transition-all leading-tight text-center overflow-hidden`;
     button.style.fontSize = '7px';
     button.style.imageRendering = 'pixelated';
     button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
@@ -997,11 +1071,130 @@ function createLocationButton(text, onClick, type = 'navigation') {
     return button;
 }
 
-// Placeholder functions for building and NPC interactions
+// Check if a building is currently open based on time of day
+function isBuildingOpen(building, currentTime) {
+    // Always open buildings
+    if (building.open === 'always') {
+        return true;
+    }
+
+    const openTime = building.open;
+    const closeTime = building.close;
+
+    // No hours specified - assume always open
+    if (openTime === undefined) {
+        return true;
+    }
+
+    // Open rest of day (close is null)
+    if (closeTime === null) {
+        return currentTime >= openTime;
+    }
+
+    // Check if open hours wrap around midnight
+    if (openTime < closeTime) {
+        // Normal hours (e.g., 3-8: dawn to afternoon)
+        return currentTime >= openTime && currentTime < closeTime;
+    } else {
+        // Overnight hours (e.g., 7-4: midday through night to morning)
+        return currentTime >= openTime || currentTime < closeTime;
+    }
+}
+
+// Show message when clicking a closed building
+function showBuildingClosedMessage(building) {
+    const timeNames = [
+        'midnight', 'twilight', 'witching', 'dawn', 'morning', 'latemorning',
+        'highnoon', 'midday', 'afternoon', 'golden', 'dusk', 'evening'
+    ];
+
+    const openTimeName = building.open === 'always' ? 'always' : timeNames[building.open] || building.open;
+
+    showMessage(`🔒 ${building.name} is closed. Opens at ${openTimeName}.`, 'error');
+}
+
+// Enter a building
 function enterBuilding(buildingId) {
     console.log('Entering building:', buildingId);
-    showMessage(`🏛️ Entering ${buildingId}...`, 'info');
-    // TODO: Implement building interaction
+
+    const state = getGameState();
+
+    // Update location to include building
+    const newLocationState = {
+        ...state.location,
+        building: buildingId
+    };
+
+    updateGameState({
+        location: newLocationState
+    });
+
+    // Refresh display to show building interior
+    displayCurrentLocation();
+    showMessage(`🏛️ Entered building`, 'info');
+
+    // Auto-save when entering building
+    if (window.saveGameToLocal) {
+        window.saveGameToLocal();
+    }
+}
+
+// Exit a building
+function exitBuilding() {
+    console.log('Exiting building');
+
+    const state = getGameState();
+
+    // Update location to remove building (back to outdoors)
+    const newLocationState = {
+        ...state.location,
+        building: null
+    };
+
+    // Handle time advancement when exiting building
+    const newCharacterState = { ...state.character };
+
+    // Advance time by 1 increment when exiting building
+    let newTimeOfDay = (newCharacterState.time_of_day !== undefined) ? newCharacterState.time_of_day : 6; // Default to highnoon if not set
+    let newCurrentDay = newCharacterState.current_day || 1;
+
+    newTimeOfDay += 1;
+
+    // Handle day rollover (11 evening -> 0 midnight = new day)
+    if (newTimeOfDay > 11) {
+        newTimeOfDay = 0;
+        newCurrentDay += 1;
+        showMessage('🌅 A new day dawns (Day ' + newCurrentDay + ')', 'info');
+    }
+
+    // Handle fatigue: increment every 2 time periods
+    let movementCounter = newCharacterState.movement_counter || 0;
+    movementCounter += 1;
+
+    if (movementCounter >= 2) {
+        newCharacterState.fatigue = (newCharacterState.fatigue || 0) + 1;
+        movementCounter = 0;
+        showMessage('😓 You feel tired (Fatigue +1)', 'warning');
+    }
+
+    // Update character state with new time and counter
+    newCharacterState.time_of_day = newTimeOfDay;
+    newCharacterState.current_day = newCurrentDay;
+    newCharacterState.movement_counter = movementCounter;
+
+    updateGameState({
+        location: newLocationState,
+        character: newCharacterState
+    });
+
+    // Refresh display to show district
+    displayCurrentLocation();
+    showMessage(`🚪 Exited building`, 'info');
+
+    // Auto-save when exiting building
+    if (window.saveGameToLocal) {
+        window.saveGameToLocal();
+    }
 }
 
 function talkToNPC(npcId) {
@@ -1221,12 +1414,50 @@ function openTavern() {
     // This would open a tavern interface
 }
 
+// Update time of day display
+function updateTimeDisplay() {
+    const state = getGameState();
+    const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 6;
+    const currentDay = state.character?.current_day || 1;
+
+    // Map time index (0-11) to PNG filenames
+    const timeImages = [
+        '00-midnight.png',
+        '01-twilight.png',
+        '02-witching.png',
+        '03-dawn.png',
+        '04-morning.png',
+        '05-latemorning.png',
+        '06-highnoon.png',
+        '07-midday.png',
+        '08-afternoon.png',
+        '09-golden.png',
+        '10-dusk.png',
+        '11-evening.png'
+    ];
+
+    // Update time image
+    const timeImage = document.getElementById('time-of-day-image');
+    if (timeImage) {
+        const imageName = timeImages[timeOfDay] || timeImages[6]; // Default to highnoon if invalid
+        timeImage.src = `/res/img/time/${imageName}`;
+        timeImage.alt = `Time: ${imageName.replace('.png', '').replace(/^\d+-/, '')}`;
+    }
+
+    // Update day counter
+    const dayCounter = document.getElementById('day-counter');
+    if (dayCounter) {
+        dayCounter.textContent = `Day ${currentDay}`;
+    }
+}
+
 // Update all displays
 function updateAllDisplays() {
     updateCharacterDisplay();
     updateInventoryDisplay();
     updateSpellsDisplay();
     displayCurrentLocation();
+    updateTimeDisplay();
 
     const state = getGameState();
     if (state.combat) {

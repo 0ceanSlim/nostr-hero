@@ -3,7 +3,6 @@
   "name": "Rosie Lockwood",
   "title": "Keywarden",
   "race": "Halfling",
-  "location": "village-west",
   "building": "burrowlock",
   "description": "A cheerful halfling woman with nimble fingers and a ring of intricate keys hanging from her belt. Rosie runs the communal storage burrows with the same care she gives her prize-winning garden.",
   "greeting": {
@@ -52,11 +51,5 @@
       "text": "Safe travels, dear! Come back anytime—there's always a warm meal and a friendly face in Millhaven!",
       "action": "end_dialogue"
     }
-  },
-  "storage_config": {
-    "free_for_races": ["Halfling", "Gnome"],
-    "registration_fee": 45,
-    "storage_slots": 40,
-    "slot_type": "standard"
   }
 }

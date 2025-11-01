@@ -32,9 +32,8 @@
         {
           "id": "glade_of_safekeeping",
           "name": "The Glade of Safekeeping",
-          "type": "house_of_keeping",
+          "type": "vault",
           "description": "Enchanted trees store belongings within hollow roots, kept safe by ancient elven magic. The eldest trees of the enclave offer this blessing to their kin and those who earn it.",
-          "accessible": true,
           "npc": "warden-of-roots",
           "actions": ["talk_to_warden", "access_storage", "offer_binding"]
         },
@@ -43,7 +42,6 @@
           "name": "The Verdant Archives",
           "type": "library",
           "description": "A massive library specializing in natural philosophy and druidic lore.",
-          "accessible": true,
           "actions": ["research_nature", "study_herbalism", "talk_to_scholars"]
         },
         {
@@ -51,7 +49,6 @@
           "name": "Circle of the Ancient Oak",
           "type": "guild",
           "description": "The headquarters of the region's druid circle, built around a massive ancient oak.",
-          "accessible": true,
           "actions": ["learn_druid_magic", "commune_with_nature", "seek_wisdom"]
         },
         {
@@ -59,7 +56,6 @@
           "name": "Greenleaf Provisions",
           "type": "shop",
           "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
-          "accessible": true,
           "shop_type": "general",
           "npc": "nature-supplier",
           "actions": ["talk_to_merchant", "browse", "buy", "sell"]
@@ -69,7 +65,6 @@
           "name": "Garden of Remedies",
           "type": "shop",
           "description": "A market specializing in medicinal herbs and natural remedies.",
-          "accessible": true,
           "shop_type": "herbalism",
           "actions": ["buy_herbs", "sell_plants", "learn_recipes"]
         },
@@ -78,7 +73,6 @@
           "name": "The Moonlit Glade",
           "type": "inn",
           "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
-          "accessible": true,
           "npcs": ["forest-innkeeper", "forest-doorman"],
           "actions": [
             "talk_to_innkeeper",
@@ -90,7 +84,12 @@
           ]
         }
       ],
-      "npcs": ["warden-of-roots", "nature-supplier", "forest-innkeeper", "forest-doorman"]
+      "npcs": [
+        "warden-of-roots",
+        "nature-supplier",
+        "forest-innkeeper",
+        "forest-doorman"
+      ]
     },
     "north": {
       "id": "verdant-north",
@@ -106,7 +105,6 @@
           "name": "Forest Rangers Lodge",
           "type": "guild",
           "description": "The headquarters for forest rangers who protect the woodland paths.",
-          "accessible": true,
           "actions": ["hire_guide", "report_dangers", "learn_tracking"]
         }
       ],
@@ -127,8 +125,11 @@
           "name": "Living Wood Workshop",
           "type": "crafting",
           "description": "A workshop where artisans craft items from living wood and natural materials.",
-          "accessible": true,
-          "actions": ["commission_staff", "buy_natural_armor", "learn_woodcraft"]
+          "actions": [
+            "commission_staff",
+            "buy_natural_armor",
+            "learn_woodcraft"
+          ]
         }
       ],
       "npcs": [],
@@ -148,9 +149,12 @@
           "name": "Seaside Trading Post",
           "type": "shop",
           "description": "Traders who specialize in goods from both forest and sea.",
-          "accessible": true,
           "shop_type": "coastal",
-          "actions": ["buy_sea_goods", "sell_forest_products", "arrange_shipping"]
+          "actions": [
+            "buy_sea_goods",
+            "sell_forest_products",
+            "arrange_shipping"
+          ]
         }
       ],
       "npcs": [],

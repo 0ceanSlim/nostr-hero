@@ -55,6 +55,7 @@ func main() {
 	mux.HandleFunc("/api/spells/", api.SpellsHandler) // Note the trailing slash to match /api/spells/{id}
 	mux.HandleFunc("/api/monsters", api.MonstersHandler)
 	mux.HandleFunc("/api/locations", api.LocationsHandler)
+	mux.HandleFunc("/api/npcs", api.NPCsHandler)
 
 	// Character generation API endpoints
 	mux.HandleFunc("/api/weights", api.WeightsHandler)

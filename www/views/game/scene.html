@@ -7,6 +7,11 @@
         <div class="absolute top-0 left-0 right-0 text-center p-2" style="background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
             <h2 id="city-name" class="text-sm font-bold text-white">Kingdom</h2>
         </div>
+        <!-- Time of day indicator (top-right corner) -->
+        <div id="time-indicator" class="absolute top-2 right-2 flex flex-col items-center gap-0.5">
+            <img id="time-of-day-image" src="/res/img/time/06-highnoon.png" alt="Time of day" class="w-10 h-10" style="image-rendering: pixelated;">
+            <span id="day-counter" class="text-xs font-bold text-white" style="font-size: 7px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Day 1</span>
+        </div>
         <!-- District name at bottom with ground button -->
         <div class="absolute bottom-0 left-0 right-0 flex items-center justify-between p-2" style="background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
             <!-- Ground button (left) -->

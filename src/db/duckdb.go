@@ -171,6 +171,19 @@ func createTables() error {
 			items TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// NPCs table
+		`CREATE TABLE IF NOT EXISTS npcs (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			title TEXT,
+			race TEXT,
+			location TEXT,
+			building TEXT,
+			description TEXT,
+			properties TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, table := range tables {

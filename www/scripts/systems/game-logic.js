@@ -42,6 +42,34 @@ async function moveToLocation(locationId) {
     // Handle travel effects (fatigue, time passage, etc.)
     const newCharacterState = { ...state.character };
 
+    // Advance time by 1 increment when moving to a new district
+    let newTimeOfDay = (newCharacterState.time_of_day !== undefined) ? newCharacterState.time_of_day : 6; // Default to highnoon if not set
+    let newCurrentDay = newCharacterState.current_day || 1;
+
+    newTimeOfDay += 1;
+
+    // Handle day rollover (11 evening -> 0 midnight = new day)
+    if (newTimeOfDay > 11) {
+        newTimeOfDay = 0;
+        newCurrentDay += 1;
+        showMessage('🌅 A new day dawns (Day ' + newCurrentDay + ')', 'info');
+    }
+
+    // Handle fatigue: increment every 2 time periods
+    let movementCounter = newCharacterState.movement_counter || 0;
+    movementCounter += 1;
+
+    if (movementCounter >= 2) {
+        newCharacterState.fatigue = (newCharacterState.fatigue || 0) + 1;
+        movementCounter = 0;
+        showMessage('😓 You feel tired (Fatigue +1)', 'warning');
+    }
+
+    // Update character state with new time and counter
+    newCharacterState.time_of_day = newTimeOfDay;
+    newCharacterState.current_day = newCurrentDay;
+    newCharacterState.movement_counter = movementCounter;
+
     // Update game state
     updateGameState({
         location: newLocationState,

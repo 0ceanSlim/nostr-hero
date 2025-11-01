@@ -37,9 +37,10 @@ type SaveFile struct {
 	LocationsDiscovered []string               `json:"locations_discovered"`
 	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
 	CurrentDay          int                    `json:"current_day"`
-	TimeOfDay           string                 `json:"time_of_day"` // "day" or "night"
-	InternalID          string                 `json:"-"`           // Not serialized, used internally for file naming
-	InternalNpub        string                 `json:"-"`           // Not serialized, used internally for directory structure
+	TimeOfDay           int                    `json:"time_of_day"`      // 0-11 index (0=midnight, 6=highnoon, 11=evening)
+	MovementCounter     int                    `json:"movement_counter"` // Tracks movements for fatigue calculation (every 2 movements = +1 fatigue)
+	InternalID          string                 `json:"-"`                // Not serialized, used internally for file naming
+	InternalNpub        string                 `json:"-"`                // Not serialized, used internally for directory structure
 }
 
 const SavesDirectory = "data/saves"
@@ -142,6 +143,7 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["music_tracks_unlocked"] = save.MusicTracksUnlocked
 		saveMap["current_day"] = save.CurrentDay
 		saveMap["time_of_day"] = save.TimeOfDay
+		saveMap["movement_counter"] = save.MovementCounter
 		savesWithID = append(savesWithID, saveMap)
 	}
 

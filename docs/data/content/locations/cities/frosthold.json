@@ -31,7 +31,6 @@
           "name": "The Frozen Mug Tavern",
           "type": "inn",
           "description": "A warm tavern serving strong ales and hearty stews to ward off the northern cold.",
-          "accessible": true,
           "actions": ["rent_room", "buy_food", "warm_by_fire", "talk_to_locals"]
         },
         {
@@ -39,7 +38,6 @@
           "name": "Northern Furs Trading Post",
           "type": "shop",
           "description": "A shop specializing in warm clothing and cold-weather gear.",
-          "accessible": true,
           "shop_type": "cold_gear",
           "actions": ["buy_furs", "sell_pelts", "repair_gear"]
         },
@@ -48,7 +46,6 @@
           "name": "Town Hall",
           "type": "civic",
           "description": "The administrative center where the town elder holds court.",
-          "accessible": true,
           "actions": ["speak_to_elder", "check_notices", "report_problems"]
         }
       ],
@@ -68,7 +65,6 @@
           "name": "Guard House",
           "type": "military",
           "description": "A fortified building where the town guard maintains watch.",
-          "accessible": true,
           "actions": ["talk_to_guards", "report_crime", "seek_protection"]
         }
       ],

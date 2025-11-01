@@ -31,18 +31,20 @@
         {
           "id": "stonevault",
           "name": "The Stonevault",
-          "type": "house_of_keeping",
+          "type": "vault",
           "description": "Ancient dwarven vaults carved deep into the mountain by the first settlers. Massive underground chambers where clan members store their wealth and heirlooms.",
-          "accessible": true,
           "npc": "vaultwright",
-          "actions": ["talk_to_vaultwright", "access_storage", "request_engraving"]
+          "actions": [
+            "talk_to_vaultwright",
+            "access_storage",
+            "request_engraving"
+          ]
         },
         {
           "id": "miners_inn",
           "name": "The Pickaxe & Pint",
           "type": "inn",
           "description": "A rowdy inn run by the sturdy dwarf Helga Stonebrew, where miners gather after long shifts underground. Loud rhythmic music echoes through the halls.",
-          "accessible": true,
           "npcs": ["miners-innkeeper", "miners-doorman"],
           "actions": [
             "talk_to_innkeeper",
@@ -59,7 +61,6 @@
           "name": "Ironhand's Supplies",
           "type": "shop",
           "description": "Brogni Ironhand's no-nonsense supply shop, stocked with durable gear built to survive the harsh mountains.",
-          "accessible": true,
           "shop_type": "general",
           "npc": "mining-supplier",
           "actions": ["talk_to_merchant", "browse", "buy", "sell"]
@@ -69,7 +70,6 @@
           "name": "Mountain Ore Exchange",
           "type": "shop",
           "description": "A trading post that buys raw ores and sells mining equipment.",
-          "accessible": true,
           "shop_type": "mining",
           "actions": ["sell_ore", "buy_tools", "check_ore_prices"]
         },
@@ -78,11 +78,19 @@
           "name": "Miners' Guild Hall",
           "type": "guild",
           "description": "The administrative center for all mining operations in the region.",
-          "accessible": true,
-          "actions": ["register_claim", "check_mining_rights", "hire_expedition"]
+          "actions": [
+            "register_claim",
+            "check_mining_rights",
+            "hire_expedition"
+          ]
         }
       ],
-      "npcs": ["vaultwright", "mining-supplier", "miners-innkeeper", "miners-doorman"]
+      "npcs": [
+        "vaultwright",
+        "mining-supplier",
+        "miners-innkeeper",
+        "miners-doorman"
+      ]
     },
     "south": {
       "id": "ironpeak-south",
@@ -98,7 +106,6 @@
           "name": "Mine Cart Station",
           "type": "transport",
           "description": "A depot where mine carts are loaded and dispatched to various mining sites.",
-          "accessible": true,
           "actions": ["hire_cart", "check_routes", "load_cargo"]
         }
       ],
