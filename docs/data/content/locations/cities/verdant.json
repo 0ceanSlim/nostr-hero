@@ -32,56 +32,50 @@
         {
           "id": "glade_of_safekeeping",
           "name": "The Glade of Safekeeping",
-          "type": "vault",
           "description": "Enchanted trees store belongings within hollow roots, kept safe by ancient elven magic. The eldest trees of the enclave offer this blessing to their kin and those who earn it.",
-          "npc": "warden-of-roots",
-          "actions": ["talk_to_warden", "access_storage", "offer_binding"]
+          "npcs": ["warden-of-roots"],
+          "open": "always",
+          "close": null
         },
         {
           "id": "great_library",
           "name": "The Verdant Archives",
-          "type": "library",
           "description": "A massive library specializing in natural philosophy and druidic lore.",
-          "actions": ["research_nature", "study_herbalism", "talk_to_scholars"]
+          "npcs": [],
+          "open": 7,
+          "close": 10
         },
         {
           "id": "druid_circle",
           "name": "Circle of the Ancient Oak",
-          "type": "guild",
           "description": "The headquarters of the region's druid circle, built around a massive ancient oak.",
-          "actions": ["learn_druid_magic", "commune_with_nature", "seek_wisdom"]
+          "npcs": [],
+          "open": "always",
+          "close": null
         },
         {
           "id": "verdant_supplies",
           "name": "Greenleaf Provisions",
-          "type": "shop",
           "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
-          "shop_type": "general",
-          "npc": "nature-supplier",
-          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
+          "npcs": ["nature-supplier"],
+          "open": 7,
+          "close": 8
         },
         {
           "id": "herb_market",
           "name": "Garden of Remedies",
-          "type": "shop",
           "description": "A market specializing in medicinal herbs and natural remedies.",
-          "shop_type": "herbalism",
-          "actions": ["buy_herbs", "sell_plants", "learn_recipes"]
+          "npcs": [],
+          "open": 6,
+          "close": 9
         },
         {
           "id": "moonlit_glade_inn",
           "name": "The Moonlit Glade",
-          "type": "inn",
           "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
           "npcs": ["forest-innkeeper", "forest-doorman"],
-          "actions": [
-            "talk_to_innkeeper",
-            "rent_room",
-            "buy_herbal_tea",
-            "talk_to_doorman",
-            "book_performance",
-            "meditate_in_garden"
-          ]
+          "open": 7,
+          "close": 4
         }
       ],
       "npcs": [
@@ -103,9 +97,10 @@
         {
           "id": "ranger_lodge",
           "name": "Forest Rangers Lodge",
-          "type": "guild",
           "description": "The headquarters for forest rangers who protect the woodland paths.",
-          "actions": ["hire_guide", "report_dangers", "learn_tracking"]
+          "npcs": [],
+          "open": "always",
+          "close": null
         }
       ],
       "npcs": [],
@@ -123,13 +118,10 @@
         {
           "id": "nature_crafts",
           "name": "Living Wood Workshop",
-          "type": "crafting",
           "description": "A workshop where artisans craft items from living wood and natural materials.",
-          "actions": [
-            "commission_staff",
-            "buy_natural_armor",
-            "learn_woodcraft"
-          ]
+          "npcs": [],
+          "open": 8,
+          "close": 6
         }
       ],
       "npcs": [],
@@ -147,14 +139,10 @@
         {
           "id": "coastal_traders",
           "name": "Seaside Trading Post",
-          "type": "shop",
           "description": "Traders who specialize in goods from both forest and sea.",
-          "shop_type": "coastal",
-          "actions": [
-            "buy_sea_goods",
-            "sell_forest_products",
-            "arrange_shipping"
-          ]
+          "npcs": [],
+          "open": 7,
+          "close": 8
         }
       ],
       "npcs": [],

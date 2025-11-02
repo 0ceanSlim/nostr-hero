@@ -55,20 +55,40 @@ async function moveToLocation(locationId) {
         showMessage('🌅 A new day dawns (Day ' + newCurrentDay + ')', 'info');
     }
 
-    // Handle fatigue: increment every 2 time periods
-    let movementCounter = newCharacterState.movement_counter || 0;
-    movementCounter += 1;
-
-    if (movementCounter >= 2) {
-        newCharacterState.fatigue = (newCharacterState.fatigue || 0) + 1;
-        movementCounter = 0;
+    // Handle fatigue: +1 every 2 time segments
+    let fatigueCounter = (newCharacterState.fatigue_counter || 0) + 1;
+    if (fatigueCounter >= 2) {
+        newCharacterState.fatigue = Math.min((newCharacterState.fatigue || 0) + 1, 9);
+        fatigueCounter = 0;
         showMessage('😓 You feel tired (Fatigue +1)', 'warning');
     }
+    newCharacterState.fatigue_counter = fatigueCounter;
 
-    // Update character state with new time and counter
+    // Handle hunger: -1 every 3 time segments (or 6 if hunger==1)
+    let currentHunger = newCharacterState.hunger !== undefined ? newCharacterState.hunger : 1;
+    let hungerCounter = (newCharacterState.hunger_counter || 0) + 1;
+
+    if (currentHunger > 1 && hungerCounter >= 3) {
+        currentHunger -= 1;
+        hungerCounter = 0;
+        showMessage('🍖 You feel hungry', 'warning');
+    } else if (currentHunger === 1 && hungerCounter >= 6) {
+        currentHunger = 0;
+        hungerCounter = 0;
+        showMessage('💀 You are famished!', 'error');
+    } else if (currentHunger === 0 && hungerCounter >= 3) {
+        // Starvation damage when famished
+        newCharacterState.hp = Math.max(0, newCharacterState.hp - 1);
+        hungerCounter = 0;
+        showMessage('💀 Starvation damages you! (-1 HP)', 'error');
+    }
+
+    newCharacterState.hunger = Math.max(0, Math.min(currentHunger, 3));
+    newCharacterState.hunger_counter = hungerCounter;
+
+    // Update character state with new time
     newCharacterState.time_of_day = newTimeOfDay;
     newCharacterState.current_day = newCurrentDay;
-    newCharacterState.movement_counter = movementCounter;
 
     // Update game state
     updateGameState({
@@ -76,8 +96,11 @@ async function moveToLocation(locationId) {
         character: newCharacterState
     });
 
-    // Update display
+    // Update displays
     displayCurrentLocation();
+    if (typeof updateCharacterDisplay === 'function') {
+        updateCharacterDisplay();
+    }
     showMessage('📍 Moved to ' + locationData.name, 'info');
 
     // Save the location change to backend
@@ -211,11 +234,8 @@ function useItem(itemId) {
         }
     }
 
-    // Handle rations specially (reduce fatigue and provide sustenance)
-    if (itemId === 'rations') {
-        newCharacterState.fatigue = Math.max(0, newCharacterState.fatigue - 1);
-        showMessage('🍖 You feel nourished and rested', 'success');
-    }
+    // Note: Item effects are now handled by the backend in inventory.go
+    // The backend applies effects like hunger, fatigue, hp, mana based on item properties
 
     // Remove/reduce item from inventory
     const itemIndex = newInventory.findIndex(i => i.item === itemId);

@@ -30,28 +30,17 @@
         {
           "id": "burrowlock",
           "name": "The Burrowlock",
-          "type": "vault",
           "description": "Each family in Millhaven maintains shared storage burrows beneath their villages. Cozy underground chambers lined with cedar, each secured with unique brass locks.",
-          "npc": "keywarden",
+          "npcs": ["keywarden"],
           "open": "always",
           "close": null
         },
-        {
-          "id": "village_inn",
-          "name": "The Grain & Grape Inn",
-          "type": "inn",
-          "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
-          "npcs": ["village-innkeeper", "village-doorman"],
-          "open": 7,
-          "close": 4
-        },
+
         {
           "id": "general_store",
           "name": "Haversham's General Store",
-          "type": "shop",
           "description": "Pip Haversham's tidy family shop, offering honest prices on essential supplies for village life and adventuring.",
-          "shop_type": "general",
-          "npc": "village-shopkeeper",
+          "npcs": ["village-shopkeeper"],
           "open": 3,
           "close": 8
         }
@@ -66,7 +55,16 @@
         "center": "millhaven-center",
         "east": "windswept-hills"
       },
-      "buildings": [],
+      "buildings": [
+        {
+          "id": "village_inn",
+          "name": "The Grain & Grape Inn",
+          "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
+          "npcs": ["village-innkeeper", "village-doorman"],
+          "open": 7,
+          "close": 4
+        }
+      ],
       "exit_to_environment": "windswept-hills"
     }
   }

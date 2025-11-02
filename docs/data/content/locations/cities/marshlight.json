@@ -30,46 +30,34 @@
         {
           "id": "warhoard",
           "name": "The Warhoard",
-          "type": "vault",
           "description": "Communal caches where orcs store spoils of war. Battle-scarred vaults in the lower levels, guarded fiercely by the clan's most trusted warriors.",
-          "npc": "hoardkeeper",
-          "actions": ["talk_to_hoardkeeper", "access_storage", "pay_tribute"]
+          "npcs": ["hoardkeeper"],
+          "open": "always",
+          "close": null
         },
         {
           "id": "marsh_inn",
           "name": "The Glowing Lantern",
-          "type": "inn",
           "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
           "npcs": ["swamp-innkeeper", "swamp-doorman"],
-          "actions": [
-            "talk_to_innkeeper",
-            "rent_room",
-            "buy_swamp_stew",
-            "talk_to_doorman",
-            "book_performance",
-            "listen_to_stories",
-            "hire_boat"
-          ]
+          "open": 7,
+          "close": 4
         },
         {
           "id": "bog_trader",
           "name": "Swamp Treasures",
-          "type": "shop",
           "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
-          "shop_type": "general",
-          "npc": "swamp-trader",
-          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
+          "npcs": ["swamp-trader"],
+          "open": 7,
+          "close": 8
         },
         {
           "id": "spirit_shrine",
           "name": "Shrine of Peaceful Spirits",
-          "type": "shrine",
           "description": "A shrine dedicated to keeping the restless spirits of the marsh at peace.",
-          "actions": [
-            "pray_for_protection",
-            "leave_offering",
-            "speak_to_shaman"
-          ]
+          "npcs": [],
+          "open": "always",
+          "close": null
         }
       ],
       "npcs": [
@@ -91,9 +79,10 @@
         {
           "id": "boat_dock",
           "name": "Marsh Boat Rental",
-          "type": "transport",
           "description": "Where shallow-draft boats are rented for swamp navigation.",
-          "actions": ["rent_boat", "hire_guide", "buy_supplies"]
+          "npcs": [],
+          "open": 6,
+          "close": 9
         }
       ],
       "npcs": [],

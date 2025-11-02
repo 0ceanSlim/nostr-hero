@@ -262,6 +262,9 @@ async function initializeFromSave(saveData) {
             mana: saveData.mana,
             max_mana: saveData.max_mana,
             fatigue: saveData.fatigue || 0,
+            fatigue_counter: saveData.fatigue_counter || 0,
+            hunger: saveData.hunger !== undefined ? saveData.hunger : 1,  // Default to Hungry (0-3 scale)
+            hunger_counter: saveData.hunger_counter || 0,
             gold: saveData.gold || 0,
             stats: saveData.stats,
             inventory: saveData.inventory,
@@ -269,8 +272,7 @@ async function initializeFromSave(saveData) {
             spells: saveData.known_spells || [],
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6,  // Default to highnoon (0-11 index)
-            movement_counter: saveData.movement_counter || 0  // For fatigue tracking
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6  // Default to highnoon (0-11 index)
         },
         location: {
             current: ids.locationId,

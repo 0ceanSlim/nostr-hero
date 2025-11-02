@@ -18,8 +18,7 @@
     },
     "browse_shop": {
       "text": "Have a look around! All my prices are fair—you won't find better deals in the kingdom.",
-      "action": "open_shop",
-      "options": ["main_menu"]
+      "action": "open_shop"
     },
     "sell_items": {
       "text": "Looking to lighten your load? I'll buy most anything you're selling, as long as I have the coin for it.",
@@ -27,12 +26,10 @@
       "requirements": {
         "shop_gold": 1
       },
-      "failure": "I'm afraid I'm out of coin at the moment. Come back after I've made some sales!",
-      "options": ["main_menu"]
+      "failure": "I'm afraid I'm out of coin at the moment. Come back after I've made some sales!"
     },
     "ask_about_stock": {
-      "text": "I restock my shelves every morning with fresh supplies from local craftsmen and traders. If something's out of stock, check back tomorrow!",
-      "options": ["main_menu"]
+      "text": "I restock my shelves every morning with fresh supplies from local craftsmen and traders. If something's out of stock, check back tomorrow!"
     },
     "goodbye": {
       "text": "Safe travels, friend! Come back anytime!",

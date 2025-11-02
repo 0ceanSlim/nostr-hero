@@ -142,7 +142,7 @@ async function loadSaveData() {
         }
 
         const saves = await response.json();
-        const saveData = saves.find(save => save.id === saveID);
+        let saveData = saves.find(save => save.id === saveID);
 
         if (!saveData) {
             console.warn('⚠️ Save not found:', saveID);
@@ -196,13 +196,15 @@ async function loadSaveData() {
             mana: saveData.mana,
             max_mana: saveData.max_mana,
             fatigue: saveData.fatigue || 0,
+            fatigue_counter: saveData.fatigue_counter || 0,
+            hunger: saveData.hunger !== undefined ? saveData.hunger : 1,
+            hunger_counter: saveData.hunger_counter || 0,
             gold: saveData.gold || 0,
             stats: saveData.stats,
             vault: saveData.vault || {},
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6,
-            movement_counter: saveData.movement_counter || 0
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6
         };
 
         document.getElementById('character-data').textContent = JSON.stringify(characterData);
@@ -314,6 +316,9 @@ async function saveGameToLocal() {
             mana: character.mana || 0,
             max_mana: character.max_mana || 0,
             fatigue: character.fatigue || 0,
+            fatigue_counter: character.fatigue_counter || 0,
+            hunger: character.hunger !== undefined ? character.hunger : 1,
+            hunger_counter: character.hunger_counter || 0,
             gold: character.gold || 0,
             stats: character.stats || {},
             location: displayNames.location,
@@ -326,8 +331,7 @@ async function saveGameToLocal() {
             locations_discovered: gameState.location?.discovered || [],
             music_tracks_unlocked: character.music_tracks_unlocked || [],
             current_day: character.current_day || 1,
-            time_of_day: character.time_of_day !== undefined ? character.time_of_day : 6,
-            movement_counter: character.movement_counter || 0
+            time_of_day: character.time_of_day !== undefined ? character.time_of_day : 6
         };
 
         // ALWAYS get the save ID from URL - we only overwrite, never create new saves
@@ -467,5 +471,6 @@ document.addEventListener('keydown', (event) => {
 // Alias for manual save button
 window.saveGame = saveGameToLocal;
 window.saveGameToLocal = saveGameToLocal;  // Explicit alias for other modules
+window.loadSaveData = loadSaveData;  // Export for reloading after item use
 
 console.log('💾 Save system loaded');

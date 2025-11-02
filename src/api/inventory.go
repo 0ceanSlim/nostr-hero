@@ -188,15 +188,22 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		}
 		sourceInventory = backpackContents
 
-		if req.FromSlot < 0 || req.FromSlot >= len(sourceInventory) {
-			return &types.ItemActionResponse{Success: false, Error: "Invalid source slot"}
+		// Search for item by slot number, not array index
+		found := false
+		for _, slotData := range sourceInventory {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.FromSlot {
+					if slotMap["item"] == req.ItemID {
+						itemData = slotMap
+						found = true
+						break
+					}
+				}
+			}
 		}
-
-		itemMap, ok := sourceInventory[req.FromSlot].(map[string]interface{})
-		if !ok || itemMap["item"] != req.ItemID {
+		if !found {
 			return &types.ItemActionResponse{Success: false, Error: "Item not found in specified slot"}
 		}
-		itemData = itemMap
 	} else {
 		return &types.ItemActionResponse{Success: false, Error: "Invalid source slot type"}
 	}
@@ -396,24 +403,47 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 
 // handleUseItem uses a consumable item
 func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
-	// Get inventory from save
-	inventory, ok := save.Inventory["general_slots"].([]interface{})
-	if !ok {
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   "Invalid inventory structure",
-		}
-	}
-
-	// Find item in inventory
+	// Find item in either general slots or backpack
 	var itemSlot int = -1
 	var itemData map[string]interface{}
-	for i, item := range inventory {
-		if itemMap, ok := item.(map[string]interface{}); ok {
-			if itemMap["item"] == req.ItemID {
-				itemSlot = i
-				itemData = itemMap
-				break
+	var inventoryLocation string // "general" or "backpack"
+	var inventory []interface{}
+
+	// Determine which inventory to search based on FromSlotType
+	if req.FromSlotType == "general" {
+		// Search general slots for the item at the specific slot
+		if generalSlots, ok := save.Inventory["general_slots"].([]interface{}); ok {
+			for i, item := range generalSlots {
+				if itemMap, ok := item.(map[string]interface{}); ok {
+					// Match both item ID and slot number
+					if itemMap["item"] == req.ItemID && int(itemMap["slot"].(float64)) == req.FromSlot {
+						itemSlot = i
+						itemData = itemMap
+						inventory = generalSlots
+						inventoryLocation = "general"
+						break
+					}
+				}
+			}
+		}
+	} else if req.FromSlotType == "inventory" {
+		// Search backpack for the item at the specific slot
+		if gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{}); ok {
+			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				if backpackSlots, ok := bag["contents"].([]interface{}); ok {
+					for i, item := range backpackSlots {
+						if itemMap, ok := item.(map[string]interface{}); ok {
+							// Match both item ID and slot number
+							if itemMap["item"] == req.ItemID && int(itemMap["slot"].(float64)) == req.FromSlot {
+								itemSlot = i
+								itemData = itemMap
+								inventory = backpackSlots
+								inventoryLocation = "backpack"
+								break
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -425,8 +455,78 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 		}
 	}
 
-	// TODO: Apply item effects (healing, buffs, etc.)
-	// For now, just remove the item
+	// Query item from database to get properties and effects
+	database := db.GetDB()
+	if database == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Database not available"}
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", req.ItemID).Scan(&propertiesJSON)
+	if err != nil {
+		log.Printf("⚠️ Could not find item %s in database: %v", req.ItemID, err)
+		// Continue anyway to allow using the item
+		propertiesJSON = "{}"
+	}
+
+	// Parse properties to get effects
+	var properties map[string]interface{}
+	var effectsApplied []string
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err == nil {
+		if effects, ok := properties["effects"].([]interface{}); ok {
+			// First check if any hunger effect would exceed max (prevent eating when full)
+			for _, effect := range effects {
+				if effectMap, ok := effect.(map[string]interface{}); ok {
+					if effectType, ok := effectMap["type"].(string); ok && effectType == "hunger" {
+						if value, ok := effectMap["value"].(float64); ok {
+							newHunger := save.Hunger + int(value)
+							if newHunger > 3 {
+								return &types.ItemActionResponse{
+									Success: false,
+									Error:   "You're too full to eat",
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Apply each effect
+			for _, effect := range effects {
+				if effectMap, ok := effect.(map[string]interface{}); ok {
+					effectType, typeOk := effectMap["type"].(string)
+					value, valueOk := effectMap["value"].(float64)
+
+					if !typeOk || !valueOk {
+						continue
+					}
+
+					switch effectType {
+					case "hunger":
+						save.Hunger += int(value)
+						save.Hunger = max(0, min(save.Hunger, 3)) // Clamp to 0-3
+						save.HungerCounter = 0                    // Reset hunger counter when eating
+						effectsApplied = append(effectsApplied, fmt.Sprintf("Hunger %+d", int(value)))
+
+					case "fatigue":
+						save.Fatigue += int(value)
+						save.Fatigue = max(0, min(save.Fatigue, 9)) // Clamp to 0-9
+						effectsApplied = append(effectsApplied, fmt.Sprintf("Fatigue %+d", int(value)))
+
+					case "hp":
+						save.HP += int(value)
+						save.HP = max(0, min(save.HP, save.MaxHP)) // Clamp to 0-max_hp
+						effectsApplied = append(effectsApplied, fmt.Sprintf("HP %+d", int(value)))
+
+					case "mana":
+						save.Mana += int(value)
+						save.Mana = max(0, min(save.Mana, save.MaxMana)) // Clamp to 0-max_mana
+						effectsApplied = append(effectsApplied, fmt.Sprintf("Mana %+d", int(value)))
+					}
+				}
+			}
+		}
+	}
 
 	// Handle quantity
 	quantity := int(itemData["quantity"].(float64))
@@ -434,21 +534,32 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 		itemData["quantity"] = quantity - 1
 		inventory[itemSlot] = itemData
 	} else {
-		// Remove item completely
-		newInventory := make([]interface{}, 0, len(inventory)-1)
-		for i, item := range inventory {
-			if i != itemSlot {
-				newInventory = append(newInventory, item)
-			}
-		}
-		inventory = newInventory
+		// Empty the slot but keep it in the array to preserve slot numbers
+		itemData["item"] = nil
+		itemData["quantity"] = 0
+		inventory[itemSlot] = itemData
 	}
 
-	save.Inventory["general_slots"] = inventory
+	// Save to correct location
+	if inventoryLocation == "general" {
+		save.Inventory["general_slots"] = inventory
+	} else if inventoryLocation == "backpack" {
+		if gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{}); ok {
+			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				bag["contents"] = inventory
+			}
+		}
+	}
+
+	// Build message with effects applied
+	message := "Item used"
+	if len(effectsApplied) > 0 {
+		message = fmt.Sprintf("Item used (%s)", strings.Join(effectsApplied, ", "))
+	}
 
 	return &types.ItemActionResponse{
 		Success: true,
-		Message: "Item used",
+		Message: message,
 		NewState: save.Inventory,
 	}
 }
@@ -545,27 +656,23 @@ func handleDropItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		}
 		inventory = backpackInventory
 
-		// Validate slot index
-		if itemSlot < 0 || itemSlot >= len(inventory) {
-			return &types.ItemActionResponse{
-				Success: false,
-				Error:   fmt.Sprintf("Invalid slot index: %d", itemSlot),
+		// Search for item by slot number, not array index
+		arrayIndex := -1
+		var itemMap map[string]interface{}
+		for i, slotData := range inventory {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == itemSlot {
+					arrayIndex = i
+					itemMap = slotMap
+					break
+				}
 			}
 		}
 
-		// Get the item at the specific slot
-		if inventory[itemSlot] == nil {
+		if arrayIndex == -1 {
 			return &types.ItemActionResponse{
 				Success: false,
-				Error:   "Slot is empty",
-			}
-		}
-
-		itemMap, ok := inventory[itemSlot].(map[string]interface{})
-		if !ok {
-			return &types.ItemActionResponse{
-				Success: false,
-				Error:   "Invalid slot structure",
+				Error:   fmt.Sprintf("Source slot %d is empty", itemSlot),
 			}
 		}
 
@@ -583,6 +690,9 @@ func handleDropItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		} else if qty, ok := itemMap["quantity"].(int); ok {
 			currentQuantity = qty
 		}
+
+		// Update itemSlot to use array index for later operations
+		itemSlot = arrayIndex
 
 	} else {
 		return &types.ItemActionResponse{
@@ -717,29 +827,23 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		bag["contents"] = fromInventory
 	}
 
-	// Validate source slot has an item
-	if req.FromSlot < 0 || req.FromSlot >= len(fromInventory) {
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   fmt.Sprintf("Invalid source slot: %d", req.FromSlot),
+	// Search for item by slot number, not array index
+	fromArrayIndex := -1
+	var slotObj map[string]interface{}
+	for i, slotData := range fromInventory {
+		if slotMap, ok := slotData.(map[string]interface{}); ok {
+			if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.FromSlot {
+				fromArrayIndex = i
+				slotObj = slotMap
+				break
+			}
 		}
 	}
 
-	// Check if the slot object exists
-	if fromInventory[req.FromSlot] == nil {
+	if fromArrayIndex == -1 {
 		return &types.ItemActionResponse{
 			Success: false,
 			Error:   fmt.Sprintf("Source slot %d is empty", req.FromSlot),
-		}
-	}
-
-	// The inventory stores items as objects with {item, quantity, slot} fields
-	// Check if the slot's "item" field is nil
-	slotObj, ok := fromInventory[req.FromSlot].(map[string]interface{})
-	if !ok {
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   fmt.Sprintf("Invalid slot structure at %d", req.FromSlot),
 		}
 	}
 
@@ -828,36 +932,34 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			fromInventory = append(fromInventory, emptySlot)
 		}
 
-		// Get source and destination slot objects (handle nil slots)
-		var fromSlotObj map[string]interface{}
-		if fromInventory[req.FromSlot] != nil {
-			fromSlotObj = fromInventory[req.FromSlot].(map[string]interface{})
-		} else {
-			// Create empty slot object if nil
-			fromSlotObj = map[string]interface{}{
-				"item":     nil,
-				"quantity": 0,
-				"slot":     req.FromSlot,
+		// fromSlotObj is already set from earlier search
+		// Search for destination slot by slot number
+		toArrayIndex := -1
+		var toSlotObj map[string]interface{}
+		for i, slotData := range fromInventory {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.ToSlot {
+					toArrayIndex = i
+					toSlotObj = slotMap
+					break
+				}
 			}
-			fromInventory[req.FromSlot] = fromSlotObj
 		}
 
-		var toSlotObj map[string]interface{}
-		if fromInventory[req.ToSlot] != nil {
-			toSlotObj = fromInventory[req.ToSlot].(map[string]interface{})
-		} else {
-			// Create empty slot object if nil
+		// If destination slot doesn't exist, create it
+		if toArrayIndex == -1 {
 			toSlotObj = map[string]interface{}{
 				"item":     nil,
 				"quantity": 0,
 				"slot":     req.ToSlot,
 			}
-			fromInventory[req.ToSlot] = toSlotObj
+			toArrayIndex = len(fromInventory)
+			fromInventory = append(fromInventory, toSlotObj)
 		}
 
 		// Swap item and quantity, but keep slot numbers correct
-		fromSlotObj["item"], toSlotObj["item"] = toSlotObj["item"], fromSlotObj["item"]
-		fromSlotObj["quantity"], toSlotObj["quantity"] = toSlotObj["quantity"], fromSlotObj["quantity"]
+		slotObj["item"], toSlotObj["item"] = toSlotObj["item"], slotObj["item"]
+		slotObj["quantity"], toSlotObj["quantity"] = toSlotObj["quantity"], slotObj["quantity"]
 
 		// Save back to the correct location
 		if fromSlotType == "general" {
@@ -869,44 +971,43 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		}
 	} else {
 		// Moving between different inventory arrays (general <-> backpack)
-		item := fromInventory[req.FromSlot]
+		// slotObj already contains the source item
 
-		// Extend destination array if needed
-		for len(toInventory) <= req.ToSlot {
-			// Create proper empty slot object instead of nil
-			emptySlot := map[string]interface{}{
+		// Search for destination slot by slot number
+		toArrayIndex := -1
+		var toSlotObj map[string]interface{}
+		for i, slotData := range toInventory {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.ToSlot {
+					toArrayIndex = i
+					toSlotObj = slotMap
+					break
+				}
+			}
+		}
+
+		// If destination slot doesn't exist, create it
+		if toArrayIndex == -1 {
+			toSlotObj = map[string]interface{}{
 				"item":     nil,
 				"quantity": 0,
-				"slot":     len(toInventory),
+				"slot":     req.ToSlot,
 			}
-			toInventory = append(toInventory, emptySlot)
+			toArrayIndex = len(toInventory)
+			toInventory = append(toInventory, toSlotObj)
 		}
 
 		// If destination slot has an item, swap them
-		if req.ToSlot < len(toInventory) && toInventory[req.ToSlot] != nil {
-			// Check if destination slot actually has an item
-			if destSlot, ok := toInventory[req.ToSlot].(map[string]interface{}); ok {
-				if destSlot["item"] != nil && destSlot["item"] != "" {
-					// Swap the items
-					fromInventory[req.FromSlot], toInventory[req.ToSlot] = toInventory[req.ToSlot], fromInventory[req.FromSlot]
-				} else {
-					// Destination is empty, just move
-					toInventory[req.ToSlot] = item
-					fromInventory[req.FromSlot] = map[string]interface{}{
-						"item":     nil,
-						"quantity": 0,
-						"slot":     req.FromSlot,
-					}
-				}
-			}
+		if toSlotObj["item"] != nil && toSlotObj["item"] != "" {
+			// Swap the items - exchange all data but preserve slot numbers
+			slotObj["item"], toSlotObj["item"] = toSlotObj["item"], slotObj["item"]
+			slotObj["quantity"], toSlotObj["quantity"] = toSlotObj["quantity"], slotObj["quantity"]
 		} else {
-			// Just move the item
-			toInventory[req.ToSlot] = item
-			fromInventory[req.FromSlot] = map[string]interface{}{
-				"item":     nil,
-				"quantity": 0,
-				"slot":     req.FromSlot,
-			}
+			// Destination is empty, just move
+			toSlotObj["item"] = slotObj["item"]
+			toSlotObj["quantity"] = slotObj["quantity"]
+			slotObj["item"] = nil
+			slotObj["quantity"] = 0
 		}
 
 		// Save both arrays back

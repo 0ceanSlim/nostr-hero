@@ -34,16 +34,24 @@
         <span class="relative z-10 text-[8px] font-bold text-white"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
     </div>
 
-    <!-- Fatigue & Weight Row -->
+    <!-- Fatigue, Hunger & Weight Row -->
     <div class="flex gap-0.5">
-        <!-- Fatigue Bar (65% width) -->
-        <div class="relative h-3 flex items-center justify-between px-1 bg-win95-bgDark border border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight" style="flex: 0.65;">
-            <div id="fatigue-bar" class="absolute inset-0 h-3 transition-all" style="width: 0%; background: linear-gradient(90deg, #00cc00 0%, #ffff00 50%, #ff8800 75%, #ff0000 100%);"></div>
-            <span class="relative z-10 text-white" style="font-size: 6px;">FTG <span id="fatigue-level">0</span>/10</span>
-            <span id="fatigue-status" class="relative z-10 text-white" style="font-size: 6px;">FRESH</span>
+        <!-- Fatigue Bar (45% width) -->
+        <div class="relative h-3 flex items-center justify-between px-1 border border-t-win95-black border-l-win95-black border-r-win95-bgLight border-b-win95-bgLight" style="flex: 0.45; overflow: hidden; background: #1a1a1a;">
+            <!-- Full-width gradient background -->
+            <div class="absolute inset-0" style="background: linear-gradient(90deg, #00cc00 0%, #ffff00 50%, #ff8800 75%, #ff0000 100%); z-index: 0;"></div>
+            <!-- Overlay to hide unused gradient -->
+            <div class="absolute top-0 right-0 bottom-0 transition-all" id="fatigue-overlay" style="left: 0%; background: #1a1a1a; z-index: 1;"></div>
+            <span class="relative text-white" style="font-size: 6px; z-index: 10;">💪</span>
+            <span id="fatigue-status" class="relative text-white" style="font-size: 6px; z-index: 10;">FRESH</span>
         </div>
-        <!-- Weight Display (35% width, no border) -->
-        <div class="h-3 flex items-center justify-between px-1" style="flex: 0.35;">
+        <!-- Hunger Display (30% width, no border) -->
+        <div class="h-3 flex items-center justify-between px-1" style="flex: 0.30;">
+            <span class="text-white" style="font-size: 6px;">🍖 <span id="hunger-level">1</span>/3</span>
+            <span id="hunger-status" class="text-white" style="font-size: 6px;">HUNGRY</span>
+        </div>
+        <!-- Weight Display (25% width, no border) -->
+        <div class="h-3 flex items-center justify-between px-1" style="flex: 0.25;">
             <span class="text-white" style="font-size: 6px;">⚖️ <span id="char-weight">0</span>/<span id="max-weight">0</span></span>
             <span id="weight-status" class="text-white" style="font-size: 6px;">OK</span>
         </div>

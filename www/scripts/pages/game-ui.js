@@ -341,15 +341,14 @@ async function updateCharacterDisplay() {
     }
 
     // Update fatigue (scale 0-10)
-    const fatigueLevelEl = document.getElementById('fatigue-level');
-    const fatigueBarEl = document.getElementById('fatigue-bar');
+    const fatigueOverlayEl = document.getElementById('fatigue-overlay');
     const fatigueStatusEl = document.getElementById('fatigue-status');
     const fatigue = Math.min(character.fatigue || 0, 10);
 
-    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
-    if (fatigueBarEl) {
+    if (fatigueOverlayEl) {
         const fatiguePercentage = (fatigue / 10) * 100;
-        fatigueBarEl.style.width = fatiguePercentage + '%';
+        // Overlay covers the right portion, so it starts where the bar ends
+        fatigueOverlayEl.style.left = fatiguePercentage + '%';
     }
     if (fatigueStatusEl) {
         // Update status text based on fatigue level
@@ -361,6 +360,25 @@ async function updateCharacterDisplay() {
             fatigueStatusEl.textContent = 'WEARY';
         } else {
             fatigueStatusEl.textContent = 'EXHAUSTED';
+        }
+    }
+
+    // Update hunger (scale 0-3, text-only display)
+    const hungerLevelEl = document.getElementById('hunger-level');
+    const hungerStatusEl = document.getElementById('hunger-status');
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+
+    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
+    if (hungerStatusEl) {
+        // Update status text based on hunger level
+        if (hunger === 0) {
+            hungerStatusEl.textContent = 'FAMISHED';
+        } else if (hunger === 1) {
+            hungerStatusEl.textContent = 'HUNGRY';
+        } else if (hunger === 2) {
+            hungerStatusEl.textContent = 'SATISFIED';
+        } else {
+            hungerStatusEl.textContent = 'FULL';
         }
     }
 

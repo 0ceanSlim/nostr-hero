@@ -33,37 +33,21 @@
         {
           "id": "vault_of_crowns",
           "name": "The Vault of Crowns",
-          "type": "vault",
           "description": "The kingdom's official storage facility, funded by the crown to encourage trade and travel. Citizens and allies store goods freely as a royal right.",
-          "npc": "royal-custodian",
-          "actions": ["talk_to_custodian", "access_storage", "register"]
-        },
-        {
-          "id": "royal_palace",
-          "name": "Royal Palace",
-          "type": "landmark",
-          "description": "The seat of royal power, its golden spires reaching toward the heavens.",
-          "accessible": false,
-          "actions": ["observe", "approach_guards"]
+          "npcs": ["royal-custodian"],
+          "open": "always",
+          "close": null
         },
         {
           "id": "kingdom_general_store",
           "name": "Grand Market",
-          "type": "shop",
           "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
-          "shop_type": "general",
-          "npc": "general-merchant",
-          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
-        },
-        {
-          "id": "adventurers_guild",
-          "name": "Adventurers Guild",
-          "type": "guild",
-          "description": "A sturdy stone building where heroes gather to share tales and seek employment.",
-          "actions": ["register", "check_contracts", "talk_to_adventurers"]
+          "npcs": ["general-merchant"],
+          "open": 6,
+          "close": 10
         }
       ],
-      "npcs": ["royal-custodian", "general-merchant"]
+      "npcs": []
     },
     "north": {
       "id": "kingdom-north",
@@ -75,27 +59,12 @@
       },
       "buildings": [
         {
-          "id": "royal_library",
-          "name": "Royal Library",
-          "type": "library",
-          "description": "A towering repository of knowledge containing tomes from across the realm.",
-          "actions": ["research", "read", "talk_to_scholars"]
-        },
-        {
-          "id": "noble_quarter",
-          "name": "Noble Quarter",
-          "type": "residential",
-          "description": "Elegant mansions line tree-shaded streets where the wealthy reside.",
-          "accessible": false,
-          "actions": ["observe", "walk_streets"]
-        },
-        {
           "id": "mage_tower",
           "name": "Mage Tower",
-          "type": "magic_shop",
           "description": "A crystalline spire where court wizards study the arcane arts.",
-          "shop_type": "magic",
-          "actions": ["buy_spells", "identify_items", "talk_to_mages"]
+          "npcs": [],
+          "open": 8,
+          "close": 8
         }
       ],
       "npcs": [],
@@ -111,30 +80,20 @@
       },
       "buildings": [
         {
-          "id": "main_gate",
-          "name": "Main Gate",
-          "type": "gate",
-          "description": "The grand entrance to the kingdom, flanked by imposing guard towers.",
-          "actions": ["exit_city", "talk_to_guards", "observe_travelers"]
-        },
-        {
           "id": "travelers_inn",
           "name": "The Wayward Traveler Inn",
-          "type": "inn",
           "description": "A cozy inn catering to merchants and adventurers from distant lands.",
-          "actions": [
-            "rent_room",
-            "buy_food",
-            "talk_to_patrons",
-            "listen_to_rumors"
-          ]
+          "npcs": [],
+          "open": 7,
+          "close": 4
         },
         {
           "id": "stable",
           "name": "Royal Stables",
-          "type": "transport",
           "description": "Well-maintained stables offering cart services to other cities.",
-          "actions": ["hire_cart", "check_routes", "talk_to_drivers"]
+          "npcs": [],
+          "open": 6,
+          "close": 10
         }
       ],
       "npcs": [],
@@ -152,34 +111,10 @@
         {
           "id": "grand_forge",
           "name": "Grand Forge",
-          "type": "blacksmith",
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
-          "shop_type": "weapons_armor",
-          "actions": [
-            "buy_weapons",
-            "buy_armor",
-            "repair_equipment",
-            "commission_items"
-          ]
-        },
-        {
-          "id": "artisan_quarter",
-          "name": "Artisan Quarter",
-          "type": "crafting",
-          "description": "Workshops and studios where skilled craftsmen ply their trades.",
-          "actions": ["browse_crafts", "learn_techniques", "buy_supplies"]
-        },
-        {
-          "id": "merchants_bank",
-          "name": "Royal Mint",
-          "type": "bank",
-          "description": "The kingdom's financial center where merchants store wealth and exchange currency.",
-          "actions": [
-            "deposit_gold",
-            "withdraw_gold",
-            "exchange_currency",
-            "check_balance"
-          ]
+          "npcs": [],
+          "open": 7,
+          "close": 7
         }
       ],
       "npcs": [],
@@ -197,36 +132,22 @@
         {
           "id": "trading_post",
           "name": "Western Trading Post",
-          "type": "shop",
           "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
-          "shop_type": "exotic",
-          "actions": ["buy_rare_items", "sell_valuables", "trade_goods"]
+          "npcs": [],
+          "open": 7,
+          "close": 9
         },
         {
           "id": "tavern_golden_griffin",
           "name": "The Golden Griffin Tavern",
-          "type": "tavern",
           "description": "A popular upscale tavern where merchants, adventurers, and locals gather for fine drinks, live music, and news. Gareth Thornfield runs a refined establishment with quality entertainment.",
           "npcs": ["tavern-keeper", "tavern-doorman"],
-          "actions": [
-            "talk_to_innkeeper",
-            "rent_room",
-            "buy_drinks",
-            "talk_to_doorman",
-            "book_performance",
-            "listen_to_music"
-          ],
+          "open": 7,
+          "close": 4,
           "special_features": [
             "vip_section_for_happytavern_nip5",
             "live_music_nightly"
           ]
-        },
-        {
-          "id": "caravan_office",
-          "name": "Caravan Guild Office",
-          "type": "transport",
-          "description": "The headquarters for organizing merchant caravans and long-distance travel.",
-          "actions": ["join_caravan", "hire_guards", "check_trade_routes"]
         }
       ],
       "npcs": ["tavern-keeper", "tavern-doorman"],

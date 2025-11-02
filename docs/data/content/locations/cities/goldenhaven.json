@@ -32,54 +32,42 @@
         {
           "id": "ember_vault",
           "name": "The Ember Vault",
-          "type": "vault",
           "description": "A place of fire and honor where dragonborn clan relics are preserved in magically sealed chests heated by dragonfire. The vaults are guarded by ancient draconic magic.",
-          "npc": "scalekeeper",
-          "actions": [
-            "talk_to_scalekeeper",
-            "access_storage",
-            "undergo_flamebinding"
-          ]
+          "npcs": ["scalekeeper"],
+          "open": "always",
+          "close": null
         },
         {
           "id": "goldenhaven_trade_goods",
           "name": "Goldscale Trading House",
-          "type": "shop",
           "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
-          "shop_type": "general",
-          "npc": "trade-merchant",
-          "actions": ["talk_to_merchant", "browse", "buy", "sell"]
+          "npcs": ["trade-merchant"],
+          "open": 7,
+          "close": 8
         },
         {
           "id": "grand_exchange",
           "name": "Grand Exchange",
-          "type": "bank",
           "description": "The financial heart of the city where currencies are exchanged and large transactions occur.",
-          "actions": [
-            "exchange_currency",
-            "deposit_large_sums",
-            "arrange_loans",
-            "check_rates"
-          ]
+          "npcs": [],
+          "open": 8,
+          "close": 6
         },
         {
           "id": "luxury_market",
           "name": "Golden Bazaar",
-          "type": "shop",
           "description": "An upscale market selling rare and exotic goods from across the world.",
-          "shop_type": "luxury",
-          "actions": ["buy_exotic_goods", "sell_rarities", "browse_luxuries"]
+          "npcs": [],
+          "open": 7,
+          "close": 9
         },
         {
           "id": "merchants_guild",
           "name": "Merchant Princes Guild",
-          "type": "guild",
           "description": "The most powerful guild in the city, controlling trade routes and merchant licenses.",
-          "actions": [
-            "apply_for_license",
-            "check_trade_routes",
-            "negotiate_contracts"
-          ]
+          "npcs": [],
+          "open": 8,
+          "close": 7
         }
       ],
       "npcs": ["scalekeeper", "trade-merchant"]
@@ -96,21 +84,18 @@
         {
           "id": "customs_house",
           "name": "Customs House",
-          "type": "civic",
           "description": "Where all goods entering the city are inspected and taxed.",
-          "actions": ["pay_customs", "declare_goods", "speak_to_officials"]
+          "npcs": [],
+          "open": 6,
+          "close": 10
         },
         {
           "id": "caravan_rest",
           "name": "Caravan Rest Inn",
-          "type": "inn",
           "description": "A large inn designed to accommodate merchant caravans and their guards.",
-          "actions": [
-            "rent_room",
-            "stable_animals",
-            "hire_guards",
-            "plan_routes"
-          ]
+          "npcs": [],
+          "open": 7,
+          "close": 4
         }
       ],
       "npcs": [],
@@ -128,10 +113,10 @@
         {
           "id": "miners_exchange",
           "name": "Mountain Ore Exchange",
-          "type": "shop",
           "description": "A major trading post for ores, gems, and mining equipment.",
-          "shop_type": "mining",
-          "actions": ["buy_gems", "sell_ore", "hire_prospectors"]
+          "npcs": [],
+          "open": 7,
+          "close": 7
         }
       ],
       "npcs": [],
@@ -149,25 +134,18 @@
         {
           "id": "harbor_master",
           "name": "Harbor Master's Office",
-          "type": "transport",
           "description": "Where ship passages are booked and cargo is registered.",
-          "actions": ["book_passage", "hire_ship", "check_schedules"]
+          "npcs": [],
+          "open": 6,
+          "close": 8
         },
         {
           "id": "sailors_tavern",
           "name": "The Salty Anchor",
-          "type": "tavern",
           "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
           "npcs": ["port-innkeeper", "port-doorman"],
-          "actions": [
-            "talk_to_innkeeper",
-            "rent_room",
-            "buy_drinks",
-            "talk_to_doorman",
-            "book_performance",
-            "listen_to_tales",
-            "hire_crew"
-          ]
+          "open": 7,
+          "close": 4
         }
       ],
       "npcs": ["port-innkeeper", "port-doorman"],

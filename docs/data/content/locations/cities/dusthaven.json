@@ -28,29 +28,26 @@
         {
           "id": "desert_inn",
           "name": "The Mirage's Rest",
-          "type": "inn",
           "description": "A cool, shaded inn built around the oasis where desert travelers rest.",
-          "actions": [
-            "rent_room",
-            "buy_water",
-            "rest_in_shade",
-            "talk_to_travelers"
-          ]
+          "npcs": [],
+          "open": 7,
+          "close": 4
         },
         {
           "id": "desert_supplies",
           "name": "Desert Walker's Supplies",
-          "type": "shop",
           "description": "A shop specializing in desert survival gear and supplies.",
-          "shop_type": "desert_gear",
-          "actions": ["buy_water_skins", "buy_desert_robes", "hire_guide"]
+          "npcs": [],
+          "open": 6,
+          "close": 9
         },
         {
           "id": "oasis_shrine",
           "name": "Shrine of the Sacred Well",
-          "type": "shrine",
           "description": "A modest shrine dedicated to the water spirits that bless the oasis.",
-          "actions": ["pray_for_water", "leave_offering", "ask_for_blessing"]
+          "npcs": [],
+          "open": "always",
+          "close": null
         }
       ],
       "npcs": []
@@ -67,9 +64,10 @@
         {
           "id": "caravan_staging",
           "name": "Caravan Assembly Point",
-          "type": "transport",
           "description": "Where desert caravans gather supplies and travelers before heading into the wasteland.",
-          "actions": ["join_caravan", "hire_protection", "buy_camels"]
+          "npcs": [],
+          "open": "always",
+          "close": null
         }
       ],
       "npcs": [],

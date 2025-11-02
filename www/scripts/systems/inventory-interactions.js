@@ -549,8 +549,12 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             console.log('✅ Action successful:', result.message);
             showMessage(result.message, 'success');
 
-            // Update game state with new inventory
-            if (result.newState) {
+            // For 'use' action, reload the full save to update hunger/fatigue/hp/mana
+            if (action === 'use' && window.loadSaveData) {
+                console.log('🔄 Reloading save to update character stats');
+                await window.loadSaveData();
+            } else if (result.newState) {
+                // Update game state with new inventory for other actions
                 const currentState = getGameState();
                 // Update character.inventory (full structure)
                 currentState.character.inventory = result.newState;
@@ -705,10 +709,18 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
     // Check backpack first (more space)
     if (state.character.inventory?.gear_slots?.bag?.contents) {
         const backpackSlots = state.character.inventory.gear_slots.bag.contents;
+
+        // Build a set of used slot numbers by checking the 'slot' field of each item
+        const usedSlots = new Set();
+        backpackSlots.forEach(slot => {
+            if (slot && slot.slot !== undefined && slot.item !== null && slot.item !== '') {
+                usedSlots.add(slot.slot);
+            }
+        });
+
+        // Find first unused slot number (0-19)
         for (let i = 0; i < 20; i++) {
-            // Check if slot is empty (null or item: null)
-            if (i >= backpackSlots.length || backpackSlots[i] === null ||
-                (backpackSlots[i].item === null || backpackSlots[i].item === '')) {
+            if (!usedSlots.has(i)) {
                 emptySlotIndex = i;
                 emptySlotType = 'inventory';
                 break;
@@ -719,10 +731,18 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
     // If no empty backpack slot, check general slots
     if (emptySlotIndex === -1 && state.character.inventory?.general_slots) {
         const generalSlots = state.character.inventory.general_slots;
+
+        // Build a set of used slot numbers
+        const usedSlots = new Set();
+        generalSlots.forEach(slot => {
+            if (slot && slot.slot !== undefined && slot.item !== null && slot.item !== '') {
+                usedSlots.add(slot.slot);
+            }
+        });
+
+        // Find first unused slot number (0-3)
         for (let i = 0; i < 4; i++) {
-            // Check if slot is empty (null or item: null)
-            if (i >= generalSlots.length || generalSlots[i] === null ||
-                (generalSlots[i].item === null || generalSlots[i].item === '')) {
+            if (!usedSlots.has(i)) {
                 emptySlotIndex = i;
                 emptySlotType = 'general';
                 break;

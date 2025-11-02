@@ -24,8 +24,11 @@ type SaveFile struct {
 	MaxHP               int                    `json:"max_hp"`
 	Mana                int                    `json:"mana"`
 	MaxMana             int                    `json:"max_mana"`
-	Fatigue             int                    `json:"fatigue"`
-	Gold                int                    `json:"gold"`
+	Fatigue        int `json:"fatigue"`
+	FatigueCounter int `json:"fatigue_counter"` // Increments each time segment, +1 fatigue when reaches 2
+	Hunger         int `json:"hunger"`          // 0-3 scale: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
+	HungerCounter  int `json:"hunger_counter"`  // Increments each time segment, -1 hunger when reaches threshold (3 or 6)
+	Gold           int `json:"gold"`
 	Stats               map[string]interface{} `json:"stats"`
 	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
@@ -37,9 +40,8 @@ type SaveFile struct {
 	LocationsDiscovered []string               `json:"locations_discovered"`
 	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
 	CurrentDay          int                    `json:"current_day"`
-	TimeOfDay           int                    `json:"time_of_day"`      // 0-11 index (0=midnight, 6=highnoon, 11=evening)
-	MovementCounter     int                    `json:"movement_counter"` // Tracks movements for fatigue calculation (every 2 movements = +1 fatigue)
-	InternalID          string                 `json:"-"`                // Not serialized, used internally for file naming
+	TimeOfDay           int                    `json:"time_of_day"` // 0-11 index (0=midnight, 6=highnoon, 11=evening)
+	InternalID          string                 `json:"-"`           // Not serialized, used internally for file naming
 	InternalNpub        string                 `json:"-"`                // Not serialized, used internally for directory structure
 }
 
@@ -130,6 +132,9 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["mana"] = save.Mana
 		saveMap["max_mana"] = save.MaxMana
 		saveMap["fatigue"] = save.Fatigue
+		saveMap["fatigue_counter"] = save.FatigueCounter
+		saveMap["hunger"] = save.Hunger
+		saveMap["hunger_counter"] = save.HungerCounter
 		saveMap["gold"] = save.Gold
 		saveMap["stats"] = save.Stats
 		saveMap["location"] = save.Location
@@ -143,7 +148,6 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["music_tracks_unlocked"] = save.MusicTracksUnlocked
 		saveMap["current_day"] = save.CurrentDay
 		saveMap["time_of_day"] = save.TimeOfDay
-		saveMap["movement_counter"] = save.MovementCounter
 		savesWithID = append(savesWithID, saveMap)
 	}
 
