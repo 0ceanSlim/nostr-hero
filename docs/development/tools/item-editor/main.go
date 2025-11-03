@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -12,34 +15,38 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/yaml.v3"
 )
 
 // Item represents a game item with all possible fields
 type Item struct {
-	ID           string              `json:"id"`
-	Name         string              `json:"name"`
-	Description  string              `json:"description,omitempty"`
-	Price        int                 `json:"price"`
-	Type         string              `json:"type"`
-	Weight       float64             `json:"weight"`
-	Stack        int                 `json:"stack"`
-	GearSlot     string              `json:"gear_slot,omitempty"`
-	Rarity       string              `json:"rarity"`
-	Tags         []string            `json:"tags,omitempty"`
-	Contents     [][]interface{}     `json:"contents,omitempty"`
-	AC           interface{}         `json:"ac,omitempty"`
-	Damage       interface{}         `json:"damage,omitempty"`
-	DamageType   string              `json:"damage-type,omitempty"`
-	Heal         interface{}         `json:"heal,omitempty"`
-	Ammunition   string              `json:"ammunition,omitempty"`
-	Range        string              `json:"range,omitempty"`
-	RangeLong    string              `json:"range-long,omitempty"`
-	Img          string              `json:"img,omitempty"`
-	Notes        []string            `json:"notes,omitempty"`
+	ID            string              `json:"id"`
+	Name          string              `json:"name"`
+	Description   string              `json:"description,omitempty"`
+	AIDescription string              `json:"ai_description,omitempty"`
+	Price         int                 `json:"price"`
+	Type          string              `json:"type"`
+	Weight        float64             `json:"weight"`
+	Stack         int                 `json:"stack"`
+	GearSlot      string              `json:"gear_slot,omitempty"`
+	Rarity        string              `json:"rarity"`
+	Tags          []string            `json:"tags,omitempty"`
+	Contents      [][]interface{}     `json:"contents,omitempty"`
+	AC            interface{}         `json:"ac,omitempty"`
+	Damage        interface{}         `json:"damage,omitempty"`
+	DamageType    string              `json:"damage-type,omitempty"`
+	Heal          interface{}         `json:"heal,omitempty"`
+	Ammunition    string              `json:"ammunition,omitempty"`
+	Range         string              `json:"range,omitempty"`
+	RangeLong     string              `json:"range-long,omitempty"`
+	Img           string              `json:"img,omitempty"`
+	Image         string              `json:"image,omitempty"`
+	Notes         []string            `json:"notes,omitempty"`
 	// Dynamic fields for any additional properties
-	Extra        map[string]interface{} `json:"-"`
+	Extra         map[string]interface{} `json:"-"`
 }
 
 // Reference represents a reference to an item ID found in other files
@@ -71,12 +78,201 @@ type RefactorPreview struct {
 	WillRename string      `json:"willRename"`
 }
 
+// Config for PixelLab API
+type Config struct {
+	PixelLab struct {
+		APIKey string `yaml:"api_key"`
+	} `yaml:"pixellab"`
+}
+
+// PixelLabResponse from API
+type PixelLabResponse struct {
+	Usage struct {
+		USD float64 `json:"usd"`
+	} `json:"usage"`
+	Image struct {
+		Base64 string `json:"base64"`
+	} `json:"image"`
+}
+
+// BalanceResponse from PixelLab
+type BalanceResponse struct {
+	Type string  `json:"type"`
+	USD  float64 `json:"usd"`
+}
+
+// PixelLabClient for image generation
+type PixelLabClient struct {
+	APIKey  string
+	BaseURL string
+	Client  *http.Client
+}
+
+// NewPixelLabClient creates a new PixelLab client
+func NewPixelLabClient(apiKey string) *PixelLabClient {
+	return &PixelLabClient{
+		APIKey:  apiKey,
+		BaseURL: "https://api.pixellab.ai/v1",
+		Client:  &http.Client{Timeout: 120 * time.Second},
+	}
+}
+
+// GetBalance checks API balance
+func (c *PixelLabClient) GetBalance() (*BalanceResponse, error) {
+	req, err := http.NewRequest("GET", c.BaseURL+"/balance", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, string(body))
+	}
+
+	var balance BalanceResponse
+	if err := json.NewDecoder(resp.Body).Decode(&balance); err != nil {
+		return nil, err
+	}
+	return &balance, nil
+}
+
+// GenerateImage generates a pixel art image
+func (c *PixelLabClient) GenerateImage(description, negativePrompt string, model string) (*PixelLabResponse, error) {
+	var endpoint string
+	var payload map[string]interface{}
+
+	basePayload := map[string]interface{}{
+		"description": description,
+		"image_size": map[string]int{
+			"width":  32,
+			"height": 32,
+		},
+		"no_background": true,
+		"detail":        "highly detailed",
+		"outline":       "single color black outline",
+	}
+
+	if negativePrompt != "" {
+		basePayload["negative_description"] = negativePrompt
+	}
+
+	switch model {
+	case "bitforge":
+		endpoint = "/generate-image-bitforge"
+		payload = basePayload
+	case "pixflux":
+		endpoint = "/generate-image-pixflux"
+		payload = basePayload
+	default:
+		return nil, fmt.Errorf("unsupported model: %s", model)
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", c.BaseURL+endpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result PixelLabResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // ItemEditor holds the application state
 type ItemEditor struct {
-	items map[string]*Item
+	items         map[string]*Item
+	pixellabClient *PixelLabClient
 }
 
 var editor *ItemEditor
+
+func loadConfig() (*Config, error) {
+	configPath := "config.yml"
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		log.Printf("⚠️ config.yml not found - image generation will be disabled")
+		return nil, nil
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+
+	if config.PixelLab.APIKey == "" {
+		log.Printf("⚠️ pixellab.api_key not found in config.yml - image generation will be disabled")
+		return nil, nil
+	}
+
+	return &config, nil
+}
+
+func generateFantasyPrompt(item *Item) string {
+	// Priority 1: Use ai_description if available
+	if item.AIDescription != "" && len(item.AIDescription) > 10 {
+		return item.AIDescription
+	}
+
+	// Priority 2: Use regular description if available
+	if item.Description != "" && len(item.Description) > 10 {
+		return item.Description
+	}
+
+	// Fallback: Generate from item name and type
+	rarity := strings.ToLower(item.Rarity)
+	var rarityDesc string
+	switch rarity {
+	case "common":
+		rarityDesc = "simple, basic"
+	case "uncommon":
+		rarityDesc = "well-crafted, slightly ornate"
+	case "rare":
+		rarityDesc = "ornate, decorated"
+	case "very rare":
+		rarityDesc = "highly ornate, magical aura"
+	case "legendary":
+		rarityDesc = "legendary, glowing, magical effects"
+	default:
+		rarityDesc = "well-made"
+	}
+
+	return fmt.Sprintf("%s %s", rarityDesc, item.Name)
+}
+
+func generateNegativePrompt() string {
+	return "blurry, fuzzy, soft, antialiased, smooth, low quality, modern, realistic, photograph, 3d render, low resolution, text, letters, words, people, characters, faces, anime, cartoon"
+}
 
 func main() {
 	editor = &ItemEditor{
@@ -85,6 +281,15 @@ func main() {
 
 	if err := editor.loadItems(); err != nil {
 		log.Fatal(err)
+	}
+
+	// Try to load config for PixelLab
+	config, err := loadConfig()
+	if err != nil {
+		log.Printf("⚠️ Error loading config: %v - continuing without image generation", err)
+	} else if config != nil {
+		editor.pixellabClient = NewPixelLabClient(config.PixelLab.APIKey)
+		log.Printf("✅ PixelLab client initialized")
 	}
 
 	r := mux.NewRouter()
@@ -99,9 +304,16 @@ func main() {
 	r.HandleFunc("/api/refactor/preview", editor.handleRefactorPreview).Methods("POST")
 	r.HandleFunc("/api/refactor/apply", editor.handleRefactorApply).Methods("POST")
 
+	// Image generation routes
+	r.HandleFunc("/api/balance", editor.handleGetBalance).Methods("GET")
+	r.HandleFunc("/api/items/{filename}/generate-image", editor.handleGenerateImage).Methods("POST")
+	r.HandleFunc("/api/items/{filename}/image", editor.handleGetImage).Methods("GET")
+	r.HandleFunc("/api/items/{filename}/accept-image", editor.handleAcceptImage).Methods("POST")
+
 	// Static files
-	r.HandleFunc("/", editor.handleIndex).Methods("GET")
+	r.PathPrefix("/www/").Handler(http.StripPrefix("/www/", http.FileServer(http.Dir("./www/"))))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	r.HandleFunc("/", editor.handleIndex).Methods("GET")
 
 	fmt.Println("🔧 Item Editor starting on http://localhost:8080")
 	fmt.Println("Opening browser...")
@@ -489,6 +701,67 @@ func (e *ItemEditor) handleIndex(w http.ResponseWriter, r *http.Request) {
             <div class="title" id="editTitle">Select an item to edit</div>
 
             <div id="editForm" class="hidden">
+                <!-- Image Preview and Generation Section -->
+                <div class="form-group" style="border: 1px solid #3d3d3d; border-radius: 4px; padding: 15px; margin-bottom: 20px; background-color: #1e1e1e;">
+                    <label class="form-label">Item Image:</label>
+
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <!-- Current Image Preview -->
+                        <div id="imagePreviewContainer" style="flex: 0 0 128px;">
+                            <div style="width: 128px; height: 128px; background-color: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 4px; display: flex; align-items: center; justify-content: center; image-rendering: pixelated;">
+                                <img id="currentImagePreview" style="max-width: 128px; max-height: 128px; image-rendering: pixelated; display: none;" />
+                                <div id="noImagePlaceholder" style="color: #6272a4; text-align: center; font-size: 12px;">No image</div>
+                            </div>
+                        </div>
+
+                        <!-- Image Generation Controls -->
+                        <div style="flex: 1;">
+                            <div id="pixellabStatus" style="margin-bottom: 10px; color: #6272a4; font-size: 12px;">
+                                <span id="balanceDisplay"></span>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <select id="modelSelect" class="form-input" style="width: 150px;">
+                                    <option value="bitforge">Bitforge (~$0.03)</option>
+                                    <option value="pixflux">Pixflux (~$0.05)</option>
+                                </select>
+                                <button class="button" onclick="generateImage()" id="generateImageBtn">
+                                    🎨 Generate Image
+                                </button>
+                                <button class="button button-secondary" onclick="refreshBalance()">
+                                    🔄 Refresh Balance
+                                </button>
+                            </div>
+
+                            <div id="generationStatus" style="display: none; padding: 10px; background-color: #2d2d2d; border-radius: 4px; margin-bottom: 10px;">
+                                <div id="generationMessage" style="color: #f1fa8c;"></div>
+                                <div id="generationCost" style="color: #50fa7b; font-size: 12px; margin-top: 5px;"></div>
+                            </div>
+
+                            <!-- Generated Image Preview -->
+                            <div id="generatedImageContainer" style="display: none;">
+                                <div style="margin-bottom: 10px;">
+                                    <label class="form-label">Generated Image:</label>
+                                    <div style="width: 128px; height: 128px; background-color: #2d2d2d; border: 1px solid #50fa7b; border-radius: 4px; display: flex; align-items: center; justify-content: center; image-rendering: pixelated;">
+                                        <img id="generatedImagePreview" style="max-width: 128px; max-height: 128px; image-rendering: pixelated;" />
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="button" onclick="acceptGeneratedImage()">
+                                        ✓ Use This Image
+                                    </button>
+                                    <button class="button button-danger" onclick="discardGeneratedImage()">
+                                        ✗ Discard
+                                    </button>
+                                </div>
+                                <div id="promptUsed" style="margin-top: 10px; padding: 8px; background-color: #2d2d2d; border-radius: 4px; font-size: 11px; color: #6272a4;">
+                                    <strong>Prompt:</strong> <span id="promptText"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="dynamicFields"></div>
 
                 <div class="form-group">
@@ -608,9 +881,9 @@ func (e *ItemEditor) handleIndex(w http.ResponseWriter, r *http.Request) {
 
         // Standard field order - these fields appear first in this order
         const STANDARD_FIELDS = [
-            'id', 'name', 'description', 'price', 'type', 'weight', 'stack',
+            'id', 'name', 'description', 'ai_description', 'price', 'type', 'weight', 'stack',
             'gear_slot', 'rarity', 'ac', 'damage', 'damage-type', 'heal',
-            'ammunition', 'range', 'range-long', 'img'
+            'ammunition', 'range', 'range-long', 'img', 'image'
         ];
 
         // Fields that should always exist (will be added if missing)
@@ -774,6 +1047,9 @@ func (e *ItemEditor) handleIndex(w http.ResponseWriter, r *http.Request) {
             renderDynamicFields();
             renderTags();
             renderNotes();
+
+            // Load current image
+            loadCurrentImage();
 
             // Show edit form
             document.getElementById('editForm').classList.remove('hidden');
@@ -1237,6 +1513,163 @@ func (e *ItemEditor) handleIndex(w http.ResponseWriter, r *http.Request) {
             document.getElementById('statusText').textContent = message;
         }
 
+        // Image generation functions
+        let generatedImageData = null;
+
+        async function refreshBalance() {
+            try {
+                const response = await fetch('/api/balance');
+                if (response.ok) {
+                    const balance = await response.json();
+                    document.getElementById('balanceDisplay').textContent =
+                        'Balance: $' + balance.usd.toFixed(4) + ' USD';
+                    updateStatus('Balance refreshed');
+                } else {
+                    document.getElementById('balanceDisplay').textContent =
+                        'PixelLab API not configured';
+                }
+            } catch (error) {
+                document.getElementById('balanceDisplay').textContent =
+                    'PixelLab API unavailable';
+                console.error('Error fetching balance:', error);
+            }
+        }
+
+        async function loadCurrentImage() {
+            if (!selectedFilename) return;
+
+            const response = await fetch('/api/items/' + selectedFilename + '/image');
+            const data = await response.json();
+
+            const preview = document.getElementById('currentImagePreview');
+            const placeholder = document.getElementById('noImagePlaceholder');
+
+            if (data.exists) {
+                preview.src = '/' + data.path.replace(/\\/g, '/');
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
+        }
+
+        async function generateImage() {
+            if (!selectedFilename) {
+                updateStatus('No item selected');
+                return;
+            }
+
+            const model = document.getElementById('modelSelect').value;
+            const btn = document.getElementById('generateImageBtn');
+            const statusDiv = document.getElementById('generationStatus');
+            const messageDiv = document.getElementById('generationMessage');
+            const costDiv = document.getElementById('generationCost');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+            statusDiv.style.display = 'block';
+            messageDiv.textContent = 'Generating pixel art image...';
+            costDiv.textContent = '';
+
+            try {
+                const response = await fetch('/api/items/' + selectedFilename + '/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ model: model })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    generatedImageData = result;
+
+                    messageDiv.textContent = '✓ Image generated successfully!';
+                    costDiv.textContent = 'Cost: $' + result.cost.toFixed(4) + ' USD';
+
+                    // Show the generated image
+                    const generatedPreview = document.getElementById('generatedImagePreview');
+                    generatedPreview.src = 'data:image/png;base64,' + result.imageData;
+                    document.getElementById('generatedImageContainer').style.display = 'block';
+                    document.getElementById('promptText').textContent = result.prompt;
+
+                    updateStatus('Image generated successfully');
+                    refreshBalance(); // Update balance
+                } else {
+                    const error = await response.text();
+                    messageDiv.textContent = '✗ Error: ' + error;
+                    messageDiv.style.color = '#ff5555';
+                    updateStatus('Error generating image');
+                }
+            } catch (error) {
+                messageDiv.textContent = '✗ Error: ' + error.message;
+                messageDiv.style.color = '#ff5555';
+                updateStatus('Error generating image');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🎨 Generate Image';
+            }
+        }
+
+        async function acceptGeneratedImage() {
+            if (!generatedImageData || !selectedFilename) return;
+
+            try {
+                // Call backend to copy the image to the main directory
+                const response = await fetch('/api/items/' + selectedFilename + '/accept-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageData: generatedImageData.imageData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save image');
+                }
+
+                const result = await response.json();
+
+                // Update the item's image field
+                const itemId = currentItemData.id;
+                const imagePathField = document.getElementById('field_image');
+                if (imagePathField) {
+                    imagePathField.value = '/res/img/items/' + itemId + '.png';
+                }
+
+                // Hide the generated image container
+                document.getElementById('generatedImageContainer').style.display = 'none';
+                document.getElementById('generationStatus').style.display = 'none';
+
+                // Update the current image preview
+                const preview = document.getElementById('currentImagePreview');
+                const placeholder = document.getElementById('noImagePlaceholder');
+                preview.src = 'data:image/png;base64,' + generatedImageData.imageData;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                updateStatus('Image accepted and saved to ' + result.path);
+                generatedImageData = null;
+            } catch (error) {
+                updateStatus('Error accepting image: ' + error.message);
+            }
+        }
+
+        function discardGeneratedImage() {
+            document.getElementById('generatedImageContainer').style.display = 'none';
+            document.getElementById('generationStatus').style.display = 'none';
+            generatedImageData = null;
+            updateStatus('Generated image discarded');
+        }
+
+        // Load balance on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshBalance();
+        });
+
         // Close modals when clicking outside
         window.onclick = function(event) {
             const refactorModal = document.getElementById('refactorModal');
@@ -1584,6 +2017,173 @@ func (e *ItemEditor) applyRefactor(preview *RefactorPreview, filename string) er
 	e.items[newFilename] = item
 
 	return nil
+}
+
+func (e *ItemEditor) handleGetBalance(w http.ResponseWriter, r *http.Request) {
+	if e.pixellabClient == nil {
+		http.Error(w, "PixelLab client not initialized", http.StatusServiceUnavailable)
+		return
+	}
+
+	balance, err := e.pixellabClient.GetBalance()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(balance)
+}
+
+func (e *ItemEditor) handleGenerateImage(w http.ResponseWriter, r *http.Request) {
+	if e.pixellabClient == nil {
+		http.Error(w, "PixelLab client not initialized", http.StatusServiceUnavailable)
+		return
+	}
+
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+
+	item, exists := e.items[filename]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	var req struct {
+		Model string `json:"model"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if req.Model == "" {
+		req.Model = "bitforge"
+	}
+
+	log.Printf("🎨 Generating image for %s using %s...", item.Name, req.Model)
+
+	prompt := generateFantasyPrompt(item)
+	negativePrompt := generateNegativePrompt()
+
+	result, err := e.pixellabClient.GenerateImage(prompt, negativePrompt, req.Model)
+	if err != nil {
+		log.Printf("❌ Error generating image: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Save image with timestamp to history folder
+	timestamp := time.Now().Format("20060102_150405")
+	historyDir := filepath.Join("www/res/img/items/_history", item.ID)
+	if err := os.MkdirAll(historyDir, 0755); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	historyFile := filepath.Join(historyDir, fmt.Sprintf("%s_%s.png", timestamp, req.Model))
+	imageData, err := base64.StdEncoding.DecodeString(result.Image.Base64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := os.WriteFile(historyFile, imageData, 0644); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("✅ Image generated successfully ($%.4f) - saved to history", result.Usage.USD)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":   true,
+		"cost":      result.Usage.USD,
+		"imagePath": historyFile,
+		"imageData": result.Image.Base64,
+		"prompt":    prompt,
+	})
+}
+
+func (e *ItemEditor) handleGetImage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+
+	item, exists := e.items[filename]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if image exists
+	imagePath := filepath.Join("www/res/img/items", item.ID+".png")
+	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"exists": false,
+		})
+		return
+	}
+
+	// Also check for images in history
+	historyDir := filepath.Join("www/res/img/items/_history", item.ID)
+	var historyFiles []string
+	if entries, err := os.ReadDir(historyDir); err == nil {
+		for _, entry := range entries {
+			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".png") {
+				historyFiles = append(historyFiles, entry.Name())
+			}
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"exists":       true,
+		"path":         imagePath,
+		"historyFiles": historyFiles,
+	})
+}
+
+func (e *ItemEditor) handleAcceptImage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+
+	item, exists := e.items[filename]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	var req struct {
+		ImageData string `json:"imageData"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Decode the base64 image data
+	imageData, err := base64.StdEncoding.DecodeString(req.ImageData)
+	if err != nil {
+		http.Error(w, "Invalid image data", http.StatusBadRequest)
+		return
+	}
+
+	// Save to main items directory
+	mainImagePath := filepath.Join("www/res/img/items", item.ID+".png")
+	if err := os.WriteFile(mainImagePath, imageData, 0644); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("✅ Image accepted for %s", item.Name)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"path":    mainImagePath,
+	})
 }
 
 func (e *ItemEditor) updateStartingGearReferences(preview *RefactorPreview) error {
