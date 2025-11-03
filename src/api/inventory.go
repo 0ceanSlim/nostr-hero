@@ -86,6 +86,8 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 	// Determine which equipment slot from item's gear_slot property
 	equipSlot := req.ToEquip
+	isTwoHanded := false
+
 	if equipSlot == "" {
 		// Fetch item data from database to get gear_slot property
 		database := db.GetDB()
@@ -95,9 +97,10 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 		var propertiesJSON string
 		var itemType string
-		err := database.QueryRow("SELECT properties, type FROM items WHERE id = ?", req.ItemID).Scan(&propertiesJSON, &itemType)
+		err := database.QueryRow("SELECT properties, item_type FROM items WHERE id = ?", req.ItemID).Scan(&propertiesJSON, &itemType)
 		if err != nil {
-			return &types.ItemActionResponse{Success: false, Error: "Item not found in database"}
+			log.Printf("❌ Failed to find item '%s' in database: %v", req.ItemID, err)
+			return &types.ItemActionResponse{Success: false, Error: fmt.Sprintf("Item '%s' not found in database", req.ItemID)}
 		}
 
 		var properties map[string]interface{}
@@ -105,16 +108,52 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 			return &types.ItemActionResponse{Success: false, Error: "Failed to parse item properties"}
 		}
 
+		// Check if item has two-handed tag
+		isTwoHanded = false
+		if tags, ok := properties["tags"].([]interface{}); ok {
+			for _, tag := range tags {
+				if tagStr, ok := tag.(string); ok && tagStr == "two-handed" {
+					isTwoHanded = true
+					break
+				}
+			}
+		}
+
 		if gearSlotProp, ok := properties["gear_slot"].(string); ok {
 			// Map item gear_slot to actual save file slot names
 			switch gearSlotProp {
 			case "hands":
-				// For weapons and shields, check if it's a shield or weapon
-				// Shields go to left_arm, weapons go to right_arm
+				// For weapons and shields, determine slot
 				if strings.Contains(strings.ToLower(itemType), "shield") || strings.Contains(strings.ToLower(itemType), "armor") {
 					equipSlot = "left_arm"
 				} else {
-					equipSlot = "right_arm"
+					// Weapon logic: check slot availability
+					rightArm := gearSlots["right_arm"]
+					leftArm := gearSlots["left_arm"]
+
+					rightOccupied := false
+					leftOccupied := false
+
+					if rightMap, ok := rightArm.(map[string]interface{}); ok {
+						if rightMap["item"] != nil && rightMap["item"] != "" {
+							rightOccupied = true
+						}
+					}
+					if leftMap, ok := leftArm.(map[string]interface{}); ok {
+						if leftMap["item"] != nil && leftMap["item"] != "" {
+							leftOccupied = true
+						}
+					}
+
+					// Choose slot based on availability
+					if !rightOccupied {
+						equipSlot = "right_arm"
+					} else if !leftOccupied {
+						equipSlot = "left_arm"
+					} else {
+						// Both full, will swap with right_arm
+						equipSlot = "right_arm"
+					}
 				}
 			case "armor", "body":
 				equipSlot = "armor"
@@ -136,16 +175,44 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		}
 	}
 
-	log.Printf("⚔️ Equipping to slot: %s", equipSlot)
+	log.Printf("⚔️ Equipping to slot: %s (two-handed: %v)", equipSlot, isTwoHanded)
 
-	// Check if slot is occupied
-	if existing := gearSlots[equipSlot]; existing != nil {
-		if existingMap, ok := existing.(map[string]interface{}); ok {
-			if existingMap["item"] != nil && existingMap["item"] != "" {
-				return &types.ItemActionResponse{
-					Success: false,
-					Error:   fmt.Sprintf("Equipment slot '%s' is already occupied", equipSlot),
-					Message: "Unequip the current item first",
+	// For two-handed weapons, unequip both hands first
+	var itemsToUnequip []map[string]interface{}
+	if isTwoHanded {
+		// Unequip right_arm if occupied
+		if rightMap, ok := gearSlots["right_arm"].(map[string]interface{}); ok {
+			if rightMap["item"] != nil && rightMap["item"] != "" {
+				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
+					"item":     rightMap["item"],
+					"quantity": rightMap["quantity"],
+					"from":     "right_arm",
+				})
+			}
+		}
+		// Unequip left_arm if occupied
+		if leftMap, ok := gearSlots["left_arm"].(map[string]interface{}); ok {
+			if leftMap["item"] != nil && leftMap["item"] != "" {
+				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
+					"item":     leftMap["item"],
+					"quantity": leftMap["quantity"],
+					"from":     "left_arm",
+				})
+			}
+		}
+	} else {
+		// Check if equipping a one-handed weapon when two-handed is equipped
+		// (Need to unequip the two-handed weapon)
+		// For now, just check if target slot is occupied
+		if existing := gearSlots[equipSlot]; existing != nil {
+			if existingMap, ok := existing.(map[string]interface{}); ok {
+				if existingMap["item"] != nil && existingMap["item"] != "" {
+					// Will swap with this item
+					itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
+						"item":     existingMap["item"],
+						"quantity": existingMap["quantity"],
+						"from":     equipSlot,
+					})
 				}
 			}
 		}
@@ -208,17 +275,57 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		return &types.ItemActionResponse{Success: false, Error: "Invalid source slot type"}
 	}
 
+	// Find source slot array index if searching backpack by slot number
+	sourceArrayIndex := req.FromSlot
+	if fromSlotType == "inventory" {
+		// Find the array index for this slot
+		for i, slotData := range sourceInventory {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.FromSlot {
+					sourceArrayIndex = i
+					break
+				}
+			}
+		}
+	}
+
+	// Add unequipped items back to inventory (swapped items)
+	for _, unequipData := range itemsToUnequip {
+		// Put the item in the slot we're taking the new item from
+		sourceInventory[sourceArrayIndex] = map[string]interface{}{
+			"item":     unequipData["item"],
+			"quantity": unequipData["quantity"],
+			"slot":     req.FromSlot,
+		}
+		// Clear the equipment slot
+		slotName := unequipData["from"].(string)
+		gearSlots[slotName] = map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+		}
+	}
+
 	// Move item to equipment slot (only store item and quantity, remove slot field)
 	gearSlots[equipSlot] = map[string]interface{}{
 		"item":     itemData["item"],
 		"quantity": itemData["quantity"],
 	}
 
-	// Empty the source slot
-	sourceInventory[req.FromSlot] = map[string]interface{}{
-		"item":     nil,
-		"quantity": 0,
-		"slot":     req.FromSlot,
+	// For two-handed weapons, also clear left_arm
+	if isTwoHanded {
+		gearSlots["left_arm"] = map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+		}
+	}
+
+	// Empty the source slot if no swap occurred
+	if len(itemsToUnequip) == 0 {
+		sourceInventory[sourceArrayIndex] = map[string]interface{}{
+			"item":     nil,
+			"quantity": 0,
+			"slot":     req.FromSlot,
+		}
 	}
 
 	// Save back to correct location
@@ -229,7 +336,7 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		bag["contents"] = sourceInventory
 	}
 
-	log.Printf("✅ Equipped %s to %s", req.ItemID, equipSlot)
+	log.Printf("✅ Equipped %s to %s (swapped %d items)", req.ItemID, equipSlot, len(itemsToUnequip))
 
 	return &types.ItemActionResponse{
 		Success: true,

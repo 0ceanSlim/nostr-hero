@@ -550,9 +550,16 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             showMessage(result.message, 'success');
 
             // For 'use' action, reload the full save to update hunger/fatigue/hp/mana
-            if (action === 'use' && window.loadSaveData) {
-                console.log('🔄 Reloading save to update character stats');
-                await window.loadSaveData();
+            if (action === 'use') {
+                if (window.loadSaveData) {
+                    console.log('🔄 Reloading save to update character stats');
+                    await window.loadSaveData();
+
+                    // Force a UI refresh by calling updateCharacterDisplay again
+                    if (typeof updateCharacterDisplay === 'function') {
+                        await updateCharacterDisplay();
+                    }
+                }
             } else if (result.newState) {
                 // Update game state with new inventory for other actions
                 const currentState = getGameState();

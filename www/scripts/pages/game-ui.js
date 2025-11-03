@@ -492,10 +492,11 @@ async function updateCharacterDisplay() {
                                 itemImg.remove();
                             }
                         } else {
-                            // Placeholder was removed, restore it from the original HTML
-                            // Get the slot-specific placeholder based on slot name
-                            const placeholderHTML = getPlaceholderSVG(slotName);
-                            imageContainer.innerHTML = placeholderHTML;
+                            // No placeholder found, just clear the image
+                            const itemImg = imageContainer.querySelector('img');
+                            if (itemImg) {
+                                itemImg.remove();
+                            }
                         }
                     }
                 }

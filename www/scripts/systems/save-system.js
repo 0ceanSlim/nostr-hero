@@ -201,6 +201,7 @@ async function loadSaveData() {
             hunger_counter: saveData.hunger_counter || 0,
             gold: saveData.gold || 0,
             stats: saveData.stats,
+            inventory: saveData.inventory || {},
             vault: saveData.vault || {},
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
