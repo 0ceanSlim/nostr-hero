@@ -2,13 +2,11 @@
   "id": "parchment",
   "name": "Parchment",
   "description": "A sheet of treated animal skin that serves as a writing surface.",
+  "ai_description": "Cream-colored animal skin sheet with smooth writing surface",
   "price": 10,
   "type": "Adventuring Gear",
-  "weight": 0.01,
-  "stack": 1,
-  "gear_slot": "",
+  "weight": 0,
+  "stack": 10,
   "rarity": "common",
-  "tags": [],
-  "ai_description": "Cream-colored animal skin sheet with smooth writing surface",
   "image": "/res/img/items/parchment.png"
 }
