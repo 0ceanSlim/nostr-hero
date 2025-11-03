@@ -911,34 +911,122 @@ function showItemDetails(itemId) {
         return;
     }
 
-    // Create modal
+    // Find the scene container
+    const sceneImage = document.getElementById('scene-image');
+    const sceneContainer = sceneImage ? sceneImage.parentElement : null;
+
+    if (!sceneContainer) {
+        console.warn('Scene container not found');
+        return;
+    }
+
+    // Create modal overlay within scene
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    modal.className = 'absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
 
     const content = document.createElement('div');
-    content.className = 'bg-gray-800 border-4 border-gray-600 p-6 max-w-md';
+    content.className = 'bg-gray-800 border-4 border-gray-600 p-3 max-w-xs w-full mx-4';
     content.style.clipPath = 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))';
 
+    // Build properties display - check both top-level and properties object
+    const properties = [];
+    const props = itemData.properties || {};
+
+    // Helper to get property value
+    const getProp = (name) => itemData[name] ?? props[name];
+
+    // Always show basic info
+    properties.push(`<div><strong class="text-gray-400">Type:</strong> ${itemData.type || itemData.item_type || 'Unknown'}</div>`);
+    properties.push(`<div><strong class="text-gray-400">Rarity:</strong> <span class="capitalize">${itemData.rarity || 'common'}</span></div>`);
+
+    const weight = getProp('weight');
+    if (weight && weight > 0) {
+        properties.push(`<div><strong class="text-gray-400">⚖️</strong> ${weight} lb</div>`);
+    }
+
+    const price = getProp('price');
+    if (price && price > 0) {
+        properties.push(`<div><strong class="text-yellow-400">💰</strong> ${price} gp</div>`);
+    }
+
+    // Weapon properties
+    const damage = getProp('damage');
+    if (damage && damage !== 'null' && damage !== null) {
+        properties.push(`<div><strong class="text-red-400">Damage:</strong> ${damage}</div>`);
+    }
+
+    const damageType = getProp('damage-type');
+    if (damageType && damageType !== 'null') {
+        properties.push(`<div><strong class="text-red-400">Damage Type:</strong> <span class="capitalize">${damageType}</span></div>`);
+    }
+
+    const range = getProp('range');
+    if (range && range !== 'null' && range !== null) {
+        properties.push(`<div><strong class="text-blue-400">Range:</strong> ${range} ft</div>`);
+    }
+
+    const rangeLong = getProp('range-long');
+    if (rangeLong && rangeLong !== 'null' && rangeLong !== null) {
+        properties.push(`<div><strong class="text-blue-400">Long Range:</strong> ${rangeLong} ft</div>`);
+    }
+
+    // Armor properties
+    const ac = getProp('ac');
+    if (ac && ac !== 'null' && ac !== null) {
+        properties.push(`<div><strong class="text-blue-400">AC:</strong> ${ac}</div>`);
+    }
+
+    // Healing properties
+    const heal = getProp('heal');
+    if (heal && heal !== 'null' && heal !== null) {
+        properties.push(`<div><strong class="text-green-400">Healing:</strong> ${heal}</div>`);
+    }
+
+    // Effects (for consumables)
+    const effects = props.effects;
+    if (effects && Array.isArray(effects) && effects.length > 0) {
+        const effectsList = effects.map(effect => {
+            const sign = effect.value > 0 ? '+' : '';
+            return `${effect.type} ${sign}${effect.value}`;
+        }).join(', ');
+        properties.push(`<div class="col-span-2"><strong class="text-green-400">Effects:</strong> ${effectsList}</div>`);
+    }
+
+    // Tags
+    const tags = itemData.tags || props.tags;
+    if (tags && Array.isArray(tags) && tags.length > 0) {
+        const tagsList = tags
+            .filter(tag => tag !== 'equipment') // Hide generic equipment tag
+            .map(tag => `<span class="px-2 py-0.5 bg-gray-700 rounded text-xs capitalize">${tag.replace(/-/g, ' ')}</span>`)
+            .join(' ');
+        if (tagsList) {
+            properties.push(`<div class="col-span-2 mt-2"><strong class="text-gray-400">Tags:</strong> ${tagsList}</div>`);
+        }
+    }
+
+    // Gear slot
+    const gearSlot = getProp('gear_slot');
+    if (gearSlot) {
+        properties.push(`<div class="col-span-2"><strong class="text-purple-400">Equip Slot:</strong> <span class="capitalize">${gearSlot.replace(/_/g, ' ')}</span></div>`);
+    }
+
     content.innerHTML = `
-        <h2 class="text-2xl font-bold text-yellow-400 mb-4">${itemData.name}</h2>
-        ${itemData.image ? `<img src="${itemData.image}" alt="${itemData.name}" class="w-full mb-4" style="image-rendering: pixelated;">` : ''}
-        <p class="text-gray-300 mb-4">${itemData.description || 'No description available.'}</p>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-            <div><strong class="text-gray-400">Type:</strong> ${itemData.type}</div>
-            <div><strong class="text-gray-400">Rarity:</strong> ${itemData.rarity || 'common'}</div>
-            <div><strong class="text-gray-400">Weight:</strong> ${itemData.weight || 0} lbs</div>
-            <div><strong class="text-gray-400">Value:</strong> ${itemData.price || 0} gp</div>
+        <h2 class="text-base font-bold text-yellow-400 mb-1">${itemData.name}</h2>
+        ${itemData.image ? `<img src="${itemData.image}" alt="${itemData.name}" class="w-16 mx-auto mb-1" style="image-rendering: pixelated;">` : ''}
+        <p class="text-gray-300 mb-2 italic text-xs">${itemData.description || itemData.ai_description || 'No description available.'}</p>
+        <div class="grid grid-cols-2 gap-1 text-xs mb-2">
+            ${properties.join('\n            ')}
         </div>
-        <button class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white w-full">Close</button>
+        <button class="mt-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs w-full">Close</button>
     `;
 
     content.querySelector('button').addEventListener('click', () => modal.remove());
 
     modal.appendChild(content);
-    document.body.appendChild(modal);
+    sceneContainer.appendChild(modal);
 }
 
 /**

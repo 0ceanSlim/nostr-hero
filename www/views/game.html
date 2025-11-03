@@ -28,6 +28,76 @@
   class="fixed z-50 max-w-sm space-y-2 top-4 right-4"
 ></div>
 
+<!-- Logout Confirmation Modal -->
+<div
+  id="logout-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideLogoutModal()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-md"
+    style="border: 4px solid var(--color-textPrimary); background: #2a2a2a;"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-6">
+      <h3 class="text-2xl font-bold mb-4 text-center" style="color: #dc2626;">❌ Logout</h3>
+      <p class="text-center mb-6" style="color: #e5e7eb;">Are you sure you want to log out?</p>
+      <div class="flex gap-3">
+        <button
+          onclick="confirmLogout()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #dc2626; border-top: 2px solid #ef4444; border-left: 2px solid #ef4444; border-right: 2px solid #991b1b; border-bottom: 2px solid #991b1b;"
+        >
+          Yes, Logout
+        </button>
+        <button
+          onclick="hideLogoutModal()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bug Report Modal -->
+<div
+  id="bug-report-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideBugReportModal()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-md"
+    style="border: 4px solid var(--color-textPrimary); background: #2a2a2a;"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-6">
+      <h3 class="text-2xl font-bold mb-4 text-center" style="color: #eab308;">🐛 Report Bug</h3>
+      <p class="text-center mb-6" style="color: #e5e7eb;">This button will open a new window to a GitHub issue. Please be as descriptive as you can and thank you for taking the time to make a report!</p>
+      <div class="flex gap-3">
+        <button
+          onclick="confirmBugReport()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #ca8a04; border-top: 2px solid #eab308; border-left: 2px solid #eab308; border-right: 2px solid #854d0e; border-bottom: 2px solid #854d0e;"
+        >
+          Open GitHub
+        </button>
+        <button
+          onclick="hideBugReportModal()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Main Game Container - Full Screen with Dark Win95 Style -->
 <div
   id="game-app"
@@ -222,22 +292,38 @@
       });
     }
 
-    function reportBug() {
+    function showBugReportModal() {
+      document.getElementById('bug-report-modal').classList.remove('hidden');
+    }
+
+    function hideBugReportModal() {
+      document.getElementById('bug-report-modal').classList.add('hidden');
+    }
+
+    function confirmBugReport() {
+      hideBugReportModal();
       const bugReportUrl = "https://github.com/0ceanSlim/nostr-hero/issues/new?template=bug_report.md";
       showMessage("🐛 Opening bug report...", "info");
       window.open(bugReportUrl, "_blank");
     }
 
-    function logout() {
-      if (confirm("Are you sure you want to logout? Any unsaved progress will be lost.")) {
-        showMessage("🚪 Logging out...", "info");
-        if (window.sessionManager) {
-          window.sessionManager.logout();
-        }
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+    function showLogoutModal() {
+      document.getElementById('logout-modal').classList.remove('hidden');
+    }
+
+    function hideLogoutModal() {
+      document.getElementById('logout-modal').classList.add('hidden');
+    }
+
+    function confirmLogout() {
+      hideLogoutModal();
+      showMessage("🚪 Logging out...", "info");
+      if (window.sessionManager) {
+        window.sessionManager.logout();
       }
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
     }
   </script>
   <script src="/scripts/core/session-manager.js?v=20251026t"></script>
