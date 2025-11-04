@@ -1,7 +1,33 @@
 # Hunger System Implementation Plan
 
+**Status**: ✅ Implemented (2025-11-02)
+**Needs Refactoring**: Item effects system
+
 ## Overview
 Add hunger tracking (0-3 scale) with automatic time-based decay and ration consumption. When famished (hunger = 0), take -1 HP damage every 4 hours. Cannot eat when full.
+
+## Current Status
+
+✅ **Implemented**:
+- Hunger tracking (0-3 scale)
+- Time-based decay
+- Starvation damage
+- Rations consumption
+- UI display
+- Save/load persistence
+
+⚠️ **Needs Refactoring**:
+The item effects system described in Phase 4 needs to be standardized. Currently, item effects are handled inconsistently:
+- Rations have `effects` array but format needs standardization
+- Other consumables (food, potions) need unified effect structure
+- Backend needs generic effect application system
+- See: `docs/development/tools/item-editor.md` for planned effects schema
+
+**Next Steps**:
+1. Standardize item `effects` field format across all consumable items
+2. Implement generic backend effect handler (not item-specific)
+3. Update item editor to support effects editing
+4. Migrate existing items to new format
 
 ---
 

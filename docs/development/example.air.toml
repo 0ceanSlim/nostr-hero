@@ -1,0 +1,65 @@
+# Air Configuration for Nostr Hero
+# Live reload development server
+# https://github.com/cosmtrek/air
+
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  args_bin = []
+  bin = "tmp/main.exe"
+
+  # Build command - includes Tailwind CSS compilation
+  # Runs Tailwind first, then builds Go binary
+  cmd = "cmd /c \"tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --minify && go build -o ./tmp/main.exe .\""
+
+  # Delay before restart (milliseconds)
+  delay = 1000
+
+  # Directories to exclude from watching
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "www", "docs", "data"]
+  exclude_file = []
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = true
+  follow_symlink = false
+  full_bin = ""
+
+  # Directories to watch
+  include_dir = ["src"]
+
+  # File extensions to watch
+  include_ext = ["go"]
+  include_file = []
+
+  # Process management
+  kill_delay = "0s"
+  log = "build-errors.log"
+  poll = false
+  poll_interval = 0
+  rerun = false
+  rerun_delay = 500
+  send_interrupt = false
+  stop_on_error = false
+
+[color]
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[log]
+  main_only = false
+  time = false
+
+[watcher]
+  # Reduce verbosity - don't show excluded file messages
+  verbose = false
+
+[misc]
+  clean_on_exit = false
+
+[screen]
+  clear_on_rebuild = true
+  keep_scroll = false

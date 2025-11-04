@@ -1,8 +1,22 @@
-# House of Keeping System
+# Vault System (House of Keeping)
+
+**Status**: ❌ Not implemented - Planning phase
+**Priority**: Medium - QoL feature for inventory management
+**Note**: Original concept was "House of Keeping" - simplified to "Vault" for starting cities
 
 ## Overview
 
-The **House of Keeping** is the world's universal storage system - culturally-appropriate "banks" where players can safely store items across different locations. Each racial starting location has its own unique House of Keeping with thematic flavor and naming conventions.
+The **Vault** (originally "House of Keeping") is a universal storage system where players can safely store items beyond inventory limits.
+
+**Simplified Scope**:
+- Focus on general vault service for now
+- Skip race-specific themes and multi-location mechanics initially
+- Just need basic storage in starting cities
+
+**Original Concept** (below):
+The House of Keeping was designed as culturally-appropriate "banks" where players can safely store items across different locations. Each racial starting location has its own unique House of Keeping with thematic flavor and naming conventions.
+
+**Current Plan**: See `locations-plan.md` for simplified vault requirements.
 
 ## Core Mechanics
 
