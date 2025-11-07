@@ -3,7 +3,7 @@
   "name": "Millhaven Village",
   "type": "village",
   "image": "/res/img/locations/millhaven.png",
-  "music": "/res/aud/millhaven - Healing.wav",
+  "music": "Healing",
   "description": "A peaceful farming village nestled in rolling hills, where windmills turn lazily in the breeze and fields of grain stretch to the horizon.",
   "starting_races": ["Halfling", "Gnome"],
   "racial_entry_fees": {

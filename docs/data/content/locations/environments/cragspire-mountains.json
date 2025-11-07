@@ -3,6 +3,7 @@
   "name": "Cragspire Mountains",
   "type": "environment",
   "environment_type": "mountain",
+  "music": "Citadel in the Mountains",
   "connects": ["ironpeak-south", "goldenhaven-north"],
   "description": "Towering peaks pierce the clouds, their snow-capped summits gleaming in the sunlight. Rocky paths wind precariously along cliff faces, while the thin air makes every breath a struggle.",
   "travel_time": 4,

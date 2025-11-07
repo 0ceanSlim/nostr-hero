@@ -3,7 +3,7 @@
   "name": "Ironpeak Town",
   "type": "town",
   "image": "/res/img/locations/ironpeak.png",
-  "music": "/res/aud/ironpeak - Breath Of The Mountains.wav",
+  "music": "Breath Of The Mountains",
   "description": "A mining town built into the foothills of towering mountains. The constant ring of hammers on metal echoes through the valleys as miners extract precious ores from the rocky peaks.",
   "starting_races": ["Dwarf"],
   "racial_entry_fees": {

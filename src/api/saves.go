@@ -33,14 +33,14 @@ type SaveFile struct {
 	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
 	Building            string                 `json:"building"`     // Building ID or empty for outdoors
+	CurrentDay          int                    `json:"current_day"`
+	TimeOfDay           int                    `json:"time_of_day"` // 0-11 index (0=midnight, 6=highnoon, 11=evening)
 	Inventory           map[string]interface{} `json:"inventory"`
-	Vault               map[string]interface{} `json:"vault"`
+	Vaults              []map[string]interface{} `json:"vaults"`
 	KnownSpells         []string               `json:"known_spells"`
 	SpellSlots          map[string]interface{} `json:"spell_slots"`
 	LocationsDiscovered []string               `json:"locations_discovered"`
 	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
-	CurrentDay          int                    `json:"current_day"`
-	TimeOfDay           int                    `json:"time_of_day"` // 0-11 index (0=midnight, 6=highnoon, 11=evening)
 	InternalID          string                 `json:"-"`           // Not serialized, used internally for file naming
 	InternalNpub        string                 `json:"-"`                // Not serialized, used internally for directory structure
 }
@@ -141,7 +141,7 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["district"] = save.District
 		saveMap["building"] = save.Building
 		saveMap["inventory"] = save.Inventory
-		saveMap["vault"] = save.Vault
+		saveMap["vaults"] = save.Vaults
 		saveMap["known_spells"] = save.KnownSpells
 		saveMap["spell_slots"] = save.SpellSlots
 		saveMap["locations_discovered"] = save.LocationsDiscovered

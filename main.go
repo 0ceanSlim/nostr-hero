@@ -79,6 +79,7 @@ func main() {
 
 	// Existing API endpoints
 	mux.HandleFunc("/api/character", api.CharacterHandler)
+	mux.HandleFunc("/api/character/create-save", api.CreateCharacterHandler)
 	mux.HandleFunc("/api/profile", api.ProfileHandler)
 
 	port := utils.AppConfig.Server.Port

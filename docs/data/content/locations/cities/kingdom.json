@@ -3,7 +3,7 @@
   "name": "The Royal Kingdom",
   "type": "kingdom",
   "image": "/res/img/locations/kingdom.png",
-  "music": "/res/aud/kingdom - A Just King.wav",
+  "music": "A Just King",
   "description": "The grand capital city stands as the heart of the realm, its towering spires and bustling streets a testament to prosperity and order.",
   "starting_races": ["Human", "Half-Elf", "Half-Orc", "Tiefling"],
   "racial_entry_fees": {

@@ -3,7 +3,7 @@
   "name": "Marshlight Village",
   "type": "village",
   "image": "/res/img/locations/marshlight.png",
-  "music": "/res/aud/marshlight - Mellow Times.wav",
+  "music": "Mellow Times",
   "description": "A small village built on raised platforms over the wetlands. The residents have learned to live in harmony with the swamp, using its resources while respecting its dangers.",
   "starting_races": ["Orc"],
   "racial_entry_fees": {

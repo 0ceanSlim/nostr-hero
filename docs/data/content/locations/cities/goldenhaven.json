@@ -3,7 +3,7 @@
   "name": "Goldenhaven City",
   "type": "city",
   "image": "/res/img/locations/kingdom.png",
-  "music": "/res/aud/goldhaven - God of Dreams.wav",
+  "music": "God of Dreams",
   "description": "A prosperous trading city where merchant ships dock at busy harbors and exotic goods from distant lands fill the markets. Golden banners flutter from tall buildings built with wealth from maritime commerce.",
   "starting_races": ["Dragonborn"],
   "racial_entry_fees": {

@@ -4,12 +4,12 @@
     "Half-Elf": "kingdom",
     "Half-Orc": "kingdom",
     "Tiefling": "kingdom",
-    "Elf": "city-south",
-    "Dwarf": "town-northeast",
-    "Halfling": "village-west",
-    "Gnome": "village-west",
-    "Orc": "village-southwest",
-    "Dragonborn": "city-east"
+    "Elf": "verdant",
+    "Dwarf": "ironpeak",
+    "Halfling": "millhaven",
+    "Gnome": "millhaven",
+    "Orc": "marshlight",
+    "Dragonborn": "goldenhaven"
   },
   "entry_fees_by_race": {
     "kingdom": {
@@ -26,7 +26,7 @@
         "Dragonborn": 2
       }
     },
-    "city-east": {
+    "goldenhaven": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -40,7 +40,7 @@
         "Dragonborn": 0
       }
     },
-    "city-south": {
+    "verdant": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": -1,
@@ -54,7 +54,7 @@
         "Dragonborn": 1
       }
     },
-    "town-north": {
+    "frosthold": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -68,7 +68,7 @@
         "Dragonborn": 0
       }
     },
-    "town-northeast": {
+    "ironpeak": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -82,7 +82,7 @@
         "Dragonborn": 1
       }
     },
-    "village-west": {
+    "millhaven": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -96,7 +96,7 @@
         "Dragonborn": 1
       }
     },
-    "village-southeast": {
+    "dusthaven": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -110,7 +110,7 @@
         "Dragonborn": -1
       }
     },
-    "village-southwest": {
+    "marshlight": {
       "racial_modifiers": {
         "Human": 1,
         "Half-Elf": 0,
@@ -124,7 +124,7 @@
         "Dragonborn": 0
       }
     },
-    "village-south": {
+    "saltwind": {
       "racial_modifiers": {
         "Human": 0,
         "Half-Elf": 0,
@@ -157,27 +157,27 @@
       "description": "Tieflings begin in the kingdom where the rule of law provides some protection, despite facing suspicion and prejudice throughout the realm."
     },
     "Elf": {
-      "starting_city": "city-south",
+      "starting_city": "verdant",
       "description": "Elves start in Verdant City, a center of learning and nature magic that aligns with their long lives and connection to the natural world."
     },
     "Dwarf": {
-      "starting_city": "town-northeast",
+      "starting_city": "ironpeak",
       "description": "Dwarves begin in Ironpeak Town, a mining community built into the mountains where their skills with stone and metal are highly valued."
     },
     "Halfling": {
-      "starting_city": "village-west",
+      "starting_city": "millhaven",
       "description": "Halflings start in Millhaven Village, a peaceful farming community in the hills that matches their love of comfort, good food, and simple pleasures."
     },
     "Gnome": {
-      "starting_city": "village-west",
+      "starting_city": "millhaven",
       "description": "Gnomes begin in Millhaven Village where their curiosity and inventiveness are welcomed by the farming community that appreciates practical innovations."
     },
     "Orc": {
-      "starting_city": "village-southwest",
+      "starting_city": "marshlight",
       "description": "Orcs start in Marshlight Village, a remote swamp settlement where their strength is valued and their tribal nature is better understood."
     },
     "Dragonborn": {
-      "starting_city": "city-east",
+      "starting_city": "goldenhaven",
       "description": "Dragonborn begin in Goldenhaven City, a wealthy trading hub where exotic travelers are more common and their draconic heritage is seen as prestigious rather than threatening."
     }
   }

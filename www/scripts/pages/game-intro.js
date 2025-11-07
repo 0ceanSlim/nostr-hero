@@ -1844,133 +1844,62 @@ async function createInventoryFromItems(allItems) {
 async function startAdventure() {
   try {
     console.log("🎮 Starting adventure...");
-    console.log("generatedCharacter:", generatedCharacter);
-    console.log("startingEquipment:", startingEquipment);
-    console.log("selectedEquipment:", selectedEquipment);
     console.log("playerName:", playerName);
-
-    // Validate we have the required data
-    if (!generatedCharacter) {
-      throw new Error("No character data available");
-    }
-    if (!startingEquipment) {
-      throw new Error("No starting equipment data available");
-    }
+    console.log("selectedEquipment:", selectedEquipment);
 
     // Get the final character name (either edited or generated)
-    const finalName = playerName || generatedCharacter.name;
+    const finalName = playerName || "0";
 
-    // Collect all items (starting + selected)
-    let allItems = [];
-
-    // Add starting equipment with proper stacking
-    for (const startingItem of startingEquipment.inventory) {
-      await addItemWithStacking(
-        allItems,
-        startingItem.item,
-        startingItem.quantity
-      );
-    }
-
-    // Add selected equipment to items list with proper stacking
+    // Convert selectedEquipment to simple key-value map
+    const equipmentChoices = {};
     for (const [key, option] of Object.entries(selectedEquipment)) {
-      // Skip pack - it will be handled separately in inventory creation
       if (key === "pack") {
-        // Pack is just a string ID, add it as an item
-        await addItemWithStacking(allItems, option, 1);
-        continue;
+        continue; // Handle pack separately
       }
 
-      if (option.isComplexChoice) {
-        // Handle complex weapon choices
-        const selectedWeapons = option.weapons || [];
-        for (const weapon of selectedWeapons) {
-          await addItemWithStacking(allItems, weapon[0], weapon[1]);
+      // Convert numeric keys to "choice-X" format for Go
+      const choiceKey = `choice-${key}`;
+
+      if (option.item) {
+        equipmentChoices[choiceKey] = option.item;
+      } else if (option.isBundle && option.bundle && option.bundle.length > 0) {
+        // Use first item in bundle as identifier
+        equipmentChoices[choiceKey] = option.bundle[0][0];
+      } else if (option.isComplexChoice) {
+        // Handle complex weapon choices - get selected weapons
+        const weapons = option.getSelectedWeapons();
+        if (weapons && weapons.length > 0) {
+          // Send as JSON string with weapon selections
+          equipmentChoices[choiceKey] = JSON.stringify(weapons);
         }
-      } else if (option.isBundle) {
-        for (const bundleItem of option.bundle) {
-          await addItemWithStacking(allItems, bundleItem[0], bundleItem[1]);
-        }
-      } else if (option.item) {
-        await addItemWithStacking(allItems, option.item, option.quantity || 1);
       }
     }
 
-    // Create proper inventory structure with dynamic equipment placement
-    const inventory = await createInventoryFromItems(allItems);
+    // Get pack choice
+    const packChoice = selectedEquipment.pack || "";
 
-    // Prepare final character data (remove choices and other unnecessary fields)
-    const finalCharacter = {
-      name: finalName,
-      race: generatedCharacter.race,
-      class: generatedCharacter.class,
-      background: generatedCharacter.background,
-      alignment: generatedCharacter.alignment,
-      experience: generatedCharacter.experience,
-      stats: generatedCharacter.stats,
-      hp: generatedCharacter.hp,
-      max_hp: generatedCharacter.max_hp,
-      mana: generatedCharacter.mana,
-      max_mana: generatedCharacter.max_mana,
-      fatigue: generatedCharacter.fatigue,
-      gold: generatedCharacter.gold,
-      inventory: inventory,
-      known_spells: generatedCharacter.spells || [],
-      spell_slots: generatedCharacter.spell_slots || {},
-    };
-
-
-    // Generate starting vault (40 slots, empty, city-based)
-    const startingCity = generatedCharacter.city || "kingdom";
-    const startingVault = generateStartingVault(startingCity);
-    console.log("✅ Generated vault for", startingCity, ":", startingVault);
-
-    // Convert location IDs to display names for save file
-    const displayNames = await getDisplayNamesForLocation(startingCity, "center", "");
-    console.log("✅ Display names:", displayNames);
-
-    // Create new save file with ALL required fields
+    // Send to new Go endpoint
     const session = window.sessionManager.getSession();
-    const saveData = {
-      d: finalName,
-      created_at: new Date().toISOString(),
-      race: finalCharacter.race,
-      class: finalCharacter.class,
-      background: finalCharacter.background,
-      alignment: finalCharacter.alignment,
-      experience: finalCharacter.experience || 0,
-      hp: finalCharacter.hp,
-      max_hp: finalCharacter.max_hp,
-      mana: finalCharacter.mana,
-      max_mana: finalCharacter.max_mana,
-      fatigue: finalCharacter.fatigue || 0,
-      gold: finalCharacter.gold,
-      stats: finalCharacter.stats,
-      location: displayNames.location,
-      district: displayNames.district,
-      building: displayNames.building || "",
-      inventory: finalCharacter.inventory,
-      vault: startingVault,
-      known_spells: finalCharacter.known_spells,
-      spell_slots: finalCharacter.spell_slots,
-      locations_discovered: [startingCity],
-      music_tracks_unlocked: ["character-creation", "kingdom-theme"],
-      current_day: 1,
-      time_of_day: "day"
+    const requestData = {
+      npub: session.npub,
+      name: finalName,
+      equipment_choices: equipmentChoices,
+      pack_choice: packChoice
     };
 
-    console.log("💾 Creating save with data:", saveData);
-    const response = await fetch(`/api/saves/${session.npub}`, {
+    console.log("📤 Sending character creation request:", requestData);
+
+    const response = await fetch("/api/character/create-save", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(saveData),
+      body: JSON.stringify(requestData),
     });
 
     if (response.ok) {
       const result = await response.json();
-      console.log("✅ Save created successfully:", result);
+      console.log("✅ Character created successfully:", result);
 
       // Play departure music and transition
       const introMusic = document.getElementById("intro-music");
@@ -1986,7 +1915,8 @@ async function startAdventure() {
         window.location.href = "/game?save=" + result.save_id;
       }, 3000);
     } else {
-      throw new Error("Failed to create save file");
+      const error = await response.json();
+      throw new Error(error.error || "Failed to create save file");
     }
   } catch (error) {
     console.error("❌ Failed to start adventure:", error);

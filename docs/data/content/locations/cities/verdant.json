@@ -3,7 +3,7 @@
   "name": "Verdant City",
   "type": "city",
   "image": "/res/img/locations/verdant.png",
-  "music": "/res/aud/verdant - Folklore.wav",
+  "music": "Folklore",
   "description": "A lush city built where the great forest meets fertile farmlands. Green terraced gardens rise up the hillsides, and the scent of blooming flowers fills the air. This is a center of learning and nature magic.",
   "starting_races": ["Elf"],
   "racial_entry_fees": {
