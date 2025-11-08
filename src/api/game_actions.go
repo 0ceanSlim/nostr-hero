@@ -302,120 +302,7 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 	return effects
 }
 
-// handleEquipItemAction equips an item from inventory
-func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
-	itemID, ok := params["item_id"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing or invalid item_id parameter")
-	}
-
-	toEquip, ok := params["equipment_slot"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing or invalid equipment_slot parameter")
-	}
-
-	fromSlot := int(params["from_slot"].(float64))
-	fromSlotType, _ := params["from_slot_type"].(string)
-
-	log.Printf("⚔️ Equipping %s from %s[%d] to %s", itemID, fromSlotType, fromSlot, toEquip)
-
-	// Get inventory structure
-	gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{})
-	if !ok {
-		gearSlots = make(map[string]interface{})
-		state.Inventory["gear_slots"] = gearSlots
-	}
-
-	// Check if something is already equipped in that slot
-	currentlyEquipped := gearSlots[toEquip]
-	if currentlyEquipped != nil {
-		log.Printf("⚠️ Slot %s is occupied, will be unequipped", toEquip)
-		// Unequip current item to first available inventory slot
-		// For now, we'll just overwrite (TODO: add auto-unequip logic)
-	}
-
-	// Remove item from source inventory
-	var sourceItem map[string]interface{}
-
-	if fromSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
-		if !ok || fromSlot >= len(generalSlots) {
-			return nil, fmt.Errorf("invalid source slot")
-		}
-		slotMap, ok := generalSlots[fromSlot].(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf("invalid slot data")
-		}
-		sourceItem = slotMap
-	} else if fromSlotType == "inventory" {
-		// From backpack
-		bag, ok := gearSlots["bag"].(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf("backpack not found")
-		}
-		contents, ok := bag["contents"].([]interface{})
-		if !ok || fromSlot >= len(contents) {
-			return nil, fmt.Errorf("invalid backpack slot")
-		}
-		slotMap, ok := contents[fromSlot].(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf("invalid slot data")
-		}
-		sourceItem = slotMap
-	} else {
-		return nil, fmt.Errorf("invalid source slot type: %s", fromSlotType)
-	}
-
-	// Verify the item matches
-	if sourceItem["item"] != itemID {
-		return nil, fmt.Errorf("item mismatch: expected %s, found %v", itemID, sourceItem["item"])
-	}
-
-	// Equip the item
-	gearSlots[toEquip] = map[string]interface{}{
-		"item":     itemID,
-		"quantity": 1,
-	}
-
-	// Clear source slot
-	sourceItem["item"] = nil
-	sourceItem["quantity"] = 0
-
-	return &GameActionResponse{
-		Success: true,
-		Message: fmt.Sprintf("Equipped %s", itemID),
-	}, nil
-}
-
-// handleUnequipItemAction unequips an item to inventory
-func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
-	slot, ok := params["equipment_slot"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing or invalid equipment_slot parameter")
-	}
-
-	// Get gear slots
-	inventory, ok := state.Inventory["gear_slots"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid inventory structure")
-	}
-
-	// Check if slot has an item
-	currentItem := inventory[slot]
-	if currentItem == nil {
-		return nil, fmt.Errorf("no item equipped in slot %s", slot)
-	}
-
-	// TODO: Find empty slot in general inventory
-	// TODO: Move item to general inventory
-	// For now, just clear the equipment slot
-	inventory[slot] = nil
-
-	return &GameActionResponse{
-		Success: true,
-		Message: fmt.Sprintf("Unequipped item from %s", slot),
-	}, nil
-}
+// Equipment handlers are now in equipment.go
 
 // handleDropItemAction drops an item from inventory
 func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
@@ -425,13 +312,42 @@ func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*Game
 	}
 
 	slot, _ := params["slot"].(float64)
-
-	// Find and remove item
-	inventory, ok := state.Inventory["general_slots"].([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid inventory structure")
+	slotType, _ := params["slot_type"].(string)
+	if slotType == "" {
+		slotType = "general" // Default to general slots
 	}
 
+	// Get the quantity to drop (default to all if not specified)
+	dropQuantity := -1
+	if qty, ok := params["quantity"].(float64); ok {
+		dropQuantity = int(qty)
+	}
+
+	log.Printf("📤 Dropping %s: quantity=%d from %s[%d]", itemID, dropQuantity, slotType, int(slot))
+
+	// Find item in appropriate inventory
+	var itemFound bool
+	var inventory []interface{}
+
+	if slotType == "general" {
+		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid inventory structure")
+		}
+		inventory = generalSlots
+	} else if slotType == "inventory" {
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
+		bag, _ := gearSlots["bag"].(map[string]interface{})
+		backpackContents, ok := bag["contents"].([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid backpack structure")
+		}
+		inventory = backpackContents
+	} else {
+		return nil, fmt.Errorf("invalid slot_type: %s", slotType)
+	}
+
+	// Search for item
 	for i, slotData := range inventory {
 		slotMap, ok := slotData.(map[string]interface{})
 		if !ok {
@@ -439,10 +355,31 @@ func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*Game
 		}
 
 		if slotMap["item"] == itemID && (slot < 0 || i == int(slot)) {
-			slotMap["item"] = nil
-			slotMap["quantity"] = 0
+			itemFound = true
+
+			// Get current quantity
+			currentQty := 1
+			if qty, ok := slotMap["quantity"].(float64); ok {
+				currentQty = int(qty)
+			}
+
+			// Determine how much to drop
+			if dropQuantity <= 0 || dropQuantity >= currentQty {
+				// Drop entire stack
+				slotMap["item"] = nil
+				slotMap["quantity"] = 0
+				log.Printf("✅ Dropped entire stack of %s (%d items)", itemID, currentQty)
+			} else {
+				// Drop partial stack
+				slotMap["quantity"] = float64(currentQty - dropQuantity)
+				log.Printf("✅ Dropped %d %s (keeping %d)", dropQuantity, itemID, currentQty-dropQuantity)
+			}
 			break
 		}
+	}
+
+	if !itemFound {
+		return nil, fmt.Errorf("item not found: %s", itemID)
 	}
 
 	return &GameActionResponse{

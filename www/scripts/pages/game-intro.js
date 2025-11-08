@@ -1295,9 +1295,28 @@ function showEquipmentSelection() {
       }`;
       choiceGroup.appendChild(choiceTitle);
 
-      // Handle complex weapon choices
-      if (choice.type === "complex_weapon_choice") {
-        renderComplexWeaponChoice(choiceGroup, choice, index);
+      // Handle complex weapon choices (check if ANY option has multi_slot type)
+      const hasMultiSlotOption = choice.options && choice.options.some(opt => opt.type === 'multi_slot');
+      if (choice.type === "complex_weapon_choice" || choice.type === "multi_slot" || hasMultiSlotOption) {
+        // Normalize format from character-generator.js to what renderComplexWeaponChoice expects
+        const normalizedChoice = {
+          ...choice,
+          slots: choice.slots || (choice.weaponSlots ? choice.weaponSlots.map(slot => {
+            if (slot.type === 'weapon_choice') {
+              return {
+                type: 'choice',
+                options: slot.options.map(opt => Array.isArray(opt) ? opt[0] : opt)
+              };
+            } else if (slot.type === 'fixed_item') {
+              return {
+                type: 'fixed_item',
+                item: Array.isArray(slot.item) ? slot.item[0] : slot.item
+              };
+            }
+            return slot;
+          }) : [])
+        };
+        renderComplexWeaponChoice(choiceGroup, normalizedChoice, index);
       } else {
         // Regular options
         choice.options.forEach((option, optionIndex) => {
@@ -1845,7 +1864,10 @@ async function startAdventure() {
   try {
     console.log("🎮 Starting adventure...");
     console.log("playerName:", playerName);
-    console.log("selectedEquipment:", selectedEquipment);
+
+    // Get selections from equipment-selection.js
+    const selectedEquipment = window.getSelectedEquipment ? window.getSelectedEquipment() : {};
+    console.log("selectedEquipment from equipment-selection.js:", selectedEquipment);
 
     // Get the final character name (either edited or generated)
     const finalName = playerName || "0";
@@ -1860,18 +1882,29 @@ async function startAdventure() {
       // Convert numeric keys to "choice-X" format for Go
       const choiceKey = `choice-${key}`;
 
-      if (option.item) {
-        equipmentChoices[choiceKey] = option.item;
-      } else if (option.isBundle && option.bundle && option.bundle.length > 0) {
-        // Use first item in bundle as identifier
-        equipmentChoices[choiceKey] = option.bundle[0][0];
-      } else if (option.isComplexChoice) {
-        // Handle complex weapon choices - get selected weapons
+      // Check bundles and complex choices FIRST (they also have .item property)
+      if (option.isBundle && option.bundle && option.bundle.length > 0) {
+        // Send entire bundle as JSON array
+        console.log('📦 Bundle choice:', option.bundle);
+        equipmentChoices[choiceKey] = JSON.stringify(option.bundle);
+      } else if (option.isComplexChoice && option.weapons) {
+        // Handle complex weapon choices from equipment-selection.js
+        console.log('🗡️ Complex choice with weapons:', option.weapons);
+        equipmentChoices[choiceKey] = JSON.stringify(option.weapons);
+      } else if (option.isComplexChoice && typeof option.getSelectedWeapons === 'function') {
+        // Handle complex weapon choices - old format
         const weapons = option.getSelectedWeapons();
         if (weapons && weapons.length > 0) {
           // Send as JSON string with weapon selections
           equipmentChoices[choiceKey] = JSON.stringify(weapons);
         }
+      } else if (option.isComplexChoice && option.weaponSlots) {
+        // Handle complex choice from character generator (doesn't have getSelectedWeapons method)
+        // For now, skip this - user needs to make a proper selection
+        console.warn('Complex choice selected but not properly initialized:', option);
+      } else if (option.item) {
+        // Simple item (check this LAST since bundles also have .item property)
+        equipmentChoices[choiceKey] = option.item;
       }
     }
 

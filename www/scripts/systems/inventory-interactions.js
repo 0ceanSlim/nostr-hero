@@ -126,29 +126,42 @@ function bindSlotEvents(slotElement, slotType, slotIndex) {
  * Bind events to an equipment slot
  */
 function bindEquipmentSlotEvents(slotElement, slotName) {
-    // Check if slot has an item (look for data-item-id on the slot or inside it)
-    let itemId = slotElement.getAttribute('data-item-id');
-    if (!itemId) {
-        const itemData = slotElement.querySelector('[data-item-id]');
-        itemId = itemData?.getAttribute('data-item-id');
-    }
+    // Always bind click events to equipment slots (even when empty)
+    // The handlers will dynamically check if there's an item at click time
+    slotElement.addEventListener('click', (e) => {
+        const itemId = slotElement.getAttribute('data-item-id');
+        if (itemId) {
+            handleLeftClick(e, itemId, 'equipment', slotName);
+        }
+    });
 
-    if (itemId) {
-        // Make slot draggable
-        slotElement.setAttribute('draggable', 'true');
+    slotElement.addEventListener('contextmenu', (e) => {
+        const itemId = slotElement.getAttribute('data-item-id');
+        if (itemId) {
+            handleRightClick(e, itemId, 'equipment', slotName);
+        }
+    });
 
-        // Drag events
-        slotElement.addEventListener('dragstart', (e) => handleDragStart(e, itemId, 'equipment', slotName));
-        slotElement.addEventListener('dragend', handleDragEnd);
+    // Bind drag events dynamically
+    slotElement.addEventListener('dragstart', (e) => {
+        const itemId = slotElement.getAttribute('data-item-id');
+        if (itemId) {
+            slotElement.setAttribute('draggable', 'true');
+            handleDragStart(e, itemId, 'equipment', slotName);
+        } else {
+            e.preventDefault();
+        }
+    });
+    slotElement.addEventListener('dragend', handleDragEnd);
 
-        // Click events
-        slotElement.addEventListener('click', (e) => handleLeftClick(e, itemId, 'equipment', slotName));
-        slotElement.addEventListener('contextmenu', (e) => handleRightClick(e, itemId, 'equipment', slotName));
-
-        // Hover events
-        slotElement.addEventListener('mouseenter', (e) => showItemTooltip(e, itemId, 'equipment'));
-        slotElement.addEventListener('mouseleave', hideItemTooltip);
-    }
+    // Hover events (dynamic check)
+    slotElement.addEventListener('mouseenter', (e) => {
+        const itemId = slotElement.getAttribute('data-item-id');
+        if (itemId) {
+            showItemTooltip(e, itemId, 'equipment');
+        }
+    });
+    slotElement.addEventListener('mouseleave', hideItemTooltip);
 
     // Always allow dropping onto equipment slots
     slotElement.addEventListener('dragover', handleDragOver);
@@ -341,9 +354,10 @@ function getDefaultAction(itemData, isEquipped) {
     const weaponTypes = ['Weapon', 'Melee Weapon', 'Ranged Weapon', 'Simple Weapon', 'Martial Weapon'];
     const armorTypes = ['Armor', 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shield'];
     const wearableTypes = ['Ring', 'Necklace', 'Amulet', 'Cloak', 'Boots', 'Gloves', 'Helmet', 'Hat'];
+    const ammunitionTypes = ['Ammunition', 'Ammo'];
     const consumableTypes = ['Potion', 'Consumable', 'Food'];
 
-    if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType)) {
+    if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType) || ammunitionTypes.includes(itemType)) {
         return 'equip';
     }
 
@@ -372,8 +386,9 @@ function getItemActions(itemData, isEquipped) {
             const weaponTypes = ['Weapon', 'Melee Weapon', 'Ranged Weapon', 'Simple Weapon', 'Martial Weapon'];
             const armorTypes = ['Armor', 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shield'];
             const wearableTypes = ['Ring', 'Necklace', 'Amulet', 'Cloak', 'Boots', 'Gloves', 'Helmet', 'Hat'];
+            const ammunitionTypes = ['Ammunition', 'Ammo'];
 
-            if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType)) {
+            if (weaponTypes.includes(itemType) || armorTypes.includes(itemType) || wearableTypes.includes(itemType) || ammunitionTypes.includes(itemType)) {
                 actions.push({ action: 'equip', label: 'Equip' });
             }
         }
@@ -522,8 +537,8 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
                 return;
             }
 
-            // Set the drop quantity in the request
-            request.quantity = dropQuantity;
+            // Set the drop quantity in the params
+            params.quantity = dropQuantity;
 
             // Store drop info for after successful API call
             dropInfo = {
@@ -533,7 +548,7 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             };
         } else {
             // Single item
-            request.quantity = 1;
+            params.quantity = 1;
 
             // Store drop info for after successful API call
             dropInfo = {

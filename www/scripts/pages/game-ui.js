@@ -454,7 +454,8 @@ async function updateCharacterDisplay() {
             const slotEl = document.querySelector(`[data-slot="${slotName}"]`);
             if (slotEl) {
                 const itemId = gear[slotName]?.item;
-                console.log(`Equipment slot ${slotName}:`, itemId);
+                const quantity = gear[slotName]?.quantity || 1;
+                console.log(`Equipment slot ${slotName}:`, itemId, `(qty: ${quantity})`);
 
                 if (itemId) {
                     // Add data-item-id attribute to the slot for interaction system
@@ -473,10 +474,31 @@ async function updateCharacterDisplay() {
                         } else {
                             console.warn(`⚠️ No image container found for ${slotName}`);
                         }
+
+                        // Add quantity label if > 1 (for ammunition, potions, etc.)
+                        // First remove any existing quantity label
+                        const existingLabel = slotEl.querySelector('.equipment-quantity-label');
+                        if (existingLabel) {
+                            existingLabel.remove();
+                        }
+
+                        if (quantity > 1) {
+                            const quantityLabel = document.createElement('div');
+                            quantityLabel.className = 'equipment-quantity-label absolute bottom-0 right-0 text-white';
+                            quantityLabel.style.fontSize = '10px';
+                            quantityLabel.textContent = `${quantity}`;
+                            slotEl.appendChild(quantityLabel);
+                        }
                     }
                 } else {
                     // Remove data-item-id attribute if slot is empty
                     slotEl.removeAttribute('data-item-id');
+
+                    // Remove quantity label if present
+                    const existingLabel = slotEl.querySelector('.equipment-quantity-label');
+                    if (existingLabel) {
+                        existingLabel.remove();
+                    }
 
                     // Reset to placeholder if empty
                     const imageContainer = slotEl.querySelector('.w-10.h-10');
@@ -1671,55 +1693,28 @@ async function pickupGroundItem(itemId) {
 
     const itemData = getItemById(itemId);
 
-    // Add to inventory via backend
-    const npub = getCurrentNpub();
-    const saveId = getSaveId();
-
-    if (!npub || !saveId) {
-        showMessage('No active save', 'error');
+    // Check if Game API is initialized
+    if (!window.gameAPI || !window.gameAPI.initialized) {
+        console.error('Game API not initialized');
+        // Put back on ground
+        window.addItemToGround(itemId, groundItem.quantity);
+        showMessage('❌ Game not initialized', 'error');
         return;
     }
 
     try {
-        const response = await fetch('/api/inventory/action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                npub: npub,
-                save_id: saveId,
-                item_id: itemId,
-                action: 'add',
-                quantity: groundItem.quantity,
-                from_slot: -1,
-                to_slot: -1,
-                from_slot_type: '',
-                to_slot_type: '',
-                from_equip: '',
-                to_equip: ''
-            })
+        // Use new game API
+        const result = await window.gameAPI.sendAction('add_item', {
+            item_id: itemId,
+            quantity: groundItem.quantity
         });
-
-        const result = await response.json();
 
         if (result.success) {
             showMessage(`Picked up ${itemData?.name || itemId}`, 'success');
             window.addGameLog(`Picked up ${itemData?.name || itemId} from the ground.`);
 
-            // Update game state
-            if (result.newState) {
-                const currentState = getGameState();
-                // Update character.inventory (full structure)
-                currentState.character.inventory = result.newState;
-                // Also update the separate inventory and equipment fields
-                currentState.inventory = result.newState.general_slots || [];
-                currentState.equipment = result.newState.gear_slots || {};
-                updateGameState(currentState);
-
-                // Refresh inventory UI to show the picked up item
-                await updateCharacterDisplay();
-            }
+            // Refresh game state from Go memory
+            await refreshGameState();
 
             // Refresh modal
             closeGroundModal();

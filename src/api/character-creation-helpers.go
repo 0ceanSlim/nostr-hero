@@ -59,21 +59,26 @@ func buildInventoryFromChoices(database *sql.DB, startingGear *StartingGearData,
 			continue
 		}
 
-		// Check if it's a JSON array (complex weapon choice)
-		if selectedID[0] == '[' {
-			var weaponList [][]interface{}
-			if err := json.Unmarshal([]byte(selectedID), &weaponList); err == nil {
-				// Successfully parsed as complex choice
-				for _, weapon := range weaponList {
-					if len(weapon) >= 2 {
-						itemID, ok1 := weapon[0].(string)
-						qty, ok2 := weapon[1].(float64)
+		// Check if it's a JSON array (complex weapon choice OR bundle)
+		if len(selectedID) > 0 && selectedID[0] == '[' {
+			log.Printf("📦 Parsing JSON array for %s: %s", choiceKey, selectedID)
+			var itemList [][]interface{}
+			if err := json.Unmarshal([]byte(selectedID), &itemList); err == nil {
+				// Successfully parsed as array
+				log.Printf("✅ Parsed %d items from JSON array", len(itemList))
+				for _, itemPair := range itemList {
+					if len(itemPair) >= 2 {
+						itemID, ok1 := itemPair[0].(string)
+						qty, ok2 := itemPair[1].(float64)
 						if ok1 && ok2 {
+							log.Printf("  - Adding %s x%d", itemID, int(qty))
 							allItems = append(allItems, ItemWithQty{Item: itemID, Quantity: int(qty)})
 						}
 					}
 				}
 				continue
+			} else {
+				log.Printf("❌ Failed to parse JSON array: %v", err)
 			}
 		}
 
@@ -221,8 +226,9 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 		}
 	}
 
-	// 2. Auto-equip equipment items
-	for i := len(remainingItems) - 1; i >= 0; i-- {
+	// 2. Auto-equip equipment items (process in forward order - earlier choices have priority)
+	equippedIndices := []int{} // Track which items were equipped
+	for i := 0; i < len(remainingItems); i++ {
 		item := remainingItems[i]
 		itemData, err := getItemData(database, item.Item)
 		if err != nil {
@@ -244,6 +250,7 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 					"item":     item.Item,
 					"quantity": item.Quantity,
 				}
+				log.Printf("✅ Equipped %s to %s slot", item.Item, gearSlot)
 				equipped = true
 			}
 
@@ -256,6 +263,7 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
+					log.Printf("✅ Equipped two-handed %s to hands", item.Item)
 					twoHandedEquipped = true
 					equipped = true
 				}
@@ -265,21 +273,28 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
+					log.Printf("✅ Equipped %s to right hand", item.Item)
 					equipped = true
 				} else if gearSlots["left_arm"].(map[string]interface{})["item"] == nil && !twoHandedEquipped {
 					gearSlots["left_arm"] = map[string]interface{}{
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
+					log.Printf("✅ Equipped %s to left hand", item.Item)
 					equipped = true
 				}
 			}
 		}
 
 		if equipped {
-			// Remove from remaining items
-			remainingItems = append(remainingItems[:i], remainingItems[i+1:]...)
+			equippedIndices = append(equippedIndices, i)
 		}
+	}
+
+	// Remove equipped items in reverse order to maintain indices
+	for i := len(equippedIndices) - 1; i >= 0; i-- {
+		idx := equippedIndices[i]
+		remainingItems = append(remainingItems[:idx], remainingItems[idx+1:]...)
 	}
 
 	// 3. Put remaining items in general slots or backpack

@@ -437,7 +437,14 @@ async function showEquipmentChoiceScene(choice, choiceIndex) {
   content.appendChild(title);
 
   // Check if any option is a complex choice (multi_slot)
+  console.log('🔍 Checking for complex options in choice:', choice);
+  console.log('🔍 Options:', choice.options);
+  choice.options.forEach((opt, i) => {
+    console.log(`  Option ${i}: type=${opt.type}, isComplexChoice=${opt.isComplexChoice}`);
+  });
+
   const complexOptions = choice.options.filter(opt => opt.isComplexChoice);
+  console.log('🔍 Found', complexOptions.length, 'complex options');
 
   if (complexOptions.length > 0) {
     // Show complex choice with weapon slots (two-step process)
@@ -702,6 +709,11 @@ async function showRegularChoiceSelection(content, choice, choiceIndex) {
  * Step 2: Choose specific weapons for each slot
  */
 async function showMultiSlotChoiceSelection(content, choice, choiceIndex, complexOptions) {
+  console.log('🎮 showMultiSlotChoiceSelection called!');
+  console.log('  choice:', choice);
+  console.log('  choiceIndex:', choiceIndex);
+  console.log('  complexOptions:', complexOptions);
+
   const container = document.getElementById('scene-container');
 
   // Step 1: Show configuration options
@@ -737,6 +749,14 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
     // Show slot descriptions
     const slotsDesc = document.createElement('div');
     slotsDesc.className = 'text-center text-gray-300 space-y-2';
+
+    console.log('🔧 Rendering slots for option:', option);
+    console.log('🔧 option.weaponSlots:', option.weaponSlots);
+
+    if (!option.weaponSlots || option.weaponSlots.length === 0) {
+      console.error('❌ No weaponSlots found!');
+      return; // Skip this option
+    }
 
     option.weaponSlots.forEach((slot, slotIdx) => {
       const slotDiv = document.createElement('div');
@@ -787,7 +807,9 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
 
   // Add back button if this is not the first choice
   if (choiceIndex > 0) {
+    console.log('🔙 Creating back button for choice', choiceIndex);
     const backBtn = createBackButton(() => {
+      console.log('🔙 Back button clicked!');
       userClickedBack = true;
       // Enable confirm button so it can be clicked
       confirmBtn.disabled = false;
@@ -796,6 +818,7 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
     });
     document.body.appendChild(backBtn);
     currentBackButton = backBtn;
+    console.log('🔙 Back button added to DOM');
   }
 
   // Show scene with slide in animation
@@ -803,8 +826,14 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
   container.style.opacity = '1';
   content.style.animation = 'slideInFromRight 0.3s ease-out';
 
+  console.log('⏳ About to wait for button click...');
+  console.log('⏳ Confirm button:', confirmBtn);
+  console.log('⏳ Confirm button disabled?', confirmBtn.disabled);
+
   // Wait for configuration selection
   await waitForButtonClick(confirmBtn);
+
+  console.log('✅ Button was clicked! User selected configuration:', selectedConfiguration);
 
   // Remove back button
   if (currentBackButton) {
@@ -833,6 +862,8 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
   }
 
   // Step 2: Now show weapon selection for each slot in the chosen configuration
+  console.log('⚔️ Step 2: Weapon selection for configuration:', selectedConfiguration);
+
   const weaponSelections = {};
   let currentSlotIdx = 0;
   let weaponChoiceIndices = []; // Track which slots are weapon choices (for back navigation)
@@ -844,14 +875,23 @@ async function showMultiSlotChoiceSelection(content, choice, choiceIndex, comple
     }
   });
 
+  console.log('⚔️ Found', weaponChoiceIndices.length, 'weapon slots to choose:', weaponChoiceIndices);
+
   let weaponChoicePosition = 0; // Position in weaponChoiceIndices array
 
+  console.log('⚔️ Starting weapon selection loop...');
+
   while (weaponChoicePosition < weaponChoiceIndices.length) {
+    console.log(`⚔️ Loop iteration ${weaponChoicePosition + 1} of ${weaponChoiceIndices.length}`);
     currentSlotIdx = weaponChoiceIndices[weaponChoicePosition];
     const slot = selectedConfiguration.weaponSlots[currentSlotIdx];
 
+    console.log('⚔️ Showing weapon selection for slot', currentSlotIdx, ':', slot);
+
     // Show weapon selection scene
     const result = await showWeaponSlotSelection(slot, weaponChoicePosition, weaponChoiceIndices.length, choiceIndex);
+
+    console.log('⚔️ Weapon selection result:', result);
 
     if (result.shouldGoBack) {
       // Go back to previous weapon choice, or back to configuration if first
@@ -967,8 +1007,19 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
   confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
   content.appendChild(confirmBtn);
 
+  // IMPORTANT: Remove any existing back button first!
+  console.log('🔙 Checking for existing back buttons...');
+  const existingBackButtons = document.querySelectorAll('.pixel-back-btn');
+  console.log('🔙 Found', existingBackButtons.length, 'existing back buttons');
+  existingBackButtons.forEach((btn, i) => {
+    console.log(`🔙 Removing old back button ${i}`);
+    btn.remove();
+  });
+
   // Add back button (always show during weapon selection, since we can go back to config or previous weapon)
+  console.log('🔙 Creating NEW back button for weapon selection');
   const backBtn = createBackButton(() => {
+    console.log('🔙 WEAPON SELECTION back button clicked!');
     userClickedBack = true;
     // Enable confirm button so it can be clicked
     confirmBtn.disabled = false;
@@ -977,14 +1028,21 @@ async function showWeaponSlotSelection(slot, slotIndex, totalSlots, choiceIndex)
   });
   document.body.appendChild(backBtn);
   currentBackButton = backBtn;
+  console.log('🔙 Weapon selection back button added to DOM');
 
   // Show scene with slide in animation
   container.classList.remove('hidden');
   container.style.opacity = '1';
   content.style.animation = 'slideInFromRight 0.3s ease-out';
 
+  console.log('⏳ About to wait for WEAPON selection button...');
+  console.log('⏳ Weapon confirm button:', confirmBtn);
+  console.log('⏳ Weapon confirm button disabled?', confirmBtn.disabled);
+
   // Wait for weapon selection
   await waitForButtonClick(confirmBtn);
+
+  console.log('✅ WEAPON selection button clicked! Selected:', selectedWeapon);
 
   // Remove back button
   if (currentBackButton) {
@@ -1612,3 +1670,6 @@ async function animateSceneOut(content, container) {
 function getSelectedEquipment() {
   return selectedChoices;
 }
+
+// Export globally for game-intro.js to access
+window.getSelectedEquipment = getSelectedEquipment;
