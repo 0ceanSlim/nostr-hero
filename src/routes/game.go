@@ -15,9 +15,10 @@ func GameHandler(w http.ResponseWriter, r *http.Request) {
 		Title: "Nostr Hero - Game",
 		Theme: "dark",
 		CustomData: map[string]interface{}{
-			"GameMode": true,
-			"SaveID":   saveID,
-			"NewGame":  newGame == "true",
+			"GameMode":  true,
+			"SaveID":    saveID,
+			"NewGame":   newGame == "true",
+			"DebugMode": utils.AppConfig.Server.DebugMode,
 		},
 	}
 

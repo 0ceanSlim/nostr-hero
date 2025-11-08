@@ -73,6 +73,29 @@ func main() {
 	// Save/load API endpoints
 	mux.HandleFunc("/api/saves/", api.SavesHandler)
 
+	// Session management API endpoints (in-memory state)
+	mux.HandleFunc("/api/session/init", api.InitSessionHandler)
+	mux.HandleFunc("/api/session/reload", api.ReloadSessionHandler)
+	mux.HandleFunc("/api/session/state", api.GetSessionHandler)
+	mux.HandleFunc("/api/session/update", api.UpdateSessionHandler)
+	mux.HandleFunc("/api/session/save", api.SaveSessionHandler)
+	mux.HandleFunc("/api/session/cleanup", api.CleanupSessionHandler)
+
+	// Game action API endpoints (Go-first game logic)
+	mux.HandleFunc("/api/game/action", api.GameActionHandler)
+	mux.HandleFunc("/api/game/state", api.GetGameStateHandler)
+
+	// Debug endpoints (only enabled in debug mode)
+	if utils.AppConfig.Server.DebugMode {
+		log.Println("🐛 Debug mode enabled")
+		mux.HandleFunc("/api/debug/sessions", func(w http.ResponseWriter, r *http.Request) {
+			api.DebugSessionsHandler(w, r, true)
+		})
+		mux.HandleFunc("/api/debug/state", func(w http.ResponseWriter, r *http.Request) {
+			api.DebugStateHandler(w, r, true)
+		})
+	}
+
 	// Inventory API endpoints
 	mux.HandleFunc("/api/inventory/action", api.InventoryHandler)
 	mux.HandleFunc("/api/inventory/actions", api.ItemActionsHandler)

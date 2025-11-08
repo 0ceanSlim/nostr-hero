@@ -170,8 +170,11 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		gold = 1000 // Default
 	}
 
-	// 10. Get display names for location
-	locationName, districtName, buildingName := getDisplayNamesForSave(database, startingCity, "center", "")
+	// 10. Use location IDs directly (not display names)
+	// startingCity is already an ID like "millhaven", "verdant", etc.
+	locationID := startingCity
+	districtKey := "center" // All characters start in the center district
+	buildingID := ""        // Start outdoors
 
 	// 11. Get music tracks (auto-unlock + location track)
 	musicTracks := getAutoUnlockMusicTracks()
@@ -205,9 +208,9 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		HungerCounter:       0,  // ← ADDED
 		Gold:                gold,
 		Stats:               statsInterface,
-		Location:            locationName,
-		District:            districtName,
-		Building:            buildingName,
+		Location:            locationID,    // Use ID, not display name
+		District:            districtKey,   // Use key, not display name
+		Building:            buildingID,    // Use ID, not display name
 		CurrentDay:          1,
 		TimeOfDay:           6, // Highnoon
 		Inventory:           inventory,

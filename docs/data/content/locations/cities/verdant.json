@@ -38,36 +38,12 @@
           "close": null
         },
         {
-          "id": "great_library",
-          "name": "The Verdant Archives",
-          "description": "A massive library specializing in natural philosophy and druidic lore.",
-          "npcs": [],
-          "open": 7,
-          "close": 10
-        },
-        {
-          "id": "druid_circle",
-          "name": "Circle of the Ancient Oak",
-          "description": "The headquarters of the region's druid circle, built around a massive ancient oak.",
-          "npcs": [],
-          "open": "always",
-          "close": null
-        },
-        {
           "id": "verdant_supplies",
           "name": "Greenleaf Provisions",
           "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
           "npcs": ["nature-supplier"],
           "open": 7,
           "close": 8
-        },
-        {
-          "id": "herb_market",
-          "name": "Garden of Remedies",
-          "description": "A market specializing in medicinal herbs and natural remedies.",
-          "npcs": [],
-          "open": 6,
-          "close": 9
         },
         {
           "id": "moonlit_glade_inn",
@@ -78,12 +54,7 @@
           "close": 4
         }
       ],
-      "npcs": [
-        "warden-of-roots",
-        "nature-supplier",
-        "forest-innkeeper",
-        "forest-doorman"
-      ]
+      "npcs": []
     },
     "north": {
       "id": "verdant-north",
@@ -93,16 +64,7 @@
         "center": "verdant-center",
         "north": "darkwood-forest"
       },
-      "buildings": [
-        {
-          "id": "ranger_lodge",
-          "name": "Forest Rangers Lodge",
-          "description": "The headquarters for forest rangers who protect the woodland paths.",
-          "npcs": [],
-          "open": "always",
-          "close": null
-        }
-      ],
+      "buildings": [],
       "npcs": [],
       "exit_to_environment": "darkwood-forest"
     },
@@ -114,16 +76,7 @@
         "center": "verdant-center",
         "west": "shadowmere-wetlands"
       },
-      "buildings": [
-        {
-          "id": "nature_crafts",
-          "name": "Living Wood Workshop",
-          "description": "A workshop where artisans craft items from living wood and natural materials.",
-          "npcs": [],
-          "open": 8,
-          "close": 6
-        }
-      ],
+      "buildings": [],
       "npcs": [],
       "exit_to_environment": "shadowmere-wetlands"
     },
@@ -135,16 +88,7 @@
         "center": "verdant-center",
         "south": "suncrest-coastlands"
       },
-      "buildings": [
-        {
-          "id": "coastal_traders",
-          "name": "Seaside Trading Post",
-          "description": "Traders who specialize in goods from both forest and sea.",
-          "npcs": [],
-          "open": 7,
-          "close": 8
-        }
-      ],
+      "buildings": [],
       "npcs": [],
       "exit_to_environment": "suncrest-coastlands"
     }

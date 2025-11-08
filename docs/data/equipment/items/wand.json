@@ -24,6 +24,6 @@
     "Can be used as a spellcasting focus for arcane magic",
     "Provides unlimited Arcane Powder for evocation and force spells"
   ],
-  "Gear_Slot": "hands",
+  "gear_slot": "hands",
   "image": "/res/img/items/wand.png"
 }

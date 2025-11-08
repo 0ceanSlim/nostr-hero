@@ -253,7 +253,7 @@ async function calculateAndDisplayWeight(character) {
 // Update full character display from save data
 async function updateCharacterDisplay() {
     console.log('🎨 updateCharacterDisplay() starting...');
-    const state = getGameState();
+    const state = getGameStateSync();
     const character = state.character;
 
     console.log('🎨 Character data:', {
@@ -665,7 +665,7 @@ function updateInventoryDisplay() {
 
 // Update spells display
 function updateSpellsDisplay() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const character = state.character;
 
     // Update known spells
@@ -805,7 +805,7 @@ function playLocationMusic(musicPath) {
 
 // Display current location
 function displayCurrentLocation() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const cityId = state.location?.current;
     const districtKey = state.location?.district || 'center';
 
@@ -1136,7 +1136,7 @@ function showBuildingClosedMessage(building) {
 function enterBuilding(buildingId) {
     console.log('Entering building:', buildingId);
 
-    const state = getGameState();
+    const state = getGameStateSync();
 
     // Update location to include building
     const newLocationState = {
@@ -1162,7 +1162,7 @@ function enterBuilding(buildingId) {
 function exitBuilding() {
     console.log('Exiting building');
 
-    const state = getGameState();
+    const state = getGameStateSync();
 
     // Update location to remove building (back to outdoors)
     const newLocationState = {
@@ -1224,7 +1224,7 @@ function talkToNPC(npcId) {
 
 // Update combat interface
 function updateCombatInterface() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const combatInterface = document.getElementById('combat-interface');
     const combatStatus = document.getElementById('combat-status');
     const combatActions = document.getElementById('combat-actions');
@@ -1304,7 +1304,7 @@ function updateCombatInterface() {
 
 // Basic combat actions
 function combatAdvance() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat) return;
 
     const newCombat = { ...state.combat };
@@ -1319,7 +1319,7 @@ function combatAdvance() {
 }
 
 function combatRetreat() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat) return;
 
     const newCombat = { ...state.combat };
@@ -1333,7 +1333,7 @@ function combatRetreat() {
 }
 
 function combatAttack() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat) return;
 
     // Simple attack calculation
@@ -1356,7 +1356,7 @@ function combatAttack() {
 }
 
 function combatDefend() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat) return;
 
     const newCombat = { ...state.combat };
@@ -1369,7 +1369,7 @@ function combatDefend() {
 }
 
 function combatFlee() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat) return;
 
     // Simple flee chance
@@ -1395,7 +1395,7 @@ function combatFlee() {
 
 // Simple enemy AI
 function enemyTurn() {
-    const state = getGameState();
+    const state = getGameStateSync();
     if (!state.combat || state.combat.player_turn) return;
 
     // Simple enemy attack
@@ -1435,7 +1435,7 @@ function openTavern() {
 
 // Update time of day display
 function updateTimeDisplay() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 6;
     const currentDay = state.character?.current_day || 1;
 
@@ -1478,7 +1478,7 @@ function updateAllDisplays() {
     displayCurrentLocation();
     updateTimeDisplay();
 
-    const state = getGameState();
+    const state = getGameStateSync();
     if (state.combat) {
         updateCombatInterface();
     }
@@ -1486,7 +1486,7 @@ function updateAllDisplays() {
 
 // Save game to Nostr relay
 async function saveGameToRelay() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const npub = getCurrentNpub();
 
     if (!npub) {

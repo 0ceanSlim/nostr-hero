@@ -41,8 +41,11 @@ function initializeInventoryInteractions() {
  * Note: Since slots are recreated via innerHTML='', old listeners are automatically removed
  */
 function bindInventoryEvents() {
+    console.log('🔧 bindInventoryEvents() called');
+
     // General slots (quick access)
     const generalSlots = document.querySelectorAll('#general-slots [data-item-slot]');
+    console.log(`📦 Found ${generalSlots.length} general slots`);
     generalSlots.forEach((slot) => {
         // Skip if already bound (check for a marker attribute)
         if (slot.hasAttribute('data-events-bound')) {
@@ -56,6 +59,7 @@ function bindInventoryEvents() {
 
     // Backpack slots
     const backpackSlots = document.querySelectorAll('#backpack-slots [data-item-slot]');
+    console.log(`🎒 Found ${backpackSlots.length} backpack slots`);
     backpackSlots.forEach((slot) => {
         // Skip if already bound
         if (slot.hasAttribute('data-events-bound')) {
@@ -69,6 +73,7 @@ function bindInventoryEvents() {
 
     // Equipment slots
     const equipmentSlots = document.querySelectorAll('[data-slot]');
+    console.log(`⚔️ Found ${equipmentSlots.length} equipment slots`);
     equipmentSlots.forEach(slot => {
         // Skip if already bound
         if (slot.hasAttribute('data-events-bound')) {
@@ -78,6 +83,8 @@ function bindInventoryEvents() {
         const slotName = slot.getAttribute('data-slot');
         bindEquipmentSlotEvents(slot, slotName);
     });
+
+    console.log('✅ bindInventoryEvents() completed');
 }
 
 /**
@@ -86,15 +93,19 @@ function bindInventoryEvents() {
 function bindSlotEvents(slotElement, slotType, slotIndex) {
     const itemId = slotElement.getAttribute('data-item-id');
 
+    console.log(`🔗 Binding events to ${slotType}[${slotIndex}], itemId: ${itemId || 'empty'}`);
+
     if (!itemId) {
         // Empty slot - only allow dropping
         slotElement.addEventListener('dragover', handleDragOver);
         slotElement.addEventListener('drop', (e) => handleDrop(e, slotType, slotIndex));
+        console.log(`  ✓ Bound drop event to empty slot`);
         return;
     }
 
     // Make slot draggable
     slotElement.setAttribute('draggable', 'true');
+    console.log(`  ✓ Set draggable=true`);
 
     // Drag events
     slotElement.addEventListener('dragstart', (e) => handleDragStart(e, itemId, slotType, slotIndex));
@@ -197,7 +208,7 @@ async function handleDrop(e, toSlotType, toSlotIndex) {
     // If dropping on an inventory slot
     else {
         // Check if destination slot has an item
-        const state = getGameState();
+        const state = getGameStateSync();
         let destItem = null;
 
         // Get destination slot item
@@ -283,7 +294,7 @@ function handleRightClick(e, itemId, slotType, slotIndex) {
     }
 
     // Get actual inventory item to check current quantity
-    const state = getGameState();
+    const state = getGameStateSync();
     let inventoryItem = null;
 
     if (slotType === 'general' && state.character.inventory?.general_slots) {
@@ -410,8 +421,14 @@ function showContextMenu(x, y, itemId, slotIndex, slotType, actions) {
         item.textContent = label;
         item.addEventListener('click', async () => {
             // Pass parameters correctly: action, itemId, fromSlot, toSlotOrType, fromSlotType, toSlotType
-            // For context menu actions (drop, examine, etc), we need fromSlot and fromSlotType
-            await performAction(action, itemId, slotIndex, undefined, slotType, undefined);
+            // For equip action, we need to pass the gear_slot from item data
+            let toSlotOrType = undefined;
+            if (action === 'equip') {
+                const itemData = getItemById(itemId);
+                toSlotOrType = itemData?.gear_slot || undefined;
+            }
+
+            await performAction(action, itemId, slotIndex, toSlotOrType, slotType, undefined);
             closeContextMenu();
         });
         menu.appendChild(item);
@@ -451,36 +468,29 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         return;
     }
 
-    // Special case: split stack
+    // Special case: split stack (handle client-side for now)
     if (action === 'split') {
         await handleSplitStack(itemId, fromSlot, fromSlotType);
         return;
     }
 
-    // Get current game state for request building
-    const npub = getCurrentNpub();
-    const saveId = getSaveId();
-
-    if (!npub || !saveId) {
-        console.error('No active save');
-        showMessage('No active save', 'error');
+    // Check if Game API is initialized
+    if (!window.gameAPI || !window.gameAPI.initialized) {
+        console.error('Game API not initialized');
+        showMessage('❌ Game not initialized', 'error');
         return;
     }
 
-    // Prepare request
-    const request = {
-        npub: npub,
-        save_id: saveId,
+    // Prepare parameters for the new Game API
+    const params = {
         item_id: itemId,
-        action: action,
-        // For equipment slots, fromSlot is a string name like "left_arm", not an integer
-        // So we only use it for from_slot when it's not equipment
         from_slot: fromSlotType === 'equipment' ? -1 : (typeof fromSlot === 'number' ? fromSlot : -1),
         to_slot: typeof toSlotOrType === 'number' ? toSlotOrType : -1,
         from_slot_type: fromSlotType || '',
         to_slot_type: toSlotType || '',
         from_equip: fromSlotType === 'equipment' ? fromSlot : '',
         to_equip: typeof toSlotOrType === 'string' ? toSlotOrType : '',
+        equipment_slot: typeof toSlotOrType === 'string' ? toSlotOrType : '',
         quantity: 1
     };
 
@@ -488,7 +498,7 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
     let dropInfo = null;  // Store drop details for later
     if (action === 'drop') {
         // Get item data from inventory to check current quantity
-        const state = getGameState();
+        const state = getGameStateSync();
         let inventoryItem = null;
 
         // Find the SPECIFIC item at the clicked slot (use fromSlot, not find())
@@ -535,41 +545,30 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
     }
 
     try {
-        const response = await fetch('/api/inventory/action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(request)
-        });
+        // Map old action names to new game action types
+        const actionMap = {
+            'equip': 'equip_item',
+            'unequip': 'unequip_item',
+            'use': 'use_item',
+            'drop': 'drop_item',
+            'move': 'move_item',
+            'stack': 'stack_item',
+            'add': 'add_item'
+        };
 
-        const result = await response.json();
+        const gameAction = actionMap[action] || action;
+
+        console.log(`📤 Sending action: ${gameAction}`, params);
+
+        // Send action to Go backend
+        const result = await window.gameAPI.sendAction(gameAction, params);
 
         if (result.success) {
             console.log('✅ Action successful:', result.message);
             showMessage(result.message, 'success');
 
-            // For 'use' action, reload the full save to update hunger/fatigue/hp/mana
-            if (action === 'use') {
-                if (window.loadSaveData) {
-                    console.log('🔄 Reloading save to update character stats');
-                    await window.loadSaveData();
-
-                    // Force a UI refresh by calling updateCharacterDisplay again
-                    if (typeof updateCharacterDisplay === 'function') {
-                        await updateCharacterDisplay();
-                    }
-                }
-            } else if (result.newState) {
-                // Update game state with new inventory for other actions
-                const currentState = getGameState();
-                // Update character.inventory (full structure)
-                currentState.character.inventory = result.newState;
-                // Also update the separate inventory and equipment fields
-                currentState.inventory = result.newState.general_slots || [];
-                currentState.equipment = result.newState.gear_slots || {};
-                updateGameState(currentState);
-            }
+            // Refresh game state from Go memory
+            await refreshGameState();
 
             // If this was a drop action, NOW add to ground (after successful API call)
             if (action === 'drop' && dropInfo) {
@@ -587,7 +586,7 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         }
     } catch (error) {
         console.error('❌ Error performing action:', error);
-        showMessage('Failed to perform action', 'error');
+        showMessage(`❌ Failed to perform action: ${error.message}`, 'error');
     }
 }
 
@@ -683,7 +682,7 @@ async function promptDropQuantity(itemName, maxQuantity) {
  */
 async function handleSplitStack(itemId, fromSlot, fromSlotType) {
     // Get item data from inventory to check current quantity
-    const state = getGameState();
+    const state = getGameStateSync();
     let inventoryItem = null;
 
     // Find the item in inventory to get actual quantity
@@ -764,50 +763,33 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
         return;
     }
 
-    // Call backend to split the stack
-    const npub = getCurrentNpub();
-    const saveId = getSaveId();
-
-    if (!npub || !saveId) {
+    // Call new in-memory game action system
+    if (!window.gameAPI || !window.gameAPI.initialized) {
+        console.error('Game API not initialized');
+        showMessage('❌ Game not initialized', 'error');
         return;
     }
 
     try {
-        const response = await fetch('/api/inventory/action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                npub: npub,
-                save_id: saveId,
-                item_id: itemId,
-                action: 'split',
-                from_slot: fromSlot,
-                to_slot: emptySlotIndex,
-                from_slot_type: fromSlotType,
-                to_slot_type: emptySlotType,
-                quantity: splitQuantity
-            })
+        // Send split action to Go backend (in-memory)
+        const result = await window.gameAPI.sendAction('split_item', {
+            item_id: itemId,
+            from_slot: fromSlot,
+            to_slot: emptySlotIndex,
+            from_slot_type: fromSlotType,
+            to_slot_type: emptySlotType,
+            quantity: splitQuantity
         });
 
-        const result = await response.json();
+        // Refresh UI from Go memory
+        await refreshGameState();
 
-        if (result.success) {
-            const currentState = getGameState();
-            // Update character.inventory (full structure)
-            currentState.character.inventory = result.newState;
-            // Also update the separate inventory and equipment fields
-            currentState.inventory = result.newState.general_slots || [];
-            currentState.equipment = result.newState.gear_slots || {};
-            updateGameState(currentState);
+        window.addGameLog(`Split ${splitQuantity} from stack of ${itemData?.name || itemId}`);
+        showMessage(`✂️ Split ${splitQuantity} items into new stack`, 'success');
 
-            window.addGameLog(`Split ${splitQuantity} from stack of ${itemData?.name || itemId}`);
-        } else {
-            window.showMessage(result.error || 'Failed to split stack', 'error');
-        }
     } catch (error) {
-        window.showMessage('Error splitting stack: ' + error.message, 'error');
+        console.error('Failed to split stack:', error);
+        showMessage('❌ Error splitting stack: ' + error.message, 'error');
     }
 }
 

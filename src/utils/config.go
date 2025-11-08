@@ -9,9 +9,10 @@ import (
 
 // ServerConfig holds server-related configurations
 type ServerConfig struct {
-	Port     int    `yaml:"port"`
-	TLS      bool   `yaml:"tls"`
-	AppTitle string `yaml:"app_title"`
+	Port      int    `yaml:"port"`
+	TLS       bool   `yaml:"tls"`
+	AppTitle  string `yaml:"app_title"`
+	DebugMode bool   `yaml:"debug_mode"`
 }
 
 // Config holds the full application configuration

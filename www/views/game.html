@@ -71,11 +71,65 @@
   onclick="if(event.target === this) hideBugReportModal()"
 >
   <div
-    class="win95-outset pixel-clip w-full max-w-md"
-    style="border: 4px solid var(--color-textPrimary); background: #2a2a2a;"
+    class="win95-outset pixel-clip w-full"
+    style="border: 4px solid var(--color-textPrimary); background: #2a2a2a; max-width: {{if .CustomData.DebugMode}}90%{{else}}28rem{{end}}; max-height: 90vh; overflow-y: auto;"
     onclick="event.stopPropagation()"
   >
     <div class="p-6">
+      {{if .CustomData.DebugMode}}
+      <!-- Debug Mode: Show game state console -->
+      <h3 class="text-2xl font-bold mb-4 text-center" style="color: #eab308;">🐛 Debug Console</h3>
+      <p class="text-center mb-4 text-sm" style="color: #e5e7eb;">Current in-memory game state</p>
+
+      <div class="mb-4">
+        <pre id="debug-state-display" class="bg-black p-4 rounded text-xs overflow-x-auto" style="color: #00ff00; max-height: 60vh; font-family: 'Courier New', monospace;">Loading state...</pre>
+      </div>
+
+      <div class="flex gap-3 mb-3">
+        <button
+          onclick="copyDebugStateToClipboard()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #1d4ed8; border-top: 2px solid #3b82f6; border-left: 2px solid #3b82f6; border-right: 2px solid #1e40af; border-bottom: 2px solid #1e40af;"
+        >
+          📋 Copy to Clipboard
+        </button>
+        <button
+          onclick="refreshDebugState()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #15803d; border-top: 2px solid #22c55e; border-left: 2px solid #22c55e; border-right: 2px solid #166534; border-bottom: 2px solid #166534;"
+        >
+          🔄 Refresh View
+        </button>
+      </div>
+
+      <div class="flex gap-3 mb-3">
+        <button
+          onclick="reloadFromSave()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #dc2626; border-top: 2px solid #ef4444; border-left: 2px solid #ef4444; border-right: 2px solid #991b1b; border-bottom: 2px solid #991b1b;"
+        >
+          💾 Reload from Save File
+        </button>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          onclick="confirmBugReport()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #ca8a04; border-top: 2px solid #eab308; border-left: 2px solid #eab308; border-right: 2px solid #854d0e; border-bottom: 2px solid #854d0e;"
+        >
+          Open GitHub
+        </button>
+        <button
+          onclick="hideBugReportModal()"
+          class="flex-1 py-3 font-medium text-white"
+          style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;"
+        >
+          Close
+        </button>
+      </div>
+      {{else}}
+      <!-- Production Mode: Standard bug report -->
       <h3 class="text-2xl font-bold mb-4 text-center" style="color: #eab308;">🐛 Report Bug</h3>
       <p class="text-center mb-6" style="color: #e5e7eb;">This button will open a new window to a GitHub issue. Please be as descriptive as you can and thank you for taking the time to make a report!</p>
       <div class="flex gap-3">
@@ -93,6 +147,7 @@
         >
           Cancel
         </button>
+      {{end}}
       </div>
     </div>
   </div>
@@ -292,8 +347,15 @@
       });
     }
 
-    function showBugReportModal() {
+    const DEBUG_MODE = {{.CustomData.DebugMode}};
+
+    async function showBugReportModal() {
       document.getElementById('bug-report-modal').classList.remove('hidden');
+
+      // If in debug mode, load the current state
+      if (DEBUG_MODE) {
+        await refreshDebugState();
+      }
     }
 
     function hideBugReportModal() {
@@ -301,10 +363,113 @@
     }
 
     function confirmBugReport() {
-      hideBugReportModal();
       const bugReportUrl = "https://github.com/0ceanSlim/nostr-hero/issues/new?template=bug_report.md";
       showMessage("🐛 Opening bug report...", "info");
       window.open(bugReportUrl, "_blank");
+    }
+
+    // Debug console functions
+    async function refreshDebugState() {
+      if (!DEBUG_MODE) return;
+
+      const debugDisplay = document.getElementById('debug-state-display');
+      if (!debugDisplay) return;
+
+      debugDisplay.textContent = 'Loading state...';
+
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const saveID = urlParams.get('save');
+
+        if (!window.sessionManager || !window.sessionManager.isAuthenticated()) {
+          debugDisplay.textContent = 'Error: Not authenticated';
+          return;
+        }
+
+        const session = window.sessionManager.getSession();
+
+        // Fetch state from debug endpoint
+        const response = await fetch(`/api/debug/state?npub=${session.npub}&save_id=${saveID}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch debug state: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Pretty print the JSON
+        debugDisplay.textContent = JSON.stringify(data, null, 2);
+
+      } catch (error) {
+        console.error('Failed to load debug state:', error);
+        debugDisplay.textContent = `Error loading state: ${error.message}`;
+      }
+    }
+
+    async function copyDebugStateToClipboard() {
+      const debugDisplay = document.getElementById('debug-state-display');
+      if (!debugDisplay) return;
+
+      try {
+        await navigator.clipboard.writeText(debugDisplay.textContent);
+        showMessage('✅ Debug state copied to clipboard!', 'success');
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        showMessage('❌ Failed to copy to clipboard', 'error');
+      }
+    }
+
+    async function reloadFromSave() {
+      if (!DEBUG_MODE) return;
+
+      if (!confirm('⚠️ This will discard all in-memory changes and reload from the last saved file. Continue?')) {
+        return;
+      }
+
+      try {
+        showMessage('💾 Reloading from save file...', 'info');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const saveID = urlParams.get('save');
+
+        if (!window.sessionManager || !window.sessionManager.isAuthenticated()) {
+          showMessage('❌ Not authenticated', 'error');
+          return;
+        }
+
+        const session = window.sessionManager.getSession();
+
+        // Force reload session from save file on disk
+        const reloadResponse = await fetch('/api/session/reload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            npub: session.npub,
+            save_id: saveID
+          })
+        });
+
+        if (!reloadResponse.ok) {
+          throw new Error(`Failed to reload: ${reloadResponse.status}`);
+        }
+
+        const reloadResult = await reloadResponse.json();
+        console.log('✅ Session reloaded from save file:', reloadResult);
+
+        // Refresh game state from Go memory
+        if (window.refreshGameState) {
+          await window.refreshGameState();
+        }
+
+        // Refresh debug display
+        await refreshDebugState();
+
+        showMessage('✅ Reloaded from save file!', 'success');
+
+      } catch (error) {
+        console.error('Failed to reload from save:', error);
+        showMessage('❌ Failed to reload: ' + error.message, 'error');
+      }
     }
 
     function showLogoutModal() {
@@ -327,6 +492,7 @@
     }
   </script>
   <script src="/scripts/core/session-manager.js?v=20251026t"></script>
+  <script src="/scripts/core/game-api.js?v=20251026t"></script>
   <script src="/scripts/pages/game-ui.js?v=20251026t"></script>
   <script src="/scripts/core/auth.js?v=20251026t"></script>
   <script src="/scripts/systems/character-generator.js?v=20251026t"></script>

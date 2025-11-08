@@ -1,41 +1,231 @@
-// Game State Management
-// All game state is stored in hidden DOM elements and managed through these functions
+// Game State Management - Go-First Architecture
+// All game state lives in Go memory
+// JavaScript fetches state from Go and triggers UI updates
 
-// Get the current game state from DOM
-function getGameState() {
+// Cache the last fetched state for immediate UI access
+let cachedGameState = null;
+
+// Get the current game state (fetches from Go if needed)
+async function getGameState(forceRefresh = false) {
+    if (!forceRefresh && cachedGameState) {
+        return cachedGameState;
+    }
+
+    try {
+        // Fetch from Go backend
+        const state = await window.gameAPI.getState();
+
+        // Transform Go SaveFile format to UI format
+        const uiState = transformSaveDataToUIState(state);
+
+        // Cache it
+        cachedGameState = uiState;
+
+        return uiState;
+    } catch (error) {
+        console.error('❌ Failed to fetch game state:', error);
+        // Return cached state if fetch fails
+        return cachedGameState || getEmptyGameState();
+    }
+}
+
+// Synchronous version for immediate access (uses cached state)
+function getGameStateSync() {
+    if (!cachedGameState) {
+        console.warn('⚠️ No cached game state, returning empty state');
+        return getEmptyGameState();
+    }
+    return cachedGameState;
+}
+
+// Transform SaveFile (Go format) to UI state format
+function transformSaveDataToUIState(saveData) {
+    // Map display names to location/district IDs
+    const locationNameMap = {
+        // Cities
+        'Verdant City': 'verdant',
+        'Golden Haven': 'goldenhaven',
+        'Goldenhaven': 'goldenhaven',
+
+        // Towns
+        'Ironpeak': 'ironpeak',
+        'Iron Peak': 'ironpeak',
+        'Frosthold': 'frosthold',
+
+        // Villages
+        'Millhaven Village': 'millhaven',
+        'Millhaven': 'millhaven',
+        'Saltwind Village': 'saltwind',
+        'Saltwind': 'saltwind',
+        'Marshlight Village': 'marshlight',
+        'Marshlight': 'marshlight',
+        'Dusthaven Village': 'dusthaven',
+        'Dusthaven': 'dusthaven',
+
+        // Kingdoms/General
+        'Kingdom': 'kingdom',
+        'The Royal Kingdom': 'kingdom',
+        'Village': 'village',
+        'Dwarven Stronghold': 'dwarven',
+        'Desert Oasis': 'desert',
+        'Port City': 'port'
+    };
+
+    const districtNameMap = {
+        // Generic district names
+        'Garden Plaza': 'center',
+        'Town Square': 'center',
+        'Village Center': 'center',
+        'City Center': 'center',
+        'Town Center': 'center',
+        'Kingdom Center': 'center',
+
+        // Directional districts
+        'Market District': 'market',
+        'Northern Quarter': 'north',
+        'North District': 'north',
+        'Southern Quarter': 'south',
+        'South District': 'south',
+        'Western Quarter': 'west',
+        'West District': 'west',
+        'Eastern Quarter': 'east',
+        'East District': 'east',
+
+        // Special districts
+        'Harbor': 'harbor',
+        'Residential': 'residential'
+    };
+
+    // Get location ID (handle both display names and IDs)
+    let locationId = saveData.location || 'kingdom';
+    if (locationNameMap[locationId]) {
+        locationId = locationNameMap[locationId];
+    }
+
+    // Get district key (handle both display names and IDs)
+    let districtKey = saveData.district || 'center';
+    // If it's a full district ID like "verdant-center", extract the key
+    if (districtKey.includes('-')) {
+        districtKey = districtKey.split('-').pop();
+    }
+    // If it's a display name like "Garden Plaza", map it
+    if (districtNameMap[districtKey]) {
+        districtKey = districtNameMap[districtKey];
+    }
+
+    // Normalize stats keys to lowercase (Go sends "Strength", UI expects "strength")
+    const normalizedStats = {};
+    if (saveData.stats) {
+        for (const [key, value] of Object.entries(saveData.stats)) {
+            normalizedStats[key.toLowerCase()] = value;
+        }
+    }
+
+    console.log('🔄 Transforming save data to UI state:', {
+        savedLocation: saveData.location,
+        savedDistrict: saveData.district,
+        mappedLocationId: locationId,
+        mappedDistrictKey: districtKey,
+        hasInventory: !!saveData.inventory,
+        hasGearSlots: !!saveData.inventory?.gear_slots,
+        hasGeneralSlots: !!saveData.inventory?.general_slots,
+        statsNormalized: normalizedStats
+    });
+
     return {
-        character: JSON.parse(document.getElementById('character-data').textContent || '{}'),
-        inventory: JSON.parse(document.getElementById('inventory-data').textContent || '[]'),
-        equipment: JSON.parse(document.getElementById('equipment-data').textContent || '{}'),
-        spells: JSON.parse(document.getElementById('spell-data').textContent || '[]'),
-        location: JSON.parse(document.getElementById('location-data').textContent || '{}'),
-        combat: JSON.parse(document.getElementById('combat-data').textContent || 'null')
+        character: {
+            name: saveData.d || 'Unknown',
+            race: saveData.race,
+            class: saveData.class,
+            background: saveData.background,
+            alignment: saveData.alignment,
+            level: saveData.level || 1,
+            experience: saveData.experience || 0,
+            hp: saveData.hp,
+            max_hp: saveData.max_hp,
+            mana: saveData.mana,
+            max_mana: saveData.max_mana,
+            fatigue: saveData.fatigue || 0,
+            fatigue_counter: saveData.fatigue_counter || 0,
+            hunger: saveData.hunger !== undefined ? saveData.hunger : 1,
+            hunger_counter: saveData.hunger_counter || 0,
+            gold: saveData.gold || 0,
+            stats: normalizedStats,
+            inventory: saveData.inventory || {},
+            vaults: saveData.vaults || [],
+            spells: saveData.known_spells || [],
+            spell_slots: saveData.spell_slots || {},
+            music_tracks_unlocked: saveData.music_tracks_unlocked || [],
+            current_day: saveData.current_day || 1,
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6
+        },
+        location: {
+            current: locationId,
+            district: districtKey,
+            building: saveData.building || null,
+            discovered: saveData.locations_discovered || []
+        },
+        inventory: saveData.inventory?.general_slots || [],
+        equipment: saveData.inventory?.gear_slots || {},
+        spells: saveData.known_spells || [],
+        combat: null // Combat state not stored in save file
     };
 }
 
-// Update the game state in DOM and trigger UI updates
+// Get empty game state (fallback)
+function getEmptyGameState() {
+    return {
+        character: {},
+        inventory: [],
+        equipment: {},
+        spells: [],
+        location: {},
+        combat: null
+    };
+}
+
+// Update the game state (triggers UI refresh)
+// This is now just for UI updates - game actions should use gameAPI.sendAction()
+async function refreshGameState() {
+    console.log('🔄 Refreshing game state from Go...');
+
+    // Fetch fresh state from Go
+    const newState = await getGameState(true);
+
+    console.log('📦 Fetched state:', {
+        hasCharacter: !!newState.character,
+        hasInventory: !!newState.inventory,
+        hasEquipment: !!newState.equipment,
+        inventorySlots: newState.inventory?.length,
+        characterInventory: !!newState.character?.inventory
+    });
+
+    // Trigger UI updates
+    console.log('📢 Dispatching gameStateChange event...');
+    document.dispatchEvent(new CustomEvent('gameStateChange', { detail: newState }));
+
+    return newState;
+}
+
+// Legacy compatibility: Update state locally (only for UI, doesn't persist)
+// DEPRECATED: Use gameAPI.sendAction() instead
 function updateGameState(newState) {
-    if (newState.character) {
-        document.getElementById('character-data').textContent = JSON.stringify(newState.character);
-    }
-    if (newState.inventory) {
-        document.getElementById('inventory-data').textContent = JSON.stringify(newState.inventory);
-    }
-    if (newState.equipment) {
-        document.getElementById('equipment-data').textContent = JSON.stringify(newState.equipment);
-    }
-    if (newState.spells) {
-        document.getElementById('spell-data').textContent = JSON.stringify(newState.spells);
-    }
-    if (newState.location) {
-        document.getElementById('location-data').textContent = JSON.stringify(newState.location);
-    }
-    if (newState.combat !== undefined) {
-        document.getElementById('combat-data').textContent = JSON.stringify(newState.combat);
+    console.warn('⚠️ updateGameState() is deprecated. Use gameAPI.sendAction() instead.');
+
+    // Update cache
+    if (cachedGameState) {
+        if (newState.character) cachedGameState.character = {...cachedGameState.character, ...newState.character};
+        if (newState.inventory) cachedGameState.inventory = newState.inventory;
+        if (newState.equipment) cachedGameState.equipment = newState.equipment;
+        if (newState.spells) cachedGameState.spells = newState.spells;
+        if (newState.location) cachedGameState.location = {...cachedGameState.location, ...newState.location};
+        if (newState.combat !== undefined) cachedGameState.combat = newState.combat;
+    } else {
+        cachedGameState = newState;
     }
 
     // Trigger UI updates
-    document.dispatchEvent(new CustomEvent('gameStateChange', { detail: newState }));
+    document.dispatchEvent(new CustomEvent('gameStateChange', { detail: cachedGameState }));
 }
 
 // Get static game data helpers
@@ -133,6 +323,17 @@ async function initializeGame() {
         const session = window.sessionManager.getSession();
         console.log(`🎮 Starting game for user: ${session.npub}`);
 
+        // Get save ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const saveID = urlParams.get('save');
+        const newGame = urlParams.get('new') === 'true';
+
+        // Initialize Game API
+        if (saveID) {
+            window.gameAPI.init(session.npub, saveID);
+            console.log('🎮 Game API initialized with save:', saveID);
+        }
+
     } catch (error) {
         console.error('❌ Session initialization failed:', error);
         showMessage('❌ Failed to initialize session: ' + error.message, 'error');
@@ -175,23 +376,34 @@ async function initializeGame() {
         const newGame = urlParams.get('new') === 'true';
 
         if (saveID) {
-            // Load specific save
+            // Load specific save into Go memory
             try {
-                const saveResponse = await fetch(`/api/saves/${session.npub}`);
-                if (saveResponse.ok) {
-                    const saves = await saveResponse.json();
-                    const save = saves.find(s => s.id === saveID);
+                console.log('🔄 Initializing session in Go memory...');
 
-                    if (save) {
-                        // New save structure: character and location are at root level
-                        await initializeFromSave(save);
-                        showMessage('✅ Save file loaded successfully!', 'success');
-                    } else {
-                        throw new Error('Save file not found');
-                    }
-                } else {
-                    throw new Error('Failed to load save files');
+                // Initialize session in backend memory
+                const initResponse = await fetch('/api/session/init', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        npub: session.npub,
+                        save_id: saveID
+                    })
+                });
+
+                if (!initResponse.ok) {
+                    throw new Error(`Failed to initialize session: ${initResponse.status}`);
                 }
+
+                const initResult = await initResponse.json();
+                console.log('✅ Session loaded into Go memory:', initResult);
+
+                // Fetch initial game state from Go
+                await refreshGameState();
+
+                showMessage('✅ Save file loaded successfully!', 'success');
+
             } catch (saveError) {
                 console.error('Failed to load specific save:', saveError);
                 showMessage('❌ Failed to load save: ' + saveError.message, 'error');
@@ -601,20 +813,36 @@ function generateSpellSlots(characterClass) {
 
 // Event listeners for game state changes
 document.addEventListener('gameStateChange', async function(event) {
-    await updateCharacterDisplay();  // Wait for character display to finish
-    updateInventoryDisplay();
-    updateSpellsDisplay();
+    // The event.detail contains the updated state
+    const state = event.detail || getGameStateSync();
 
-    // Rebind inventory interactions after UI is updated
+    console.log('🎨 gameStateChange event fired, updating displays...');
+
+    // Update all displays
+    await updateCharacterDisplay();
+
+    // Update location display
+    if (typeof displayCurrentLocation === 'function') {
+        displayCurrentLocation();
+    }
+
+    // Give the DOM time to render
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Now rebind inventory interactions after UI is updated
     if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
+        console.log('🔄 Rebinding inventory events...');
         window.inventoryInteractions.bindInventoryEvents();
+    } else {
+        console.warn('⚠️ inventoryInteractions not available');
     }
 
     // Update combat interface if in combat
-    const state = getGameState();
     if (state.combat) {
         updateCombatInterface();
     }
+
+    console.log('✅ All displays updated');
 });
 
 // Helper functions for character generation
@@ -1129,7 +1357,7 @@ const groundItems = {};
  * Get location key for ground storage
  */
 function getGroundLocationKey() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const cityId = state.location?.current || 'unknown';
     const districtKey = state.location?.district || 'center';
     return `${cityId}-${districtKey}`;
@@ -1140,7 +1368,7 @@ function getGroundLocationKey() {
  */
 function addItemToGround(itemId, quantity = 1) {
     const locationKey = getGroundLocationKey();
-    const state = getGameState();
+    const state = getGameStateSync();
     const currentDay = state.character?.current_day || 1;
 
     if (!groundItems[locationKey]) {
@@ -1191,7 +1419,7 @@ function getGroundItems() {
  * Clean up items older than 1 game day
  */
 function cleanupOldGroundItems() {
-    const state = getGameState();
+    const state = getGameStateSync();
     const currentDay = state.character?.current_day || 1;
 
     for (const locationKey in groundItems) {
