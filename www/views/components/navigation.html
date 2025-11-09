@@ -1,11 +1,12 @@
 {{define "navigation"}}
 <button
   onclick="toggleNav()"
-  class="lg:hidden p-4 win95-button"
+  class="lg:hidden win95-button pixel-clip p-2 hover:opacity-80 transition"
   style="color: var(--color-textPrimary);"
+  title="Menu"
 >
   <svg
-    class="w-6 h-6"
+    class="w-4 h-4"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
@@ -42,7 +43,7 @@
   <ul
     class="flex flex-col lg:flex-row justify-center items-center lg:space-x-4 space-y-4 lg:space-y-0 px-4 lg:px-0"
   >
-    {{template "nav-play" .}} {{template "nav-other" .}}
+    {{template "nav-play" .}}
   </ul>
 </nav>
 {{end}}

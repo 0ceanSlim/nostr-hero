@@ -61,6 +61,14 @@ func RenderTemplateWithLayout(w http.ResponseWriter, data PageData, view string,
 		return
 	}
 
+	// Load main page tab components (for homepage)
+	tabPattern := filepath.Join(viewsDir, "tabs", "*.html")
+	tabTemplates, err := filepath.Glob(tabPattern)
+	if err != nil {
+		http.Error(w, "Error loading tab templates: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var templates []string
 	var layoutName string
 
@@ -77,6 +85,7 @@ func RenderTemplateWithLayout(w http.ResponseWriter, data PageData, view string,
 	templates = append(templates, componentTemplates...)
 	templates = append(templates, gameComponentTemplates...)
 	templates = append(templates, gameTabTemplates...)
+	templates = append(templates, tabTemplates...)
 
 	tmpl, err := template.New("").Funcs(template.FuncMap{}).ParseFiles(templates...)
 	if err != nil {

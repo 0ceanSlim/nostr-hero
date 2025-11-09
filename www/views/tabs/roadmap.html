@@ -1,0 +1,130 @@
+{{define "tab-roadmap"}}
+<div id="tab-roadmap" class="tab-content hidden">
+  <div class="rounded-xl shadow-xl overflow-hidden win95-outset">
+    <div class="p-6 md:p-8">
+      <h2 class="text-3xl font-bold mb-6" style="color: var(--color-textHighlighted);">
+        🗺️ Development Roadmap
+      </h2>
+
+      <p class="mb-8" style="color: var(--color-textSecondary);">
+        Track the progress of Nostr Hero from Pre-Alpha to Beta and beyond.
+      </p>
+
+      <!-- Completed Section -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 flex items-center gap-2" style="color: rgb(76, 175, 80);">
+          <span>✅</span> Completed
+        </h3>
+        <div class="space-y-2 win95-inset p-4 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Deterministic Character Generation</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Nostr Authentication (NIP-07, Amber)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Save File System</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Inventory & Equipment Management</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Spell System (Cantrips & Leveled Spells)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Item Database (200+ items)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Basic Combat System</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-500">✓</span>
+            <span>Hunger & Fatigue Mechanics</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- In Progress Section -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 flex items-center gap-2" style="color: rgb(251, 146, 60);">
+          <span>🚧</span> In Progress
+        </h3>
+        <div class="space-y-2 win95-inset p-4 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-orange-500">⟳</span>
+            <span>NPC Interactions & Dialogue</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-orange-500">⟳</span>
+            <span>Combat System Polish</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-orange-500">⟳</span>
+            <span>Quest System Foundation</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-orange-500">⟳</span>
+            <span>Shop & Trading System</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-orange-500">⟳</span>
+            <span>Location Traversal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planned Section -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold mb-4 flex items-center gap-2" style="color: var(--color-textMuted);">
+          <span>⬜</span> Planned
+        </h3>
+        <div class="space-y-2 win95-inset p-4 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Full Quest System with Story Arcs</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Nostr Event-Based Saves</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Achievement Badges (NIP-58)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Cross-Client Play</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Community Wiki (Nostr Auth)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>In-Game Nostr Integration (Notes, Long-Form)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span style="color: var(--color-textMuted);">☐</span>
+            <span>Dungeon Master npub Announcements</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="win95-inset p-4 rounded-lg">
+        <p class="text-sm" style="color: var(--color-textMuted);">
+          <strong>Current Phase:</strong> Pre-Alpha v0.2.1<br>
+          <strong>Next Milestone:</strong> Alpha Release (Core gameplay complete)<br>
+          <strong>Contributions Welcome!</strong> See the Contribute tab to help build Nostr Hero.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

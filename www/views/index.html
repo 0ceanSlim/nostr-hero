@@ -1,350 +1,131 @@
 {{define "view"}}
+<!-- Load required scripts -->
+<script src="/scripts/systems/theme-manager.js"></script>
+<script src="/scripts/systems/profile-manager.js"></script>
+<script src="/scripts/pages/tabs.js"></script>
 <script src="/scripts/core/session-manager.js"></script>
-<script src="/scripts/pages/game-ui.js"></script>
 <script src="/scripts/core/auth.js"></script>
 
-<div class="rounded-xl shadow-xl overflow-hidden mt-4 win95-outset">
-  <div class="p-6">
-    <h1 class="text-3xl font-bold mb-2" style="color: var(--color-textHighlighted);">
-      Unveiling Your Digital Identity's Champion
-    </h1>
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.85);">
+  <div class="win95-outset pixel-clip p-8 text-center" style="border: 4px solid var(--color-textPrimary);">
+    <img src="/res/img/loading.gif" alt="Loading..." class="mx-auto mb-4" style="width: 64px; height: 64px; image-rendering: pixelated;">
+    <p id="loading-text" class="text-lg font-bold" style="color: var(--color-textPrimary);">Connecting to extension...</p>
   </div>
-  <div class="md:max-w-screen-md mx-auto">
-    <div class="p-6">
-      <p class="mb-4 leading-relaxed">
-        Your Nostr public key, a unique string of characters identifying you in
-        the decentralized Nostr network, is more than just an address. It's the
-        seed for a personalized hero, a character whose fate is woven from the
-        very fabric of your digital identity. This discovery transforms your key
-        into a consistent and reproducible champion, allowing you to explore the
-        possibilities hidden within your Nostr persona.
-      </p>
+</div>
 
-      <h3 class="text-2xl font-bold mt-8 mb-4">How does this work?</h3>
+<!-- Simple message system for home page -->
+<script>
+window.showMessage = function(text, type = 'info', duration = 5000) {
+  console.log(`${type.toUpperCase()}: ${text}`);
 
-      <div class="space-y-6">
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            1. The Seed: Your Nostr Public Key
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              Your key is the foundation. It's fed into a deterministic
-              algorithm, ensuring that every time you use the same key, you get
-              the exact same hero.
-            </li>
-          </ul>
-        </div>
+  // Create simple toast notification
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 pixel-clip';
+  toast.textContent = text;
 
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            2. Race: The Heritage of Your Identity
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              Your key determines your hero's race. This choice isn't arbitrary.
-              Different races (Elves, Dwarves, Humans, etc.) have varying
-              probabilities of being selected, reflecting inherent population
-              distributions.
-            </li>
-            <div class="group relative">
-              <!-- Your list item with hover effect -->
-              <li
-                class="cursor-pointer transition-colors duration-200"
-                style="color: var(--color-textHighlighted);"
-              >
-                🤙 Here are the current racial distributions
-              </li>
+  // Style based on type
+  if (type === 'success') {
+    toast.style.background = 'rgb(34, 197, 94)';
+    toast.style.color = 'white';
+  } else if (type === 'error') {
+    toast.style.background = 'rgb(239, 68, 68)';
+    toast.style.color = 'white';
+  } else if (type === 'warning') {
+    toast.style.background = 'rgb(251, 146, 60)';
+    toast.style.color = 'white';
+  } else {
+    toast.style.background = 'rgb(59, 130, 246)';
+    toast.style.color = 'white';
+  }
 
-              <!-- Hidden table that appears on hover -->
-              <div
-                class="absolute hidden group-hover:block z-50 left-4 mt-2 w-fit win95-outset rounded-lg shadow-lg overflow-hidden"
-              >
-                <table class="w-full text-sm">
-                  <thead class="win95-inset" style="color: var(--color-textHighlighted);">
-                    <tr>
-                      <th class="px-2 py-2 text-left">Race</th>
-                      <th class="px-2 py-2 text-right">Weight</th>
-                    </tr>
-                  </thead>
-                  <tbody id="race-table-body" class="divide-y" style="border-color: var(--color-bgTertiary);">
-                    <!-- Races will be inserted here by JavaScript -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
+  document.body.appendChild(toast);
 
-            <script>
-              document.addEventListener("DOMContentLoaded", async () => {
-                try {
-                  // Fetch the weights.json file
-                  const response = await fetch("/data/systems/weights.json");
-                  if (!response.ok) throw new Error("Failed to load race data");
-                  const raceData = await response.json();
+  // Fade out and remove
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.3s';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+};
 
-                  // Validate the data structure
-                  if (
-                    !raceData.Races ||
-                    !raceData.RaceWeights ||
-                    raceData.Races.length !== raceData.RaceWeights.length
-                  ) {
-                    throw new Error("Invalid data format in weights.json");
-                  }
+// Show loading modal
+window.showLoadingModal = function(text = 'Loading...') {
+  const modal = document.getElementById('loading-modal');
+  const loadingText = document.getElementById('loading-text');
+  if (modal && loadingText) {
+    loadingText.textContent = text;
+    modal.classList.remove('hidden');
+  }
+};
 
-                  const tableBody = document.getElementById("race-table-body");
+// Hide loading modal
+window.hideLoadingModal = function() {
+  const modal = document.getElementById('loading-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+};
 
-                  // Clear any existing content
-                  tableBody.innerHTML = "";
+// Listen for authentication events to show/hide loading
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    if (window.sessionManager) {
+      window.sessionManager.on('authenticationStarted', (method) => {
+        let text = 'Logging in...';
+        if (method === 'extension') {
+          text = 'Connecting to extension...';
+        } else if (method === 'amber') {
+          text = 'Connecting to Amber...';
+        } else if (method === 'private_key') {
+          text = 'Logging in with private key...';
+        }
+        window.showLoadingModal(text);
+      });
 
-                  // Create table rows for each race
-                  raceData.Races.forEach((race, index) => {
-                    const row = document.createElement("tr");
-                    row.className = "hover:opacity-80";
-                    row.innerHTML = `
-                    <td class="px-2 py-2">${race}</td>
-                    <td class="px-2 font-mono py-2 text-right">${raceData.RaceWeights[index]} %</td>
-                  `;
-                    tableBody.appendChild(row);
-                  });
-                } catch (error) {
-                  console.error("Error loading race data:", error);
-                  const tableBody = document.getElementById("race-table-body");
-                  tableBody.innerHTML = `
-                  <tr>
-                    <td colspan="2" class="px-4 py-2 text-center" style="color: var(--color-textMuted);">
-                      Failed to load race data
-                    </td>
-                  </tr>
-                `;
-                }
-              });
-            </script>
+      window.sessionManager.on('authenticationSuccess', () => {
+        window.hideLoadingModal();
+      });
 
-            <li>The selected race then influences the class weights.</li>
-          </ul>
-        </div>
+      window.sessionManager.on('authenticationFailed', () => {
+        window.hideLoadingModal();
+      });
+    }
+  });
+}
+</script>
 
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            3. Class: The Path Chosen by Fate
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              The class of your hero (Wizard, Fighter, Rogue, etc.) is chosen
-              based on your key, and the available classes are weighted.
-            </li>
-            <li
-              class="transition-colors duration-200"
-              style="color: var(--color-textHighlighted);"
-            >
-              <a
-                href="/data/systems/weights.json"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="gap-2 cursor-pointer"
-              >
-                <span>🔍 View complete weights breakdown (JSON)</span>
-              </a>
-            </li>
-            <li>
-              The race of your character effects the likely hood of a character
-              being a certain class. Elves are more likely to be rangers for
-              example.
-            </li>
-            <li>
-              The chosen class then impacts the available background options and
-              the some minimum stat requirements.
-            </li>
-          </ul>
-        </div>
-
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            4. Background: The Story Forged in the Past
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              Your hero's background (Noble, Criminal, Sage, etc.) adds depth to
-              their story.
-            </li>
-            <li>
-              The possible backgrounds are based on the characters class. A
-              criminal background is more likely for a rogue than a paladin.
-            </li>
-            <li>
-              This background provides context for your hero's skills and
-              motivations.
-            </li>
-          </ul>
-        </div>
-
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            5. Alignment: The Moral Compass
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              Your hero's alignment (Lawful Good, Chaotic Neutral, etc.) defines
-              their moral stance.
-            </li>
-            <li>
-              This is an independent choice, but it helps shape your hero's
-              personality and interactions.
-            </li>
-          </ul>
-        </div>
-
-        <div class="border-l-4 pl-4" style="border-color: var(--color-textHighlighted);">
-          <h4 class="text-xl font-semibold" style="color: var(--color-textHighlighted);">
-            6. Stats: The Physical and Mental Attributes
-          </h4>
-          <ul class="list-disc ml-6 mt-2">
-            <li>
-              Your hero's stats (Strength, Dexterity, Constitution,
-              Intelligence, Wisdom, Charisma) are rolled using a virtual dice
-              system, mimicking traditional Dungeons & Dragons.
-            </li>
-
-            <li>
-              To maintain balance, stats are capped at 16 and floored at 8.
-            </li>
-            <li>
-              Your chosen class imposes a minimum stat of 12 in two ckills. For
-              example, Wizards need at least 12 in Intelligence and Wisdom.
-              These minimums ensure your hero is capable in their chosen
-              profession.
-            </li>
-            <div class="group relative">
-              <!-- List item trigger -->
-              <li
-                class="cursor-pointer transition-colors duration-200"
-                style="color: var(--color-textHighlighted);"
-              >
-                ⚔️ View class minimum stats
-              </li>
-
-              <!-- Popup table now positioned above the text -->
-              <div
-                class="absolute hidden group-hover:block z-50 -top-2 -left-16 -translate-y-full w-[20rem] win95-outset rounded-lg shadow-lg overflow-auto max-h-[70vh]"
-              >
-                <table class="w-full text-sm">
-                  <thead class="win95-inset sticky top-0" style="color: var(--color-textHighlighted);">
-                    <tr>
-                      <th class="px-2 py-2 text-left">Class</th>
-                      <th class="px-2 py-2">Primary Stat</th>
-                      <th class="px-2 py-2">Secondary Stat</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y" style="border-color: var(--color-bgTertiary);">
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Paladin</td>
-                      <td class="px-2 py-2 text-center">Strength</td>
-                      <td class="px-2 py-2 text-center">Charisma</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Sorcerer</td>
-                      <td class="px-2 py-2 text-center">Charisma</td>
-                      <td class="px-2 py-2 text-center">Constitution</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Warlock</td>
-                      <td class="px-2 py-2 text-center">Charisma</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Bard</td>
-                      <td class="px-2 py-2 text-center">Charisma</td>
-                      <td class="px-2 py-2 text-center">Dexterity</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Fighter</td>
-                      <td class="px-2 py-2 text-center">Strength</td>
-                      <td class="px-2 py-2 text-center">Dexterity</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Barbarian</td>
-                      <td class="px-2 py-2 text-center">Strength</td>
-                      <td class="px-2 py-2 text-center">Constitution</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Monk</td>
-                      <td class="px-2 py-2 text-center">Dexterity</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Rogue</td>
-                      <td class="px-2 py-2 text-center">Dexterity</td>
-                      <td class="px-2 py-2 text-center">Intelligence</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Cleric</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                      <td class="px-2 py-2 text-center">Charisma</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Druid</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                      <td class="px-2 py-2 text-center">Intelligence</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Ranger</td>
-                      <td class="px-2 py-2 text-center">Dexterity</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                    </tr>
-                    <tr class="hover:opacity-80">
-                      <td class="px-2 py-2">Wizard</td>
-                      <td class="px-2 py-2 text-center">Intelligence</td>
-                      <td class="px-2 py-2 text-center">Wisdom</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <li>
-              These stats determine your hero's strengths and weaknesses,
-              influencing their abilities in combat, social interactions, and
-              other challenges.
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-8 p-5 rounded-lg win95-outset">
-        <h3 class="text-2xl font-bold mb-3" style="color: var(--color-textHighlighted);">
-          The Result: A Hero Born of Your Identity
-        </h3>
-        <p class="leading-relaxed">
-          By connecting these steps, you have the key do discover a coherent and
-          consistent hero. This hero is a reflection of your digital identity. A
-          unique character with their own story and destiny.
-        </p>
-      </div>
-
-      <!-- Play Button Section -->
-      <div class="mt-8 text-center">
-        <h3 class="text-2xl font-bold mb-4" style="color: var(--color-textHighlighted);">Ready to Discover Your Hero?</h3>
-        <p class="mb-6" style="color: var(--color-textMuted);">
-          Login with your Nostr key to generate your unique character and start your adventure!
-        </p>
-        {{template "nav-play" .}}
-      </div>
-
-      <div class="mt-4">{{template "nav-discover" .}}</div>
-    </div>
-    <div class="text-sm mt-2 mb-4">
-      If you think I should change how anything is weighted, please
-      <a
-        href="https://github.com/0ceanSlim/nostr-hero/issues"
-        class="hover:opacity-80"
-        style="color: var(--color-textHighlighted);"
-        >let me know!</a
-      >
-    </div>
-    <div class="text-sm mt-2 mb-4">
-      I'll work on getting the registries to load faster and add some more
-      things to do in the future
-    </div>
+<!-- Tab Navigation -->
+<div class="sticky top-0 z-40 win95-outset rounded-md mt-4 mb-4 p-2">
+  <div class="tab-scroll-container overflow-x-auto">
+    <button id="tab-btn-home" class="tab-inactive pixel-clip">
+      🏠 Home
+    </button>
+    <button id="tab-btn-updates" class="tab-inactive pixel-clip">
+      📰 Updates
+    </button>
+    <button id="tab-btn-roadmap" class="tab-inactive pixel-clip">
+      🗺️ Roadmap
+    </button>
+    <button id="tab-btn-about" class="tab-inactive pixel-clip">
+      📚 About
+    </button>
+    <button id="tab-btn-contribute" class="tab-inactive pixel-clip">
+      🤝 Contribute
+    </button>
+    <button id="tab-btn-wiki" class="tab-inactive pixel-clip">
+      📖 Wiki
+    </button>
   </div>
+</div>
+
+<!-- Tab Content Container -->
+<div class="tab-content-container">
+  {{template "tab-home" .}}
+  {{template "tab-updates" .}}
+  {{template "tab-roadmap" .}}
+  {{template "tab-about" .}}
+  {{template "tab-contribute" .}}
+  {{template "tab-wiki" .}}
 </div>
 {{end}}

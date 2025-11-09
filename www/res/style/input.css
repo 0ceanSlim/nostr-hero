@@ -20,15 +20,15 @@
 
   :root,
   :root[data-theme="dark"] {
-    --color-bgPrimary: rgb(16, 16, 16);
-    --color-bgSecondary: rgb(40, 40, 40);
-    --color-bgTertiary: rgb(30, 30, 30);
+    --color-bgPrimary: rgb(30, 30, 30);
+    --color-bgSecondary: rgb(45, 45, 45);
+    --color-bgTertiary: rgb(60, 60, 60);
     --color-bgInverted: rgb(225, 225, 225);
-    --color-textPrimary: rgb(255, 255, 255);
-    --color-textSecondary: rgb(235, 235, 235);
-    --color-textMuted: rgb(200, 200, 200);
-    --color-textInverted: rgb(16, 16, 16);
-    --color-textHighlighted: rgb(149, 40, 244);
+    --color-textPrimary: rgb(212, 212, 212);
+    --color-textSecondary: rgb(204, 204, 204);
+    --color-textMuted: rgb(150, 150, 150);
+    --color-textInverted: rgb(30, 30, 30);
+    --color-textHighlighted: rgb(86, 156, 214);
   }
   :root[data-theme="light"] {
     --color-bgPrimary: rgb(230, 230, 230);
@@ -304,128 +304,475 @@
       -3px -3px 0 0 rgb(239, 68, 68);
   }
 
-  /* Blue button for browser extension */
+  /* Purple/Magenta login button for header */
+  .login-button-yellow {
+    background: rgb(216, 27, 216);
+    border-top: 2px solid rgb(240, 100, 240);
+    border-left: 2px solid rgb(240, 100, 240);
+    border-right: 2px solid rgb(150, 15, 150);
+    border-bottom: 2px solid rgb(150, 15, 150);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .login-button-yellow:hover {
+    background: rgb(230, 60, 230);
+  }
+
+  .login-button-yellow:active {
+    background: rgb(180, 20, 180);
+    border-top: 2px solid rgb(150, 15, 150);
+    border-left: 2px solid rgb(150, 15, 150);
+    border-right: 2px solid rgb(240, 100, 240);
+    border-bottom: 2px solid rgb(240, 100, 240);
+  }
+
+  /* Blue discover button */
+  .discover-button-blue {
+    background: rgb(59, 130, 246);
+    border-top: 2px solid rgb(147, 197, 253);
+    border-left: 2px solid rgb(147, 197, 253);
+    border-right: 2px solid rgb(29, 78, 216);
+    border-bottom: 2px solid rgb(29, 78, 216);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .discover-button-blue:hover {
+    background: rgb(96, 165, 250);
+  }
+
+  .discover-button-blue:active {
+    background: rgb(37, 99, 235);
+    border-top: 2px solid rgb(29, 78, 216);
+    border-left: 2px solid rgb(29, 78, 216);
+    border-right: 2px solid rgb(147, 197, 253);
+    border-bottom: 2px solid rgb(147, 197, 253);
+  }
+
+  /* Orange Amber button */
+  .amber-button-orange {
+    background: rgb(249, 115, 22);
+    border-top: 2px solid rgb(251, 146, 60);
+    border-left: 2px solid rgb(251, 146, 60);
+    border-right: 2px solid rgb(194, 65, 12);
+    border-bottom: 2px solid rgb(194, 65, 12);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .amber-button-orange:hover {
+    background: rgb(251, 146, 60);
+  }
+
+  .amber-button-orange:active {
+    background: rgb(234, 88, 12);
+    border-top: 2px solid rgb(194, 65, 12);
+    border-left: 2px solid rgb(194, 65, 12);
+    border-right: 2px solid rgb(251, 146, 60);
+    border-bottom: 2px solid rgb(251, 146, 60);
+  }
+
+  /* Dull red Private Key button */
+  .private-key-button-red {
+    background: rgb(153, 27, 27);
+    border-top: 2px solid rgb(185, 28, 28);
+    border-left: 2px solid rgb(185, 28, 28);
+    border-right: 2px solid rgb(127, 29, 29);
+    border-bottom: 2px solid rgb(127, 29, 29);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .private-key-button-red:hover {
+    background: rgb(185, 28, 28);
+  }
+
+  .private-key-button-red:active {
+    background: rgb(127, 29, 29);
+    border-top: 2px solid rgb(127, 29, 29);
+    border-left: 2px solid rgb(127, 29, 29);
+    border-right: 2px solid rgb(185, 28, 28);
+    border-bottom: 2px solid rgb(185, 28, 28);
+  }
+
+  /* Purple New to Nostr button */
+  .new-nostr-button-purple {
+    background: rgb(147, 51, 234);
+    border-top: 2px solid rgb(192, 132, 252);
+    border-left: 2px solid rgb(192, 132, 252);
+    border-right: 2px solid rgb(126, 34, 206);
+    border-bottom: 2px solid rgb(126, 34, 206);
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .new-nostr-button-purple:hover {
+    background: rgb(168, 85, 247);
+  }
+
+  .new-nostr-button-purple:active {
+    background: rgb(126, 34, 206);
+    border-top: 2px solid rgb(126, 34, 206);
+    border-left: 2px solid rgb(126, 34, 206);
+    border-right: 2px solid rgb(192, 132, 252);
+    border-bottom: 2px solid rgb(192, 132, 252);
+  }
+
+  /* Theme-aware action buttons */
+  /* Primary action button (highlighted theme color) */
+  .action-button-primary {
+    background: var(--color-textHighlighted);
+    border-top: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, white);
+    border-left: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, white);
+    border-right: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, black);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, black);
+    color: var(--color-bgPrimary);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .action-button-primary:hover {
+    background: color-mix(in srgb, var(--color-textHighlighted) 90%, white);
+  }
+
+  .action-button-primary:active {
+    background: color-mix(in srgb, var(--color-textHighlighted) 80%, black);
+    border-top: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, black);
+    border-left: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, black);
+    border-right: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, white);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-textHighlighted) 70%, white);
+  }
+
+  /* Secondary action button (tertiary background) */
+  .action-button-secondary {
+    background: var(--color-bgTertiary);
+    border-top: 2px solid var(--color-textSecondary);
+    border-left: 2px solid var(--color-textSecondary);
+    border-right: 2px solid var(--color-bgPrimary);
+    border-bottom: 2px solid var(--color-bgPrimary);
+    color: var(--color-textPrimary);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .action-button-secondary:hover {
+    background: var(--color-bgSecondary);
+    color: var(--color-textHighlighted);
+  }
+
+  .action-button-secondary:active {
+    background: var(--color-bgPrimary);
+    border-top: 2px solid var(--color-bgPrimary);
+    border-left: 2px solid var(--color-bgPrimary);
+    border-right: 2px solid var(--color-textSecondary);
+    border-bottom: 2px solid var(--color-textSecondary);
+  }
+
+  /* Muted action button (for less important actions) */
+  .action-button-muted {
+    background: var(--color-bgSecondary);
+    border-top: 2px solid var(--color-bgTertiary);
+    border-left: 2px solid var(--color-bgTertiary);
+    border-right: 2px solid var(--color-bgPrimary);
+    border-bottom: 2px solid var(--color-bgPrimary);
+    color: var(--color-textMuted);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .action-button-muted:hover {
+    background: var(--color-bgTertiary);
+    color: var(--color-textSecondary);
+  }
+
+  .action-button-muted:active {
+    background: var(--color-bgPrimary);
+    border-top: 2px solid var(--color-bgPrimary);
+    border-left: 2px solid var(--color-bgPrimary);
+    border-right: 2px solid var(--color-bgTertiary);
+    border-bottom: 2px solid var(--color-bgTertiary);
+  }
+
+  /* Inverted action button (for special emphasis) */
+  .action-button-inverted {
+    background: var(--color-bgInverted);
+    border-top: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, white);
+    border-left: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, white);
+    border-right: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, black);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, black);
+    color: var(--color-textInverted);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .action-button-inverted:hover {
+    background: color-mix(in srgb, var(--color-bgInverted) 90%, white);
+  }
+
+  .action-button-inverted:active {
+    background: color-mix(in srgb, var(--color-bgInverted) 80%, black);
+    border-top: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, black);
+    border-left: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, black);
+    border-right: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, white);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-bgInverted) 70%, white);
+  }
+
+  /* Legacy button styles (kept for backwards compatibility but deprecated) */
   .blue-button {
-    background: rgb(29, 78, 216);
-    border: none;
-    box-shadow:
-      3px 0 0 0 rgb(59, 130, 246),
-      0 3px 0 0 rgb(59, 130, 246),
-      -3px 0 0 0 rgb(30, 58, 138),
-      0 -3px 0 0 rgb(30, 58, 138),
-      3px 3px 0 0 rgb(59, 130, 246),
-      -3px -3px 0 0 rgb(30, 58, 138);
-    color: white;
-    transition: all 0.1s;
-    image-rendering: pixelated;
+    background: var(--color-textHighlighted);
+    border: 2px solid var(--color-textHighlighted);
+    color: var(--color-bgPrimary);
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-textHighlighted) 40%, transparent);
   }
 
   .blue-button:hover {
-    background: rgb(37, 99, 235);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-textHighlighted) 60%, transparent);
   }
 
-  .blue-button:active {
-    background: rgb(30, 58, 138);
-    box-shadow:
-      3px 0 0 0 rgb(30, 58, 138),
-      0 3px 0 0 rgb(30, 58, 138),
-      -3px 0 0 0 rgb(59, 130, 246),
-      0 -3px 0 0 rgb(59, 130, 246),
-      3px 3px 0 0 rgb(30, 58, 138),
-      -3px -3px 0 0 rgb(59, 130, 246);
-  }
-
-  /* Orange button for Amber */
   .orange-button {
-    background: rgb(234, 88, 12);
-    border: none;
-    box-shadow:
-      3px 0 0 0 rgb(251, 146, 60),
-      0 3px 0 0 rgb(251, 146, 60),
-      -3px 0 0 0 rgb(154, 52, 18),
-      0 -3px 0 0 rgb(154, 52, 18),
-      3px 3px 0 0 rgb(251, 146, 60),
-      -3px -3px 0 0 rgb(154, 52, 18);
-    color: white;
+    background: var(--color-bgTertiary);
+    border: 2px solid var(--color-textPrimary);
+    color: var(--color-textPrimary);
     transition: all 0.1s;
     image-rendering: pixelated;
   }
 
   .orange-button:hover {
-    background: rgb(249, 115, 22);
+    background: var(--color-bgSecondary);
+    border-color: var(--color-textHighlighted);
+    color: var(--color-textHighlighted);
   }
 
-  .orange-button:active {
-    background: rgb(154, 52, 18);
-    box-shadow:
-      3px 0 0 0 rgb(154, 52, 18),
-      0 3px 0 0 rgb(154, 52, 18),
-      -3px 0 0 0 rgb(251, 146, 60),
-      0 -3px 0 0 rgb(251, 146, 60),
-      3px 3px 0 0 rgb(154, 52, 18),
-      -3px -3px 0 0 rgb(251, 146, 60);
-  }
-
-  /* Red button for private key */
   .red-button {
-    background: rgb(185, 28, 28);
-    border: none;
-    box-shadow:
-      3px 0 0 0 rgb(239, 68, 68),
-      0 3px 0 0 rgb(239, 68, 68),
-      -3px 0 0 0 rgb(127, 29, 29),
-      0 -3px 0 0 rgb(127, 29, 29),
-      3px 3px 0 0 rgb(239, 68, 68),
-      -3px -3px 0 0 rgb(127, 29, 29);
-    color: white;
-    transition: all 0.1s;
-    image-rendering: pixelated;
+    background: var(--color-bgSecondary);
+    border: 2px solid var(--color-textMuted);
+    color: var(--color-textMuted);
+    font-weight: 500;
+    transition: all 0.2s;
   }
 
   .red-button:hover {
-    background: rgb(220, 38, 38);
+    border-color: var(--color-textSecondary);
+    color: var(--color-textSecondary);
   }
 
   .red-button:active {
-    background: rgb(127, 29, 29);
-    box-shadow:
-      3px 0 0 0 rgb(127, 29, 29),
-      0 3px 0 0 rgb(127, 29, 29),
-      -3px 0 0 0 rgb(239, 68, 68),
-      0 -3px 0 0 rgb(239, 68, 68),
-      3px 3px 0 0 rgb(127, 29, 29),
-      -3px -3px 0 0 rgb(239, 68, 68);
+    background: var(--color-bgPrimary);
   }
 
-  /* Purple button for generate keys */
   .purple-button {
-    background: rgb(126, 34, 206);
-    border: none;
-    box-shadow:
-      3px 0 0 0 rgb(168, 85, 247),
-      0 3px 0 0 rgb(168, 85, 247),
-      -3px 0 0 0 rgb(88, 28, 135),
-      0 -3px 0 0 rgb(88, 28, 135),
-      3px 3px 0 0 rgb(168, 85, 247),
-      -3px -3px 0 0 rgb(88, 28, 135);
-    color: white;
-    transition: all 0.1s;
-    image-rendering: pixelated;
+    background: var(--color-bgInverted);
+    border: 2px solid var(--color-bgInverted);
+    color: var(--color-textInverted);
+    font-weight: 600;
+    transition: all 0.2s;
   }
 
   .purple-button:hover {
-    background: rgb(147, 51, 234);
+    opacity: 0.9;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-bgInverted) 50%, transparent);
   }
 
   .purple-button:active {
-    background: rgb(88, 28, 135);
+    opacity: 0.8;
+  }
+
+  /* ========================================
+     Fantasy Pixel RPG UI Components
+     ======================================== */
+
+  /* Tab navigation styles */
+  .tab-inactive {
+    border: 2px solid var(--color-bgTertiary);
+    background: var(--color-bgSecondary);
+    color: var(--color-textSecondary);
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+
+  .tab-inactive:hover {
+    background: var(--color-bgTertiary);
+    color: var(--color-textPrimary);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .tab-active {
+    border: 2px solid var(--color-textHighlighted);
+    background: var(--color-bgTertiary);
+    color: var(--color-textHighlighted);
+    box-shadow: 0 0 8px var(--color-textHighlighted);
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+  }
+
+  /* Profile picture frame */
+  .pfp-24 {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    image-rendering: pixelated;
+    border: 1px solid var(--color-textHighlighted);
+    object-fit: cover;
+  }
+
+  .pfp-32 {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    image-rendering: pixelated;
+    border: 2px solid var(--color-textHighlighted);
+    object-fit: cover;
+  }
+
+  .pfp-48 {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    image-rendering: pixelated;
+    border: 2px solid var(--color-textHighlighted);
+    object-fit: cover;
+  }
+
+  /* Profile dropdown button */
+  .profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-bgSecondary);
+    border: 2px solid var(--color-bgTertiary);
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: var(--color-textPrimary);
+  }
+
+  .profile-btn:hover {
+    border-color: var(--color-textHighlighted);
+    box-shadow: 0 0 8px rgba(149, 40, 244, 0.4);
+  }
+
+  /* Play button with enchanted glow */
+  .play-button {
+    background: rgb(46, 125, 50);
+    border: none;
     box-shadow:
-      3px 0 0 0 rgb(88, 28, 135),
-      0 3px 0 0 rgb(88, 28, 135),
-      -3px 0 0 0 rgb(168, 85, 247),
-      0 -3px 0 0 rgb(168, 85, 247),
-      3px 3px 0 0 rgb(88, 28, 135),
-      -3px -3px 0 0 rgb(168, 85, 247);
+      3px 0 0 0 rgb(76, 175, 80),
+      0 3px 0 0 rgb(76, 175, 80),
+      -3px 0 0 0 rgb(27, 94, 32),
+      0 -3px 0 0 rgb(27, 94, 32),
+      3px 3px 0 0 rgb(76, 175, 80),
+      -3px -3px 0 0 rgb(27, 94, 32),
+      0 0 12px rgba(76, 175, 80, 0.5);
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    image-rendering: pixelated;
+  }
+
+  .play-button:hover {
+    background: rgb(56, 142, 60);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .play-button:active {
+    background: rgb(27, 94, 32);
+    box-shadow:
+      3px 0 0 0 rgb(27, 94, 32),
+      0 3px 0 0 rgb(27, 94, 32),
+      -3px 0 0 0 rgb(76, 175, 80),
+      0 -3px 0 0 rgb(76, 175, 80),
+      3px 3px 0 0 rgb(27, 94, 32),
+      -3px -3px 0 0 rgb(76, 175, 80);
+  }
+
+  /* Enchanted glow pulse animation */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow:
+        3px 0 0 0 rgb(76, 175, 80),
+        0 3px 0 0 rgb(76, 175, 80),
+        -3px 0 0 0 rgb(27, 94, 32),
+        0 -3px 0 0 rgb(27, 94, 32),
+        3px 3px 0 0 rgb(76, 175, 80),
+        -3px -3px 0 0 rgb(27, 94, 32),
+        0 0 12px rgba(76, 175, 80, 0.6);
+    }
+    50% {
+      box-shadow:
+        3px 0 0 0 rgb(76, 175, 80),
+        0 3px 0 0 rgb(76, 175, 80),
+        -3px 0 0 0 rgb(27, 94, 32),
+        0 -3px 0 0 rgb(27, 94, 32),
+        3px 3px 0 0 rgb(76, 175, 80),
+        -3px -3px 0 0 rgb(27, 94, 32),
+        0 0 20px rgba(76, 175, 80, 0.9);
+    }
+  }
+
+  /* Highlighted glow animation for active elements */
+  @keyframes pulse-highlight-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px var(--color-textHighlighted);
+    }
+    50% {
+      box-shadow: 0 0 16px var(--color-textHighlighted);
+    }
+  }
+
+  .pixel-glow {
+    animation: pulse-highlight-glow 2s ease-in-out infinite;
+  }
+
+  /* Tab container for horizontal scroll on mobile */
+  .tab-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 0.5rem;
+  }
+
+  .tab-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Theme preview swatch */
+  .theme-swatch {
+    width: 100%;
+    height: 3rem;
+    border: 2px solid var(--color-textPrimary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .theme-swatch:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .theme-swatch-selected {
+    border: 3px solid var(--color-textHighlighted);
+    box-shadow: 0 0 12px var(--color-textHighlighted);
   }
 }
 

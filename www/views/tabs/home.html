@@ -1,0 +1,132 @@
+{{define "tab-home"}}
+<div id="tab-home" class="tab-content">
+  <div class="rounded-xl shadow-xl overflow-hidden win95-outset">
+    <div class="p-6 md:p-8">
+      <!-- Hero Section -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3" style="color: var(--color-textHighlighted);">
+          ⚔️ Nostr Hero ⚔️
+        </h1>
+        <p class="text-lg md:text-xl mb-4" style="color: var(--color-textSecondary);">
+          Your Nostr Identity Becomes a D&D Adventure
+        </p>
+        <p class="mb-6" style="color: var(--color-textMuted);">
+          A web-based RPG that generates your unique character from your Nostr public key.
+          Explore a persistent world, battle monsters, cast spells, and become a legend.
+        </p>
+      </div>
+
+      <!-- CTA Section (Not Logged In) -->
+      <div id="home-cta-loggedout" class="text-center mb-8">
+        <div class="flex flex-col items-center gap-3">
+          {{template "nav-play" .}}
+          <a
+            href="/discover"
+            class="discover-button-blue pixel-clip px-4 py-2 hover:opacity-80 transition text-sm"
+          >
+            ⛏️ Discover
+          </a>
+        </div>
+        <p class="mt-4 text-sm" style="color: var(--color-textMuted);">
+          🔐 Secure Nostr authentication • 🎲 Deterministic character generation • 💾 Save your progress
+        </p>
+      </div>
+
+      <!-- Logged In Section -->
+      <div id="home-cta-loggedin" class="hidden text-center mb-8 win95-inset p-6 rounded-lg">
+        <p class="text-xl mb-4" style="color: var(--color-textHighlighted);">
+          Welcome back, <span id="home-username">Hero</span>!
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/saves" class="play-button pixel-clip px-8 py-3 text-lg">
+            ▶️ Continue Adventure
+          </a>
+          <a href="/new-game" class="pixel-button pixel-clip px-8 py-3" style="color: var(--color-textPrimary);">
+            ✨ New Character
+          </a>
+          <a href="/discover" class="discover-button-blue pixel-clip px-8 py-3">
+            ⛏️ Discover
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="win95-inset p-4 text-center rounded-lg">
+          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">200+</div>
+          <div class="text-sm" style="color: var(--color-textMuted);">Items</div>
+        </div>
+        <div class="win95-inset p-4 text-center rounded-lg">
+          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">300+</div>
+          <div class="text-sm" style="color: var(--color-textMuted);">Spells</div>
+        </div>
+        <div class="win95-inset p-4 text-center rounded-lg">
+          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">100%</div>
+          <div class="text-sm" style="color: var(--color-textMuted);">Deterministic</div>
+        </div>
+        <div class="win95-inset p-4 text-center rounded-lg">
+          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">∞</div>
+          <div class="text-sm" style="color: var(--color-textMuted);">Adventures</div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="text-center space-y-3">
+        <div>
+          <a href="https://happytavern.co" target="_blank" class="text-lg hover:opacity-80 transition" style="color: var(--color-textHighlighted);">
+            🍻 Visit Happy Tavern
+          </a>
+        </div>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <a href="https://github.com/0ceanSlim/nostr-hero" target="_blank" class="hover:opacity-80" style="color: var(--color-textSecondary);">
+            💻 GitHub
+          </a>
+          <a href="#about" class="hover:opacity-80" style="color: var(--color-textSecondary);">
+            📚 Learn More
+          </a>
+          <a href="#contribute" class="hover:opacity-80" style="color: var(--color-textSecondary);">
+            🤝 Contribute
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Update home tab based on auth state
+  function updateHomeAuthUI() {
+    const loggedOutCTA = document.getElementById('home-cta-loggedout');
+    const loggedInCTA = document.getElementById('home-cta-loggedin');
+    const username = document.getElementById('home-username');
+
+    if (window.sessionManager && window.sessionManager.isAuthenticated()) {
+      // Logged in
+      if (loggedOutCTA) loggedOutCTA.classList.add('hidden');
+      if (loggedInCTA) loggedInCTA.classList.remove('hidden');
+
+      // Update username
+      if (window.profileManager && window.profileManager.getProfile()) {
+        const profile = window.profileManager.getProfile();
+        const name = profile.display_name || profile.name || profile.npub?.slice(0, 10) + '...';
+        if (username) username.textContent = name;
+      }
+    } else {
+      // Not logged in
+      if (loggedOutCTA) loggedOutCTA.classList.remove('hidden');
+      if (loggedInCTA) loggedInCTA.classList.add('hidden');
+    }
+  }
+
+  // Listen for auth changes
+  window.addEventListener('auth-changed', updateHomeAuthUI);
+  window.addEventListener('profile-updated', updateHomeAuthUI);
+
+  // Initial check
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateHomeAuthUI);
+  } else {
+    updateHomeAuthUI();
+  }
+</script>
+{{end}}

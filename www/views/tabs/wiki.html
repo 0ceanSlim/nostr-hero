@@ -1,0 +1,60 @@
+{{define "tab-wiki"}}
+<div id="tab-wiki" class="tab-content hidden">
+  <div class="rounded-xl shadow-xl overflow-hidden win95-outset">
+    <div class="p-6 md:p-8 text-center">
+      <div class="text-6xl mb-6">📖</div>
+      <h2 class="text-3xl font-bold mb-6" style="color: var(--color-textHighlighted);">
+        Community Wiki
+      </h2>
+
+      <p class="text-lg mb-6" style="color: var(--color-textSecondary);">
+        Coming Soon!
+      </p>
+
+      <div class="max-w-2xl mx-auto win95-inset p-6 rounded-lg text-left mb-8">
+        <h3 class="text-xl font-bold mb-4">What's Planned:</h3>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-2">
+            <span style="color: var(--color-textHighlighted);">•</span>
+            <span><strong>Community-Editable Wiki:</strong> Anyone with a Nostr key can contribute</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--color-textHighlighted);">•</span>
+            <span><strong>Nostr Authentication:</strong> Login with your npub to edit pages</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--color-textHighlighted);">•</span>
+            <span><strong>Game Guides:</strong> Strategies, tips, character builds, quest walkthroughs</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--color-textHighlighted);">•</span>
+            <span><strong>Lore & Worldbuilding:</strong> Expand the Nostr Hero universe together</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span style="color: var(--color-textHighlighted);">•</span>
+            <span><strong>Technical Documentation:</strong> API docs, modding guides, data formats</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="max-w-2xl mx-auto win95-inset p-6 rounded-lg text-left">
+        <h3 class="text-xl font-bold mb-4">Technical Approach:</h3>
+        <p class="mb-4 text-sm">
+          The wiki will use <strong>Gollum</strong> (the same engine that powers GitHub wikis)
+          running as a headless service, with Nostr Hero's Go backend acting as the frontend proxy.
+        </p>
+        <p class="text-sm" style="color: var(--color-textMuted);">
+          This allows full control over styling (matching the retro pixel aesthetic) while
+          leveraging Gollum's powerful Git-based wiki engine.
+        </p>
+      </div>
+
+      <div class="mt-8">
+        <p class="text-sm" style="color: var(--color-textMuted);">
+          Want to help build this feature? See the <a href="#contribute" class="hover:opacity-80" style="color: var(--color-textHighlighted);">Contribute tab</a> for ways to get involved.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

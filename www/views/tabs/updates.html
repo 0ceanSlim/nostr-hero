@@ -1,0 +1,110 @@
+{{define "tab-updates"}}
+<div id="tab-updates" class="tab-content hidden">
+  <div class="rounded-xl shadow-xl overflow-hidden win95-outset">
+    <div class="p-6 md:p-8">
+      <h2 class="text-3xl font-bold mb-6" style="color: var(--color-textHighlighted);">
+        📰 Development Updates
+      </h2>
+
+      <!-- Update Entries -->
+      <div class="space-y-6">
+        <!-- Entry 1 -->
+        <div class="win95-inset p-4 rounded-lg">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🔧</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold" style="color: var(--color-textPrimary);">Game Logic Refactor to Go</h3>
+                <span class="text-xs px-2 py-1 win95-button rounded" style="color: var(--color-textMuted);">Recent</span>
+              </div>
+              <p class="text-sm mb-2" style="color: var(--color-textSecondary);">
+                Major refactor moving game logic from JavaScript to Go backend. This improves performance,
+                security, and makes the server authoritative for all game actions.
+              </p>
+              <div class="text-xs" style="color: var(--color-textMuted);">2 hours ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry 2 -->
+        <div class="win95-inset p-4 rounded-lg">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🍖</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold" style="color: var(--color-textPrimary);">Hunger & Fatigue System</h3>
+                <span class="text-xs px-2 py-1 win95-button rounded" style="color: var(--color-textMuted);">v0.2.0</span>
+              </div>
+              <p class="text-sm mb-2" style="color: var(--color-textSecondary);">
+                Implemented hunger and fatigue mechanics with counters and starvation effects.
+                Characters now need to eat food and rest to maintain their stats.
+              </p>
+              <div class="text-xs" style="color: var(--color-textMuted);">1 day ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry 3 -->
+        <div class="win95-inset p-4 rounded-lg">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">⚔️</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold" style="color: var(--color-textPrimary);">Equipment & Inventory Fixes</h3>
+                <span class="text-xs px-2 py-1 win95-button rounded" style="color: var(--color-textMuted);">v0.1.9</span>
+              </div>
+              <p class="text-sm mb-2" style="color: var(--color-textSecondary);">
+                Equipping and inventory systems working mostly bug-free. Item stacking, drag-drop,
+                and ground items all functional.
+              </p>
+              <div class="text-xs" style="color: var(--color-textMuted);">3 days ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry 4 -->
+        <div class="win95-inset p-4 rounded-lg">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🎵</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold" style="color: var(--color-textPrimary);">Music System Refactor</h3>
+                <span class="text-xs px-2 py-1 win95-button rounded" style="color: var(--color-textMuted);">v0.1.8</span>
+              </div>
+              <p class="text-sm mb-2" style="color: var(--color-textSecondary);">
+                Refactored music system and save state management. Music now properly tracks
+                unlocked tracks and location themes.
+              </p>
+              <div class="text-xs" style="color: var(--color-textMuted);">4 days ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry 5 -->
+        <div class="win95-inset p-4 rounded-lg">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🛠️</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-bold" style="color: var(--color-textPrimary);">Item Editor Improvements</h3>
+                <span class="text-xs px-2 py-1 win95-button rounded" style="color: var(--color-textMuted);">Tools</span>
+              </div>
+              <p class="text-sm mb-2" style="color: var(--color-textSecondary);">
+                Enhanced the item editor tool with better validation, preview features,
+                and easier content creation workflows.
+              </p>
+              <div class="text-xs" style="color: var(--color-textMuted);">5 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a href="https://github.com/0ceanSlim/nostr-hero/commits/main" target="_blank" class="text-sm hover:opacity-80" style="color: var(--color-textHighlighted);">
+          View all commits on GitHub →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

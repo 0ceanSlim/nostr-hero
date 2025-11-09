@@ -3,102 +3,98 @@
 <button
   id="login-btn"
   onclick="handleLoginClick()"
-  class="login-button pixel-clip px-3 py-2 sm:px-8 sm:py-3 font-bold transition-all hover:scale-105"
-  style="font-size: 0.65rem; background: rgb(46, 125, 50) !important;"
+  class="login-button-yellow pixel-clip p-2 hover:opacity-80 transition flex-shrink-0"
+  title="Login"
 >
-  <span class="flex items-center gap-1 sm:gap-2 sm:text-base" id="login-btn-text">
-    🔑 Login
+  <span class="text-base" id="login-btn-text">
+    🗝️ Login
   </span>
 </button>
 
 <!-- Login Modal (Hidden by default) -->
 <div
   id="login-modal"
-  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
   style="background-color: rgba(0, 0, 0, 0.85);"
   onclick="if(event.target === this) hideLoginModal()"
 >
   <div
-    class="win95-outset pixel-clip w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
     style="border: 4px solid var(--color-textPrimary);"
     onclick="event.stopPropagation()"
   >
-    <div class="p-6 sm:p-8">
+    <div class="p-2 sm:p-6 md:p-8">
       <!-- Header -->
-      <div class="text-center mb-6">
-        <h2 class="text-3xl sm:text-4xl font-bold mb-2" style="color: var(--color-textHighlighted);">⚔️ Nostr Hero ⚔️</h2>
-        <p class="text-sm sm:text-base" style="color: var(--color-textMuted);">Login with your Nostr identity to save your progress</p>
+      <div class="text-center mb-3">
+        <h2 class="text-xl sm:text-3xl font-bold mb-1" style="color: var(--color-textHighlighted);">⚔️ Nostr Hero ⚔️</h2>
+        <p class="text-xs sm:text-sm" style="color: var(--color-textMuted);">Login with your Nostr identity to save your progress</p>
       </div>
 
       <!-- Login Methods -->
-      <div class="space-y-4 mb-6">
-        <!-- Browser Extension -->
-        <div class="win95-inset p-4">
-          <div class="flex items-start gap-4">
-            <div class="text-4xl">🔗</div>
+      <div class="space-y-2 mb-3">
+        <!-- Generate New Keys -->
+        <div class="win95-inset p-2 sm:p-3">
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="text-2xl sm:text-4xl">✨</div>
             <div class="flex-1">
-              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Browser Extension</h4>
-              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Use Alby, nos2x, or other Nostr browser extensions</p>
+              <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">New to Nostr?</h4>
+              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Generate a new keypair and start your adventure</p>
+              <button
+                onclick="generateNewKeys()"
+                class="new-nostr-button-purple px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
+              >
+                ✨ Generate Keys
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Browser Extension -->
+        <div class="win95-inset p-2 sm:p-3">
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="text-2xl sm:text-4xl">🔗</div>
+            <div class="flex-1">
+              <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">Browser Extension</h4>
+              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Use Alby, nos2x, or other Nostr browser extensions</p>
               <button
                 onclick="loginWithExtension()"
-                class="blue-button px-6 py-2 font-medium pixel-clip"
-                style="background: rgb(29, 78, 216) !important;"
+                class="action-button-primary px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
               >
-                Connect Extension
+                🔗 Extension
               </button>
             </div>
           </div>
         </div>
 
         <!-- Amber (Android) -->
-        <div class="win95-inset p-4">
-          <div class="flex items-start gap-4">
-            <div class="text-4xl">📱</div>
+        <div class="win95-inset p-2 sm:p-3">
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="text-2xl sm:text-4xl">📱</div>
             <div class="flex-1">
-              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Amber Signer</h4>
-              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Android app for secure key management</p>
+              <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">Amber Signer</h4>
+              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Android app for secure key management</p>
               <button
                 onclick="loginWithAmber()"
-                class="orange-button px-6 py-2 font-medium pixel-clip"
-                style="background: rgb(234, 88, 12) !important;"
+                class="amber-button-orange px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
               >
-                Connect Amber
+                📱 Amber
               </button>
             </div>
           </div>
         </div>
 
         <!-- Private Key -->
-        <div class="win95-inset p-4">
-          <div class="flex items-start gap-4">
-            <div class="text-4xl">🗝️</div>
+        <div class="win95-inset p-2 sm:p-3">
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="text-2xl sm:text-4xl">🗝️</div>
             <div class="flex-1">
-              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">Private Key</h4>
-              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Login with your nsec or hex private key (encrypted with password for session)</p>
+              <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">Private Key</h4>
+              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Login with your nsec or hex private key (encrypted with password for session)</p>
               <button
                 onclick="showPrivateKeyForm()"
-                class="red-button px-6 py-2 font-medium pixel-clip"
-                style="background: rgb(185, 28, 28) !important;"
+                class="private-key-button-red px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
               >
-                Enter Private Key
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Generate New Keys -->
-        <div class="win95-inset p-4">
-          <div class="flex items-start gap-4">
-            <div class="text-4xl">✨</div>
-            <div class="flex-1">
-              <h4 class="font-bold mb-1" style="color: var(--color-textPrimary);">New to Nostr?</h4>
-              <p class="text-sm mb-3" style="color: var(--color-textMuted);">Generate a new keypair and start your adventure</p>
-              <button
-                onclick="generateNewKeys()"
-                class="purple-button px-6 py-2 font-medium pixel-clip"
-                style="background: rgb(126, 34, 206) !important;"
-              >
-                Generate New Keys
+                🗝️ Private Key
               </button>
             </div>
           </div>
@@ -107,15 +103,15 @@
 
 
       <!-- Info Section -->
-      <div class="text-xs text-center mb-4" style="color: var(--color-textMuted);">
+      <div class="text-[10px] sm:text-xs text-center mb-2" style="color: var(--color-textMuted);">
         <p>🔐 Your keys are never sent to our servers</p>
-        <p class="mt-1">All signing happens locally in your browser or signer app</p>
+        <p class="mt-0.5">All signing happens locally in your browser or signer app</p>
       </div>
 
       <!-- Close Button -->
       <button
         onclick="hideLoginModal()"
-        class="w-full win95-button pixel-clip px-4 py-2 text-sm font-medium"
+        class="w-full win95-button pixel-clip px-2 py-1.5 text-xs font-medium"
         style="color: var(--color-textPrimary);"
       >
         Close
@@ -127,52 +123,51 @@
 <!-- Private Key Modal (Initially Hidden) -->
 <div
   id="private-key-modal"
-  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
   style="background-color: rgba(0, 0, 0, 0.85);"
   onclick="if(event.target === this) hidePrivateKeyForm()"
 >
   <div
-    class="win95-outset pixel-clip w-full max-w-md"
+    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-md max-h-[95vh] overflow-y-auto"
     style="border: 4px solid var(--color-textPrimary);"
     onclick="event.stopPropagation()"
   >
-    <div class="p-6">
-      <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-textHighlighted);">🗝️ Enter Private Key</h3>
-      <div class="space-y-4">
+    <div class="p-2 sm:p-6">
+      <h3 class="text-lg sm:text-2xl font-bold mb-2 text-center" style="color: var(--color-textHighlighted);">🗝️ Private Key</h3>
+      <div class="space-y-2">
         <div>
-          <label class="block text-sm font-medium mb-2" style="color: var(--color-textSecondary);">Private Key</label>
+          <label class="block text-xs font-medium mb-1" style="color: var(--color-textSecondary);">Private Key</label>
           <input
             type="password"
             id="private-key-modal-input"
-            class="w-full win95-inset px-3 py-2 focus:outline-none font-mono text-sm"
+            class="w-full win95-inset px-2 py-1.5 focus:outline-none font-mono text-xs"
             style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
             placeholder="nsec1... or hex private key"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-2" style="color: var(--color-textSecondary);">Encryption Password</label>
+          <label class="block text-xs font-medium mb-1" style="color: var(--color-textSecondary);">Encryption Password</label>
           <input
             type="password"
             id="encryption-password-modal-input"
-            class="w-full win95-inset px-3 py-2 focus:outline-none text-sm"
+            class="w-full win95-inset px-2 py-1.5 focus:outline-none text-xs"
             style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
             placeholder="Password to encrypt your key"
           />
         </div>
-        <div class="text-xs win95-inset p-3" style="color: var(--color-textMuted);">
+        <div class="text-xs win95-inset p-2" style="color: var(--color-textMuted);">
           <p>🔒 Your private key will be encrypted with your password and stored securely for this session only.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
           <button
             onclick="loginWithPrivateKeyAndPassword()"
-            class="flex-1 login-button pixel-clip px-4 py-3 font-medium"
-            style="background: rgb(46, 125, 50) !important;"
+            class="flex-1 action-button-primary pixel-clip px-2 py-1.5 text-xs"
           >
-            Login
+            🔑 Login
           </button>
           <button
             onclick="hidePrivateKeyForm()"
-            class="flex-1 win95-button pixel-clip px-4 py-3"
+            class="flex-1 win95-button pixel-clip px-2 py-1.5 text-xs"
             style="color: var(--color-textPrimary);"
           >
             Cancel
@@ -186,47 +181,46 @@
 <!-- Generated Keys Modal (Initially Hidden) -->
 <div
   id="generated-keys-modal"
-  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
   style="background-color: rgba(0, 0, 0, 0.85);"
   onclick="if(event.target === this) hideGeneratedKeys()"
 >
   <div
-    class="win95-outset pixel-clip w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
     style="border: 4px solid var(--color-textPrimary);"
     onclick="event.stopPropagation()"
   >
-    <div class="p-6">
-      <h3 class="text-2xl font-bold mb-4 text-center" style="color: var(--color-textHighlighted);">✨ New Keys Generated!</h3>
-      <div class="space-y-4">
+    <div class="p-2 sm:p-6">
+      <h3 class="text-lg sm:text-2xl font-bold mb-2 text-center" style="color: var(--color-textHighlighted);">✨ New Keys!</h3>
+      <div class="space-y-2">
         <div>
-          <label class="block text-sm font-bold mb-2" style="color: rgb(59, 130, 246);">📄 Public Key (npub)</label>
-          <div class="flex gap-2">
-            <div class="flex-1 win95-inset p-3 text-xs font-mono break-all" style="color: rgb(59, 130, 246); background: var(--color-bgPrimary);" id="gen-npub"></div>
-            <button onclick="copyToClipboard('gen-npub', '📄 Public key')" class="blue-button px-4 py-2 pixel-clip text-sm" style="background: rgb(29, 78, 216) !important;">Copy</button>
+          <label class="block text-xs font-bold mb-1" style="color: var(--color-textHighlighted);">📄 Public Key (npub)</label>
+          <div class="flex flex-col sm:flex-row gap-1">
+            <div class="flex-1 win95-inset p-1.5 text-[10px] sm:text-xs font-mono break-all overflow-x-auto" style="color: var(--color-textHighlighted); background: var(--color-bgPrimary); max-height: 60px;" id="gen-npub"></div>
+            <button onclick="copyToClipboard('gen-npub', '📄 Public key')" class="action-button-secondary px-3 py-1.5 pixel-clip text-xs flex-shrink-0">📋 Copy</button>
           </div>
         </div>
         <div>
-          <label class="block text-sm font-bold mb-2" style="color: rgb(239, 68, 68);">🔒 Private Key (nsec)</label>
-          <div class="flex gap-2">
-            <div class="flex-1 win95-inset p-3 text-xs font-mono break-all" style="color: rgb(239, 68, 68); background: var(--color-bgPrimary);" id="gen-nsec"></div>
-            <button onclick="copyToClipboard('gen-nsec', '🔒 Private key')" class="red-button px-4 py-2 pixel-clip text-sm" style="background: rgb(185, 28, 28) !important;">Copy</button>
+          <label class="block text-xs font-bold mb-1" style="color: rgb(239, 68, 68);">🔒 Private Key (nsec)</label>
+          <div class="flex flex-col sm:flex-row gap-1">
+            <div class="flex-1 win95-inset p-1.5 text-[10px] sm:text-xs font-mono break-all overflow-x-auto" style="color: rgb(239, 68, 68); background: var(--color-bgPrimary); max-height: 60px;" id="gen-nsec"></div>
+            <button onclick="copyToClipboard('gen-nsec', '🔒 Private key')" class="action-button-secondary px-3 py-1.5 pixel-clip text-xs flex-shrink-0">📋 Copy</button>
           </div>
         </div>
-        <div class="text-sm win95-inset p-4" style="background: var(--color-bgTertiary); color: var(--color-textHighlighted);">
-          <p class="font-bold">⚠️ CRITICAL - SAVE YOUR PRIVATE KEY!</p>
-          <p class="mt-2">This is the ONLY way to access your account. Copy and store it in a password manager or write it down securely. Anyone with this key controls your account.</p>
+        <div class="text-[10px] sm:text-xs win95-outset p-2 pixel-clip" style="background: rgb(153, 27, 27); color: rgb(255, 255, 255); border: 2px solid rgb(239, 68, 68);">
+          <p class="font-bold text-xs sm:text-sm">⚠️ CRITICAL - SAVE YOUR PRIVATE KEY!</p>
+          <p class="mt-1">This is the ONLY way to access your account. <strong>It cannot be recovered or changed by anyone.</strong> Copy and store it in a password manager or write it down securely. Anyone with this key controls your account.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
           <button
             onclick="useGeneratedKeys()"
-            class="flex-1 login-button pixel-clip px-4 py-3 font-medium"
-            style="background: rgb(46, 125, 50) !important;"
+            class="flex-1 action-button-primary pixel-clip px-2 py-1.5 text-xs"
           >
-            I Saved It - Continue
+            ✅ I Saved It
           </button>
           <button
             onclick="hideGeneratedKeys()"
-            class="flex-1 win95-button pixel-clip px-4 py-3"
+            class="flex-1 win95-button pixel-clip px-2 py-1.5 text-xs"
             style="color: var(--color-textPrimary);"
           >
             Cancel
@@ -281,16 +275,12 @@ function updateLoginButtonState() {
 
   if (window.sessionManager && window.sessionManager.isAuthenticated()) {
     // User is logged in - show logout button
-    button.classList.remove('login-button');
-    button.classList.add('logout-button');
-    button.style.cssText = 'font-size: 0.65rem; background: rgb(183, 28, 28) !important;';
     buttonText.innerHTML = '🚪 Logout';
+    button.title = 'Logout';
   } else {
     // User is not logged in - show login button
-    button.classList.remove('logout-button');
-    button.classList.add('login-button');
-    button.style.cssText = 'font-size: 0.65rem; background: rgb(46, 125, 50) !important;';
-    buttonText.innerHTML = '🔑 Login';
+    buttonText.innerHTML = '🗝️ Login';
+    button.title = 'Login';
   }
 }
 
@@ -356,7 +346,7 @@ async function loginWithPrivateKeyAndPassword() {
   }
 }
 
-// Copy to clipboard function
+// Copy to clipboard function with mobile fallback
 function copyToClipboard(elementId, label) {
   const element = document.getElementById(elementId);
   if (!element) return;
@@ -364,12 +354,51 @@ function copyToClipboard(elementId, label) {
   const text = element.textContent;
   if (!text) return;
 
-  navigator.clipboard.writeText(text).then(() => {
-    showMessage(`✅ ${label} copied to clipboard!`, 'success');
-  }).catch(err => {
-    console.error('Failed to copy:', err);
+  // Try modern clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showMessage(`✅ ${label} copied!`, 'success');
+    }).catch(err => {
+      console.error('Clipboard API failed:', err);
+      fallbackCopyTextToClipboard(text, label);
+    });
+  } else {
+    // Fallback for older browsers and mobile
+    fallbackCopyTextToClipboard(text, label);
+  }
+}
+
+// Fallback copy method using textarea
+function fallbackCopyTextToClipboard(text, label) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.width = '2em';
+  textArea.style.height = '2em';
+  textArea.style.padding = '0';
+  textArea.style.border = 'none';
+  textArea.style.outline = 'none';
+  textArea.style.boxShadow = 'none';
+  textArea.style.background = 'transparent';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      showMessage(`✅ ${label} copied!`, 'success');
+    } else {
+      showMessage('❌ Failed to copy to clipboard', 'error');
+    }
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
     showMessage('❌ Failed to copy to clipboard', 'error');
-  });
+  }
+
+  document.body.removeChild(textArea);
 }
 
 function hideGeneratedKeys() {
