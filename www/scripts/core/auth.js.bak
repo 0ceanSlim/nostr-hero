@@ -515,32 +515,19 @@ function showGeneratedKeys(keyPair) {
     }
 }
 
-// Use the generated keys to login
-async function useGeneratedKeys() {
-    if (!window.generatedKeyPair || !window.generatedKeyPair.nsec) {
-        showMessage('❌ No keys available', 'error');
+// Use the generated keys to login using SessionManager
+async function useGeneratedKeys(nsec) {
+    if (!window.sessionManager) {
+        showMessage('❌ Session manager not available', 'error');
         return;
     }
 
     try {
-        showMessage('🔐 Logging in...', 'info');
-
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                private_key: window.generatedKeyPair.nsec,
-                signing_method: 'encrypted_key',
-                mode: 'write'
-            })
-        });
-
-        if (!response.ok) throw new Error('Login failed');
-
-        hideGeneratedKeys();
-        showMessage('✅ Success!', 'success');
-        setTimeout(() => window.location.href = '/saves', 1000);
+        showMessage('🔐 Logging in with new keys...', 'info');
+        await window.sessionManager.loginWithPrivateKey(nsec);
+        // Success handling is done by event listeners
     } catch (error) {
+        console.error('Generated key login error:', error);
         showMessage('❌ Login failed: ' + error.message, 'error');
     }
 }
