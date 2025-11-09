@@ -69,15 +69,15 @@
           </div>
         </div>
 
-        <!-- Amber Signer (Combined: QR + Direct) -->
+        <!-- Amber (Android) -->
         <div class="win95-inset p-2 sm:p-3">
           <div class="flex items-start gap-2 sm:gap-3">
             <div class="text-2xl sm:text-4xl">📱</div>
             <div class="flex-1">
               <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">Amber Signer</h4>
-              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Login with Amber app - QR for desktop or direct on mobile</p>
+              <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Android app for secure key management</p>
               <button
-                onclick="showAmberOptions()"
+                onclick="loginWithAmber()"
                 class="amber-button-orange px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
               >
                 📱 Amber
@@ -85,7 +85,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- Private Key -->
         <div class="win95-inset p-2 sm:p-3">
@@ -234,100 +233,6 @@
     </div>
   </div>
 </div>
-
-
-
-<!-- Amber Options Modal (QR + Direct) -->
-<div
-  id="nostr-connect-qr-modal"
-  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-  style="background-color: rgba(0, 0, 0, 0.85);"
-  onclick="if(event.target === this) hideNostrConnectQR()"
->
-  <div
-    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-lg max-h-[95vh] overflow-y-auto"
-    style="border: 4px solid var(--color-textPrimary);"
-    onclick="event.stopPropagation()"
-  >
-    <div class="p-2 sm:p-6">
-      <!-- Header -->
-      <h3 class="text-lg sm:text-2xl font-bold mb-2 text-center" style="color: var(--color-textHighlighted);">📱 Amber Signer</h3>
-      <p class="text-xs sm:text-sm text-center mb-3" style="color: var(--color-textMuted);">Choose your login method</p>
-
-      <!-- Direct Button (for mobile devices) -->
-      <div class="mb-3">
-        <button
-          onclick="loginWithAmber()"
-          class="w-full amber-button-orange pixel-clip px-3 py-2 text-sm font-medium"
-        >
-          📱 Open Amber
-        </button>
-        <p class="text-[10px] text-center mt-1" style="color: var(--color-textMuted);">Use this if you're on your Android phone with Amber installed</p>
-      </div>
-
-      <div class="text-center text-xs mb-2" style="color: var(--color-textMuted);">
-        — OR —
-      </div>
-
-      <!-- QR Code Section Header -->
-      <div class="text-center mb-2">
-        <h4 class="text-sm font-bold" style="color: var(--color-textPrimary);">📷 Scan QR Code (Desktop Login)</h4>
-        <p class="text-[10px]" style="color: var(--color-textMuted);">Scan with Amber on your phone to login on this desktop</p>
-      </div>
-
-      <!-- Connection Status -->
-      <div id="nostr-connect-status" class="mb-3 p-2 win95-inset text-center">
-        <p class="text-xs" style="color: var(--color-textPrimary);" id="nostr-connect-status-text">⏳ Click "Show QR Code" to start</p>
-      </div>
-
-      <!-- Show QR Button -->
-      <button
-        id="show-qr-btn"
-        onclick="generateAmberQRCode()"
-        class="w-full action-button-primary pixel-clip px-3 py-2 text-sm font-medium mb-3"
-      >
-        📷 Show QR Code
-      </button>
-
-      <!-- QR Code Display -->
-      <div id="qr-code-container" class="hidden bg-white p-3 sm:p-4 rounded-lg mb-3 flex justify-center items-center min-h-[200px] sm:min-h-[280px]">
-        <canvas id="nostr-connect-qr-canvas"></canvas>
-      </div>
-
-      <!-- Connection String (for manual entry) -->
-      <div id="connection-string-container" class="hidden mb-3">
-        <label class="block text-xs font-medium mb-1" style="color: var(--color-textSecondary);">Connection String:</label>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            id="nostr-connect-uri"
-            readonly
-            class="flex-1 win95-inset px-2 py-1.5 focus:outline-none font-mono text-[10px] sm:text-xs"
-            style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
-            placeholder="nostrconnect://..."
-          />
-          <button
-            onclick="copyNostrConnectURI()"
-            class="action-button-primary pixel-clip px-2 py-1.5 text-xs w-full sm:w-auto"
-          >
-            📋 Copy
-          </button>
-        </div>
-        <p class="text-[10px] mt-1" style="color: var(--color-textMuted);">Or paste this into Amber manually</p>
-      </div>
-
-      <!-- Close Button -->
-      <button
-        onclick="hideNostrConnectQR()"
-        class="w-full win95-button pixel-clip px-2 py-1.5 text-xs font-medium"
-        style="color: var(--color-textPrimary);"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-</div>
-
 
 <script>
 // Global variable to store generated private key

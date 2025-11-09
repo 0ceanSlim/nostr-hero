@@ -5,12 +5,21 @@
 <script src="/scripts/pages/tabs.js"></script>
 <script src="/scripts/core/session-manager.js"></script>
 <script src="/scripts/core/auth.js"></script>
+<script src="/scripts/core/nostr-connect.js"></script>
 
 <!-- Loading Modal -->
 <div id="loading-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.85);">
-  <div class="win95-outset pixel-clip p-8 text-center" style="border: 4px solid var(--color-textPrimary);">
+  <div class="win95-outset pixel-clip p-4 sm:p-8 text-center" style="border: 4px solid var(--color-textPrimary);">
     <img src="/res/img/loading.gif" alt="Loading..." class="mx-auto mb-4" style="width: 64px; height: 64px; image-rendering: pixelated;">
-    <p id="loading-text" class="text-lg font-bold" style="color: var(--color-textPrimary);">Connecting to extension...</p>
+    <p id="loading-text" class="text-sm sm:text-lg font-bold mb-4" style="color: var(--color-textPrimary);">Connecting to extension...</p>
+    <button
+      id="loading-modal-cancel"
+      onclick="window.cancelLogin()"
+      class="win95-button pixel-clip px-4 py-2 text-xs sm:text-sm"
+      style="color: var(--color-textPrimary);"
+    >
+      Cancel
+    </button>
   </div>
 </div>
 
@@ -67,28 +76,33 @@ window.hideLoadingModal = function() {
   }
 };
 
-// Listen for authentication events to show/hide loading
+// Cancel login operation
+window.cancelLogin = function() {
+  window.hideLoadingModal();
+  window.showMessage('Login cancelled', 'info');
+
+  // Emit cancellation event if sessionManager is available
+  if (window.sessionManager) {
+    window.sessionManager.emit('authenticationFailed', { method: 'user_cancelled', error: 'User cancelled login' });
+  }
+};
+
+// Listen for authentication events (minimal - Grain-style login handles its own status)
 if (typeof window !== 'undefined') {
   window.addEventListener('load', () => {
     if (window.sessionManager) {
+      // Session manager events are now handled by Grain-style login functions
+      // No blocking loading modals for extension/amber to allow permission prompts
       window.sessionManager.on('authenticationStarted', (method) => {
-        let text = 'Logging in...';
-        if (method === 'extension') {
-          text = 'Connecting to extension...';
-        } else if (method === 'amber') {
-          text = 'Connecting to Amber...';
-        } else if (method === 'private_key') {
-          text = 'Logging in with private key...';
-        }
-        window.showLoadingModal(text);
+        console.log(`Authentication started: ${method}`);
       });
 
       window.sessionManager.on('authenticationSuccess', () => {
-        window.hideLoadingModal();
+        console.log('Authentication successful');
       });
 
       window.sessionManager.on('authenticationFailed', () => {
-        window.hideLoadingModal();
+        console.log('Authentication failed');
       });
     }
   });

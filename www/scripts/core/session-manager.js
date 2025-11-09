@@ -219,7 +219,13 @@ class SessionManager {
 
             this.emit('authenticationStarted', 'extension');
 
-            const publicKey = await window.nostr.getPublicKey();
+            // Add timeout for extension prompt (30 seconds)
+            const publicKeyPromise = window.nostr.getPublicKey();
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Extension request timed out. Please try again.')), 30000);
+            });
+
+            const publicKey = await Promise.race([publicKeyPromise, timeoutPromise]);
             if (!publicKey) {
                 throw new Error('Failed to get public key from extension');
             }

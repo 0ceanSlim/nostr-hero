@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -273,8 +274,17 @@ func (auth *AuthHandler) HandleAmberCallback(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	// URL decode the event parameter (Amber may send it encoded)
+	decodedEvent, err := url.QueryUnescape(eventParam)
+	if err != nil {
+		log.Printf("⚠️ Failed to URL decode event parameter, using raw value: %v", err)
+		decodedEvent = eventParam
+	}
+
+	log.Printf("📥 Amber event parameter: %s", decodedEvent)
+
 	// Extract public key from event parameter
-	publicKey, err := auth.extractPublicKeyFromAmber(eventParam)
+	publicKey, err := auth.extractPublicKeyFromAmber(decodedEvent)
 	if err != nil {
 		log.Printf("❌ Failed to extract public key from amber response: %v", err)
 		auth.renderAmberError(w, "Invalid response from Amber: "+err.Error())
@@ -331,15 +341,38 @@ func (auth *AuthHandler) extractPublicKeyFromAmber(eventParam string) (string, e
 		return "", fmt.Errorf("compressed Amber responses not supported")
 	}
 
-	// For get_public_key, event parameter should contain the public key directly
+	// Try to parse as JSON event (returnType=signature or returnType=event)
+	var event map[string]interface{}
+	if err := json.Unmarshal([]byte(eventParam), &event); err == nil {
+		// It's a JSON event, extract pubkey field
+		if pubkey, ok := event["pubkey"].(string); ok && len(pubkey) == 64 {
+			log.Printf("✅ Extracted pubkey from JSON event: %s", pubkey)
+			return pubkey, nil
+		}
+
+		// Check if it's wrapped in an "event" field
+		if eventObj, ok := event["event"].(map[string]interface{}); ok {
+			if pubkey, ok := eventObj["pubkey"].(string); ok && len(pubkey) == 64 {
+				log.Printf("✅ Extracted pubkey from nested event: %s", pubkey)
+				return pubkey, nil
+			}
+		}
+
+		log.Printf("⚠️ JSON event doesn't have valid pubkey field: %v", event)
+		return "", fmt.Errorf("event JSON missing valid pubkey field")
+	}
+
+	// Fallback: treat as direct public key string
 	publicKey := strings.TrimSpace(eventParam)
 
 	// Validate public key format (64 hex characters)
 	pubKeyRegex := regexp.MustCompile(`^[a-fA-F0-9]{64}$`)
 	if !pubKeyRegex.MatchString(publicKey) {
+		log.Printf("⚠️ Not a valid hex pubkey: %s", publicKey)
 		return "", fmt.Errorf("invalid public key format from Amber")
 	}
 
+	log.Printf("✅ Extracted pubkey as direct string: %s", publicKey)
 	return publicKey, nil
 }
 

@@ -113,37 +113,276 @@ function redirectToLogin() {
     showLoginInterface();
 }
 
-// Login with browser extension using SessionManager
+// Login with browser extension using SessionManager (Grain-style)
 async function loginWithExtension() {
-    if (!window.sessionManager) {
-        showMessage('❌ Session manager not available', 'error');
-        return;
-    }
-
     try {
-        showMessage('🔗 Connecting to browser extension...', 'info');
-        await window.sessionManager.loginWithExtension();
-        // Success handling is done by event listeners
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('loading', 'Requesting access from extension...');
+        }
+
+        if (!window.nostr) {
+            throw new Error('Nostr extension not found');
+        }
+
+        const publicKey = await window.nostr.getPublicKey();
+
+        if (!publicKey || publicKey.length !== 64) {
+            throw new Error('Invalid public key received from extension');
+        }
+
+        console.log('Extension returned public key:', publicKey);
+
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('loading', 'Creating session with extension signing...');
+        }
+
+        const sessionRequest = {
+            public_key: publicKey,
+            signing_method: 'browser_extension',
+            mode: 'write'
+        };
+
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(sessionRequest)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            const errorMsg = errorData?.message || `HTTP ${response.status}`;
+            throw new Error(`Login failed: ${errorMsg}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message || 'Login failed');
+        }
+
+        console.log('Extension login successful');
+
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('success', 'Connected via browser extension!');
+        } else {
+            showMessage('✅ Connected via browser extension!', 'success');
+        }
+
+        window.nostrExtensionConnected = true;
+
+        setTimeout(() => {
+            hideLoginModal();
+            window.location.href = '/saves';
+        }, 1000);
     } catch (error) {
         console.error('Extension login error:', error);
-        showMessage('❌ Extension login failed: ' + error.message, 'error');
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('error', `Extension error: ${error.message}`);
+        } else {
+            showMessage('❌ Extension login failed: ' + error.message, 'error');
+        }
     }
 }
 
-// Login with Amber using SessionManager
-async function loginWithAmber() {
-    if (!window.sessionManager) {
-        showMessage('❌ Session manager not available', 'error');
+// Amber callback state
+let amberCallbackReceived = false;
+
+// Login with Amber using NIP-55 protocol (Grain-style)
+function loginWithAmber() {
+    // Check if running on localhost (won't work with Amber from mobile)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('error', '⚠️ Amber login requires a local IP address (like 192.168.x.x), not localhost. Access the site from your computer\'s IP address on your local network.');
+        } else {
+            showMessage('❌ Amber login requires a local IP address, not localhost', 'error', 10000);
+        }
         return;
     }
 
+    if (typeof showAuthResult === 'function') {
+        showAuthResult('loading', 'Opening Amber app...');
+    }
+
+    // Set up callback listener BEFORE opening Amber
+    setupAmberCallbackListener();
+
+    // Generate proper callback URL (EXACTLY like Grain - note the ?event= at the end)
+    const callbackUrl = `${window.location.origin}/api/auth/amber-callback?event=`;
+
+    // Use NIP-55 nostrsigner URL format (EXACTLY like Grain)
+    const amberUrl = `nostrsigner:?compressionType=none&returnType=signature&type=get_public_key&callbackUrl=${encodeURIComponent(callbackUrl)}&appName=${encodeURIComponent('Nostr Hero')}`;
+
+    console.log('=== AMBER DEBUG ===');
+    console.log('window.location.hostname:', window.location.hostname);
+    console.log('window.location.origin:', window.location.origin);
+    console.log('Callback URL:', callbackUrl);
+    console.log('Full Amber URL:', amberUrl);
+    console.log('===================');
+
     try {
-        showMessage('📱 Connecting to Amber...', 'info');
-        await window.sessionManager.loginWithAmber();
-        // Success handling is done by event listeners
+        // Try multiple approaches for opening the nostrsigner protocol
+        let protocolOpened = false;
+
+        // Method 1: Create anchor element and click it (most reliable on mobile)
+        try {
+            const anchor = document.createElement('a');
+            anchor.href = amberUrl;
+            anchor.target = '_blank';
+            anchor.style.display = 'none';
+            document.body.appendChild(anchor);
+
+            anchor.click();
+            protocolOpened = true;
+
+            setTimeout(() => {
+                if (document.body.contains(anchor)) {
+                    document.body.removeChild(anchor);
+                }
+            }, 100);
+
+            console.log('Amber protocol opened via anchor click');
+        } catch (anchorError) {
+            console.warn('Anchor method failed:', anchorError);
+        }
+
+        // Method 2: Fallback to window.location.href if anchor didn't work
+        if (!protocolOpened) {
+            try {
+                window.location.href = amberUrl;
+                protocolOpened = true;
+                console.log('Amber protocol opened via window.location.href');
+            } catch (locationError) {
+                console.warn('Window location method failed:', locationError);
+            }
+        }
+
+        // Method 3: Last resort - try window.open
+        if (!protocolOpened) {
+            try {
+                const newWindow = window.open(amberUrl, '_blank');
+                if (newWindow) {
+                    newWindow.close(); // Close immediately, we just want to trigger the protocol
+                    protocolOpened = true;
+                    console.log('Amber protocol opened via window.open');
+                }
+            } catch (openError) {
+                console.warn('Window open method failed:', openError);
+            }
+        }
+
+        if (!protocolOpened) {
+            throw new Error('Unable to open Amber protocol - no method worked');
+        }
+
+        // Show additional guidance for mobile users
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('loading', 'Opening Amber app... If nothing happens, make sure Amber is installed and try again.');
+        }
+
+        // Set timeout in case user doesn't complete the flow
+        setTimeout(() => {
+            if (!amberCallbackReceived) {
+                if (typeof showAuthResult === 'function') {
+                    showAuthResult('error', 'Amber connection timed out. Make sure Amber is installed and try again. If the app opened but didn\'t return, check your Amber app permissions.');
+                } else {
+                    showMessage('❌ Amber connection timed out', 'error');
+                }
+            }
+        }, 60000); // 60 seconds timeout
     } catch (error) {
-        console.error('Amber login error:', error);
-        showMessage('❌ Amber login failed: ' + error.message, 'error');
+        console.error('Error opening Amber:', error);
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('error', 'Failed to open Amber app. Please ensure Amber is installed and your browser supports the nostrsigner protocol.');
+        } else {
+            showMessage('❌ Amber login failed: ' + error.message, 'error');
+        }
+    }
+}
+
+// Set up Amber callback listener (Grain-style)
+function setupAmberCallbackListener() {
+    // Listen for when user returns to the page
+    const handleVisibilityChange = () => {
+        if (!document.hidden && !amberCallbackReceived) {
+            // Check if we're on the callback URL
+            setTimeout(checkForAmberCallback, 500);
+        }
+    };
+
+    const handleFocus = () => {
+        if (!amberCallbackReceived) {
+            setTimeout(checkForAmberCallback, 500);
+        }
+    };
+
+    // Add multiple listeners to catch the return
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Also check immediately
+    setTimeout(checkForAmberCallback, 1000);
+
+    // Clean up listeners after timeout
+    setTimeout(() => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handleFocus);
+    }, 65000);
+}
+
+// Check for Amber callback (Grain-style)
+function checkForAmberCallback() {
+    console.log('Checking for Amber callback...');
+
+    // Check localStorage for callback result (set by the callback page)
+    const amberResult = localStorage.getItem('amber_callback_result');
+    if (amberResult) {
+        try {
+            console.log('Found Amber result in localStorage:', amberResult);
+            localStorage.removeItem('amber_callback_result');
+            const data = JSON.parse(amberResult);
+            amberCallbackReceived = true;
+            handleAmberCallbackData(data);
+        } catch (error) {
+            console.error('Failed to parse stored Amber result:', error);
+        }
+    }
+}
+
+// Handle Amber callback data (Grain-style)
+function handleAmberCallbackData(data) {
+    try {
+        // If there's an error in the stored data
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Session was already created by the callback handler
+        // Just show success and update UI like extension login does
+        console.log('Amber login completed successfully');
+
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('success', 'Connected via Amber!');
+        } else {
+            showMessage('✅ Connected via Amber!', 'success');
+        }
+
+        // Store Amber connection info
+        window.amberConnected = true;
+
+        // Hide modal and redirect
+        setTimeout(() => {
+            hideLoginModal();
+            window.location.href = '/saves';
+        }, 1000);
+    } catch (error) {
+        console.error('Error processing Amber callback data:', error);
+        if (typeof showAuthResult === 'function') {
+            showAuthResult('error', `Amber login failed: ${error.message}`);
+        } else {
+            showMessage('❌ Amber login failed: ' + error.message, 'error');
+        }
     }
 }
 
@@ -259,40 +498,21 @@ async function generateNewKeys() {
 
 // Show generated keys to user
 function showGeneratedKeys(keyPair) {
-    const loginDetails = document.getElementById('login-details');
-    loginDetails.innerHTML = `
-        <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg">
-            <h3 class="text-xl font-bold mb-4 text-green-400">New Keys Generated!</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Public Key (npub)</label>
-                    <div class="bg-gray-700 p-3 rounded text-xs font-mono text-green-400 break-all">
-                        ${keyPair.npub}
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Private Key (nsec)</label>
-                    <div class="bg-gray-700 p-3 rounded text-xs font-mono text-red-400 break-all">
-                        ${keyPair.nsec}
-                    </div>
-                </div>
-                <div class="text-sm text-yellow-400 bg-yellow-900 bg-opacity-20 p-3 rounded">
-                    <p><strong>⚠️ IMPORTANT:</strong> Save your private key (nsec) securely! You'll need it to access your account. Anyone with this key can control your account.</p>
-                </div>
-                <div class="flex space-x-3">
-                    <button onclick="useGeneratedKeys('${keyPair.nsec}')"
-                            class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium">
-                        Use These Keys
-                    </button>
-                    <button onclick="hideKeyLogin()"
-                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    loginDetails.classList.remove('hidden');
+    // Store globally for use by useGeneratedKeys
+    window.generatedKeyPair = keyPair;
+
+    // Populate the modal fields
+    const npubEl = document.getElementById('gen-npub');
+    const nsecEl = document.getElementById('gen-nsec');
+
+    if (npubEl) npubEl.textContent = keyPair.npub;
+    if (nsecEl) nsecEl.textContent = keyPair.nsec;
+
+    // Show the modal
+    const modal = document.getElementById('generated-keys-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 // Use the generated keys to login using SessionManager
