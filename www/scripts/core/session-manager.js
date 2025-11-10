@@ -374,7 +374,12 @@ class SessionManager {
                 if (isActive && window._amberLoginPromise) {
                     this.currentStatus = this.SessionStatus.ACTIVE;
                     this.startSessionMonitoring();
-                    this.emit('authenticationSuccess', 'amber');
+                    this.emit('authenticationSuccess', {
+                        method: 'amber',
+                        npub: this.sessionData.npub,
+                        pubkey: this.sessionData.publicKey,
+                        isNewAccount: false
+                    });
                     window._amberLoginPromise.resolve(this.sessionData);
                     window._amberLoginPromise = null;
                 }
@@ -402,7 +407,12 @@ class SessionManager {
                 if (isActive) {
                     this.currentStatus = this.SessionStatus.ACTIVE;
                     this.startSessionMonitoring();
-                    this.emit('authenticationSuccess', 'amber');
+                    this.emit('authenticationSuccess', {
+                        method: 'amber',
+                        npub: this.sessionData.npub,
+                        pubkey: this.sessionData.publicKey,
+                        isNewAccount: false
+                    });
                     window._amberLoginPromise.resolve(this.sessionData);
                     window._amberLoginPromise = null;
                 } else {
@@ -456,7 +466,20 @@ class SessionManager {
         // Start monitoring
         this.startSessionMonitoring();
 
-        this.emit('authenticationSuccess', loginRequest.signing_method);
+        // Check if this is a new account (keys just generated)
+        const isNewAccount = window._isNewAccount || false;
+        if (isNewAccount) {
+            // Clear the flag after use
+            window._isNewAccount = false;
+        }
+
+        // Emit with session data
+        this.emit('authenticationSuccess', {
+            method: loginRequest.signing_method,
+            npub: this.sessionData.npub,
+            pubkey: this.sessionData.publicKey,
+            isNewAccount: isNewAccount
+        });
         return this.sessionData;
     }
 

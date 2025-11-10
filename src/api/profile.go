@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"nostr-hero/src/cache"
 	"nostr-hero/src/utils"
 )
 
@@ -30,6 +32,28 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid npub", http.StatusBadRequest)
 		return
 	}
+
+	// Check cache first
+	if cachedProfile, found := cache.GlobalProfileCache.Get(pubKey); found {
+		log.Printf("✅ Profile cache hit for %s", pubKey[:8]+"...")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"npub":    npub,
+			"pubkey":  pubKey,
+			"profile": ProfileMetadata{
+				Name:        cachedProfile.Name,
+				DisplayName: cachedProfile.DisplayName,
+				About:       cachedProfile.About,
+				Picture:     cachedProfile.Picture,
+				Nip05:       cachedProfile.NIP05,
+				Lud16:       cachedProfile.LUD16,
+			},
+			"cached": true,
+		})
+		return
+	}
+
+	log.Printf("⏳ Profile cache miss for %s, fetching from relays...", pubKey[:8]+"...")
 
 	// Default relays to query
 	relays := []string{
@@ -58,10 +82,22 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Cache the profile data
+	cache.GlobalProfileCache.Set(pubKey, cache.ProfileData{
+		DisplayName: profile.DisplayName,
+		Name:        profile.Name,
+		Picture:     profile.Picture,
+		About:       profile.About,
+		NIP05:       profile.Nip05,
+		LUD16:       profile.Lud16,
+	})
+	log.Printf("📝 Cached profile for %s (display_name: %s)", pubKey[:8]+"...", profile.DisplayName)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"npub":    npub,
 		"pubkey":  pubKey,
 		"profile": profile,
+		"cached":  false,
 	})
 }

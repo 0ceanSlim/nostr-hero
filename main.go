@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"nostr-hero/src/api"
 	"nostr-hero/src/auth"
+	"nostr-hero/src/cache"
 	"nostr-hero/src/db"
 	"nostr-hero/src/routes"
 	"nostr-hero/src/utils"
+	"time"
 )
 
 func main() {
@@ -36,6 +38,10 @@ func main() {
 	if err := db.MigrateFromJSON(); err != nil {
 		log.Printf("Warning: Migration failed: %v", err)
 	}
+
+	// Initialize profile cache (24 hour TTL)
+	cache.InitProfileCache(24 * time.Hour)
+	log.Println("✅ Profile cache initialized (24h TTL)")
 
 	mux := http.NewServeMux()
 

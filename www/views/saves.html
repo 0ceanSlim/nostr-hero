@@ -160,9 +160,19 @@ document.addEventListener('DOMContentLoaded', async function() {
       loadSaveSlots(session.npub)
     ]);
 
+    // Hide loading modal if it's showing (from login flow)
+    if (typeof hideLoadingModal === 'function') {
+      hideLoadingModal();
+    }
+
   } catch (error) {
     console.error('❌ Failed to initialize save selection:', error);
     showMessage('❌ Failed to load saves: ' + error.message, 'error');
+
+    // Hide loading modal on error too
+    if (typeof hideLoadingModal === 'function') {
+      hideLoadingModal();
+    }
   }
 });
 
@@ -195,27 +205,80 @@ async function loadProfileInfo(npub) {
   console.log('👤 Loading profile info for:', npub);
 
   try {
-    const response = await fetch(`/api/profile?npub=${npub}`);
+    let profile = null;
 
-    if (!response.ok) {
-      console.warn('⚠️ Could not fetch profile, using defaults');
-      return;
+    // Wait a moment for profile manager to finish loading (it's triggered by sessionReady)
+    if (window.profileManager) {
+      // Check if profile manager has data
+      profile = window.profileManager.getProfile();
+
+      if (!profile) {
+        // Profile manager exists but hasn't loaded yet, wait for it
+        console.log('⏳ Waiting for profile manager to load...');
+        await new Promise(resolve => {
+          const checkProfile = setInterval(() => {
+            profile = window.profileManager.getProfile();
+            if (profile) {
+              console.log('✅ Profile loaded from manager:', profile);
+              clearInterval(checkProfile);
+              resolve();
+            }
+          }, 100);
+
+          // Timeout after 2 seconds and fetch directly
+          setTimeout(() => {
+            clearInterval(checkProfile);
+            resolve();
+          }, 2000);
+        });
+      } else {
+        console.log('✅ Profile loaded from manager:', profile);
+      }
     }
 
-    const data = await response.json();
-    const profile = data.profile;
+    // If still no profile, fetch directly from API
+    if (!profile) {
+      console.log('⚠️ Profile manager didn\'t load, fetching from API...');
+      const response = await fetch(`/api/profile?npub=${npub}`);
 
-    console.log('✅ Profile loaded:', profile);
+      if (!response.ok) {
+        console.warn('⚠️ Could not fetch profile, using defaults');
+        return;
+      }
+
+      const data = await response.json();
+      profile = data.profile;
+      console.log('✅ Profile loaded from API:', profile);
+
+      // Store it in profile manager for future use
+      if (window.profileManager && profile) {
+        window.profileManager.profile = {
+          display_name: profile.display_name || profile.DisplayName,
+          name: profile.name || profile.Name,
+          picture: profile.picture || profile.Picture,
+          about: profile.about || profile.About,
+          nip05: profile.nip05 || profile.Nip05,
+          lud16: profile.lud16 || profile.Lud16,
+          npub: npub,
+          pubkey: window.sessionManager.getSession().publicKey
+        };
+        // Trigger profile update event
+        window.dispatchEvent(new CustomEvent('profile-updated', {
+          detail: window.profileManager.profile
+        }));
+      }
+    }
 
     // Update display name
-    if (profile.display_name || profile.name) {
-      document.getElementById('user-name').textContent = profile.display_name || profile.name;
+    if (profile && (profile.display_name || profile.DisplayName || profile.name || profile.Name)) {
+      document.getElementById('user-name').textContent = profile.display_name || profile.DisplayName || profile.name || profile.Name;
     }
 
     // Update avatar
-    if (profile.picture) {
+    if (profile && (profile.picture || profile.Picture)) {
       const avatarEl = document.getElementById('user-avatar');
-      avatarEl.innerHTML = `<img src="${profile.picture}" alt="Profile Picture" class="w-full h-full object-cover rounded-full" onerror="this.parentElement.innerHTML='<span style=\\'color: var(--color-textSecondary); font-size: 2rem;\\'>👤</span>'">`;
+      const pictureUrl = profile.picture || profile.Picture;
+      avatarEl.innerHTML = `<img src="${pictureUrl}" alt="Profile Picture" class="w-full h-full object-cover rounded-full" onerror="this.parentElement.innerHTML='<span style=\\'color: var(--color-textSecondary); font-size: 2rem;\\'>👤</span>'">`;
     }
 
   } catch (error) {

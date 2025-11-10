@@ -20,8 +20,9 @@ class ProfileManager {
    * Initialize profile manager with user's pubkey
    * @param {string} pubkey - Hex public key
    * @param {string} npub - Bech32 npub
+   * @param {boolean} skipRelayFetch - Skip relay fetching (for new accounts)
    */
-  async init(pubkey, npub) {
+  async init(pubkey, npub, skipRelayFetch = false) {
     this.pubkey = pubkey;
     this.npub = npub;
 
@@ -31,6 +32,21 @@ class ProfileManager {
       this.profile = cached;
       this.dispatchProfileUpdate();
       return cached;
+    }
+
+    // Skip relay fetch for new accounts (they have no events yet)
+    if (skipRelayFetch) {
+      console.log('⚡ Skipping relay fetch for new account');
+      this.profile = {
+        npub,
+        pubkey,
+        display_name: npub.slice(0, 10) + '...',
+        name: null,
+        picture: null,
+        about: null
+      };
+      this.dispatchProfileUpdate();
+      return this.profile;
     }
 
     // Fetch from relays
@@ -60,81 +76,39 @@ class ProfileManager {
   }
 
   /**
-   * Fetch kind 0 profile event from Nostr relays
+   * Fetch profile from backend API (with caching)
    * @param {string} pubkey - Hex public key
    * @returns {Promise<Object>} Profile metadata
    */
   async fetchProfile(pubkey) {
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        resolve(null);
-      }, 5000); // 5 second timeout
+    try {
+      // Use backend API which has caching
+      const response = await fetch(`/api/profile?npub=${this.npub}`);
 
-      let resolved = false;
-      let connectedRelays = 0;
-      const targetRelays = this.relays.length;
+      if (!response.ok) {
+        console.warn('Failed to fetch profile from backend:', response.status);
+        return null;
+      }
 
-      this.relays.forEach(relayUrl => {
-        try {
-          const ws = new WebSocket(relayUrl);
+      const data = await response.json();
 
-          ws.onopen = () => {
-            connectedRelays++;
-            // Subscribe to kind 0 events for this pubkey
-            const subscription = {
-              id: `profile-${pubkey.slice(0, 8)}`,
-              kinds: [0],
-              authors: [pubkey],
-              limit: 1
-            };
-            ws.send(JSON.stringify(['REQ', subscription.id, {
-              kinds: [0],
-              authors: [pubkey],
-              limit: 1
-            }]));
-          };
+      if (data.profile) {
+        console.log(`${data.cached ? '✅ Profile loaded from cache' : '⏳ Profile fetched from relays'}`);
+        return {
+          display_name: data.profile.display_name || data.profile.DisplayName,
+          name: data.profile.name || data.profile.Name,
+          picture: data.profile.picture || data.profile.Picture,
+          about: data.profile.about || data.profile.About,
+          nip05: data.profile.nip05 || data.profile.Nip05,
+          lud16: data.profile.lud16 || data.profile.Lud16
+        };
+      }
 
-          ws.onmessage = (event) => {
-            try {
-              const data = JSON.parse(event.data);
-              if (data[0] === 'EVENT' && data[2]?.kind === 0) {
-                const content = JSON.parse(data[2].content);
-                if (!resolved) {
-                  resolved = true;
-                  clearTimeout(timeout);
-                  ws.close();
-                  resolve(content);
-                }
-              }
-            } catch (error) {
-              console.error('Error parsing relay message:', error);
-            }
-          };
-
-          ws.onerror = () => {
-            ws.close();
-          };
-
-          ws.onclose = () => {
-            connectedRelays--;
-            if (connectedRelays === 0 && !resolved) {
-              clearTimeout(timeout);
-              resolve(null);
-            }
-          };
-
-          // Close connection after 5 seconds if still open
-          setTimeout(() => {
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.close();
-            }
-          }, 5000);
-
-        } catch (error) {
-          console.error(`Error connecting to ${relayUrl}:`, error);
-        }
-      });
-    });
+      return null;
+    } catch (error) {
+      console.error('Error fetching profile from backend:', error);
+      return null;
+    }
   }
 
   /**
@@ -208,19 +182,33 @@ if (typeof window !== 'undefined') {
   // Listen for session ready event to load profile
   window.addEventListener('sessionReady', async (event) => {
     if (event.detail && event.detail.npub && event.detail.pubkey) {
-      await window.profileManager.init(event.detail.pubkey, event.detail.npub);
+      const skipRelayFetch = event.detail.isNewAccount || false;
+      await window.profileManager.init(event.detail.pubkey, event.detail.npub, skipRelayFetch);
+      // Update login button after profile loads
+      if (typeof updateLoginButton === 'function') {
+        updateLoginButton();
+      }
     }
   });
 
   // Listen for authentication success
   window.addEventListener('authenticationSuccess', async (event) => {
     if (event.detail && event.detail.npub && event.detail.pubkey) {
-      await window.profileManager.init(event.detail.pubkey, event.detail.npub);
+      const skipRelayFetch = event.detail.isNewAccount || false;
+      await window.profileManager.init(event.detail.pubkey, event.detail.npub, skipRelayFetch);
+      // Update login button after profile loads
+      if (typeof updateLoginButton === 'function') {
+        updateLoginButton();
+      }
     }
   });
 
   // Clear profile on logout
   window.addEventListener('loggedOut', () => {
     window.profileManager.clear();
+    // Update login button after logout
+    if (typeof updateLoginButton === 'function') {
+      updateLoginButton();
+    }
   });
 }

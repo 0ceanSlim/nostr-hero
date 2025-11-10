@@ -1,12 +1,12 @@
 {{define "nav-play"}}
-<!-- Login/Logout Button -->
+<!-- Login/Profile Button -->
 <button
   id="login-btn"
   onclick="handleLoginClick()"
-  class="login-button-yellow pixel-clip p-2 hover:opacity-80 transition flex-shrink-0"
+  class="login-button-yellow pixel-clip p-2 hover:opacity-80 transition flex-shrink-0 flex items-center gap-2"
   title="Login"
 >
-  <span class="text-base" id="login-btn-text">
+  <span class="text-base flex items-center gap-2" id="login-btn-content">
     🗝️ Login
   </span>
 </button>
@@ -60,7 +60,7 @@
               <h4 class="font-bold mb-1 text-xs sm:text-sm" style="color: var(--color-textPrimary);">Browser Extension</h4>
               <p class="text-[10px] sm:text-sm mb-1" style="color: var(--color-textMuted);">Use Alby, nos2x, or other Nostr browser extensions</p>
               <button
-                onclick="loginWithExtension()"
+                onclick="showExtensionDetection()"
                 class="action-button-primary px-2 py-1.5 pixel-clip text-xs sm:text-sm w-full sm:w-auto"
               >
                 🔗 Extension
@@ -328,6 +328,98 @@
   </div>
 </div>
 
+<!-- Extension Detection Modal -->
+<div
+  id="extension-detection-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideExtensionDetection()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-md max-h-[95vh] overflow-y-auto"
+    style="border: 4px solid var(--color-textPrimary);"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-2 sm:p-6">
+      <h3 class="text-lg sm:text-2xl font-bold mb-2 text-center" style="color: var(--color-textHighlighted);">🔗 Browser Extension</h3>
+
+      <!-- Detection Status -->
+      <div id="extension-status" class="mb-3 text-center">
+        <p class="text-xs sm:text-sm" style="color: var(--color-textMuted);">Detecting extension...</p>
+      </div>
+
+      <!-- Extension Info (shown when detected) -->
+      <div id="extension-info" class="hidden mb-3 win95-inset p-2 sm:p-3">
+        <div class="text-center">
+          <p class="text-lg sm:text-2xl mb-1">✅</p>
+          <p class="text-xs sm:text-sm font-bold mb-1" style="color: var(--color-textPrimary);">Extension Detected!</p>
+          <p class="text-[10px] sm:text-xs" style="color: var(--color-textMuted);" id="extension-name">Nostr Extension</p>
+        </div>
+      </div>
+
+      <!-- Error Info (shown when not detected) -->
+      <div id="extension-error" class="hidden mb-3 win95-outset p-2 sm:p-3" style="background: rgb(153, 27, 27); border: 2px solid rgb(239, 68, 68);">
+        <div class="text-center">
+          <p class="text-lg sm:text-2xl mb-1">❌</p>
+          <p class="text-xs sm:text-sm font-bold mb-1" style="color: rgb(255, 255, 255);">No Extension Found</p>
+          <p class="text-[10px] sm:text-xs" style="color: rgb(255, 255, 255);">Please install a Nostr extension like Alby or nos2x</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button
+          id="open-extension-btn"
+          onclick="proceedWithExtensionLogin()"
+          class="hidden flex-1 action-button-primary pixel-clip px-2 py-1.5 text-xs"
+        >
+          🔓 Open Extension
+        </button>
+        <button
+          onclick="hideExtensionDetection()"
+          class="flex-1 win95-button pixel-clip px-2 py-1.5 text-xs"
+          style="color: var(--color-textPrimary);"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal with animated GIF -->
+<div
+  id="loading-modal"
+  class="hidden fixed inset-0 z-[60] flex items-center justify-center"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+>
+  <div
+    class="win95-outset pixel-clip p-4 sm:p-8 text-center"
+    style="border: 4px solid var(--color-textPrimary);"
+  >
+    <img
+      src="/res/img/loading.gif"
+      alt="Loading..."
+      class="mx-auto mb-4"
+      style="width: 64px; height: 64px; image-rendering: pixelated;"
+    >
+    <p
+      id="loading-text"
+      class="text-sm sm:text-lg font-bold mb-4"
+      style="color: var(--color-textPrimary);"
+    >
+      Loading...
+    </p>
+    <button
+      id="loading-modal-cancel"
+      onclick="window.cancelLogin ? window.cancelLogin() : hideLoadingModal()"
+      class="win95-button pixel-clip px-4 py-2 text-xs sm:text-sm"
+      style="color: var(--color-textPrimary);"
+    >
+      Cancel
+    </button>
+  </div>
+</div>
 
 <script>
 // Global variable to store generated private key
@@ -367,24 +459,279 @@ function clearAuthResult() {
   }
 }
 
+// Show loading modal with animated GIF
+window.showLoadingModal = function(text = 'Loading...') {
+  const modal = document.getElementById('loading-modal');
+  const loadingText = document.getElementById('loading-text');
+  if (modal && loadingText) {
+    loadingText.textContent = text;
+    modal.classList.remove('hidden');
+  }
+};
+
+// Hide loading modal
+window.hideLoadingModal = function() {
+  const modal = document.getElementById('loading-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+};
+
+// Cancel login operation
+window.cancelLogin = function() {
+  window.hideLoadingModal();
+  if (typeof showMessage === 'function') {
+    showMessage('Login cancelled', 'info');
+  }
+
+  // Emit cancellation event if sessionManager is available
+  if (window.sessionManager) {
+    window.sessionManager.emit('authenticationFailed', { method: 'user_cancelled', error: 'User cancelled login' });
+  }
+};
+
+// Show extension detection modal
+function showExtensionDetection() {
+  // Hide main login modal
+  hideLoginModal();
+
+  // Show detection modal
+  const modal = document.getElementById('extension-detection-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+  }
+
+  // Reset UI state
+  document.getElementById('extension-status').classList.remove('hidden');
+  document.getElementById('extension-info').classList.add('hidden');
+  document.getElementById('extension-error').classList.add('hidden');
+  document.getElementById('open-extension-btn').classList.add('hidden');
+
+  // Detect extension
+  setTimeout(() => {
+    detectExtension();
+  }, 500); // Small delay for better UX
+}
+
+// Hide extension detection modal
+function hideExtensionDetection() {
+  const modal = document.getElementById('extension-detection-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+
+  // Show login modal again
+  showLoginModal();
+}
+
+// Detect if Nostr extension is available
+function detectExtension() {
+  const statusDiv = document.getElementById('extension-status');
+  const infoDiv = document.getElementById('extension-info');
+  const errorDiv = document.getElementById('extension-error');
+  const openBtn = document.getElementById('open-extension-btn');
+  const extensionNameEl = document.getElementById('extension-name');
+
+  if (window.nostr) {
+    // Extension found!
+    statusDiv.classList.add('hidden');
+    infoDiv.classList.remove('hidden');
+    openBtn.classList.remove('hidden');
+
+    // Try to get extension name if available
+    if (window.nostr.name) {
+      extensionNameEl.textContent = window.nostr.name;
+    } else {
+      extensionNameEl.textContent = 'Nostr Extension';
+    }
+  } else {
+    // No extension found
+    statusDiv.classList.add('hidden');
+    errorDiv.classList.remove('hidden');
+  }
+}
+
+// Proceed with extension login (called from "Open Extension" button)
+async function proceedWithExtensionLogin() {
+  // Hide extension detection modal
+  const modal = document.getElementById('extension-detection-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+
+  // Show loading modal
+  if (typeof showLoadingModal === 'function') {
+    showLoadingModal('Requesting access from extension...');
+  }
+
+  // Call the actual login function from auth.js
+  if (typeof loginWithExtension === 'function') {
+    await loginWithExtension();
+  } else if (window.sessionManager) {
+    try {
+      await window.sessionManager.loginWithExtension();
+    } catch (error) {
+      console.error('Extension login error:', error);
+      if (typeof hideLoadingModal === 'function') {
+        hideLoadingModal();
+      }
+      if (typeof showMessage === 'function') {
+        showMessage('❌ Extension login failed: ' + error.message, 'error');
+      }
+      showLoginModal(); // Show login modal again on error
+    }
+  }
+}
+
 function handleLoginClick() {
   // Check if user is already logged in
   if (window.sessionManager && window.sessionManager.isAuthenticated()) {
-    // User is logged in, logout
-    handleLogoutFromButton();
+    // User is logged in - show profile dropdown
+    toggleProfileDropdown();
   } else {
-    // User not logged in, show login modal
+    // User not logged in - show login modal
     showLoginModal();
   }
 }
 
-// Handle logout from the button
-async function handleLogoutFromButton() {
+// Toggle profile dropdown menu
+function toggleProfileDropdown() {
+  // Check if dropdown already exists
+  let dropdown = document.getElementById('profile-dropdown');
+
+  if (dropdown) {
+    // Remove existing dropdown
+    dropdown.remove();
+    return;
+  }
+
+  // Create dropdown element
+  dropdown = document.createElement('div');
+  dropdown.id = 'profile-dropdown';
+
+  // Get login button position for positioning
+  const loginBtn = document.getElementById('login-btn');
+  const buttonRect = loginBtn.getBoundingClientRect();
+
+  // Style the dropdown with Win95 theme
+  dropdown.style.cssText = `
+    position: fixed;
+    top: ${buttonRect.bottom + 8}px;
+    right: ${window.innerWidth - buttonRect.right}px;
+    background: var(--color-bgSecondary);
+    min-width: 250px;
+    z-index: 1000;
+    font-family: inherit;
+  `;
+  dropdown.className = 'win95-outset pixel-clip p-2';
+
+  // Get profile info
+  const profile = window.profileManager ? window.profileManager.getProfile() : null;
+  const session = window.sessionManager ? window.sessionManager.getSession() : null;
+
+  let displayName = 'User';
+  let profilePicture = null;
+
+  if (profile) {
+    displayName = profile.display_name || profile.name || (session?.npub ? session.npub.slice(0, 12) + '...' : 'User');
+    profilePicture = profile.picture;
+  } else if (session?.npub) {
+    displayName = session.npub.slice(0, 12) + '...';
+  }
+
+  // Create dropdown content with profile section
+  dropdown.innerHTML = `
+    <!-- Profile Section -->
+    <div id="profile-info-section" class="win95-inset pixel-clip p-3 mb-2 flex items-center gap-3 cursor-default transition-all" style="background: var(--color-bgPrimary);">
+      <div class="flex-1 min-w-0 flex items-center gap-3">
+        ${profilePicture ?
+          `<img src="${profilePicture}" alt="Profile" class="w-10 h-10 rounded-full object-cover flex-shrink-0" style="image-rendering: auto; border: 2px solid var(--color-textHighlighted);">` :
+          `<div class="w-10 h-10 rounded-full win95-inset flex items-center justify-center flex-shrink-0" style="background: var(--color-bgSecondary); border: 2px solid var(--color-textMuted);">
+            <span style="color: var(--color-textMuted); font-size: 1.25rem;">👤</span>
+           </div>`
+        }
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-sm truncate" style="color: var(--color-textHighlighted);">
+            ${profile && (profile.display_name || profile.name) ? (profile.display_name || profile.name) : (session?.npub ? session.npub.slice(0, 12) + '...' : 'Anonymous')}
+          </div>
+          ${profile && (profile.display_name || profile.name) && session?.npub ?
+            `<div class="text-xs truncate" style="color: var(--color-textMuted);">${session.npub.slice(0, 16) + '...'}</div>` :
+            ''
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="space-y-1">
+      <button onclick="navigateToSaves()" class="w-full win95-button pixel-clip px-3 py-2 text-xs flex items-center gap-2 hover:opacity-80" style="color: var(--color-textPrimary);">
+        <span>💾</span>
+        <span>My Saves</span>
+      </button>
+      <button onclick="navigateToSettings()" class="w-full win95-button pixel-clip px-3 py-2 text-xs flex items-center gap-2 hover:opacity-80" style="color: var(--color-textPrimary);">
+        <span>⚙️</span>
+        <span>Settings</span>
+      </button>
+      <button onclick="handleDropdownLogout()" class="w-full win95-button pixel-clip px-3 py-2 text-xs flex items-center gap-2 hover:opacity-80" style="color: rgb(239, 68, 68);">
+        <span>🚪</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  `;
+
+  // Add hover effect to profile section
+  const profileSection = dropdown.querySelector('#profile-info-section');
+  if (profileSection) {
+    profileSection.addEventListener('mouseenter', function() {
+      this.style.background = 'var(--color-bgSecondary)';
+      this.style.boxShadow = '0 0 8px rgba(255, 215, 0, 0.3)';
+    });
+    profileSection.addEventListener('mouseleave', function() {
+      this.style.background = 'var(--color-bgPrimary)';
+      this.style.boxShadow = 'none';
+    });
+  }
+
+  // Add to page
+  document.body.appendChild(dropdown);
+
+  // Close dropdown when clicking elsewhere
+  setTimeout(() => {
+    const closeDropdown = (event) => {
+      if (!dropdown.contains(event.target) && !loginBtn.contains(event.target)) {
+        dropdown.remove();
+        document.removeEventListener('click', closeDropdown);
+      }
+    };
+    document.addEventListener('click', closeDropdown);
+  }, 100);
+}
+
+// Navigate to saves page
+function navigateToSaves() {
+  const dropdown = document.getElementById('profile-dropdown');
+  if (dropdown) dropdown.remove();
+  window.location.href = '/saves';
+}
+
+// Navigate to settings page
+function navigateToSettings() {
+  const dropdown = document.getElementById('profile-dropdown');
+  if (dropdown) dropdown.remove();
+  window.location.href = '/settings';
+}
+
+// Handle logout from dropdown
+async function handleDropdownLogout() {
+  // Close dropdown first
+  const dropdown = document.getElementById('profile-dropdown');
+  if (dropdown) dropdown.remove();
+
   if (window.sessionManager) {
     try {
       await window.sessionManager.logout();
       showMessage('✅ Logged out successfully', 'success');
-      updateLoginButtonState();
+      updateLoginButton();
       // Reload or redirect after logout
       setTimeout(() => {
         window.location.href = '/';
@@ -396,22 +743,75 @@ async function handleLogoutFromButton() {
   }
 }
 
-// Update button state based on authentication status
-function updateLoginButtonState() {
+// Update login button to show profile or login
+function updateLoginButton() {
   const button = document.getElementById('login-btn');
-  const buttonText = document.getElementById('login-btn-text');
+  const buttonContent = document.getElementById('login-btn-content');
 
-  if (!button || !buttonText) return;
+  if (!button || !buttonContent) return;
 
   if (window.sessionManager && window.sessionManager.isAuthenticated()) {
-    // User is logged in - show logout button
-    buttonText.innerHTML = '🚪 Logout';
-    button.title = 'Logout';
+    // Get profile info
+    const profile = window.profileManager ? window.profileManager.getProfile() : null;
+    const session = window.sessionManager.getSession();
+
+    console.log('🔄 Updating login button:', {
+      hasProfile: !!profile,
+      displayName: profile?.display_name,
+      name: profile?.name,
+      picture: profile?.picture,
+      npub: session?.npub?.slice(0, 12)
+    });
+
+    let displayName = 'User';
+    let profilePicture = null;
+
+    // Determine display name and picture
+    if (profile && (profile.display_name || profile.name)) {
+      displayName = profile.display_name || profile.name;
+      profilePicture = profile.picture;
+      console.log('✅ Using profile data:', displayName, profilePicture ? 'with pfp' : 'no pfp');
+    } else if (session?.npub) {
+      // No display name, use truncated npub (6 characters)
+      displayName = session.npub.slice(0, 6) + '...';
+      profilePicture = profile?.picture || null;
+      console.log('⚠️ No profile data, using npub fallback:', displayName);
+    }
+
+    // Update button to show profile (text on left, pic on right)
+    if (profilePicture) {
+      buttonContent.innerHTML = `
+        <span class="hidden sm:inline truncate">${displayName}</span>
+        <img src="${profilePicture}" alt="Profile" class="w-6 h-6 rounded-full object-cover flex-shrink-0" style="image-rendering: auto; border: 2px solid var(--color-textHighlighted);">
+      `;
+    } else {
+      // No profile picture, show anonymous icon
+      buttonContent.innerHTML = `
+        <span class="hidden sm:inline truncate">${displayName}</span>
+        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--color-bgSecondary); border: 1px solid var(--color-textMuted);">
+          <span style="font-size: 0.75rem;">👤</span>
+        </div>
+      `;
+    }
+    button.title = displayName;
+
+    // Remove pink background, use neutral styling
+    button.className = 'win95-button pixel-clip p-2 hover:opacity-80 transition flex-shrink-0 flex items-center gap-2';
+    button.style.color = 'var(--color-textPrimary)';
   } else {
     // User is not logged in - show login button
-    buttonText.innerHTML = '🗝️ Login';
+    buttonContent.innerHTML = '🗝️ Login';
     button.title = 'Login';
+
+    // Reset to yellow login button styling
+    button.className = 'login-button-yellow pixel-clip p-2 hover:opacity-80 transition flex-shrink-0 flex items-center gap-2';
+    button.style.color = '';
   }
+}
+
+// Backwards compatibility - keep old function name
+function updateLoginButtonState() {
+  updateLoginButton();
 }
 
 function showLoginModal() {
@@ -546,10 +946,28 @@ function showGeneratedKeys(keyPair) {
   document.getElementById('generated-keys-modal').classList.remove('hidden');
 }
 
-function useGeneratedKeys() {
+async function useGeneratedKeys() {
   if (generatedPrivateKey) {
-    loginWithPrivateKey(generatedPrivateKey);
+    // Hide generated keys modal
     hideGeneratedKeys();
+
+    // Show loading modal
+    if (typeof showLoadingModal === 'function') {
+      showLoadingModal('Logging in with new account...');
+    }
+
+    // Mark this as a new account so we skip relay lookups
+    window._isNewAccount = true;
+
+    try {
+      await loginWithPrivateKey(generatedPrivateKey);
+      // Loading modal will be hidden when redirecting to saves page
+    } catch (error) {
+      if (typeof hideLoadingModal === 'function') {
+        hideLoadingModal();
+      }
+      console.error('Login failed:', error);
+    }
   }
 }
 
@@ -620,6 +1038,12 @@ if (typeof window !== 'undefined') {
   } else {
     updateLoginButtonState();
   }
+
+  // Listen for profile updates from profile manager
+  window.addEventListener('profile-updated', (event) => {
+    console.log('👤 Profile updated event received:', event.detail);
+    updateLoginButton();
+  });
 
   // Listen for authentication state changes
   if (window.sessionManager) {

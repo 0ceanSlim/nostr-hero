@@ -33,15 +33,31 @@ function initializeAuthentication() {
         showLoginInterface();
     });
 
-    window.sessionManager.on('authenticationSuccess', (method) => {
-        console.log(`✅ Authentication successful via ${method}`);
+    window.sessionManager.on('authenticationSuccess', (data) => {
+        // Handle both old format (string) and new format (object)
+        const method = typeof data === 'string' ? data : data.method;
+        const isNewAccount = typeof data === 'object' ? data.isNewAccount : false;
+
+        console.log(`✅ Authentication successful via ${method}${isNewAccount ? ' (new account)' : ''}`);
+
+        // Update loading modal message if showing
+        if (typeof showLoadingModal === 'function') {
+            showLoadingModal('Redirecting to saves...');
+        }
+
         showMessage(`✅ Successfully logged in via ${method}!`, 'success');
         setTimeout(() => {
             // Only redirect to saves if on home page (not saves, game, or new-game)
             const allowedPaths = ['/saves', '/game', '/new-game'];
             if (!allowedPaths.includes(window.location.pathname)) {
                 console.log('Redirecting to saves page after login');
+                // Loading modal will disappear on page navigation
                 window.location.href = '/saves';
+            } else {
+                // Hide loading modal if we're staying on same page
+                if (typeof hideLoadingModal === 'function') {
+                    hideLoadingModal();
+                }
             }
         }, 1000);
     });
@@ -116,6 +132,17 @@ function redirectToLogin() {
 // Login with browser extension using SessionManager (Grain-style)
 async function loginWithExtension() {
     try {
+        // Show loading modal if not already shown (handles both direct calls and nav-play flow)
+        const loadingModal = document.getElementById('loading-modal');
+        if (loadingModal && loadingModal.classList.contains('hidden')) {
+            if (typeof showLoadingModal === 'function') {
+                showLoadingModal('Requesting access from extension...');
+            }
+        } else if (typeof showLoadingModal === 'function') {
+            // Update text if already shown
+            showLoadingModal('Requesting access from extension...');
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('loading', 'Requesting access from extension...');
         }
@@ -131,6 +158,10 @@ async function loginWithExtension() {
         }
 
         console.log('Extension returned public key:', publicKey);
+
+        if (typeof showLoadingModal === 'function') {
+            showLoadingModal('Creating session...');
+        }
 
         if (typeof showAuthResult === 'function') {
             showAuthResult('loading', 'Creating session with extension signing...');
@@ -164,6 +195,11 @@ async function loginWithExtension() {
 
         console.log('Extension login successful');
 
+        // Hide loading modal
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('success', 'Connected via browser extension!');
         } else {
@@ -178,6 +214,12 @@ async function loginWithExtension() {
         }, 1000);
     } catch (error) {
         console.error('Extension login error:', error);
+
+        // Hide loading modal on error
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('error', `Extension error: ${error.message}`);
         } else {
@@ -199,6 +241,11 @@ function loginWithAmber() {
             showMessage('❌ Amber login requires a local IP address, not localhost', 'error', 10000);
         }
         return;
+    }
+
+    // Show loading modal with gif
+    if (typeof showLoadingModal === 'function') {
+        showLoadingModal('Opening Amber app...');
     }
 
     if (typeof showAuthResult === 'function') {
@@ -284,6 +331,11 @@ function loginWithAmber() {
         // Set timeout in case user doesn't complete the flow
         setTimeout(() => {
             if (!amberCallbackReceived) {
+                // Hide loading modal on timeout
+                if (typeof hideLoadingModal === 'function') {
+                    hideLoadingModal();
+                }
+
                 if (typeof showAuthResult === 'function') {
                     showAuthResult('error', 'Amber connection timed out. Make sure Amber is installed and try again. If the app opened but didn\'t return, check your Amber app permissions.');
                 } else {
@@ -293,6 +345,12 @@ function loginWithAmber() {
         }, 60000); // 60 seconds timeout
     } catch (error) {
         console.error('Error opening Amber:', error);
+
+        // Hide loading modal on error
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('error', 'Failed to open Amber app. Please ensure Amber is installed and your browser supports the nostrsigner protocol.');
         } else {
@@ -362,6 +420,11 @@ function handleAmberCallbackData(data) {
         // Just show success and update UI like extension login does
         console.log('Amber login completed successfully');
 
+        // Hide loading modal
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('success', 'Connected via Amber!');
         } else {
@@ -378,6 +441,12 @@ function handleAmberCallbackData(data) {
         }, 1000);
     } catch (error) {
         console.error('Error processing Amber callback data:', error);
+
+        // Hide loading modal on error
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
+
         if (typeof showAuthResult === 'function') {
             showAuthResult('error', `Amber login failed: ${error.message}`);
         } else {
@@ -523,25 +592,49 @@ async function useGeneratedKeys() {
     }
 
     try {
+        // Hide generated keys modal first
+        hideGeneratedKeys();
+
+        // Show loading modal
+        if (typeof showLoadingModal === 'function') {
+            showLoadingModal('Logging in with new account...');
+        }
+
         showMessage('🔐 Logging in...', 'info');
 
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                private_key: window.generatedKeyPair.nsec,
-                signing_method: 'encrypted_key',
-                mode: 'write'
-            })
-        });
+        // Mark as new account to skip relay lookups
+        window._isNewAccount = true;
 
-        if (!response.ok) throw new Error('Login failed');
+        // Use session manager if available, otherwise fallback to direct API call
+        if (window.sessionManager) {
+            await window.sessionManager.loginWithPrivateKey(window.generatedKeyPair.nsec);
+            // Loading modal will stay visible until redirect
+            // Session manager will trigger authenticationSuccess event which handles redirect
+        } else {
+            // Fallback to direct API call
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    private_key: window.generatedKeyPair.nsec,
+                    signing_method: 'encrypted_key',
+                    mode: 'write'
+                })
+            });
 
-        hideGeneratedKeys();
-        showMessage('✅ Success!', 'success');
-        setTimeout(() => window.location.href = '/saves', 1000);
+            if (!response.ok) throw new Error('Login failed');
+
+            showMessage('✅ Success!', 'success');
+            setTimeout(() => window.location.href = '/saves', 1000);
+        }
     } catch (error) {
+        // Hide loading modal on error
+        if (typeof hideLoadingModal === 'function') {
+            hideLoadingModal();
+        }
         showMessage('❌ Login failed: ' + error.message, 'error');
+        // Clear the flag on error
+        window._isNewAccount = false;
     }
 }
 
