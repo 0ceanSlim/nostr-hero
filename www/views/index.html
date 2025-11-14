@@ -115,14 +115,14 @@ if (typeof window !== 'undefined') {
     <button id="tab-btn-home" class="tab-inactive pixel-clip">
       🏠 Home
     </button>
-    <button id="tab-btn-updates" class="tab-inactive pixel-clip">
-      📰 Updates
+    <button id="tab-btn-about" class="tab-inactive pixel-clip">
+      📚 About
     </button>
     <button id="tab-btn-roadmap" class="tab-inactive pixel-clip">
       🗺️ Roadmap
     </button>
-    <button id="tab-btn-about" class="tab-inactive pixel-clip">
-      📚 About
+    <button id="tab-btn-updates" class="tab-inactive pixel-clip">
+      📰 Updates
     </button>
     <button id="tab-btn-contribute" class="tab-inactive pixel-clip">
       🤝 Contribute
@@ -136,9 +136,9 @@ if (typeof window !== 'undefined') {
 <!-- Tab Content Container -->
 <div class="tab-content-container">
   {{template "tab-home" .}}
-  {{template "tab-updates" .}}
-  {{template "tab-roadmap" .}}
   {{template "tab-about" .}}
+  {{template "tab-roadmap" .}}
+  {{template "tab-updates" .}}
   {{template "tab-contribute" .}}
   {{template "tab-wiki" .}}
 </div>

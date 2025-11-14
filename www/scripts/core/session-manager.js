@@ -669,7 +669,6 @@ window.loginWithPrivateKey = async function(privateKeyParam) {
     }
 
     try {
-        showMessage('🗝️ Logging in with private key...', 'info');
         await window.sessionManager.loginWithPrivateKey(privateKey);
 
         // Clear the input for security if it exists
@@ -692,7 +691,6 @@ window.generateNewKeys = async function() {
     }
 
     try {
-        showMessage('✨ Generating new key pair...', 'info');
         const keyPair = await window.sessionManager.generateKeys();
 
         if (keyPair) {
@@ -706,7 +704,6 @@ window.generateNewKeys = async function() {
                 // Auto-login with new keys
                 await window.loginWithPrivateKey(keyPair.nsec);
             }
-            showMessage('✅ Keys generated successfully!', 'success');
         } else {
             showMessage('❌ Failed to generate keys', 'error');
         }

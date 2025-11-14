@@ -5,27 +5,13 @@
     <!-- Left: Logo + Version -->
     <div class="flex items-center gap-2 min-w-0 flex-shrink">
       {{template "app-name"}}
-      <span class="hidden md:inline text-xs whitespace-nowrap" style="color: var(--color-textMuted);">v0.2.1</span>
+      <span class="hidden md:inline text-xs whitespace-nowrap" style="color: var(--color-textMuted);">x.x.x</span>
     </div>
 
     <!-- Right: Compact controls -->
     <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-      <!-- Play Button (Only visible when logged in) -->
-      <a
-        href="/saves"
-        id="header-play-btn"
-        class="hidden win95-button pixel-clip p-2 hover:opacity-80 transition flex-shrink-0"
-        style="color: var(--color-textPrimary);"
-        title="Play"
-      >
-        ▶️
-      </a>
-
-      <!-- Profile Dropdown (Only visible when logged in) -->
-      {{template "profile-dropdown" .}}
-
-      <!-- Navigation (Hamburger menu) -->
-      {{template "navigation"}}
+      <!-- Login/Profile Button (Always visible) -->
+      {{template "nav-play" .}}
 
       <!-- Theme Switcher (Always visible, far right) -->
       <div class="relative flex-shrink-0">
@@ -109,29 +95,6 @@
     }
   });
 
-  // Show/hide Play button based on auth state
-  function updateHeaderPlayButton() {
-    const playBtn = document.getElementById('header-play-btn');
-    if (playBtn && window.sessionManager && window.sessionManager.isAuthenticated()) {
-      playBtn.classList.remove('hidden');
-    } else if (playBtn) {
-      playBtn.classList.add('hidden');
-    }
-  }
-
-  // Listen for auth state changes
-  if (typeof window !== 'undefined') {
-    window.addEventListener('auth-changed', updateHeaderPlayButton);
-    window.addEventListener('authenticationSuccess', updateHeaderPlayButton);
-    window.addEventListener('sessionReady', updateHeaderPlayButton);
-
-    // Initial check
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', updateHeaderPlayButton);
-    } else {
-      updateHeaderPlayButton();
-    }
-  }
 </script>
 
 {{end}}

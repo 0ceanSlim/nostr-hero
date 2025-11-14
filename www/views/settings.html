@@ -1,4 +1,6 @@
 {{define "view"}}
+<script src="/scripts/core/session-manager.js"></script>
+<script src="/scripts/core/auth.js"></script>
 <script src="/scripts/systems/theme-manager.js"></script>
 <script src="/scripts/systems/relay-manager.js"></script>
 
@@ -71,8 +73,7 @@
     <div class="mb-8">
       <h2 class="text-2xl font-bold mb-4">📡 Nostr Relays</h2>
       <p class="mb-4 text-sm" style="color: var(--color-textSecondary);">
-        Manage your Nostr relay connections. Relays will be used for future features like
-        event-based saves and cross-client synchronization.
+        The client handles Nostr login and basic authentication, but relay selection is currently a placeholder while the game is in development.
       </p>
 
       <div class="win95-inset p-4 rounded-lg mb-4">
@@ -95,9 +96,14 @@
         </button>
       </div>
 
-      <div class="mt-4 text-xs win95-inset p-3 rounded" style="color: var(--color-textMuted);">
-        <p>ℹ️ <strong>Note:</strong> Relay management for save synchronization will be available in Beta.
-        For now, this is for future feature testing.</p>
+      <div class="mt-4 text-xs win95-inset p-3 rounded" style="background: var(--color-bgPrimary); color: var(--color-textMuted);">
+        <p class="mb-2"><strong>ℹ️ Pre-Alpha Status:</strong></p>
+        <ul class="list-disc list-inside space-y-1 text-xs">
+          <li>Saves are currently held in memory when loaded</li>
+          <li>During development, saves can be read from memory or saved to disk for debugging</li>
+          <li>Relay-based save synchronization is the core feature of Nostr Hero</li>
+          <li>Full relay functionality will be implemented after pre-alpha</li>
+        </ul>
       </div>
     </div>
 

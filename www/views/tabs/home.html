@@ -5,7 +5,7 @@
       <!-- Hero Section -->
       <div class="text-center mb-8">
         <h1 class="text-3xl md:text-4xl font-bold mb-3" style="color: var(--color-textHighlighted);">
-          ⚔️ Nostr Hero ⚔️
+          Nostr Hero
         </h1>
         <p class="text-lg md:text-xl mb-4" style="color: var(--color-textSecondary);">
           Your Nostr Identity Becomes a D&D Adventure
@@ -17,55 +17,69 @@
       </div>
 
       <!-- CTA Section (Not Logged In) -->
+      <!--
+        TODO: Future Feature - Character Mining / Vanity Character Generation
+        Add a "Mine Character" button here that takes users to /discover page where they can:
+        - Generate random Nostr keys and see the character that would be created
+        - "Mine" for characters with specific traits (race, class, stats, etc.)
+
+        Mining Architecture:
+        1. Browser-based mining (client-side JavaScript)
+           - Users can mine directly in their browser
+           - No server load, runs entirely on user's device
+           - User specifies desired traits and lets it run
+           - May have performance limitations depending on browser
+
+        2. Downloadable mining tool (standalone app/CLI)
+           - More efficient than browser mining
+           - Users can mine characters on their own computer with full control
+           - No cost, unlimited attempts, runs locally
+           - User specifies desired traits and lets it run
+           - Similar to Bitcoin mining - do it yourself for free
+           - Can utilize multiple CPU cores for faster mining
+
+        Note: Server-side mining is NOT implemented because it would require handling
+        private keys on the server, which is a security risk. All mining must be done
+        client-side to maintain Nostr's security model.
+      -->
       <div id="home-cta-loggedout" class="text-center mb-8">
-        <div class="flex flex-col items-center gap-3">
-          <a
-            href="/discover"
-            class="discover-button-blue pixel-clip px-4 py-2 hover:opacity-80 transition text-sm"
-          >
-            ⛏️ Discover
-          </a>
-        </div>
-        <p class="mt-4 text-sm" style="color: var(--color-textMuted);">
+        <p class="text-sm mb-4" style="color: var(--color-textMuted);">
           🔐 Secure Nostr authentication • 🎲 Deterministic character generation • 💾 Save your progress
         </p>
+        <a href="/discover" class="action-button-primary pixel-clip px-3 py-2 text-xs sm:px-6 sm:py-3 sm:text-sm inline-block hover:opacity-90 transition">
+          🔮 Discover Your Character
+        </a>
       </div>
 
       <!-- Logged In Section -->
-      <div id="home-cta-loggedin" class="hidden text-center mb-8 win95-inset p-6 rounded-lg">
-        <p class="text-xl mb-4" style="color: var(--color-textHighlighted);">
-          Welcome back, <span id="home-username">Hero</span>!
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/saves" class="play-button pixel-clip px-8 py-3 text-lg">
-            ▶️ Continue Adventure
-          </a>
-          <a href="/new-game" class="pixel-button pixel-clip px-8 py-3" style="color: var(--color-textPrimary);">
-            ✨ New Character
-          </a>
-          <a href="/discover" class="discover-button-blue pixel-clip px-8 py-3">
-            ⛏️ Discover
+      <div id="home-cta-loggedin" class="hidden text-center mb-8 px-2">
+        <div class="win95-outset p-4 sm:p-8 rounded-lg inline-block w-full max-w-lg">
+          <p class="text-lg sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6" style="color: var(--color-textHighlighted);">
+            Welcome back, <span id="home-username">Hero</span>!
+          </p>
+          <a href="/saves" class="action-button-primary pixel-clip p-3 sm:p-4 text-sm sm:text-base inline-block hover:opacity-90 transition w-full sm:w-auto">
+            Continue Adventure
           </a>
         </div>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="win95-inset p-4 text-center rounded-lg">
-          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">200+</div>
-          <div class="text-sm" style="color: var(--color-textMuted);">Items</div>
+      <!-- Game Features -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6 max-w-5xl mx-auto">
+        <div class="win95-inset p-3 rounded-lg">
+          <div class="font-bold mb-1 text-sm" style="color: var(--color-textHighlighted);">🗺️ Travel & Exploration</div>
+          <p class="text-xs" style="color: var(--color-textMuted);">Journey between locations through linked environments. Combat, loot, and random events happen along the way.</p>
         </div>
-        <div class="win95-inset p-4 text-center rounded-lg">
-          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">300+</div>
-          <div class="text-sm" style="color: var(--color-textMuted);">Spells</div>
+        <div class="win95-inset p-3 rounded-lg">
+          <div class="font-bold mb-1 text-sm" style="color: var(--color-textHighlighted);">👥 NPCs & Interactions</div>
+          <p class="text-xs" style="color: var(--color-textMuted);">Meet characters throughout cities who offer services, tasks, and stories that unlock rewards.</p>
         </div>
-        <div class="win95-inset p-4 text-center rounded-lg">
-          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">100%</div>
-          <div class="text-sm" style="color: var(--color-textMuted);">Deterministic</div>
+        <div class="win95-inset p-3 rounded-lg">
+          <div class="font-bold mb-1 text-sm" style="color: var(--color-textHighlighted);">🍖 Survival & Resources</div>
+          <p class="text-xs" style="color: var(--color-textMuted);">Manage hunger and fatigue. Use items to stay alive and maintain your edge in dangerous situations.</p>
         </div>
-        <div class="win95-inset p-4 text-center rounded-lg">
-          <div class="text-2xl font-bold" style="color: var(--color-textHighlighted);">∞</div>
-          <div class="text-sm" style="color: var(--color-textMuted);">Adventures</div>
+        <div class="win95-inset p-3 rounded-lg">
+          <div class="font-bold mb-1 text-sm" style="color: var(--color-textHighlighted);">⭐ Progression & Growth</div>
+          <p class="text-xs" style="color: var(--color-textMuted);">Gain experience, level up, and unlock abilities. Build your reputation as you grow stronger.</p>
         </div>
       </div>
 

@@ -10,8 +10,8 @@ function initializeAuthentication() {
     // Set up session manager event listeners
     window.sessionManager.on('sessionReady', (sessionData) => {
         console.log('✅ Session ready');
-        // Only redirect to saves if on home page (not saves, game, or new-game)
-        const allowedPaths = ['/saves', '/game', '/new-game'];
+        // Only redirect to saves if on home page (not saves, game, new-game, settings, or discover)
+        const allowedPaths = ['/saves', '/game', '/new-game', '/settings', '/discover'];
         if (!allowedPaths.includes(window.location.pathname)) {
             console.log('Redirecting to saves page');
             window.location.href = '/saves';
@@ -45,10 +45,9 @@ function initializeAuthentication() {
             showLoadingModal('Redirecting to saves...');
         }
 
-        showMessage(`✅ Successfully logged in via ${method}!`, 'success');
         setTimeout(() => {
-            // Only redirect to saves if on home page (not saves, game, or new-game)
-            const allowedPaths = ['/saves', '/game', '/new-game'];
+            // Only redirect to saves if on home page (not saves, game, new-game, settings, or discover)
+            const allowedPaths = ['/saves', '/game', '/new-game', '/settings', '/discover'];
             if (!allowedPaths.includes(window.location.pathname)) {
                 console.log('Redirecting to saves page after login');
                 // Loading modal will disappear on page navigation
@@ -80,7 +79,11 @@ function showLoginInterface() {
     if (gameContainer) {
         gameContainer.innerHTML = `
             <div class="text-center py-12">
-                <h2 class="text-3xl font-bold mb-6 text-yellow-400">⚔️ Nostr Hero ⚔️</h2>
+                <h2 class="text-3xl font-bold mb-6 text-yellow-400 flex items-center justify-center gap-2">
+                    <img src="/res/img/static/logo.png" alt="Nostr Hero" class="inline-block" style="height: 1.5em; width: auto; image-rendering: pixelated;">
+                    Nostr Hero
+                    <img src="/res/img/static/logo.png" alt="Nostr Hero" class="inline-block" style="height: 1.5em; width: auto; image-rendering: pixelated;">
+                </h2>
                 <p class="text-gray-300 mb-8">A text-based RPG powered by Nostr</p>
                 <div class="space-y-4 max-w-md mx-auto">
                     <button onclick="loginWithExtension()"
@@ -202,8 +205,6 @@ async function loginWithExtension() {
 
         if (typeof showAuthResult === 'function') {
             showAuthResult('success', 'Connected via browser extension!');
-        } else {
-            showMessage('✅ Connected via browser extension!', 'success');
         }
 
         window.nostrExtensionConnected = true;
@@ -427,8 +428,6 @@ function handleAmberCallbackData(data) {
 
         if (typeof showAuthResult === 'function') {
             showAuthResult('success', 'Connected via Amber!');
-        } else {
-            showMessage('✅ Connected via Amber!', 'success');
         }
 
         // Store Amber connection info
@@ -550,7 +549,6 @@ async function generateNewKeys() {
     }
 
     try {
-        showMessage('✨ Generating new key pair...', 'info');
         const keyPair = await window.sessionManager.generateKeys();
 
         if (keyPair) {
@@ -586,55 +584,26 @@ function showGeneratedKeys(keyPair) {
 
 // Use the generated keys to login
 async function useGeneratedKeys() {
-    if (!window.generatedKeyPair || !window.generatedKeyPair.nsec) {
+    // Check both possible variable locations
+    const privateKey = window.generatedPrivateKey || (window.generatedKeyPair && window.generatedKeyPair.nsec);
+
+    if (!privateKey) {
         showMessage('❌ No keys available', 'error');
         return;
     }
 
-    try {
-        // Hide generated keys modal first
-        hideGeneratedKeys();
+    // Store in global variable for encryption modal to access
+    window.generatedPrivateKey = privateKey;
 
-        // Show loading modal
-        if (typeof showLoadingModal === 'function') {
-            showLoadingModal('Logging in with new account...');
-        }
+    // Hide generated keys modal and show encryption password modal
+    hideGeneratedKeys();
 
-        showMessage('🔐 Logging in...', 'info');
-
-        // Mark as new account to skip relay lookups
-        window._isNewAccount = true;
-
-        // Use session manager if available, otherwise fallback to direct API call
-        if (window.sessionManager) {
-            await window.sessionManager.loginWithPrivateKey(window.generatedKeyPair.nsec);
-            // Loading modal will stay visible until redirect
-            // Session manager will trigger authenticationSuccess event which handles redirect
-        } else {
-            // Fallback to direct API call
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    private_key: window.generatedKeyPair.nsec,
-                    signing_method: 'encrypted_key',
-                    mode: 'write'
-                })
-            });
-
-            if (!response.ok) throw new Error('Login failed');
-
-            showMessage('✅ Success!', 'success');
-            setTimeout(() => window.location.href = '/saves', 1000);
-        }
-    } catch (error) {
-        // Hide loading modal on error
-        if (typeof hideLoadingModal === 'function') {
-            hideLoadingModal();
-        }
-        showMessage('❌ Login failed: ' + error.message, 'error');
-        // Clear the flag on error
-        window._isNewAccount = false;
+    // Show encryption password modal (function defined in nav-play.html)
+    if (typeof showEncryptionPasswordModal === 'function') {
+        showEncryptionPasswordModal();
+    } else {
+        console.error('showEncryptionPasswordModal function not found');
+        showMessage('❌ Error: Encryption modal not available', 'error');
     }
 }
 

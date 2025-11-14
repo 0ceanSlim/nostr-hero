@@ -1,23 +1,349 @@
 {{define "view"}}
+<script src="/scripts/core/session-manager.js"></script>
+<script src="/scripts/core/auth.js"></script>
+<script src="/scripts/systems/theme-manager.js"></script>
 
-<div
-  id="discover-container"
-  class="flex flex-col items-center justify-center mt-8 text-gray-100 bg-gray-900"
->
-  <div
-    class="max-w-md md:max-w-xl p-6 text-center bg-gray-800 border-4 border-yellow-500 rounded-lg shadow-lg"
-  >
-    <h1 class="mb-4 text-4xl font-bold text-yellow-400">
-      Discover your Nostr Hero
-    </h1>
+<div class="max-w-4xl mx-auto p-4 sm:p-6 mt-4">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-3 mb-2">
+      <a href="/" class="text-2xl hover:opacity-80">←</a>
+      <h1 class="text-2xl sm:text-4xl font-bold" style="color: var(--color-textHighlighted);">
+        🔮 Discover Your Character
+      </h1>
+    </div>
+    <p class="text-sm sm:text-base" style="color: var(--color-textSecondary);">See what hero awaits your Nostr identity</p>
+  </div>
 
-    {{template "form-input"}}
+  <!-- Character Preview Section -->
+  <div class="win95-outset p-4 sm:p-6 rounded-lg">
+    <h2 class="text-lg sm:text-xl font-bold mb-4" style="color: var(--color-textHighlighted);">👤 Preview Your Character</h2>
+    <p class="text-sm mb-4" style="color: var(--color-textSecondary);">
+      Enter any Nostr public key (npub) to see what character it generates. Your character is deterministically created from your npub - the same npub always creates the same character.
+    </p>
 
-    <!-- Hidden div to store JSON response -->
-    <div id="hidden-data" class="hidden"></div>
+    <!-- Input Form -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-2" style="color: var(--color-textPrimary);">Nostr Public Key</label>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input
+          id="npub-input"
+          type="text"
+          placeholder="npub1..."
+          class="flex-1 win95-inset px-3 py-2 text-sm font-mono focus:outline-none"
+          style="color: var(--color-textPrimary); background: var(--color-bgPrimary);"
+        />
+        <button
+          onclick="discoverCharacter()"
+          class="action-button-primary pixel-clip px-6 py-2 text-sm hover:opacity-90 transition"
+        >
+          🔍 Discover
+        </button>
+      </div>
+      <div id="npub-feedback" class="mt-2 text-xs" style="color: var(--color-textMuted);"></div>
 
-    {{template "form-result"}}
+      <!-- Generate New Keys Button -->
+      <div class="mt-3">
+        <button
+          id="generate-keys-btn"
+          onclick="generateRandomKeys()"
+          class="pixel-button pixel-clip px-6 py-2 text-sm hover:opacity-90 transition w-full sm:w-auto"
+          style="color: var(--color-textPrimary);"
+        >
+          ✨ New Keys!
+        </button>
+        <div id="timer-feedback" class="mt-2 text-xs" style="color: var(--color-textMuted);"></div>
+      </div>
+
+      <!-- Generated Keys Display -->
+      <div id="generated-keys-display" class="hidden mt-4 win95-inset p-3 rounded" style="background: var(--color-bgPrimary);">
+        <p class="text-xs font-bold mb-2" style="color: var(--color-textHighlighted);">🔑 Generated Keys (Save These!)</p>
+
+        <div class="mb-2">
+          <label class="text-xs font-bold" style="color: var(--color-textMuted);">Public Key (npub):</label>
+          <div class="flex gap-2 mt-1">
+            <input
+              id="generated-npub"
+              type="text"
+              readonly
+              class="flex-1 win95-inset px-2 py-1 text-xs font-mono focus:outline-none"
+              style="color: var(--color-textPrimary); background: var(--color-bgSecondary);"
+            />
+            <button
+              onclick="copyToClipboard('generated-npub')"
+              class="pixel-button pixel-clip px-3 py-1 text-xs"
+              style="color: var(--color-textPrimary);"
+            >
+              📋 Copy
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold" style="color: var(--color-textMuted);">Private Key (nsec):</label>
+          <div class="flex gap-2 mt-1">
+            <input
+              id="generated-nsec"
+              type="text"
+              readonly
+              class="flex-1 win95-inset px-2 py-1 text-xs font-mono focus:outline-none"
+              style="color: var(--color-textPrimary); background: var(--color-bgSecondary);"
+            />
+            <button
+              onclick="copyToClipboard('generated-nsec')"
+              class="pixel-button pixel-clip px-3 py-1 text-xs"
+              style="color: var(--color-textPrimary);"
+            >
+              📋 Copy
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs mt-2" style="color: var(--color-textMuted);">
+          ⚠️ Keep your private key (nsec) safe! Anyone with it can access this identity.
+        </p>
+      </div>
+    </div>
+
+    <!-- Character Result -->
+    <div id="character-result" class="hidden mt-6">
+      <div class="win95-inset p-4 rounded-lg" style="background: var(--color-bgPrimary);">
+        <h3 class="text-lg font-bold mb-4" style="color: var(--color-textHighlighted);">Character Sheet</h3>
+
+        <!-- Basic Info -->
+        <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+          <div>
+            <span class="font-bold" style="color: var(--color-textSecondary);">Race:</span>
+            <span id="char-race" style="color: var(--color-textPrimary);"></span>
+          </div>
+          <div>
+            <span class="font-bold" style="color: var(--color-textSecondary);">Class:</span>
+            <span id="char-class" style="color: var(--color-textPrimary);"></span>
+          </div>
+          <div>
+            <span class="font-bold" style="color: var(--color-textSecondary);">Background:</span>
+            <span id="char-background" style="color: var(--color-textPrimary);"></span>
+          </div>
+          <div>
+            <span class="font-bold" style="color: var(--color-textSecondary);">Alignment:</span>
+            <span id="char-alignment" style="color: var(--color-textPrimary);"></span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="win95-outset p-3 rounded" style="background: var(--color-bgSecondary);">
+          <h4 class="text-sm font-bold mb-2" style="color: var(--color-textHighlighted);">Ability Scores</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">STR</div>
+              <div id="char-str" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">DEX</div>
+              <div id="char-dex" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">CON</div>
+              <div id="char-con" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">INT</div>
+              <div id="char-int" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">WIS</div>
+              <div id="char-wis" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+            <div class="win95-inset p-2 text-center" style="background: var(--color-bgPrimary);">
+              <div class="font-bold" style="color: var(--color-textMuted);">CHA</div>
+              <div id="char-cha" class="text-lg font-bold" style="color: var(--color-textHighlighted);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Notice -->
+  <div class="win95-outset p-4 sm:p-6 rounded-lg mt-6" style="background: var(--color-bgSecondary);">
+    <h2 class="text-lg sm:text-xl font-bold mb-3" style="color: var(--color-textHighlighted);">⚠️ Feature Status</h2>
+    <p class="text-sm mb-3" style="color: var(--color-textPrimary);">
+      This page is currently under development. The full character mining and discovery features are planned but won't be implemented until after the core game is built.
+    </p>
+    <div class="text-xs win95-inset p-3 rounded" style="background: var(--color-bgPrimary); color: var(--color-textMuted);">
+      <p class="mb-2"><strong>🚧 Coming Later:</strong></p>
+      <ul class="list-disc list-inside space-y-1">
+        <li>Character mining - generate keys to find specific traits</li>
+        <li>Browser-based mining (runs in your browser)</li>
+        <li>Downloadable mining tool for faster PC mining</li>
+        <li>Advanced filtering by race, class, and stats</li>
+      </ul>
+    </div>
   </div>
 </div>
+
+<script>
+let keyGenerationTimer = null;
+
+async function generateRandomKeys() {
+  const button = document.getElementById('generate-keys-btn');
+  const timerFeedback = document.getElementById('timer-feedback');
+  const keysDisplay = document.getElementById('generated-keys-display');
+
+  // Check if timer is active
+  if (keyGenerationTimer) {
+    return;
+  }
+
+  // Generate new keypair using session manager
+  if (!window.sessionManager) {
+    timerFeedback.textContent = '❌ Session manager not available';
+    timerFeedback.style.color = 'rgb(239, 68, 68)';
+    return;
+  }
+
+  timerFeedback.textContent = '⏳ Generating new keys...';
+  timerFeedback.style.color = 'var(--color-textMuted)';
+
+  try {
+    const keyPair = await window.sessionManager.generateKeys();
+
+    // Display the keys
+    document.getElementById('generated-npub').value = keyPair.npub;
+    document.getElementById('generated-nsec').value = keyPair.nsec;
+    keysDisplay.classList.remove('hidden');
+
+    // Auto-fill npub input and discover character
+    document.getElementById('npub-input').value = keyPair.npub;
+    await discoverCharacter();
+
+    // Start 30-second timer
+    let timeLeft = 30;
+    button.disabled = true;
+    button.style.opacity = '0.5';
+    button.style.cursor = 'not-allowed';
+
+    timerFeedback.textContent = `⏳ Wait ${timeLeft}s before generating new keys`;
+    timerFeedback.style.color = 'var(--color-textMuted)';
+
+    keyGenerationTimer = setInterval(() => {
+      timeLeft--;
+      if (timeLeft > 0) {
+        timerFeedback.textContent = `⏳ Wait ${timeLeft}s before generating new keys`;
+      } else {
+        clearInterval(keyGenerationTimer);
+        keyGenerationTimer = null;
+        button.disabled = false;
+        button.style.opacity = '';
+        button.style.cursor = '';
+        timerFeedback.textContent = '✅ Ready to generate new keys';
+        timerFeedback.style.color = 'var(--color-textHighlighted)';
+      }
+    }, 1000);
+
+  } catch (error) {
+    console.error('Error generating keys:', error);
+    timerFeedback.textContent = '❌ Error generating keys: ' + error.message;
+    timerFeedback.style.color = 'rgb(239, 68, 68)';
+  }
+}
+
+function copyToClipboard(elementId) {
+  const input = document.getElementById(elementId);
+  input.select();
+  input.setSelectionRange(0, 99999); // For mobile devices
+
+  try {
+    document.execCommand('copy');
+    // Visual feedback
+    const originalText = input.value;
+    input.value = '✅ Copied!';
+    setTimeout(() => {
+      input.value = originalText;
+    }, 1000);
+  } catch (err) {
+    console.error('Failed to copy:', err);
+  }
+}
+
+async function discoverCharacter() {
+  const input = document.getElementById('npub-input');
+  const feedback = document.getElementById('npub-feedback');
+  const result = document.getElementById('character-result');
+  const npub = input.value.trim();
+
+  // Validation
+  if (!npub) {
+    feedback.textContent = '⚠️ Please enter an npub';
+    feedback.style.color = 'var(--color-textMuted)';
+    result.classList.add('hidden');
+    return;
+  }
+
+  if (!npub.startsWith('npub1')) {
+    feedback.textContent = '❌ Invalid npub format (must start with "npub1")';
+    feedback.style.color = 'rgb(239, 68, 68)';
+    result.classList.add('hidden');
+    return;
+  }
+
+  feedback.textContent = '⏳ Generating character...';
+  feedback.style.color = 'var(--color-textMuted)';
+
+  try {
+    const response = await fetch(`/api/character?npub=${encodeURIComponent(npub)}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to generate character');
+    }
+
+    const data = await response.json();
+
+    // Extract character from response
+    const character = data.character || data;
+
+    // Update character display
+    document.getElementById('char-race').textContent = character.race || '-';
+    document.getElementById('char-class').textContent = character.class || '-';
+    document.getElementById('char-background').textContent = character.background || '-';
+    document.getElementById('char-alignment').textContent = character.alignment || '-';
+
+    // Update stats (note: backend uses capitalized keys)
+    if (character.stats) {
+      document.getElementById('char-str').textContent = character.stats.Strength || '-';
+      document.getElementById('char-dex').textContent = character.stats.Dexterity || '-';
+      document.getElementById('char-con').textContent = character.stats.Constitution || '-';
+      document.getElementById('char-int').textContent = character.stats.Intelligence || '-';
+      document.getElementById('char-wis').textContent = character.stats.Wisdom || '-';
+      document.getElementById('char-cha').textContent = character.stats.Charisma || '-';
+    }
+
+    feedback.textContent = '✅ Character generated!';
+    feedback.style.color = 'var(--color-textHighlighted)';
+    result.classList.remove('hidden');
+
+  } catch (error) {
+    console.error('Error:', error);
+    feedback.textContent = '❌ Error generating character: ' + error.message;
+    feedback.style.color = 'rgb(239, 68, 68)';
+    result.classList.add('hidden');
+  }
+}
+
+// Allow Enter key to submit
+document.getElementById('npub-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    discoverCharacter();
+  }
+});
+
+// Auto-fill with current user's npub if logged in
+if (window.sessionManager && window.sessionManager.isAuthenticated()) {
+  const session = window.sessionManager.getSession();
+  if (session?.npub) {
+    document.getElementById('npub-input').value = session.npub;
+  }
+}
+</script>
 
 {{end}}

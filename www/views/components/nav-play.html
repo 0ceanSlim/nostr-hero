@@ -7,7 +7,7 @@
   title="Login"
 >
   <span class="text-base flex items-center gap-2" id="login-btn-content">
-    🗝️ Login
+    🗝️<span class="hidden sm:inline"> Login</span>
   </span>
 </button>
 
@@ -26,7 +26,11 @@
     <div class="p-2 sm:p-6 md:p-8">
       <!-- Header -->
       <div class="text-center mb-3">
-        <h2 class="text-xl sm:text-3xl font-bold mb-1" style="color: var(--color-textHighlighted);">⚔️ Nostr Hero ⚔️</h2>
+        <h2 class="text-xl sm:text-3xl font-bold mb-1 flex items-center justify-center gap-2" style="color: var(--color-textHighlighted);">
+          <img src="/res/img/static/logo.png" alt="Nostr Hero" class="inline-block" style="height: 1.5em; width: auto; image-rendering: pixelated;">
+          Nostr Hero
+          <img src="/res/img/static/logo.png" alt="Nostr Hero" class="inline-block" style="height: 1.5em; width: auto; image-rendering: pixelated;">
+        </h2>
         <p class="text-xs sm:text-sm" style="color: var(--color-textMuted);">Login with your Nostr identity to save your progress</p>
       </div>
 
@@ -235,7 +239,77 @@
   </div>
 </div>
 
-
+<!-- Encryption Password Modal for Generated Keys -->
+<div
+  id="encryption-password-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+  style="background-color: rgba(0, 0, 0, 0.85);"
+  onclick="if(event.target === this) hideEncryptionPasswordModal()"
+>
+  <div
+    class="win95-outset pixel-clip w-full max-w-[95vw] sm:max-w-md max-h-[95vh] overflow-y-auto"
+    style="border: 4px solid var(--color-textPrimary);"
+    onclick="event.stopPropagation()"
+  >
+    <div class="p-2 sm:p-6">
+      <h3 class="text-lg sm:text-2xl font-bold mb-3 text-center" style="color: var(--color-textHighlighted);">🔒 Secure Your Session</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-textSecondary);">Set Encryption Password</label>
+          <input
+            type="password"
+            id="gen-encryption-password-input"
+            class="w-full win95-inset px-3 py-2 focus:outline-none text-sm"
+            style="color: var(--color-textPrimary); background-color: var(--color-bgPrimary);"
+            placeholder="Enter password for this session"
+            onkeypress="if(event.key === 'Enter') loginWithGeneratedKeys()"
+          />
+        </div>
+        <div class="text-xs win95-inset p-3" style="color: var(--color-textMuted); background: var(--color-bgPrimary);">
+          <p>🔒 Your private key will be encrypted with this password and stored securely for this session only.</p>
+        </div>
+        <div class="text-sm win95-inset p-3 pixel-clip" style="background: var(--color-bgPrimary); color: var(--color-textPrimary);">
+          <p class="font-bold mb-2">💡 Recommendation</p>
+          <p class="mb-2">For easier access, consider using a browser extension or mobile signer:</p>
+          <ul class="space-y-2 text-xs">
+            <li>
+              <a href="https://chromewebstore.google.com/detail/nos2x/kpgefcfmnafjgpblomihpgmejjdanjjp" target="_blank" class="inline-flex items-center gap-1 hover:opacity-80" style="color: var(--color-textHighlighted); text-decoration: underline;">
+                <img src="/res/img/static/nos2x.png" alt="nos2x" class="inline-block" style="height: 1.8em; width: auto; image-rendering: pixelated;">
+                <span>nos2x</span>
+              </a>
+              <span style="color: var(--color-textMuted);"> - Browser extension for desktop apps</span>
+            </li>
+            <li>
+              <a href="https://github.com/greenart7c3/Amber?tab=readme-ov-file#amber-nostr-event-signer-for-android" target="_blank" class="inline-flex items-center gap-1 hover:opacity-80" style="color: var(--color-textHighlighted); text-decoration: underline;">
+                <img src="/res/img/static/amber.png" alt="Amber" class="inline-block" style="height: 1.8em; width: auto; image-rendering: pixelated;">
+                <span>Amber Signer</span>
+              </a>
+              <span style="color: var(--color-textMuted);"> -
+                <img src="/res/img/static/android.png" alt="Android" class="inline-block" style="height: 1.8em; width: auto; image-rendering: pixelated;">
+                Android signing app
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button
+            onclick="loginWithGeneratedKeys()"
+            class="flex-1 action-button-primary pixel-clip px-3 py-2 text-sm"
+          >
+            🔑 Continue
+          </button>
+          <button
+            onclick="cancelEncryptionPassword()"
+            class="flex-1 win95-button pixel-clip px-3 py-2 text-sm"
+            style="color: var(--color-textPrimary);"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Amber Options Modal (QR + Direct) -->
 <div
@@ -609,9 +683,10 @@ function toggleProfileDropdown() {
   dropdown = document.createElement('div');
   dropdown.id = 'profile-dropdown';
 
-  // Get login button position for positioning
+  // Get theme button position for positioning (align dropdown with theme button)
+  const themeBtn = document.getElementById('theme-switcher-btn');
   const loginBtn = document.getElementById('login-btn');
-  const buttonRect = loginBtn.getBoundingClientRect();
+  const buttonRect = themeBtn ? themeBtn.getBoundingClientRect() : loginBtn.getBoundingClientRect();
 
   // Style the dropdown with Win95 theme
   dropdown.style.cssText = `
@@ -619,7 +694,7 @@ function toggleProfileDropdown() {
     top: ${buttonRect.bottom + 8}px;
     right: ${window.innerWidth - buttonRect.right}px;
     background: var(--color-bgSecondary);
-    min-width: 250px;
+    min-width: 300px;
     z-index: 1000;
     font-family: inherit;
   `;
@@ -748,7 +823,17 @@ function updateLoginButton() {
   const button = document.getElementById('login-btn');
   const buttonContent = document.getElementById('login-btn-content');
 
-  if (!button || !buttonContent) return;
+  console.log('🔍 updateLoginButton called:', {
+    button: !!button,
+    buttonContent: !!buttonContent,
+    sessionManager: !!window.sessionManager,
+    isAuthenticated: window.sessionManager?.isAuthenticated()
+  });
+
+  if (!button || !buttonContent) {
+    console.warn('❌ Login button or content not found');
+    return;
+  }
 
   if (window.sessionManager && window.sessionManager.isAuthenticated()) {
     // Get profile info
@@ -800,7 +885,7 @@ function updateLoginButton() {
     button.style.color = 'var(--color-textPrimary)';
   } else {
     // User is not logged in - show login button
-    buttonContent.innerHTML = '🗝️ Login';
+    buttonContent.innerHTML = '🗝️<span class="hidden sm:inline"> Login</span>';
     button.title = 'Login';
 
     // Reset to yellow login button styling
@@ -859,7 +944,10 @@ async function loginWithPrivateKeyAndPassword() {
   }
 
   try {
-    showMessage('🗝️ Logging in with encrypted private key...', 'info');
+    // Show loading modal with gif
+    if (typeof showLoadingModal === 'function') {
+      showLoadingModal('Logging in with private key...');
+    }
 
     // Pass password as metadata for encryption
     await window.sessionManager.loginWithPrivateKey(privateKey, { password });
@@ -872,6 +960,12 @@ async function loginWithPrivateKeyAndPassword() {
     // Success handling is done by event listeners in auth.js
   } catch (error) {
     console.error('Private key login error:', error);
+
+    // Hide loading modal on error
+    if (typeof hideLoadingModal === 'function') {
+      hideLoadingModal();
+    }
+
     showMessage('❌ Private key login failed: ' + error.message, 'error');
   }
 }
@@ -932,10 +1026,17 @@ function fallbackCopyTextToClipboard(text, label) {
 }
 
 function hideGeneratedKeys() {
-  document.getElementById('generated-keys-modal').classList.add('hidden');
-  document.getElementById('gen-npub').textContent = '';
-  document.getElementById('gen-nsec').textContent = '';
-  generatedPrivateKey = null;
+  const modal = document.getElementById('generated-keys-modal');
+  modal.classList.add('hidden');
+
+  // Only clear if encryption modal is also hidden (meaning user cancelled everything)
+  const encryptionModal = document.getElementById('encryption-password-modal');
+  if (encryptionModal && encryptionModal.classList.contains('hidden')) {
+    document.getElementById('gen-npub').textContent = '';
+    document.getElementById('gen-nsec').textContent = '';
+    window.generatedPrivateKey = null;
+    generatedPrivateKey = null;
+  }
 }
 
 function showGeneratedKeys(keyPair) {
@@ -943,13 +1044,80 @@ function showGeneratedKeys(keyPair) {
   document.getElementById('gen-npub').textContent = keyPair.npub;
   document.getElementById('gen-nsec').textContent = keyPair.nsec;
   generatedPrivateKey = keyPair.nsec;
+  window.generatedPrivateKey = keyPair.nsec; // Also store in window scope
   document.getElementById('generated-keys-modal').classList.remove('hidden');
 }
 
 async function useGeneratedKeys() {
-  if (generatedPrivateKey) {
-    // Hide generated keys modal
+  const privateKey = window.generatedPrivateKey || generatedPrivateKey;
+  if (privateKey) {
+    // Hide generated keys modal and show encryption password modal
     hideGeneratedKeys();
+    showEncryptionPasswordModal();
+  } else {
+    showMessage('❌ No keys available', 'error');
+  }
+}
+
+function showEncryptionPasswordModal() {
+  const modal = document.getElementById('encryption-password-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    // Focus the password input after a brief delay for the modal to render
+    setTimeout(() => {
+      const input = document.getElementById('gen-encryption-password-input');
+      if (input) input.focus();
+    }, 100);
+  } else {
+    console.error('encryption-password-modal element not found!');
+  }
+}
+
+function hideEncryptionPasswordModal() {
+  document.getElementById('encryption-password-modal').classList.add('hidden');
+  document.getElementById('gen-encryption-password-input').value = '';
+}
+
+function cancelEncryptionPassword() {
+  // Hide encryption modal
+  hideEncryptionPasswordModal();
+
+  // Clear all generated key data for security
+  document.getElementById('gen-npub').textContent = '';
+  document.getElementById('gen-nsec').textContent = '';
+  window.generatedPrivateKey = null;
+  generatedPrivateKey = null;
+
+  // Show login modal again
+  showLoginModal();
+}
+
+async function loginWithGeneratedKeys() {
+  const password = document.getElementById('gen-encryption-password-input')?.value?.trim();
+
+  if (!password) {
+    showMessage('❌ Please enter an encryption password', 'error');
+    return;
+  }
+
+  console.log('Checking for private key:', {
+    window: window.generatedPrivateKey,
+    local: generatedPrivateKey,
+    keyPair: window.generatedKeyPair
+  });
+
+  const privateKey = window.generatedPrivateKey || generatedPrivateKey || (window.generatedKeyPair && window.generatedKeyPair.nsec);
+
+  console.log('Private key found:', privateKey);
+
+  if (!privateKey) {
+    showMessage('❌ No keys available', 'error');
+    return;
+  }
+
+  try {
+    // Hide encryption password modal
+    hideEncryptionPasswordModal();
 
     // Show loading modal
     if (typeof showLoadingModal === 'function') {
@@ -959,15 +1127,40 @@ async function useGeneratedKeys() {
     // Mark this as a new account so we skip relay lookups
     window._isNewAccount = true;
 
-    try {
-      await loginWithPrivateKey(generatedPrivateKey);
-      // Loading modal will be hidden when redirecting to saves page
-    } catch (error) {
-      if (typeof hideLoadingModal === 'function') {
-        hideLoadingModal();
-      }
-      console.error('Login failed:', error);
+    // Use session manager to login with password encryption
+    if (window.sessionManager) {
+      await window.sessionManager.loginWithPrivateKey(privateKey, { password });
+      // Clear private key after successful login for security
+      window.generatedPrivateKey = null;
+      generatedPrivateKey = null;
+    } else {
+      // Fallback to direct API call
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          private_key: privateKey,
+          signing_method: 'encrypted_key',
+          mode: 'write'
+        })
+      });
+
+      if (!response.ok) throw new Error('Login failed');
+
+      // Clear private key after successful login for security
+      window.generatedPrivateKey = null;
+      generatedPrivateKey = null;
+
+      setTimeout(() => window.location.href = '/saves', 1000);
     }
+  } catch (error) {
+    // Hide loading modal on error
+    if (typeof hideLoadingModal === 'function') {
+      hideLoadingModal();
+    }
+    showMessage('❌ Login failed: ' + error.message, 'error');
+    // Clear the flag on error
+    window._isNewAccount = false;
   }
 }
 
@@ -979,12 +1172,10 @@ async function generateNewKeys() {
   }
 
   try {
-    showMessage('✨ Generating new key pair...', 'info');
     const keyPair = await window.sessionManager.generateKeys();
 
     if (keyPair) {
       showGeneratedKeys(keyPair);
-      showMessage('✅ Keys generated successfully!', 'success');
     } else {
       showMessage('❌ Failed to generate keys', 'error');
     }
@@ -1009,7 +1200,11 @@ async function loginWithPrivateKey(privateKeyParam) {
   }
 
   try {
-    showMessage('🗝️ Logging in with private key...', 'info');
+    // Show loading modal with gif
+    if (typeof showLoadingModal === 'function') {
+      showLoadingModal('Logging in with private key...');
+    }
+
     await window.sessionManager.loginWithPrivateKey(privateKey);
 
     // Clear the input for security
@@ -1021,6 +1216,12 @@ async function loginWithPrivateKey(privateKeyParam) {
     // Success handling is done by event listeners in auth.js
   } catch (error) {
     console.error('Private key login error:', error);
+
+    // Hide loading modal on error
+    if (typeof hideLoadingModal === 'function') {
+      hideLoadingModal();
+    }
+
     showMessage('❌ Private key login failed: ' + error.message, 'error');
   }
 }
@@ -1034,9 +1235,13 @@ function showSaveSelection() {
 if (typeof window !== 'undefined') {
   // Update button state on page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateLoginButtonState);
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add slight delay to ensure session manager is ready
+      setTimeout(updateLoginButtonState, 100);
+    });
   } else {
-    updateLoginButtonState();
+    // Add slight delay to ensure session manager is ready
+    setTimeout(updateLoginButtonState, 100);
   }
 
   // Listen for profile updates from profile manager
@@ -1044,6 +1249,9 @@ if (typeof window !== 'undefined') {
     console.log('👤 Profile updated event received:', event.detail);
     updateLoginButton();
   });
+
+  // Listen for generic auth changes (fired by various components)
+  window.addEventListener('auth-changed', updateLoginButtonState);
 
   // Listen for authentication state changes
   if (window.sessionManager) {
@@ -1058,7 +1266,8 @@ if (typeof window !== 'undefined') {
         window.sessionManager.on('authenticationSuccess', updateLoginButtonState);
         window.sessionManager.on('loggedOut', updateLoginButtonState);
         window.sessionManager.on('sessionReady', updateLoginButtonState);
-        updateLoginButtonState();
+        // Update immediately once session manager is available
+        setTimeout(updateLoginButtonState, 50);
       }
     }, 100);
   }
