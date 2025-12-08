@@ -20,7 +20,7 @@ sudo mv webhook-linux-amd64/webhook /usr/local/bin/
 
 1. Create `webhook-hooks.json` from template:
    ```bash
-   cd /path/to/nostr-hero/scripts
+   cd docs/development/deployment
    cp webhook-hooks.json.template webhook-hooks.json
    ```
 
@@ -30,20 +30,25 @@ sudo mv webhook-linux-amd64/webhook /usr/local/bin/
    ```
    Copy this secret - you'll need it for GitHub and the config file.
 
-3. Edit `scripts/webhook-hooks.json`:
+3. Edit `docs/development/deployment/webhook-hooks.json`:
    - Replace `/path/to/nostr-hero` with actual path (2 places)
    - Replace `REPLACE_WITH_WEBHOOK_SECRET` with the secret from step 2
 
-4. Edit `scripts/webhook-listener-advanced.sh`:
-   - Replace `/path/to/nostr-hero` with actual path
-   - Replace `nostr-hero-test` with your actual service name
-
-5. Make script executable:
+4. Create `webhook-listener-advanced.sh` from template:
    ```bash
-   chmod +x scripts/webhook-listener-advanced.sh
+   cp webhook-listener-advanced.sh.template webhook-listener-advanced.sh
    ```
 
-**Note**: `webhook-hooks.json` is gitignored to keep secrets private.
+5. Edit `docs/development/deployment/webhook-listener-advanced.sh`:
+   - Replace `/path/to/nostr-hero` with actual path
+   - Replace `your-service-name` with your actual service name
+
+6. Make script executable:
+   ```bash
+   chmod +x webhook-listener-advanced.sh
+   ```
+
+**Note**: `webhook-hooks.json`, `webhook-listener.service`, and `webhook-listener-advanced.sh` are gitignored to keep server-specific configuration and secrets private.
 
 ### Step 3: Set up systemd service
 
@@ -52,19 +57,24 @@ sudo mv webhook-linux-amd64/webhook /usr/local/bin/
    cp webhook-listener.service.template webhook-listener.service
    ```
 
-2. Edit `scripts/webhook-listener.service`:
+2. Edit `docs/development/deployment/webhook-listener.service`:
    - Replace `REPLACE_WITH_USERNAME` with your Linux username
    - Replace all `/path/to/nostr-hero` with actual path
+   - Update webhook binary path to `/usr/local/bin/webhook` (or wherever you installed it)
 
-3. Install the service:
+3. Add GitHub token for status reporting (optional but recommended):
+   - Create a GitHub Personal Access Token with `repo:status` scope at https://github.com/settings/tokens/new
+   - Add to service file: `Environment="GITHUB_TOKEN=your_token_here"`
+
+4. Install the service:
    ```bash
-   sudo cp scripts/webhook-listener.service /etc/systemd/system/
+   sudo cp docs/development/deployment/webhook-listener.service /etc/systemd/system/
    sudo systemctl daemon-reload
    sudo systemctl enable webhook-listener
    sudo systemctl start webhook-listener
    ```
 
-3. Check status:
+5. Check status:
    ```bash
    sudo systemctl status webhook-listener
    ```

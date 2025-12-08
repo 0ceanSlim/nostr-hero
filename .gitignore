@@ -24,9 +24,11 @@ pixellab-gen.exe
 /data
 
 # Deployment secrets (server-specific, never commit)
-/scripts/webhook-hooks.json
-/scripts/webhook-listener.service
-/scripts/*.local.sh
+/docs/development/deployment/webhook-hooks.json
+/docs/development/deployment/webhook-listener.service
+/docs/development/deployment/webhook-listener-advanced.sh
+/docs/development/deployment/webhook-listener.sh
+/docs/development/deployment/*.local.sh
 deploy-config.env
 
 /www/res/style/output.css
