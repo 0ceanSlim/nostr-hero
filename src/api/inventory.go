@@ -2205,6 +2205,12 @@ func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *ty
 	var containerIndex int
 	containerLocation := "" // "general" or "equipped"
 
+	// Load general slots early - we'll need them regardless of where the container is
+	generalSlots, ok := save.Inventory["general_slots"].([]interface{})
+	if !ok {
+		return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
+	}
+
 	// First, check if the container is equipped in gear_slots.bag
 	gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 	if ok {
@@ -2220,10 +2226,6 @@ func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *ty
 
 	// If not equipped, search general_slots
 	if containerSlot == nil {
-		generalSlots, ok := save.Inventory["general_slots"].([]interface{})
-		if !ok {
-			return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
-		}
 
 		log.Printf("📦 Searching %d general slots for container at slot %d", len(generalSlots), req.ContainerSlot)
 
