@@ -14,6 +14,8 @@
     "container",
     "equipment"
   ],
+  "container_slots": 20,
+  "allowed_types": "any",
   "img": "equipment/adventuring-gear.jpg",
   "notes": [
     "Expands carrying capacity for adventuring",

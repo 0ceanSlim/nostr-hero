@@ -165,12 +165,71 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 		if existing := gearSlots[equipSlot]; existing != nil {
 			if existingMap, ok := existing.(map[string]interface{}); ok {
 				if existingMap["item"] != nil && existingMap["item"] != "" {
+					existingItemID := existingMap["item"].(string)
+
 					// Will swap with this item
 					itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
-						"item":     existingMap["item"],
+						"item":     existingItemID,
 						"quantity": existingMap["quantity"],
 						"from":     equipSlot,
 					})
+
+					// CRITICAL: Check if existing item is two-handed
+					// If so, also unequip from the OTHER hand slot
+					log.Printf("🔍 Checking if existing item '%s' is two-handed", existingItemID)
+					database := db.GetDB()
+					if database != nil {
+						var tagsJSON string
+						err := database.QueryRow("SELECT tags FROM items WHERE id = ?", existingItemID).Scan(&tagsJSON)
+						if err == nil {
+							log.Printf("🔍 Tags for %s: %s", existingItemID, tagsJSON)
+							var tags []interface{}
+							if err := json.Unmarshal([]byte(tagsJSON), &tags); err == nil {
+								log.Printf("🔍 Parsed %d tags for %s", len(tags), existingItemID)
+								for _, tag := range tags {
+									if tagStr, ok := tag.(string); ok {
+										log.Printf("🔍 Tag: %s", tagStr)
+										if tagStr == "two-handed" {
+											// Existing item is two-handed - also clear the other hand
+											otherSlot := ""
+											if equipSlot == "right_arm" {
+												otherSlot = "left_arm"
+											} else if equipSlot == "left_arm" {
+												otherSlot = "right_arm"
+											}
+
+											if otherSlot != "" {
+												log.Printf("🔍 Checking other slot: %s", otherSlot)
+												if otherHand, ok := gearSlots[otherSlot].(map[string]interface{}); ok {
+													log.Printf("🔍 Other hand has: %v", otherHand["item"])
+													if otherHand["item"] == existingItemID {
+														log.Printf("🗡️ Existing two-handed weapon detected - also clearing %s", otherSlot)
+														// Don't add to itemsToUnequip (already added above)
+														// Just clear it directly
+														gearSlots[otherSlot] = map[string]interface{}{
+															"item":     nil,
+															"quantity": 0,
+														}
+													} else {
+														log.Printf("⚠️ Other hand has different item: %v (expected %s)", otherHand["item"], existingItemID)
+													}
+												} else {
+													log.Printf("⚠️ Could not get other hand slot map")
+												}
+											}
+											break
+										}
+									}
+								}
+							} else {
+								log.Printf("⚠️ Failed to parse tags JSON: %v", err)
+							}
+						} else {
+							log.Printf("⚠️ Failed to query tags for %s: %v", existingItemID, err)
+						}
+					} else {
+						log.Printf("⚠️ Database not available")
+					}
 				}
 			}
 		}
@@ -350,10 +409,24 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 		log.Printf("✅ Equipped two-handed %s to both hands", itemData["item"])
 	} else {
 		// One-handed weapons go to specified slot
-		gearSlots[equipSlot] = map[string]interface{}{
+		equippedItem := map[string]interface{}{
 			"item":     itemData["item"],
 			"quantity": itemData["quantity"],
 		}
+
+		// CRITICAL: If equipping a bag, preserve its contents
+		if equipSlot == "bag" {
+			if contents, ok := itemData["contents"].([]interface{}); ok {
+				equippedItem["contents"] = contents
+				log.Printf("📦 Preserving bag contents when equipping (%d items)", len(contents))
+			} else {
+				// Initialize empty contents if none exist
+				equippedItem["contents"] = make([]interface{}, 0, 20)
+				log.Printf("📦 Initializing empty bag contents")
+			}
+		}
+
+		gearSlots[equipSlot] = equippedItem
 	}
 
 	// Empty the source slot if no swap occurred
@@ -426,51 +499,104 @@ func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*G
 
 	log.Printf("🛡️ Unequipping: %s (quantity: %d)", itemID, quantity)
 
-	// Find first empty slot in backpack
-	bag, ok := gearSlots["bag"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("no backpack found")
-	}
-
-	backpackContents, ok := bag["contents"].([]interface{})
-	if !ok {
-		backpackContents = make([]interface{}, 0, 20)
-		bag["contents"] = backpackContents
-	}
-
-	// Look for empty slot in backpack (slots 0-19)
+	// SPECIAL CASE: Unequipping the bag itself
+	// The bag can ONLY go to general slots (not into itself!)
 	emptySlotIndex := -1
 	emptySlotType := ""
 
-	for i := 0; i < 20; i++ {
-		// Extend array if needed
-		if i >= len(backpackContents) {
-			backpackContents = append(backpackContents, map[string]interface{}{
-				"item":     nil,
-				"quantity": 0,
-				"slot":     i,
-			})
+	if equipSlot == "bag" {
+		log.Printf("🎒 Special case: Unequipping bag - can ONLY go to general slots")
+
+		// Search ONLY general slots for the bag
+		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+		if !ok {
+			generalSlots = make([]interface{}, 0, 4)
+			state.Inventory["general_slots"] = generalSlots
+		}
+
+		for i := 0; i < 4; i++ {
+			// Extend array if needed
+			if i >= len(generalSlots) {
+				generalSlots = append(generalSlots, map[string]interface{}{
+					"item":     nil,
+					"quantity": 0,
+					"slot":     i,
+				})
+				state.Inventory["general_slots"] = generalSlots
+			}
+
+			// Check if slot is empty
+			if generalSlots[i] == nil {
+				emptySlotIndex = i
+				emptySlotType = "general"
+				break
+			}
+
+			if slotMap, ok := generalSlots[i].(map[string]interface{}); ok {
+				if slotMap["item"] == nil || slotMap["item"] == "" {
+					emptySlotIndex = i
+					emptySlotType = "general"
+					break
+				}
+			}
+		}
+
+		// If no empty general slot found, bag cannot be unequipped
+		if emptySlotIndex == -1 {
+			return &GameActionResponse{
+				Success: false,
+				Error:   "There isn't enough room in your inventory to take off the bag",
+				Color:   "red",
+			}, nil
+		}
+
+		log.Printf("✅ Found empty general slot at index %d for bag", emptySlotIndex)
+	} else {
+		// NORMAL CASE: Unequipping other items
+		// Try backpack first, then general slots
+
+		bag, ok := gearSlots["bag"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("no backpack found")
+		}
+
+		backpackContents, ok := bag["contents"].([]interface{})
+		if !ok {
+			backpackContents = make([]interface{}, 0, 20)
 			bag["contents"] = backpackContents
 		}
 
-		// Check if slot is empty
-		if backpackContents[i] == nil {
-			emptySlotIndex = i
-			emptySlotType = "inventory"
-			break
-		}
+		// Look for empty slot in backpack (slots 0-19)
+		for i := 0; i < 20; i++ {
+			// Extend array if needed
+			if i >= len(backpackContents) {
+				backpackContents = append(backpackContents, map[string]interface{}{
+					"item":     nil,
+					"quantity": 0,
+					"slot":     i,
+				})
+				bag["contents"] = backpackContents
+			}
 
-		if slotMap, ok := backpackContents[i].(map[string]interface{}); ok {
-			if slotMap["item"] == nil || slotMap["item"] == "" {
+			// Check if slot is empty
+			if backpackContents[i] == nil {
 				emptySlotIndex = i
 				emptySlotType = "inventory"
 				break
 			}
+
+			if slotMap, ok := backpackContents[i].(map[string]interface{}); ok {
+				if slotMap["item"] == nil || slotMap["item"] == "" {
+					emptySlotIndex = i
+					emptySlotType = "inventory"
+					break
+				}
+			}
 		}
 	}
 
-	// If no empty backpack slot, check general slots
-	if emptySlotIndex == -1 {
+	// If no empty backpack slot (for normal items), check general slots
+	if emptySlotIndex == -1 && equipSlot != "bag" {
 		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
 		if !ok {
 			generalSlots = make([]interface{}, 0, 4)
@@ -517,7 +643,17 @@ func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*G
 		"slot":     emptySlotIndex,
 	}
 
+	// CRITICAL: If unequipping a bag, preserve its contents
+	if equipSlot == "bag" {
+		if contents, ok := itemMap["contents"].([]interface{}); ok {
+			newItem["contents"] = contents
+			log.Printf("📦 Preserving bag contents when unequipping (%d items)", len(contents))
+		}
+	}
+
 	if emptySlotType == "inventory" {
+		bag := gearSlots["bag"].(map[string]interface{})
+		backpackContents := bag["contents"].([]interface{})
 		backpackContents[emptySlotIndex] = newItem
 		bag["contents"] = backpackContents
 		log.Printf("✅ Moved to backpack slot %d", emptySlotIndex)

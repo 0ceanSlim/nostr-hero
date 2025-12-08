@@ -122,11 +122,54 @@ async function getItemByIdAsync(itemId) {
 }
 
 // Message system - DISABLED for work-in-progress UI
+/**
+ * Show action text in the game log with color coding
+ * @param {string} text - The message to display
+ * @param {string} color - Color: 'purple', 'white', 'red', 'green', 'yellow', 'blue'
+ * @param {number} duration - Ignored (kept for API compatibility)
+ */
+window.showActionText = function showActionText(text, color = 'white', duration = 0) {
+    const gameText = document.getElementById('game-text');
+    if (!gameText) return;
+
+    // Color mapping
+    const colors = {
+        'purple': '#a78bfa',   // Welcome messages
+        'white': '#ffffff',    // Descriptions, neutral info
+        'red': '#ef4444',      // Errors
+        'green': '#22c55e',    // Success
+        'yellow': '#eab308',   // Warnings
+        'blue': '#3b82f6'      // Info
+    };
+
+    // Create new log entry with styled border and color
+    const logEntry = document.createElement('p');
+    logEntry.className = 'border-l-2 pl-2';
+    logEntry.style.borderColor = colors[color] || colors['white'];
+    logEntry.style.color = colors[color] || colors['white'];
+    logEntry.textContent = text;
+
+    // Append to log
+    gameText.appendChild(logEntry);
+
+    // Auto-scroll to bottom to show latest message
+    const textContainer = gameText.parentElement;
+    if (textContainer) {
+        textContainer.scrollTop = textContainer.scrollHeight;
+    }
+
+    console.log(`📝 ${color.toUpperCase()}: ${text}`);
+}
+
+// Legacy showMessage function - now uses showActionText
 window.showMessage = function showMessage(text, type = 'info', duration = 5000) {
-    // Only log to console, don't show UI notifications
-    console.log(`📝 ${type.toUpperCase()}: ${text}`);
-    // All notifications are disabled during work-in-progress phase
-    return;
+    const colorMap = {
+        'error': 'red',
+        'success': 'green',
+        'warning': 'yellow',
+        'info': 'blue'
+    };
+    showActionText(text, colorMap[type] || 'white', duration);
 }
 
 /**
@@ -340,92 +383,75 @@ async function updateCharacterDisplay() {
         manaBarEl.style.width = manaPercentage + '%';
     }
 
-    // Update fatigue (scale 0-10)
-    const fatigueOverlayEl = document.getElementById('fatigue-overlay');
-    const fatigueStatusEl = document.getElementById('fatigue-status');
+    // Update quick status (main bar - numbers + emojis)
     const fatigue = Math.min(character.fatigue || 0, 10);
-
-    if (fatigueOverlayEl) {
-        const fatiguePercentage = (fatigue / 10) * 100;
-        // Overlay covers the right portion, so it starts where the bar ends
-        fatigueOverlayEl.style.left = fatiguePercentage + '%';
-    }
-    if (fatigueStatusEl) {
-        // Update status text based on fatigue level
-        if (fatigue <= 2) {
-            fatigueStatusEl.textContent = 'FRESH';
-        } else if (fatigue <= 5) {
-            fatigueStatusEl.textContent = 'TIRED';
-        } else if (fatigue <= 8) {
-            fatigueStatusEl.textContent = 'WEARY';
-        } else {
-            fatigueStatusEl.textContent = 'EXHAUSTED';
-        }
-    }
-
-    // Update hunger (scale 0-3, text-only display)
-    const hungerLevelEl = document.getElementById('hunger-level');
-    const hungerStatusEl = document.getElementById('hunger-status');
     const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
 
-    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
-    if (hungerStatusEl) {
-        // Update status text based on hunger level
-        if (hunger === 0) {
-            hungerStatusEl.textContent = 'FAMISHED';
-        } else if (hunger === 1) {
-            hungerStatusEl.textContent = 'HUNGRY';
-        } else if (hunger === 2) {
-            hungerStatusEl.textContent = 'SATISFIED';
+    // Fatigue number and emoji
+    const fatigueLevelEl = document.getElementById('fatigue-level');
+    const fatigueEmojiEl = document.getElementById('fatigue-emoji');
+
+    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
+    if (fatigueEmojiEl) {
+        if (fatigue <= 2) {
+            fatigueEmojiEl.textContent = '😊'; // Fresh
+        } else if (fatigue <= 5) {
+            fatigueEmojiEl.textContent = '😐'; // Tired
+        } else if (fatigue <= 8) {
+            fatigueEmojiEl.textContent = '😓'; // Weary
         } else {
-            hungerStatusEl.textContent = 'FULL';
+            fatigueEmojiEl.textContent = '😵'; // Exhausted
         }
     }
 
-    // Update weight and encumbrance status
+    // Hunger number and emoji
+    const hungerLevelEl = document.getElementById('hunger-level');
+    const hungerEmojiEl = document.getElementById('hunger-emoji');
+
+    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
+    if (hungerEmojiEl) {
+        if (hunger === 0) {
+            hungerEmojiEl.textContent = '😵'; // Famished
+        } else if (hunger === 1) {
+            hungerEmojiEl.textContent = '😋'; // Hungry
+        } else if (hunger === 2) {
+            hungerEmojiEl.textContent = '🙂'; // Satisfied
+        } else {
+            hungerEmojiEl.textContent = '😊'; // Full
+        }
+    }
+
+    // Weight numbers and emoji
     const weightEl = document.getElementById('char-weight');
     const maxWeightEl = document.getElementById('max-weight');
-    const weightStatusEl = document.getElementById('weight-status');
+    const weightEmojiEl = document.getElementById('weight-emoji');
 
-    if (weightEl) {
+    if (weightEl || maxWeightEl || weightEmojiEl) {
         Promise.all([
             calculateAndDisplayWeight(character),
             calculateMaxCapacity(character)
         ]).then(([weight, maxCapacity]) => {
-            weightEl.textContent = weight;
+            if (weightEl) weightEl.textContent = weight;
+            if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
 
-            if (maxWeightEl) {
-                maxWeightEl.textContent = maxCapacity;
-            }
-
-            // Calculate encumbrance status with emoji
             const weightPercentage = (weight / maxCapacity) * 100;
-            let status = '✓';
-            let statusColor = '#10b981'; // green
 
-            if (weightPercentage <= 50) {
-                status = '🪶'; // feather - light
-                statusColor = '#10b981'; // green
-            } else if (weightPercentage <= 100) {
-                status = '✓'; // checkmark - ok
-                statusColor = '#ffffff'; // white
-            } else if (weightPercentage <= 150) {
-                status = '📦'; // box - heavy
-                statusColor = '#eab308'; // yellow
-            } else if (weightPercentage <= 200) {
-                status = '🐌'; // snail - slow
-                statusColor = '#f97316'; // orange
-            } else {
-                status = '🛑'; // stop sign - max
-                statusColor = '#ef4444'; // red
-            }
-
-            if (weightStatusEl) {
-                weightStatusEl.textContent = status;
-                weightStatusEl.style.color = statusColor;
+            if (weightEmojiEl) {
+                if (weightPercentage <= 50) {
+                    weightEmojiEl.textContent = '🪶'; // Light
+                } else if (weightPercentage <= 100) {
+                    weightEmojiEl.textContent = '✓'; // OK
+                } else if (weightPercentage <= 150) {
+                    weightEmojiEl.textContent = '📦'; // Heavy
+                } else {
+                    weightEmojiEl.textContent = '🐌'; // Overloaded
+                }
             }
         });
     }
+
+    // Update detailed stats tab (if visible)
+    updateStatsTab(character);
 
     // Update stats
     if (character.stats) {
@@ -591,22 +617,31 @@ async function updateCharacterDisplay() {
         }
     }
 
-    // Update backpack items (4x5 grid = 20 slots) - ALWAYS create slots even if empty
+    // Update backpack items (4x5 grid = 20 slots) - ONLY show if bag is equipped
     const backpackDiv = document.getElementById('backpack-slots');
     console.log('🎨 Rendering backpack slots, element found:', !!backpackDiv);
     if (backpackDiv) {
         backpackDiv.innerHTML = '';
 
-        // Ensure inventory structure exists
-        if (!character.inventory) {
-            character.inventory = {};
+        // Check if a bag is actually equipped
+        const bagEquipped = character.inventory?.gear_slots?.bag?.item;
+
+        if (!bagEquipped) {
+            // No bag equipped - hide the backpack div
+            if (backpackDiv.parentElement) {
+                backpackDiv.parentElement.style.display = 'none';
+            }
+            console.log('🎒 No bag equipped - hiding backpack slots');
+            return; // Exit early, don't render any slots
         }
-        if (!character.inventory.gear_slots) {
-            character.inventory.gear_slots = {};
+
+        // Bag is equipped - show the backpack div
+        if (backpackDiv.parentElement) {
+            backpackDiv.parentElement.style.display = 'grid';
         }
-        if (!character.inventory.gear_slots.bag) {
-            character.inventory.gear_slots.bag = {};
-        }
+        console.log('🎒 Bag equipped - showing backpack slots');
+
+        // Get or initialize contents
         if (!character.inventory.gear_slots.bag.contents) {
             character.inventory.gear_slots.bag.contents = [];
         }
@@ -676,6 +711,171 @@ async function updateCharacterDisplay() {
     // This ensures events are always attached, regardless of where updateCharacterDisplay() is called from
     if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
         window.inventoryInteractions.bindInventoryEvents();
+    }
+}
+
+// Update detailed stats tab
+async function updateStatsTab(character) {
+    // Character info
+    const raceEl = document.getElementById('stats-char-race');
+    const classEl = document.getElementById('stats-char-class');
+    const backgroundEl = document.getElementById('stats-char-background');
+    const alignmentEl = document.getElementById('stats-char-alignment');
+
+    if (raceEl) raceEl.textContent = character.race || '-';
+    if (classEl) classEl.textContent = character.class || '-';
+    if (backgroundEl) backgroundEl.textContent = character.background || '-';
+    if (alignmentEl) alignmentEl.textContent = character.alignment || '-';
+
+    // Ability scores with modifiers
+    if (character.stats) {
+        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+        const statNames = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+
+        stats.forEach((stat, index) => {
+            const valueEl = document.getElementById(`stats-${stat}`);
+            const modEl = document.getElementById(`stats-${stat}-mod`);
+
+            const value = character.stats[statNames[index]] || 10;
+            const modifier = Math.floor((value - 10) / 2);
+
+            if (valueEl) valueEl.textContent = value;
+            if (modEl) modEl.textContent = modifier >= 0 ? `+${modifier}` : modifier;
+        });
+    }
+
+    // Fatigue details
+    const fatigue = Math.min(character.fatigue || 0, 10);
+    const fatigueLevelEl = document.getElementById('stats-fatigue-level');
+    const fatigueStatusEl = document.getElementById('stats-fatigue-status');
+    const fatigueEmojiEl = document.getElementById('stats-fatigue-emoji');
+    const fatigueDescEl = document.getElementById('stats-fatigue-desc');
+
+    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
+
+    let fatigueStatus, fatigueEmoji, fatigueDesc, fatigueColor;
+    if (fatigue <= 2) {
+        fatigueStatus = 'FRESH';
+        fatigueEmoji = '😊';
+        fatigueDesc = 'You feel energetic and ready for adventure';
+        fatigueColor = 'text-green-400';
+    } else if (fatigue <= 5) {
+        fatigueStatus = 'TIRED';
+        fatigueEmoji = '😐';
+        fatigueDesc = "You're starting to feel the strain of travel";
+        fatigueColor = 'text-yellow-400';
+    } else if (fatigue <= 8) {
+        fatigueStatus = 'WEARY';
+        fatigueEmoji = '😓';
+        fatigueDesc = 'Your steps are heavy and reactions slower';
+        fatigueColor = 'text-orange-400';
+    } else {
+        fatigueStatus = 'EXHAUSTED';
+        fatigueEmoji = '😵';
+        fatigueDesc = 'You can barely function - rest immediately!';
+        fatigueColor = 'text-red-400';
+    }
+
+    if (fatigueStatusEl) {
+        fatigueStatusEl.textContent = fatigueStatus;
+        fatigueStatusEl.className = `${fatigueColor} font-bold text-xs`;
+    }
+    if (fatigueEmojiEl) fatigueEmojiEl.textContent = fatigueEmoji;
+    if (fatigueDescEl) fatigueDescEl.textContent = fatigueDesc;
+
+    // Hunger details
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+    const hungerLevelEl = document.getElementById('stats-hunger-level');
+    const hungerStatusEl = document.getElementById('stats-hunger-status');
+    const hungerEmojiEl = document.getElementById('stats-hunger-emoji');
+    const hungerDescEl = document.getElementById('stats-hunger-desc');
+
+    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
+
+    let hungerStatus, hungerEmoji, hungerDesc, hungerColor;
+    if (hunger === 0) {
+        hungerStatus = 'FAMISHED';
+        hungerEmoji = '😵';
+        hungerDesc = 'You are starving and weak';
+        hungerColor = 'text-red-400';
+    } else if (hunger === 1) {
+        hungerStatus = 'HUNGRY';
+        hungerEmoji = '😋';
+        hungerDesc = 'You could use a meal';
+        hungerColor = 'text-yellow-400';
+    } else if (hunger === 2) {
+        hungerStatus = 'SATISFIED';
+        hungerEmoji = '🙂';
+        hungerDesc = 'Your belly is content';
+        hungerColor = 'text-green-400';
+    } else {
+        hungerStatus = 'FULL';
+        hungerEmoji = '😊';
+        hungerDesc = "You're well-fed and energized";
+        hungerColor = 'text-green-400';
+    }
+
+    if (hungerStatusEl) {
+        hungerStatusEl.textContent = hungerStatus;
+        hungerStatusEl.className = `${hungerColor} font-bold text-xs`;
+    }
+    if (hungerEmojiEl) hungerEmojiEl.textContent = hungerEmoji;
+    if (hungerDescEl) hungerDescEl.textContent = hungerDesc;
+
+    // Weight details
+    const weightEl = document.getElementById('stats-weight');
+    const maxWeightEl = document.getElementById('stats-max-weight');
+    const weightStatusEl = document.getElementById('stats-weight-status');
+    const weightEmojiEl = document.getElementById('stats-weight-emoji');
+    const weightDescEl = document.getElementById('stats-weight-desc');
+
+    try {
+        const [weight, maxCapacity] = await Promise.all([
+            calculateAndDisplayWeight(character),
+            calculateMaxCapacity(character)
+        ]);
+
+        if (weightEl) weightEl.textContent = weight;
+        if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
+
+        const weightPercentage = (weight / maxCapacity) * 100;
+        let weightStatus, weightEmoji, weightDesc, weightColor;
+
+        if (weightPercentage <= 50) {
+            weightStatus = 'LIGHT';
+            weightEmoji = '🪶';
+            weightDesc = 'You move at full speed';
+            weightColor = 'text-green-400';
+        } else if (weightPercentage <= 100) {
+            weightStatus = 'NORMAL';
+            weightEmoji = '✓';
+            weightDesc = 'Carrying a comfortable load';
+            weightColor = 'text-green-400';
+        } else if (weightPercentage <= 150) {
+            weightStatus = 'HEAVY';
+            weightEmoji = '📦';
+            weightDesc = 'Movement slightly hindered';
+            weightColor = 'text-yellow-400';
+        } else if (weightPercentage <= 200) {
+            weightStatus = 'OVERLOADED';
+            weightEmoji = '🐌';
+            weightDesc = 'Severely slowed, drop items!';
+            weightColor = 'text-orange-400';
+        } else {
+            weightStatus = 'IMMOBILE';
+            weightEmoji = '🛑';
+            weightDesc = 'Cannot move! Drop items immediately!';
+            weightColor = 'text-red-400';
+        }
+
+        if (weightStatusEl) {
+            weightStatusEl.textContent = weightStatus;
+            weightStatusEl.className = `${weightColor} font-bold text-xs`;
+        }
+        if (weightEmojiEl) weightEmojiEl.textContent = weightEmoji;
+        if (weightDescEl) weightDescEl.textContent = weightDesc;
+    } catch (error) {
+        console.error('Error calculating weight:', error);
     }
 }
 
@@ -801,6 +1001,9 @@ function updateSpellsDisplay() {
 // Current location music player
 let currentLocationMusic = null;
 
+// Track last displayed location to prevent duplicate descriptions
+let lastDisplayedLocation = null;
+
 /**
  * Play location-specific music
  */
@@ -883,9 +1086,13 @@ function displayCurrentLocation() {
     // Update time of day display
     updateTimeDisplay();
 
-    // Add location description to game log
-    if (locationData.description) {
-        addGameLog(locationData.description);
+    // Show location description in action text (white color) - only if location changed
+    // Include building ID in location key to detect entering/exiting buildings
+    const currentBuildingId = state.location?.building || '';
+    const locationKey = `${cityId}-${districtKey}-${currentBuildingId}`;
+    if (locationData.description && lastDisplayedLocation !== locationKey) {
+        showActionText(locationData.description, 'white');
+        lastDisplayedLocation = locationKey;
     }
 
     // Generate location actions based on city district structure
@@ -924,8 +1131,7 @@ function displayCurrentLocation() {
     let buildings = currentData.buildings || currentData.properties?.buildings;
     let npcs = currentData.npcs || currentData.properties?.npcs;
 
-    // Check if we're inside a building
-    const currentBuildingId = state.location?.building;
+    // Check if we're inside a building (currentBuildingId already declared above)
     if (currentBuildingId && buildings) {
         // Find the current building data
         const currentBuilding = buildings.find(b => b.id === currentBuildingId);
@@ -1002,7 +1208,7 @@ function displayCurrentLocation() {
 
         if (buildings && buildings.length > 0) {
             // Get current time of day from game state
-            const currentTime = state.character?.time_of_day !== undefined ? state.character.time_of_day : 6;
+            const currentTime = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
 
             buildings.forEach(building => {
                 // Check if this is the special "Exit Building" button
@@ -1127,6 +1333,10 @@ function isBuildingOpen(building, currentTime) {
         return true;
     }
 
+    // Convert old time values (0-11) to new 24-hour format if needed
+    // Old buildings may still use 0-11 values, so we need to handle both
+    // In 24-hour system: buildings should use actual hours (e.g., 6 = 6 AM, 14 = 2 PM)
+
     // Open rest of day (close is null)
     if (closeTime === null) {
         return currentTime >= openTime;
@@ -1134,22 +1344,17 @@ function isBuildingOpen(building, currentTime) {
 
     // Check if open hours wrap around midnight
     if (openTime < closeTime) {
-        // Normal hours (e.g., 3-8: dawn to afternoon)
+        // Normal hours (e.g., 6-18: 6 AM to 6 PM)
         return currentTime >= openTime && currentTime < closeTime;
     } else {
-        // Overnight hours (e.g., 7-4: midday through night to morning)
+        // Overnight hours (e.g., 20-6: 8 PM through night to 6 AM)
         return currentTime >= openTime || currentTime < closeTime;
     }
 }
 
 // Show message when clicking a closed building
 function showBuildingClosedMessage(building) {
-    const timeNames = [
-        'midnight', 'twilight', 'witching', 'dawn', 'morning', 'latemorning',
-        'highnoon', 'midday', 'afternoon', 'golden', 'dusk', 'evening'
-    ];
-
-    const openTimeName = building.open === 'always' ? 'always' : timeNames[building.open] || building.open;
+    const openTimeName = building.open === 'always' ? 'always' : formatTime(building.open);
 
     showMessage(`🔒 ${building.name} is closed. Opens at ${openTimeName}.`, 'error');
 }
@@ -1195,24 +1400,24 @@ function exitBuilding() {
     // Handle time advancement when exiting building
     const newCharacterState = { ...state.character };
 
-    // Advance time by 1 increment when exiting building
-    let newTimeOfDay = (newCharacterState.time_of_day !== undefined) ? newCharacterState.time_of_day : 6; // Default to highnoon if not set
+    // Advance time by 1 hour when exiting building
+    let newTimeOfDay = (newCharacterState.time_of_day !== undefined) ? newCharacterState.time_of_day : 12; // Default to noon if not set
     let newCurrentDay = newCharacterState.current_day || 1;
 
     newTimeOfDay += 1;
 
-    // Handle day rollover (11 evening -> 0 midnight = new day)
-    if (newTimeOfDay > 11) {
+    // Handle day rollover (23 (11 PM) -> 0 (midnight) = new day)
+    if (newTimeOfDay > 23) {
         newTimeOfDay = 0;
         newCurrentDay += 1;
         showMessage('🌅 A new day dawns (Day ' + newCurrentDay + ')', 'info');
     }
 
-    // Handle fatigue: increment every 2 time periods
+    // Handle fatigue: increment every 4 hours
     let movementCounter = newCharacterState.movement_counter || 0;
     movementCounter += 1;
 
-    if (movementCounter >= 2) {
+    if (movementCounter >= 4) {
         newCharacterState.fatigue = (newCharacterState.fatigue || 0) + 1;
         movementCounter = 0;
         showMessage('😓 You feel tired (Fatigue +1)', 'warning');
@@ -1458,31 +1663,40 @@ function openTavern() {
 // Update time of day display
 function updateTimeDisplay() {
     const state = getGameStateSync();
-    const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 6;
+    const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
     const currentDay = state.character?.current_day || 1;
 
-    // Map time index (0-11) to PNG filenames
+    // Map time (0-23) to 12 PNG filenames (each image covers 2 hours)
     const timeImages = [
-        '00-midnight.png',
-        '01-twilight.png',
-        '02-witching.png',
-        '03-dawn.png',
-        '04-morning.png',
-        '05-latemorning.png',
-        '06-highnoon.png',
-        '07-midday.png',
-        '08-afternoon.png',
-        '09-golden.png',
-        '10-dusk.png',
-        '11-evening.png'
+        '00-midnight.png',     // 0-1 (12 AM - 1 AM)
+        '01-twilight.png',     // 2-3
+        '02-witching.png',     // 4-5
+        '03-dawn.png',         // 6-7
+        '04-morning.png',      // 8-9
+        '05-latemorning.png',  // 10-11
+        '06-highnoon.png',     // 12-13 (12 PM - 1 PM)
+        '07-midday.png',       // 14-15
+        '08-afternoon.png',    // 16-17
+        '09-golden.png',       // 18-19
+        '10-dusk.png',         // 20-21
+        '11-evening.png'       // 22-23
     ];
+
+    // Calculate which image to use (divide by 2 since each image covers 2 hours)
+    const imageIndex = Math.floor(timeOfDay / 2);
 
     // Update time image
     const timeImage = document.getElementById('time-of-day-image');
     if (timeImage) {
-        const imageName = timeImages[timeOfDay] || timeImages[6]; // Default to highnoon if invalid
+        const imageName = timeImages[imageIndex] || timeImages[6]; // Default to noon if invalid
         timeImage.src = `/res/img/time/${imageName}`;
-        timeImage.alt = `Time: ${imageName.replace('.png', '').replace(/^\d+-/, '')}`;
+        timeImage.alt = `Time: ${formatTime(timeOfDay)}`;
+    }
+
+    // Update time text (AM/PM format)
+    const timeText = document.getElementById('time-of-day-text');
+    if (timeText) {
+        timeText.textContent = formatTime(timeOfDay);
     }
 
     // Update day counter
@@ -1490,6 +1704,14 @@ function updateTimeDisplay() {
     if (dayCounter) {
         dayCounter.textContent = `Day ${currentDay}`;
     }
+}
+
+// Helper function to format time in AM/PM format
+function formatTime(hour) {
+    if (hour === 0) return '12 AM';
+    if (hour < 12) return `${hour} AM`;
+    if (hour === 12) return '12 PM';
+    return `${hour - 12} PM`;
 }
 
 // Update all displays
@@ -1710,8 +1932,9 @@ async function pickupGroundItem(itemId) {
         });
 
         if (result.success) {
-            showMessage(`Picked up ${itemData?.name || itemId}`, 'success');
-            window.addGameLog(`Picked up ${itemData?.name || itemId} from the ground.`);
+            if (window.showActionText) {
+                window.showActionText(`Picked up ${itemData?.name || itemId}`, 'green');
+            }
 
             // Refresh game state from Go memory
             await refreshGameState();

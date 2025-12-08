@@ -157,7 +157,7 @@ function transformSaveDataToUIState(saveData) {
             spell_slots: saveData.spell_slots || {},
             music_tracks_unlocked: saveData.music_tracks_unlocked || [],
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12
         },
         location: {
             current: locationId,
@@ -484,7 +484,7 @@ async function initializeFromSave(saveData) {
             spells: saveData.known_spells || [],
             spell_slots: saveData.spell_slots || {},
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 6  // Default to highnoon (0-11 index)
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12  // Default to noon (0-23 hours)
         },
         location: {
             current: ids.locationId,
@@ -569,7 +569,7 @@ async function createNewCharacter(npub) {
         const characterObject = {
             ...fullCharacter,
             current_day: 1,
-            time_of_day: 6,  // Start at highnoon (0-11 index)
+            time_of_day: 12,  // Start at noon (0-23 hours)
             movement_counter: 0,  // For fatigue tracking
             vault: startingVault,
             spell_slots: generateSpellSlots(characterData.class)
@@ -1117,7 +1117,7 @@ async function beginAdventure() {
             locations_discovered: gameState.location?.discovered || [],
             music_tracks_unlocked: gameState.character.music_tracks_unlocked || [],
             current_day: gameState.character.current_day !== undefined ? gameState.character.current_day : 1,
-            time_of_day: gameState.character.time_of_day !== undefined ? gameState.character.time_of_day : 6,  // Default to highnoon
+            time_of_day: gameState.character.time_of_day !== undefined ? gameState.character.time_of_day : 12,  // Default to noon
             _debug: debugInfo  // Temporary debug field
         };
 

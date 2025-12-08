@@ -34,7 +34,7 @@ type SaveFile struct {
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
 	Building            string                 `json:"building"`     // Building ID or empty for outdoors
 	CurrentDay          int                    `json:"current_day"`
-	TimeOfDay           int                    `json:"time_of_day"` // 0-11 index (0=midnight, 6=highnoon, 11=evening)
+	TimeOfDay           int                    `json:"time_of_day"` // 0-23 hours (0=midnight, 12=noon, 23=11 PM)
 	Inventory           map[string]interface{} `json:"inventory"`
 	Vaults              []map[string]interface{} `json:"vaults"`
 	KnownSpells         []string               `json:"known_spells"`

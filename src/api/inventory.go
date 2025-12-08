@@ -53,10 +53,15 @@ func InventoryHandler(w http.ResponseWriter, r *http.Request) {
 		response = handleStackItem(save, &req)
 	case "split":
 		response = handleSplitItem(save, &req)
+	case "add_to_container":
+		response = handleAddToContainer(save, &req)
+	case "remove_from_container":
+		response = handleRemoveFromContainer(save, &req)
 	default:
 		response = &types.ItemActionResponse{
 			Success: false,
 			Error:   "Unknown action: " + req.Action,
+			Color:   "red",
 		}
 	}
 
@@ -292,13 +297,26 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	// Add unequipped items back to inventory (swapped items)
 	for _, unequipData := range itemsToUnequip {
 		// Put the item in the slot we're taking the new item from
-		sourceInventory[sourceArrayIndex] = map[string]interface{}{
+		swappedItem := map[string]interface{}{
 			"item":     unequipData["item"],
 			"quantity": unequipData["quantity"],
 			"slot":     req.FromSlot,
 		}
-		// Clear the equipment slot
+
+		// Special case: If unequipping a bag, preserve its contents
 		slotName := unequipData["from"].(string)
+		if slotName == "bag" {
+			if existingBag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				if contents, ok := existingBag["contents"].([]interface{}); ok {
+					swappedItem["contents"] = contents
+					log.Printf("📦 Preserving bag contents when swapping (%d items)", len(contents))
+				}
+			}
+		}
+
+		sourceInventory[sourceArrayIndex] = swappedItem
+
+		// Clear the equipment slot
 		gearSlots[slotName] = map[string]interface{}{
 			"item":     nil,
 			"quantity": 0,
@@ -306,10 +324,20 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	}
 
 	// Move item to equipment slot (only store item and quantity, remove slot field)
-	gearSlots[equipSlot] = map[string]interface{}{
+	equippedItem := map[string]interface{}{
 		"item":     itemData["item"],
 		"quantity": itemData["quantity"],
 	}
+
+	// Special case: If equipping a bag, preserve its contents
+	if equipSlot == "bag" {
+		if contents, ok := itemData["contents"].([]interface{}); ok {
+			equippedItem["contents"] = contents
+			log.Printf("📦 Preserving bag contents when equipping (%d items)", len(contents))
+		}
+	}
+
+	gearSlots[equipSlot] = equippedItem
 
 	// For two-handed weapons, also clear left_arm
 	if isTwoHanded {
@@ -338,9 +366,21 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 	log.Printf("✅ Equipped %s to %s (swapped %d items)", req.ItemID, equipSlot, len(itemsToUnequip))
 
+	// Get item name from database for better message
+	itemName := req.ItemID
+	database := db.GetDB()
+	if database != nil {
+		var name string
+		err := database.QueryRow("SELECT name FROM items WHERE id = ?", req.ItemID).Scan(&name)
+		if err == nil {
+			itemName = name
+		}
+	}
+
 	return &types.ItemActionResponse{
-		Success: true,
-		Message: fmt.Sprintf("Equipped %s", req.ItemID),
+		Success:  true,
+		Message:  fmt.Sprintf("Equipped %s", itemName),
+		Color:    "green",
 		NewState: save.Inventory,
 	}
 }
@@ -355,6 +395,7 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 		return &types.ItemActionResponse{
 			Success: false,
 			Error:   "Invalid equipment structure",
+			Color:   "red",
 		}
 	}
 
@@ -387,54 +428,24 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 
 	log.Printf("🛡️ Unequipping: %s (quantity: %d)", itemID, quantity)
 
-	// Find first empty slot in backpack
-	bag, ok := gearSlots["bag"].(map[string]interface{})
-	if !ok {
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   "No backpack found",
-		}
-	}
-
-	backpackContents, ok := bag["contents"].([]interface{})
-	if !ok {
-		backpackContents = make([]interface{}, 0, 20)
-		bag["contents"] = backpackContents
-	}
-
-	// Look for empty slot in backpack (slots 0-19)
-	emptySlotIndex := -1
-	emptySlotType := ""
-
-	for i := 0; i < 20; i++ {
-		// Extend array if needed
-		if i >= len(backpackContents) {
-			backpackContents = append(backpackContents, map[string]interface{}{
-				"item":     nil,
-				"quantity": 0,
-				"slot":     i,
-			})
-			bag["contents"] = backpackContents
-		}
-
-		// Check if slot is empty
-		if backpackContents[i] == nil {
-			emptySlotIndex = i
-			emptySlotType = "inventory"
-			break
-		}
-
-		if slotMap, ok := backpackContents[i].(map[string]interface{}); ok {
-			if slotMap["item"] == nil || slotMap["item"] == "" {
-				emptySlotIndex = i
-				emptySlotType = "inventory"
-				break
+	// Log initial state of general_slots
+	if generalSlots, ok := save.Inventory["general_slots"].([]interface{}); ok {
+		log.Printf("📊 INITIAL STATE - General slots count: %d", len(generalSlots))
+		for i, slot := range generalSlots {
+			if slotMap, ok := slot.(map[string]interface{}); ok {
+				log.Printf("   [%d] item=%v, slot=%v", i, slotMap["item"], slotMap["slot"])
 			}
 		}
 	}
 
-	// If no empty backpack slot, check general slots
-	if emptySlotIndex == -1 {
+	// Special case: If unequipping a bag, it can ONLY go to general slots (not backpack)
+	// Bags are containers and containers cannot go in other containers (including themselves)
+	emptySlotIndex := -1
+	emptySlotType := ""
+
+	if equipSlot == "bag" {
+		log.Printf("🎒 Special case: Unequipping bag - searching for empty general slot")
+		// Bag can only go to general slots
 		generalSlots, ok := save.Inventory["general_slots"].([]interface{})
 		if !ok {
 			generalSlots = make([]interface{}, 0, 4)
@@ -456,6 +467,7 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 			if generalSlots[i] == nil {
 				emptySlotIndex = i
 				emptySlotType = "general"
+				log.Printf("✅ Found empty general slot at index %d (nil)", i)
 				break
 			}
 
@@ -463,17 +475,110 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 				if slotMap["item"] == nil || slotMap["item"] == "" {
 					emptySlotIndex = i
 					emptySlotType = "general"
+					log.Printf("✅ Found empty general slot at index %d (empty item)", i)
 					break
 				}
 			}
 		}
-	}
 
-	// If no empty slot found, inventory is full
-	if emptySlotIndex == -1 {
-		return &types.ItemActionResponse{
-			Success: false,
-			Error:   "Your inventory is full",
+		// If no empty general slot, cannot unequip bag
+		if emptySlotIndex == -1 {
+			log.Printf("❌ No empty general slot found for bag")
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "There isn't enough room in your inventory to take off the bag",
+				Color:   "red",
+			}
+		}
+		log.Printf("🎒 Bag will be placed in general slot %d", emptySlotIndex)
+	} else {
+		// For non-bag items, try backpack first, then general slots
+		bag, ok := gearSlots["bag"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "No backpack found",
+				Color:   "red",
+			}
+		}
+
+		backpackContents, ok := bag["contents"].([]interface{})
+		if !ok {
+			backpackContents = make([]interface{}, 0, 20)
+			bag["contents"] = backpackContents
+		}
+
+		// Look for empty slot in backpack (slots 0-19)
+		for i := 0; i < 20; i++ {
+			// Extend array if needed
+			if i >= len(backpackContents) {
+				backpackContents = append(backpackContents, map[string]interface{}{
+					"item":     nil,
+					"quantity": 0,
+					"slot":     i,
+				})
+				bag["contents"] = backpackContents
+			}
+
+			// Check if slot is empty
+			if backpackContents[i] == nil {
+				emptySlotIndex = i
+				emptySlotType = "inventory"
+				break
+			}
+
+			if slotMap, ok := backpackContents[i].(map[string]interface{}); ok {
+				if slotMap["item"] == nil || slotMap["item"] == "" {
+					emptySlotIndex = i
+					emptySlotType = "inventory"
+					break
+				}
+			}
+		}
+
+		// If no empty backpack slot, check general slots
+		if emptySlotIndex == -1 {
+			generalSlots, ok := save.Inventory["general_slots"].([]interface{})
+			if !ok {
+				generalSlots = make([]interface{}, 0, 4)
+				save.Inventory["general_slots"] = generalSlots
+			}
+
+			for i := 0; i < 4; i++ {
+				// Extend array if needed
+				if i >= len(generalSlots) {
+					generalSlots = append(generalSlots, map[string]interface{}{
+						"item":     nil,
+						"quantity": 0,
+						"slot":     i,
+					})
+					save.Inventory["general_slots"] = generalSlots
+				}
+
+				// Check if slot is empty
+				if generalSlots[i] == nil {
+					emptySlotIndex = i
+					emptySlotType = "general"
+					break
+				}
+
+				if slotMap, ok := generalSlots[i].(map[string]interface{}); ok {
+					if slotMap["item"] == nil || slotMap["item"] == "" {
+						emptySlotIndex = i
+						emptySlotType = "general"
+						break
+					}
+				}
+			}
+		}
+
+		// If no empty slot found, inventory is full
+		if emptySlotIndex == -1 {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Your inventory is full",
+				Color:   "red",
+			}
 		}
 	}
 
@@ -484,26 +589,84 @@ func handleUnequipItem(save *SaveFile, req *types.ItemActionRequest) *types.Item
 		"slot":     emptySlotIndex,
 	}
 
+	// Special case: If unequipping a bag, preserve its contents
+	if equipSlot == "bag" {
+		if contents, ok := itemMap["contents"].([]interface{}); ok {
+			newItem["contents"] = contents
+			log.Printf("📦 Preserving bag contents (%d items)", len(contents))
+		}
+	}
+
 	if emptySlotType == "inventory" {
+		// Sanity check: bags should never go into backpack (they go into general slots only)
+		if equipSlot == "bag" {
+			log.Printf("❌ ERROR: Attempted to place bag in backpack slot - this should never happen!")
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "Internal error: bag cannot go in backpack",
+				Color:   "red",
+			}
+		}
+
+		bag, _ := gearSlots["bag"].(map[string]interface{})
+		backpackContents, _ := bag["contents"].([]interface{})
 		backpackContents[emptySlotIndex] = newItem
 		bag["contents"] = backpackContents
 		log.Printf("✅ Moved to backpack slot %d", emptySlotIndex)
 	} else {
+		log.Printf("📦 Placing item in general slots at index %d", emptySlotIndex)
 		generalSlots := save.Inventory["general_slots"].([]interface{})
+		log.Printf("📦 General slots before placement: length=%d, item at index %d: %v", len(generalSlots), emptySlotIndex, generalSlots[emptySlotIndex])
 		generalSlots[emptySlotIndex] = newItem
 		save.Inventory["general_slots"] = generalSlots
-		log.Printf("✅ Moved to general slot %d", emptySlotIndex)
+		log.Printf("✅ Moved to general slot %d, newItem: %+v", emptySlotIndex, newItem)
+		log.Printf("📦 General slots after placement: %+v", generalSlots[emptySlotIndex])
+
+		// Verify it was actually saved
+		verifySlot := save.Inventory["general_slots"].([]interface{})[emptySlotIndex]
+		log.Printf("🔍 VERIFICATION - Reading back from save.Inventory[general_slots][%d]: %+v", emptySlotIndex, verifySlot)
 	}
 
 	// Empty the equipment slot
+	log.Printf("🧹 Clearing equipment slot: %s", equipSlot)
 	gearSlots[equipSlot] = map[string]interface{}{
 		"item":     nil,
 		"quantity": 0,
 	}
+	log.Printf("✅ Equipment slot %s cleared", equipSlot)
+
+	// Final verification log
+	log.Printf("🔍 FINAL STATE CHECK:")
+	log.Printf("  - Equipment slot '%s': %+v", equipSlot, gearSlots[equipSlot])
+	if emptySlotType == "general" {
+		finalGeneralSlots := save.Inventory["general_slots"].([]interface{})
+		log.Printf("  - General slot %d: %+v", emptySlotIndex, finalGeneralSlots[emptySlotIndex])
+	}
+
+	// Get item name from database for better message
+	itemName := itemID
+	database := db.GetDB()
+	if database != nil {
+		var name string
+		err := database.QueryRow("SELECT name FROM items WHERE id = ?", itemID).Scan(&name)
+		if err == nil {
+			itemName = name
+		}
+	}
+
+	// Log what we're about to return
+	log.Printf("📤 RETURNING RESPONSE:")
+	log.Printf("  - Success: true")
+	log.Printf("  - Message: Unequipped %s", itemName)
+	if emptySlotType == "general" {
+		returnedGeneralSlots := save.Inventory["general_slots"].([]interface{})
+		log.Printf("  - NewState general_slots[%d]: %+v", emptySlotIndex, returnedGeneralSlots[emptySlotIndex])
+	}
 
 	return &types.ItemActionResponse{
-		Success: true,
-		Message: fmt.Sprintf("Unequipped %s", itemID),
+		Success:  true,
+		Message:  fmt.Sprintf("Unequipped %s", itemName),
+		Color:    "green",
 		NewState: save.Inventory,
 	}
 }
@@ -658,15 +821,27 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 		}
 	}
 
+	// Get item name from database for better message
+	itemName := req.ItemID
+	database2 := db.GetDB()
+	if database2 != nil {
+		var name string
+		err := database2.QueryRow("SELECT name FROM items WHERE id = ?", req.ItemID).Scan(&name)
+		if err == nil {
+			itemName = name
+		}
+	}
+
 	// Build message with effects applied
-	message := "Item used"
+	message := fmt.Sprintf("Used %s", itemName)
 	if len(effectsApplied) > 0 {
-		message = fmt.Sprintf("Item used (%s)", strings.Join(effectsApplied, ", "))
+		message = fmt.Sprintf("Used %s (%s)", itemName, strings.Join(effectsApplied, ", "))
 	}
 
 	return &types.ItemActionResponse{
-		Success: true,
-		Message: message,
+		Success:  true,
+		Message:  message,
+		Color:    "blue",
 		NewState: save.Inventory,
 	}
 }
@@ -962,6 +1137,64 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 		}
 	}
 
+	// CRITICAL VALIDATION: Check if moving a container to backpack - containers cannot go in backpack
+	if toSlotType == "inventory" {
+		log.Printf("🔍 VALIDATION CHECK: Is '%s' a container? (destination: backpack)", itemID)
+
+		database := db.GetDB()
+		if database == nil {
+			log.Printf("❌ CRITICAL: Database not available - cannot validate container restriction")
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "System error: Cannot validate item restrictions",
+				Color:   "red",
+			}
+		}
+
+		// Query tags directly from the tags column
+		var tagsJSON string
+		err := database.QueryRow("SELECT tags FROM items WHERE id = ?", itemID).Scan(&tagsJSON)
+		if err != nil {
+			log.Printf("❌ CRITICAL: Failed to query tags for %s: %v", itemID, err)
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("System error: Cannot find item data for %s", itemID),
+				Color:   "red",
+			}
+		}
+
+		log.Printf("📦 Raw tags JSON from database for '%s': %s", itemID, tagsJSON)
+
+		var tags []interface{}
+		if err := json.Unmarshal([]byte(tagsJSON), &tags); err != nil {
+			log.Printf("❌ CRITICAL: Failed to parse tags JSON for %s: %v", itemID, err)
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   "System error: Invalid item data format",
+				Color:   "red",
+			}
+		}
+
+		log.Printf("📦 Parsed tags array for '%s': %v", itemID, tags)
+
+		// Check each tag
+		for _, tag := range tags {
+			if tagStr, ok := tag.(string); ok {
+				log.Printf("   🏷️ Found tag: '%s'", tagStr)
+				if tagStr == "container" {
+					log.Printf("❌ BLOCKED: '%s' has 'container' tag - CANNOT go in backpack!", itemID)
+					return &types.ItemActionResponse{
+						Success: false,
+						Error:   "Containers cannot be stored in the backpack",
+						Color:   "red",
+					}
+				}
+			}
+		}
+
+		log.Printf("✅ VALIDATION PASSED: '%s' is NOT a container - allowing move to backpack", itemID)
+	}
+
 	// Get the destination inventory array
 	var toInventory []interface{}
 	if toSlotType == "general" {
@@ -1136,8 +1369,8 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 	}
 
 	return &types.ItemActionResponse{
-		Success: true,
-		Message: "Item moved",
+		Success:  true,
+		Message:  "", // Suppress message for move operations
 		NewState: save.Inventory,
 	}
 }
@@ -1687,6 +1920,477 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	return &types.ItemActionResponse{
 		Success:  true,
 		Message:  fmt.Sprintf("Split %d items from stack", splitQty),
+		NewState: save.Inventory,
+	}
+}
+
+// handleAddToContainer adds an item from inventory to a container
+func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
+	log.Printf("📦 Add to container: %s from %s[%d] to container at slot %d, container slot %d",
+		req.ItemID, req.FromSlotType, req.FromSlot, req.ContainerSlot, req.ToContainerSlot)
+
+	// Get the container from general_slots
+	generalSlots, ok := save.Inventory["general_slots"].([]interface{})
+	if !ok {
+		return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
+	}
+
+	// Find the container
+	var containerSlot map[string]interface{}
+	var containerIndex int
+	for i, slot := range generalSlots {
+		if slotMap, ok := slot.(map[string]interface{}); ok {
+			if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.ContainerSlot {
+				containerSlot = slotMap
+				containerIndex = i
+				break
+			}
+		}
+	}
+
+	if containerSlot == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Container not found", Color: "red"}
+	}
+
+	containerID := containerSlot["item"].(string)
+
+	// Get container properties from database
+	database := db.GetDB()
+	if database == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Database not available", Color: "red"}
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", containerID).Scan(&propertiesJSON)
+	if err != nil {
+		return &types.ItemActionResponse{Success: false, Error: "Container item not found in database", Color: "red"}
+	}
+
+	var properties map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
+		return &types.ItemActionResponse{Success: false, Error: "Failed to parse container properties", Color: "red"}
+	}
+
+	// Check if item is a container
+	tags, ok := properties["tags"].([]interface{})
+	isContainer := false
+	if ok {
+		for _, tag := range tags {
+			if tagStr, ok := tag.(string); ok && tagStr == "container" {
+				isContainer = true
+				break
+			}
+		}
+	}
+
+	if !isContainer {
+		return &types.ItemActionResponse{Success: false, Error: "Item is not a container", Color: "red"}
+	}
+
+	// Get container slots limit
+	containerSlots := 10 // default
+	if val, ok := properties["container_slots"].(float64); ok {
+		containerSlots = int(val)
+	}
+
+	// Get allowed types
+	allowedTypes := "any"
+	if val, ok := properties["allowed_types"].(string); ok {
+		allowedTypes = val
+	}
+
+	// Get container contents
+	contents, ok := containerSlot["contents"].([]interface{})
+	if !ok {
+		contents = make([]interface{}, 0)
+	}
+
+	// Ensure contents array has enough slots
+	for len(contents) < containerSlots {
+		contents = append(contents, nil)
+	}
+
+	// Check if container is full (count non-null items)
+	usedSlots := 0
+	for _, item := range contents {
+		if item != nil {
+			if itemMap, ok := item.(map[string]interface{}); ok {
+				if itemMap["item"] != nil {
+					usedSlots++
+				}
+			}
+		}
+	}
+
+	if usedSlots >= containerSlots {
+		return &types.ItemActionResponse{Success: false, Error: "Container is full", Color: "red"}
+	}
+
+	// Get item properties to check if it's a container
+	var itemPropertiesJSON string
+	err = database.QueryRow("SELECT properties FROM items WHERE id = ?", req.ItemID).Scan(&itemPropertiesJSON)
+	if err != nil {
+		return &types.ItemActionResponse{Success: false, Error: "Item not found in database", Color: "red"}
+	}
+
+	var itemProperties map[string]interface{}
+	if err := json.Unmarshal([]byte(itemPropertiesJSON), &itemProperties); err != nil {
+		return &types.ItemActionResponse{Success: false, Error: "Failed to parse item properties", Color: "red"}
+	}
+
+	// Check if item being added is itself a container - containers cannot go in containers
+	if itemTags, ok := itemProperties["tags"].([]interface{}); ok {
+		for _, tag := range itemTags {
+			if tagStr, ok := tag.(string); ok && tagStr == "container" {
+				return &types.ItemActionResponse{
+					Success: false,
+					Error:   "Containers cannot be stored inside other containers",
+					Color:   "red",
+				}
+			}
+		}
+	}
+
+	// Validate item type if not "any"
+	if allowedTypes != "any" {
+		// Normalize allowed type for comparison
+		normalizedAllowedType := strings.Replace(allowedTypes, "-", "_", -1)
+		normalizedAllowedType = strings.TrimSuffix(normalizedAllowedType, "s")
+
+		// Check item tags
+		itemAllowed := false
+		if itemTags, ok := itemProperties["tags"].([]interface{}); ok {
+			for _, tag := range itemTags {
+				if tagStr, ok := tag.(string); ok {
+					normalizedTag := strings.Replace(tagStr, "-", "_", -1)
+					normalizedTag = strings.TrimSuffix(normalizedTag, "s")
+					if normalizedTag == normalizedAllowedType {
+						itemAllowed = true
+						break
+					}
+				}
+			}
+		}
+
+		// Also check item_type field
+		if !itemAllowed {
+			if itemType, ok := itemProperties["item_type"].(string); ok {
+				normalizedItemType := strings.Replace(strings.ToLower(itemType), " ", "_", -1)
+				normalizedItemType = strings.Replace(normalizedItemType, "-", "_", -1)
+				normalizedItemType = strings.TrimSuffix(normalizedItemType, "s")
+				if normalizedItemType == normalizedAllowedType {
+					itemAllowed = true
+				}
+			}
+		}
+
+		if !itemAllowed {
+			return &types.ItemActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("This item cannot be stored in this container (requires %s)", allowedTypes),
+				Color:   "red",
+			}
+		}
+	}
+
+	// Find the item in source inventory
+	var sourceInventory []interface{}
+	var sourceItem map[string]interface{}
+	var sourceIndex int
+
+	if req.FromSlotType == "general" {
+		sourceInventory = generalSlots
+	} else if req.FromSlotType == "inventory" {
+		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Gear slots not found", Color: "red"}
+		}
+		bag, ok := gearSlots["bag"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Backpack not found", Color: "red"}
+		}
+		backpackContents, ok := bag["contents"].([]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Backpack contents not found", Color: "red"}
+		}
+		sourceInventory = backpackContents
+	} else {
+		return &types.ItemActionResponse{Success: false, Error: "Invalid source slot type", Color: "red"}
+	}
+
+	// Find source item by matching slot index
+	for i, slot := range sourceInventory {
+		if slotMap, ok := slot.(map[string]interface{}); ok {
+			if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.FromSlot {
+				if slotMap["item"] == req.ItemID {
+					sourceItem = slotMap
+					sourceIndex = i
+					break
+				}
+			}
+		}
+	}
+
+	if sourceItem == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Item not found in source inventory", Color: "red"}
+	}
+
+	// Get item quantity
+	quantity := 1
+	if qty, ok := sourceItem["quantity"].(float64); ok {
+		quantity = int(qty)
+	} else if qty, ok := sourceItem["quantity"].(int); ok {
+		quantity = qty
+	}
+
+	// Get item name for message
+	var itemName string
+	err = database.QueryRow("SELECT name FROM items WHERE id = ?", req.ItemID).Scan(&itemName)
+	if err != nil {
+		itemName = req.ItemID
+	}
+
+	// Create item entry for container
+	containerItem := map[string]interface{}{
+		"item":     req.ItemID,
+		"quantity": quantity,
+	}
+
+	// Find first empty slot in container
+	placedAt := -1
+	for i := 0; i < containerSlots; i++ {
+		if contents[i] == nil || (contents[i] != nil && contents[i].(map[string]interface{})["item"] == nil) {
+			contents[i] = containerItem
+			placedAt = i
+			break
+		}
+	}
+
+	if placedAt == -1 {
+		return &types.ItemActionResponse{Success: false, Error: "Container is full", Color: "red"}
+	}
+
+	// Remove item from source (set to empty slot)
+	sourceInventory[sourceIndex] = map[string]interface{}{
+		"item":     nil,
+		"quantity": 0,
+		"slot":     req.FromSlot,
+	}
+
+	// Update container contents
+	generalSlots[containerIndex].(map[string]interface{})["contents"] = contents
+
+	// Save changes
+	save.Inventory["general_slots"] = generalSlots
+	if req.FromSlotType == "inventory" {
+		gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
+		bag := gearSlots["bag"].(map[string]interface{})
+		bag["contents"] = sourceInventory
+	}
+
+	return &types.ItemActionResponse{
+		Success:  true,
+		Message:  fmt.Sprintf("Added %dx %s to container", quantity, itemName),
+		Color:    "green",
+		NewState: save.Inventory,
+	}
+}
+
+// handleRemoveFromContainer removes an item from a container back to inventory
+func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
+	log.Printf("📤 Remove from container: slot %d from container at slot %d",
+		req.FromSlot, req.ContainerSlot)
+
+	var containerSlot map[string]interface{}
+	var containerIndex int
+	containerLocation := "" // "general" or "equipped"
+
+	// First, check if the container is equipped in gear_slots.bag
+	gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
+	if ok {
+		if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+			if bag["item"] != nil && bag["item"] != "" {
+				// Bag is equipped - use it
+				containerSlot = bag
+				containerLocation = "equipped"
+				log.Printf("📦 Found container in equipped bag slot")
+			}
+		}
+	}
+
+	// If not equipped, search general_slots
+	if containerSlot == nil {
+		generalSlots, ok := save.Inventory["general_slots"].([]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
+		}
+
+		log.Printf("📦 Searching %d general slots for container at slot %d", len(generalSlots), req.ContainerSlot)
+
+		// Find the container in general slots
+		for i, slot := range generalSlots {
+			if slotMap, ok := slot.(map[string]interface{}); ok {
+				// Check slot number (can be int or float64)
+				var slotNum int
+				if sn, ok := slotMap["slot"].(float64); ok {
+					slotNum = int(sn)
+				} else if sn, ok := slotMap["slot"].(int); ok {
+					slotNum = sn
+				} else {
+					// No slot field, use array index
+					slotNum = i
+				}
+
+				log.Printf("🔍 Slot %d (index %d): item=%v, hasContents=%v", slotNum, i, slotMap["item"], slotMap["contents"] != nil)
+
+				if slotNum == req.ContainerSlot {
+					// Verify it has contents (is a container)
+					if slotMap["item"] != nil && slotMap["item"] != "" {
+						containerSlot = slotMap
+						containerIndex = i
+						containerLocation = "general"
+						log.Printf("📦 Found container '%v' in general slot %d (array index %d)", slotMap["item"], req.ContainerSlot, i)
+						break
+					} else {
+						log.Printf("⚠️ Slot %d is empty, not a container", slotNum)
+					}
+				}
+			}
+		}
+	}
+
+	if containerSlot == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Container not found", Color: "red"}
+	}
+
+	// Get container contents
+	contents, ok := containerSlot["contents"].([]interface{})
+	if !ok {
+		return &types.ItemActionResponse{Success: false, Error: "Container has no contents", Color: "red"}
+	}
+
+	// Get the item from container (use FromSlot, not ToContainerSlot)
+	if req.FromSlot >= len(contents) {
+		return &types.ItemActionResponse{Success: false, Error: "Invalid container slot", Color: "red"}
+	}
+
+	containerItem, ok := contents[req.FromSlot].(map[string]interface{})
+	if !ok || containerItem["item"] == nil {
+		return &types.ItemActionResponse{Success: false, Error: "Container slot is empty", Color: "red"}
+	}
+
+	itemID := containerItem["item"].(string)
+	quantity := 1
+	if qty, ok := containerItem["quantity"].(float64); ok {
+		quantity = int(qty)
+	} else if qty, ok := containerItem["quantity"].(int); ok {
+		quantity = qty
+	}
+
+	// Try to find empty slot in general_slots first
+	emptySlotFound := false
+
+	for i, slot := range generalSlots {
+		if slotMap, ok := slot.(map[string]interface{}); ok {
+			if slotMap["item"] == nil {
+				// Found empty general slot
+				generalSlots[i] = map[string]interface{}{
+					"item":     itemID,
+					"quantity": quantity,
+					"slot":     slotMap["slot"],
+				}
+				emptySlotFound = true
+				break
+			}
+		}
+	}
+
+	// If no space in general slots, try backpack
+	if !emptySlotFound {
+		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Gear slots not found", Color: "red"}
+		}
+		bag, ok := gearSlots["bag"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Backpack not found", Color: "red"}
+		}
+		backpackContents, ok := bag["contents"].([]interface{})
+		if !ok {
+			backpackContents = make([]interface{}, 0)
+		}
+
+		// Extend backpack if needed
+		for len(backpackContents) < 20 {
+			backpackContents = append(backpackContents, map[string]interface{}{
+				"item":     nil,
+				"quantity": 0,
+				"slot":     len(backpackContents),
+			})
+		}
+
+		// Find empty backpack slot
+		for i := 0; i < 20; i++ {
+			if backpackContents[i] == nil || backpackContents[i].(map[string]interface{})["item"] == nil {
+				backpackContents[i] = map[string]interface{}{
+					"item":     itemID,
+					"quantity": quantity,
+					"slot":     i,
+				}
+				emptySlotFound = true
+				break
+			}
+		}
+
+		if emptySlotFound {
+			bag["contents"] = backpackContents
+		}
+	}
+
+	if !emptySlotFound {
+		return &types.ItemActionResponse{
+			Success: false,
+			Error:   "Inventory is full - cannot remove from container",
+			Color:   "red",
+		}
+	}
+
+	// Remove item from container (set to empty slot with proper structure)
+	contents[req.FromSlot] = map[string]interface{}{
+		"item":     nil,
+		"quantity": 0,
+		"slot":     req.FromSlot,
+	}
+
+	// Update container in the correct location
+	if containerLocation == "equipped" {
+		// Update equipped bag
+		containerSlot["contents"] = contents
+		log.Printf("📦 Updated contents of equipped bag")
+	} else {
+		// Update general slot container
+		generalSlots, _ := save.Inventory["general_slots"].([]interface{})
+		generalSlots[containerIndex].(map[string]interface{})["contents"] = contents
+		save.Inventory["general_slots"] = generalSlots
+		log.Printf("📦 Updated contents of container in general slot %d", containerIndex)
+	}
+
+	// Get item name for message
+	database := db.GetDB()
+	var itemName string
+	if database != nil {
+		err := database.QueryRow("SELECT name FROM items WHERE id = ?", itemID).Scan(&itemName)
+		if err != nil {
+			itemName = itemID
+		}
+	} else {
+		itemName = itemID
+	}
+
+	return &types.ItemActionResponse{
+		Success:  true,
+		Message:  fmt.Sprintf("Removed %dx %s from container", quantity, itemName),
+		Color:    "green",
 		NewState: save.Inventory,
 	}
 }

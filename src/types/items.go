@@ -48,23 +48,26 @@ type ItemAction struct {
 
 // ItemActionRequest represents a request to perform an action on an item
 type ItemActionRequest struct {
-	Npub         string `json:"npub"`
-	SaveID       string `json:"save_id"`
-	ItemID       string `json:"item_id"`
-	Action       string `json:"action"`          // "equip", "unequip", "use", "drop", "examine", "move"
-	FromSlot     int    `json:"from_slot"`       // Source slot (-1 for equipment)
-	ToSlot       int    `json:"to_slot"`         // Destination slot (-1 for equipment)
-	FromSlotType string `json:"from_slot_type"`  // "general" or "inventory" (backpack)
-	ToSlotType   string `json:"to_slot_type"`    // "general" or "inventory" (backpack)
-	FromEquip    string `json:"from_equip"`      // Source equipment slot name (e.g., "mainHand")
-	ToEquip      string `json:"to_equip"`        // Destination equipment slot name
-	Quantity     int    `json:"quantity"`        // For stackable items
+	Npub            string `json:"npub"`
+	SaveID          string `json:"save_id"`
+	ItemID          string `json:"item_id"`
+	Action          string `json:"action"`             // "equip", "unequip", "use", "drop", "examine", "move", "add_to_container", "remove_from_container"
+	FromSlot        int    `json:"from_slot"`          // Source slot (-1 for equipment)
+	ToSlot          int    `json:"to_slot"`            // Destination slot (-1 for equipment)
+	FromSlotType    string `json:"from_slot_type"`     // "general" or "inventory" (backpack)
+	ToSlotType      string `json:"to_slot_type"`       // "general" or "inventory" (backpack)
+	FromEquip       string `json:"from_equip"`         // Source equipment slot name (e.g., "mainHand")
+	ToEquip         string `json:"to_equip"`           // Destination equipment slot name
+	Quantity        int    `json:"quantity"`           // For stackable items
+	ContainerSlot   int    `json:"container_slot"`     // Which inventory slot has the container
+	ToContainerSlot int    `json:"to_container_slot"`  // Which slot within the container
 }
 
 // ItemActionResponse represents the result of an item action
 type ItemActionResponse struct {
 	Success  bool        `json:"success"`
 	Message  string      `json:"message"`
+	Color    string      `json:"color,omitempty"`    // Color for message: 'red', 'green', 'yellow', 'white', 'purple', 'blue'
 	NewState interface{} `json:"newState,omitempty"` // Updated inventory/equipment state
 	Error    string      `json:"error,omitempty"`
 }

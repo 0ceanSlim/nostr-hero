@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"nostr-hero/src/db"
+	"nostr-hero/src/types"
 )
 
 // GameAction represents any action a player can take
@@ -17,6 +20,7 @@ type GameAction struct {
 type GameActionResponse struct {
 	Success bool                   `json:"success"`
 	Message string                 `json:"message"`
+	Color   string                 `json:"color,omitempty"`   // Message color (red, green, yellow, white, purple, blue)
 	State   *SaveFile              `json:"state,omitempty"`   // Updated game state
 	Delta   map[string]interface{} `json:"delta,omitempty"`   // Only changed fields (for optimization)
 	Error   string                 `json:"error,omitempty"`
@@ -120,6 +124,10 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleSplitItemAction(state, action.Params)
 	case "add_item":
 		return handleAddItemAction(state, action.Params)
+	case "add_to_container":
+		return handleAddToContainerAction(state, action.Params)
+	case "remove_from_container":
+		return handleRemoveFromContainerAction(state, action.Params)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -264,42 +272,103 @@ func handleUseItemAction(state *SaveFile, params map[string]interface{}) (*GameA
 	}, nil
 }
 
-// applyItemEffects applies item effects to the character state
+// applyItemEffects applies item effects to the character state dynamically from item data
 func applyItemEffects(state *SaveFile, itemID string) []string {
-	var effects []string
+	var effectMessages []string
 
-	// Hardcoded item effects for common consumables
-	// TODO: Load from database/JSON
-	switch itemID {
-	case "health-potion", "potion-of-healing":
-		healAmount := 10
-		state.HP = min(state.MaxHP, state.HP+healAmount)
-		effects = append(effects, fmt.Sprintf("Healed %d HP", healAmount))
-
-	case "greater-health-potion":
-		healAmount := 20
-		state.HP = min(state.MaxHP, state.HP+healAmount)
-		effects = append(effects, fmt.Sprintf("Healed %d HP", healAmount))
-
-	case "mana-potion":
-		manaAmount := 10
-		state.Mana = min(state.MaxMana, state.Mana+manaAmount)
-		effects = append(effects, fmt.Sprintf("Restored %d mana", manaAmount))
-
-	case "rations":
-		state.Hunger = min(3, state.Hunger+1)
-		effects = append(effects, "Hunger restored")
-
-	case "waterskin":
-		// Minor fatigue reduction
-		state.Fatigue = max(0, state.Fatigue-1)
-		effects = append(effects, "Feeling refreshed")
-
-	default:
-		effects = append(effects, "Used")
+	// Get database connection
+	database := db.GetDB()
+	if database == nil {
+		log.Printf("⚠️ Database not available, cannot apply effects for %s", itemID)
+		return []string{"Used"}
 	}
 
-	return effects
+	// Query item from database to get properties
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", itemID).Scan(&propertiesJSON)
+	if err != nil {
+		log.Printf("⚠️ Could not find item %s in database: %v", itemID, err)
+		return []string{"Used"}
+	}
+
+	// Parse properties JSON
+	var properties map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
+		log.Printf("⚠️ Could not parse properties for item %s: %v", itemID, err)
+		return []string{"Used"}
+	}
+
+	// Check if item has effects array
+	effectsRaw, hasEffects := properties["effects"]
+	if !hasEffects {
+		log.Printf("⚠️ Item %s has no effects defined", itemID)
+		return []string{"Used"}
+	}
+
+	// Parse effects array
+	effectsArray, ok := effectsRaw.([]interface{})
+	if !ok {
+		log.Printf("⚠️ Item %s has invalid effects format", itemID)
+		return []string{"Used"}
+	}
+
+	// Apply each effect
+	for _, effectRaw := range effectsArray {
+		effectMap, ok := effectRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		effectType, _ := effectMap["type"].(string)
+		effectValue, _ := effectMap["value"].(float64) // JSON numbers are float64
+
+		switch effectType {
+		case "hp", "health":
+			oldHP := state.HP
+			state.HP = min(state.MaxHP, state.HP+int(effectValue))
+			actualHealed := state.HP - oldHP
+			if actualHealed > 0 {
+				effectMessages = append(effectMessages, fmt.Sprintf("Healed %d HP", actualHealed))
+			}
+
+		case "mana":
+			oldMana := state.Mana
+			state.Mana = min(state.MaxMana, state.Mana+int(effectValue))
+			actualRestored := state.Mana - oldMana
+			if actualRestored > 0 {
+				effectMessages = append(effectMessages, fmt.Sprintf("Restored %d mana", actualRestored))
+			}
+
+		case "hunger":
+			oldHunger := state.Hunger
+			state.Hunger = min(3, max(0, state.Hunger+int(effectValue)))
+			if state.Hunger > oldHunger {
+				effectMessages = append(effectMessages, "Hunger restored")
+			} else if state.Hunger < oldHunger {
+				effectMessages = append(effectMessages, "Hunger decreased")
+			}
+
+		case "fatigue":
+			oldFatigue := state.Fatigue
+			state.Fatigue = max(0, state.Fatigue+int(effectValue))
+			if state.Fatigue < oldFatigue {
+				fatigueReduced := oldFatigue - state.Fatigue
+				effectMessages = append(effectMessages, fmt.Sprintf("Fatigue reduced by %d", fatigueReduced))
+			} else if state.Fatigue > oldFatigue {
+				fatigueIncreased := state.Fatigue - oldFatigue
+				effectMessages = append(effectMessages, fmt.Sprintf("Fatigue increased by %d", fatigueIncreased))
+			}
+
+		default:
+			log.Printf("⚠️ Unknown effect type: %s", effectType)
+		}
+	}
+
+	if len(effectMessages) == 0 {
+		return []string{"Used"}
+	}
+
+	return effectMessages
 }
 
 // Equipment handlers are now in equipment.go
@@ -431,7 +500,7 @@ func handleRestAction(state *SaveFile, params map[string]interface{}) (*GameActi
 	state.Fatigue = 0
 
 	// Advance time
-	state.TimeOfDay = (state.TimeOfDay + 8) % 12 // Rest for 8 time segments
+	state.TimeOfDay = (state.TimeOfDay + 8) % 24 // Rest for 8 hours
 	if state.TimeOfDay < 8 {
 		state.CurrentDay++
 	}
@@ -450,22 +519,22 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*G
 	}
 
 	newTime := state.TimeOfDay + int(segments)
-	daysAdvanced := newTime / 12
+	daysAdvanced := newTime / 24
 	state.CurrentDay += daysAdvanced
-	state.TimeOfDay = newTime % 12
+	state.TimeOfDay = newTime % 24
 
-	// Update fatigue counter
+	// Update fatigue counter (increments every 4 hours)
 	state.FatigueCounter += int(segments)
-	if state.FatigueCounter >= 2 {
+	if state.FatigueCounter >= 4 {
 		state.Fatigue++
 		state.FatigueCounter = 0
 	}
 
-	// Update hunger counter
+	// Update hunger counter (decreases every 6 hours, or 12 if already hungry)
 	state.HungerCounter += int(segments)
-	hungerThreshold := 3
+	hungerThreshold := 6
 	if state.Hunger <= 1 {
-		hungerThreshold = 6 // Slower when already hungry
+		hungerThreshold = 12 // Slower when already hungry
 	}
 	if state.HungerCounter >= hungerThreshold {
 		if state.Hunger > 0 {
@@ -571,6 +640,105 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 		toSlots = contents
 	}
 
+	// CRITICAL VALIDATION: Containers cannot go into backpack
+	if toSlotType == "inventory" {
+		log.Printf("🔍 VALIDATION CHECK: Is '%s' a container? (destination: backpack)", itemID)
+
+		database := db.GetDB()
+		if database == nil {
+			log.Printf("❌ CRITICAL: Database not available")
+			return &GameActionResponse{
+				Success: false,
+				Error:   "System error: Cannot validate item restrictions",
+				Color:   "red",
+			}, nil
+		}
+
+		// Query tags from database
+		var tagsJSON string
+		err := database.QueryRow("SELECT tags FROM items WHERE id = ?", itemID).Scan(&tagsJSON)
+		if err != nil {
+			log.Printf("❌ CRITICAL: Failed to query tags for %s: %v", itemID, err)
+			return &GameActionResponse{
+				Success: false,
+				Error:   fmt.Sprintf("System error: Cannot find item %s", itemID),
+				Color:   "red",
+			}, nil
+		}
+
+		log.Printf("📦 Raw tags JSON from database for '%s': %s", itemID, tagsJSON)
+
+		var tags []interface{}
+		if err := json.Unmarshal([]byte(tagsJSON), &tags); err != nil {
+			log.Printf("❌ CRITICAL: Failed to parse tags JSON for %s: %v", itemID, err)
+			return &GameActionResponse{
+				Success: false,
+				Error:   "System error: Invalid item data format",
+				Color:   "red",
+			}, nil
+		}
+
+		log.Printf("📦 Parsed tags array for '%s': %v", itemID, tags)
+
+		// Check each tag
+		for _, tag := range tags {
+			if tagStr, ok := tag.(string); ok {
+				log.Printf("   🏷️ Found tag: '%s'", tagStr)
+				if tagStr == "container" {
+					log.Printf("❌ BLOCKED: '%s' has 'container' tag - CANNOT go in backpack!", itemID)
+					return &GameActionResponse{
+						Success: false,
+						Error:   "Containers cannot be stored in the backpack",
+						Color:   "red",
+					}, nil
+				}
+			}
+		}
+
+		log.Printf("✅ VALIDATION PASSED: '%s' is NOT a container - allowing move to backpack", itemID)
+	}
+
+	// ADDITIONAL VALIDATION: Check displaced item in swap scenarios
+	// If dragging FROM backpack and swapping with a container, the container would go INTO backpack (not allowed!)
+	log.Printf("🔍 Checking swap validation: fromSlotType=%s, toSlotType=%s", fromSlotType, toSlotType)
+	if fromSlotType == "inventory" && toSlotType != "inventory" {
+		log.Printf("🔍 Condition met: dragging FROM backpack TO %s", toSlotType)
+		// Check if we're swapping (destination slot is not empty)
+		if toSlots != nil && toSlot < len(toSlots) {
+			log.Printf("🔍 Checking destination slot %d (toSlots length: %d)", toSlot, len(toSlots))
+			if destSlot, ok := toSlots[toSlot].(map[string]interface{}); ok {
+				log.Printf("🔍 Destination slot data: %+v", destSlot)
+				if destItem, ok := destSlot["item"].(string); ok && destItem != "" {
+					// There's an item in the destination - this is a swap
+					// Check if the displaced item is a container
+					log.Printf("🔍 SWAP VALIDATION: Checking if displaced item '%s' is a container (would go to backpack)", destItem)
+
+					database := db.GetDB()
+					if database != nil {
+						var tagsJSON string
+						err := database.QueryRow("SELECT tags FROM items WHERE id = ?", destItem).Scan(&tagsJSON)
+						if err == nil {
+							var tags []interface{}
+							if err := json.Unmarshal([]byte(tagsJSON), &tags); err == nil {
+								for _, tag := range tags {
+									if tagStr, ok := tag.(string); ok && tagStr == "container" {
+										log.Printf("❌ BLOCKED: Displaced item '%s' is a container and cannot go in backpack via swap!", destItem)
+										return &GameActionResponse{
+											Success: false,
+											Error:   "Containers cannot be stored in the backpack",
+											Color:   "red",
+										}, nil
+									}
+								}
+							}
+						}
+					}
+					log.Printf("✅ Swap validated: Displaced item '%s' is not a container", destItem)
+				}
+			}
+		}
+	}
+
 	// Swap items
 	if fromSlots != nil && toSlots != nil && fromSlot >= 0 && toSlot >= 0 {
 		if fromSlotType == toSlotType {
@@ -604,7 +772,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 
 	return &GameActionResponse{
 		Success: true,
-		Message: "Item moved",
+		Message: "", // Suppressed - no need to show success message for moves
 	}, nil
 }
 
@@ -877,4 +1045,83 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"state":   session.SaveData,
 	})
+}
+
+// handleAddToContainerAction adds an item to a container
+func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	// Convert params to ItemActionRequest
+	itemID, _ := params["item_id"].(string)
+	fromSlot := -1
+	if fs, ok := params["from_slot"].(float64); ok {
+		fromSlot = int(fs)
+	}
+	fromSlotType, _ := params["from_slot_type"].(string)
+	containerSlot := -1
+	if cs, ok := params["container_slot"].(float64); ok {
+		containerSlot = int(cs)
+	}
+	toContainerSlot := -1
+	if tcs, ok := params["to_container_slot"].(float64); ok {
+		toContainerSlot = int(tcs)
+	}
+
+	req := &types.ItemActionRequest{
+		ItemID:          itemID,
+		Action:          "add_to_container",
+		FromSlot:        fromSlot,
+		FromSlotType:    fromSlotType,
+		ContainerSlot:   containerSlot,
+		ToContainerSlot: toContainerSlot,
+	}
+
+	// Call the inventory handler
+	response := handleAddToContainer(state, req)
+
+	// Convert ItemActionResponse to GameActionResponse
+	if response.Success {
+		return &GameActionResponse{
+			Success: true,
+			Message: response.Message,
+			Color:   response.Color,
+			State:   state, // Return the updated state
+		}, nil
+	}
+
+	return nil, fmt.Errorf(response.Error)
+}
+
+// handleRemoveFromContainerAction removes an item from a container
+func handleRemoveFromContainerAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	// Convert params to ItemActionRequest
+	itemID, _ := params["item_id"].(string)
+	containerSlot := -1
+	if cs, ok := params["container_slot"].(float64); ok {
+		containerSlot = int(cs)
+	}
+	fromContainerSlot := -1
+	if fcs, ok := params["from_container_slot"].(float64); ok {
+		fromContainerSlot = int(fcs)
+	}
+
+	req := &types.ItemActionRequest{
+		ItemID:        itemID,
+		Action:        "remove_from_container",
+		ContainerSlot: containerSlot,
+		FromSlot:      fromContainerSlot, // Use FromSlot for the container slot index
+	}
+
+	// Call the inventory handler
+	response := handleRemoveFromContainer(state, req)
+
+	// Convert ItemActionResponse to GameActionResponse
+	if response.Success {
+		return &GameActionResponse{
+			Success: true,
+			Message: response.Message,
+			Color:   response.Color,
+			State:   state, // Return the updated state
+		}, nil
+	}
+
+	return nil, fmt.Errorf(response.Error)
 }

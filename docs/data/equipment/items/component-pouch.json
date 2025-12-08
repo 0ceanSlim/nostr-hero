@@ -11,12 +11,12 @@
   "damage": null,
   "heal": null,
   "ammunition": "",
-  "contains": "spell_components",
+  "container_slots": 4,
+  "allowed_types": "spell-components",
   "img": "equipment/adventuring-gear.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
-  "slots": "4",
   "tags": [
     "container"
   ],

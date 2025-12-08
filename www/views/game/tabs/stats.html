@@ -1,71 +1,116 @@
 {{define "game/tabs/stats.html"}}
 <!-- Stats Tab -->
-<div id="stats-panel" class="tab-panel hidden space-y-3">
-    <h3 class="text-sm font-bold text-yellow-400 mb-2">CHARACTER INFO</h3>
-    <div class="text-sm space-y-1">
+<div id="stats-panel" class="tab-panel hidden space-y-2" style="font-size: 9px;">
+    <!-- Character Info Section -->
+    <h3 class="font-bold text-yellow-400 mb-1" style="font-size: 10px;">CHARACTER INFO</h3>
+    <div class="space-y-0.5" style="font-size: 8px;">
         <div class="flex justify-between">
             <span class="text-gray-400">Race:</span>
-            <span id="char-race" class="font-bold">-</span>
+            <span id="stats-char-race" class="font-bold">-</span>
         </div>
         <div class="flex justify-between">
             <span class="text-gray-400">Class:</span>
-            <span id="char-class" class="font-bold">-</span>
+            <span id="stats-char-class" class="font-bold">-</span>
         </div>
         <div class="flex justify-between">
             <span class="text-gray-400">Background:</span>
-            <span id="char-background" class="font-bold">-</span>
+            <span id="stats-char-background" class="font-bold">-</span>
         </div>
         <div class="flex justify-between">
             <span class="text-gray-400">Alignment:</span>
-            <span id="char-alignment" class="font-bold">-</span>
+            <span id="stats-char-alignment" class="font-bold">-</span>
         </div>
     </div>
 
-    <h3 class="text-sm font-bold text-yellow-400 mb-2 mt-4">COMBAT STATS</h3>
-    <div class="grid grid-cols-2 gap-2 text-sm">
-        <div class="flex justify-between">
-            <span class="text-gray-400">Attack:</span>
-            <span id="attack-bonus" class="font-bold">+0</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">AC:</span>
-            <span id="armor-class" class="font-bold">10</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">Initiative:</span>
-            <span id="initiative" class="font-bold">+0</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">Speed:</span>
-            <span id="speed" class="font-bold">30 ft</span>
-        </div>
-    </div>
-
-    <h3 class="text-sm font-bold text-yellow-400 mb-2 mt-4">SAVING THROWS</h3>
-    <div class="grid grid-cols-3 gap-2 text-xs text-center">
-        <div>
+    <!-- Ability Scores Section -->
+    <h3 class="font-bold text-yellow-400 mb-1 mt-2" style="font-size: 10px;">ABILITY SCORES</h3>
+    <div class="grid grid-cols-3 gap-1 text-center" style="font-size: 7px;">
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">STR</div>
-            <div id="save-str" class="font-bold">+0</div>
+            <div id="stats-str" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-str-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
         </div>
-        <div>
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">DEX</div>
-            <div id="save-dex" class="font-bold">+0</div>
+            <div id="stats-dex" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-dex-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
         </div>
-        <div>
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">CON</div>
-            <div id="save-con" class="font-bold">+0</div>
+            <div id="stats-con" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-con-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
         </div>
-        <div>
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">INT</div>
-            <div id="save-int" class="font-bold">+0</div>
+            <div id="stats-int" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-int-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
         </div>
-        <div>
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">WIS</div>
-            <div id="save-wis" class="font-bold">+0</div>
+            <div id="stats-wis" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-wis-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
         </div>
-        <div>
+        <div class="bg-gray-800 p-1 rounded">
             <div class="text-gray-400">CHA</div>
-            <div id="save-cha" class="font-bold">+0</div>
+            <div id="stats-cha" class="font-bold text-white" style="font-size: 11px;">10</div>
+            <div id="stats-cha-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
+        </div>
+    </div>
+
+    <!-- Condition Section -->
+    <h3 class="font-bold text-yellow-400 mb-1 mt-2" style="font-size: 10px;">CONDITION</h3>
+
+    <!-- Fatigue -->
+    <div class="bg-gray-800 p-1 rounded" style="font-size: 8px;">
+        <div class="flex justify-between items-center mb-0.5">
+            <span class="text-gray-400 flex items-center gap-0.5">
+                <span style="font-size: 10px;">💪</span>
+                <span>Fatigue:</span>
+            </span>
+            <span class="font-bold"><span id="stats-fatigue-level">0</span>/10</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span id="stats-fatigue-status" class="text-green-400 font-bold" style="font-size: 7px;">FRESH</span>
+            <span id="stats-fatigue-emoji" style="font-size: 12px;">😊</span>
+        </div>
+        <div id="stats-fatigue-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
+            You feel energetic and ready for adventure
+        </div>
+    </div>
+
+    <!-- Hunger -->
+    <div class="bg-gray-800 p-1 rounded mt-1" style="font-size: 8px;">
+        <div class="flex justify-between items-center mb-0.5">
+            <span class="text-gray-400 flex items-center gap-0.5">
+                <span style="font-size: 10px;">🍖</span>
+                <span>Hunger:</span>
+            </span>
+            <span class="font-bold"><span id="stats-hunger-level">1</span>/3</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span id="stats-hunger-status" class="text-yellow-400 font-bold" style="font-size: 7px;">HUNGRY</span>
+            <span id="stats-hunger-emoji" style="font-size: 12px;">😋</span>
+        </div>
+        <div id="stats-hunger-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
+            You could use a meal
+        </div>
+    </div>
+
+    <!-- Weight & Encumbrance -->
+    <div class="bg-gray-800 p-1 rounded mt-1" style="font-size: 8px;">
+        <div class="flex justify-between items-center mb-0.5">
+            <span class="text-gray-400 flex items-center gap-0.5">
+                <span style="font-size: 10px;">⚖️</span>
+                <span>Weight:</span>
+            </span>
+            <span class="font-bold"><span id="stats-weight">0</span>/<span id="stats-max-weight">0</span> lbs</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span id="stats-weight-status" class="text-green-400 font-bold" style="font-size: 7px;">LIGHT</span>
+            <span id="stats-weight-emoji" style="font-size: 12px;">🪶</span>
+        </div>
+        <div id="stats-weight-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
+            You move at full speed
         </div>
     </div>
 </div>

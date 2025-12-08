@@ -555,8 +555,8 @@ async function startAdventure() {
       locations_discovered: [startingCity],
       music_tracks_unlocked: ['character-creation', 'kingdom-theme'],
       current_day: 1,
-      time_of_day: 6,  // 0=midnight, 6=highnoon, 11=evening
-      movement_counter: 0  // Tracks movements for fatigue (every 2 movements = +1 fatigue)
+      time_of_day: 12,  // 0=midnight, 12=noon, 23=11 PM
+      movement_counter: 0  // Tracks movements for fatigue (every 4 hours = +1 fatigue)
     };
 
     console.log('💾 Creating save with data:', saveData);

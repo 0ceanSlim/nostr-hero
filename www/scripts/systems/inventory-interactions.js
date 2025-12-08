@@ -8,6 +8,13 @@ let draggedItem = null;
 let draggedFromSlot = null;
 let draggedFromType = null; // 'inventory', 'equipment', 'general'
 
+// Expose drag state globally for container system
+window.inventoryDragState = {
+    itemId: null,
+    fromSlot: null,
+    fromType: null
+};
+
 // Context menu state
 let activeContextMenu = null;
 
@@ -176,6 +183,11 @@ function handleDragStart(e, itemId, slotType, slotIndex) {
     draggedFromSlot = slotIndex;
     draggedFromType = slotType;
 
+    // Update global state for container system
+    window.inventoryDragState.itemId = itemId;
+    window.inventoryDragState.fromSlot = slotIndex;
+    window.inventoryDragState.fromType = slotType;
+
     e.target.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', itemId);
@@ -190,6 +202,11 @@ function handleDragEnd(e) {
     draggedItem = null;
     draggedFromSlot = null;
     draggedFromType = null;
+
+    // Clear global state
+    window.inventoryDragState.itemId = null;
+    window.inventoryDragState.fromSlot = null;
+    window.inventoryDragState.fromType = null;
 }
 
 /**
@@ -283,7 +300,14 @@ async function handleLeftClick(e, itemId, slotType, slotIndex) {
     console.log(`🖱️ Left click: ${itemId} -> ${action}`);
 
     // Perform the default action
-    if (action === 'equip' && itemData.gear_slot) {
+    if (action === 'open') {
+        // Open container
+        if (window.openContainer) {
+            await window.openContainer(itemId, slotIndex);
+        } else {
+            console.error('openContainer function not found');
+        }
+    } else if (action === 'equip' && itemData.gear_slot) {
         // For equip action, pass the gear_slot as the target
         await performAction(action, itemId, slotIndex, itemData.gear_slot, slotType);
     } else if (action) {
@@ -344,6 +368,11 @@ function getDefaultAction(itemData, isEquipped) {
         return 'unequip';
     }
 
+    // Check if item is a container - containers should be opened by default
+    if (itemData.tags && itemData.tags.includes('container')) {
+        return 'open';
+    }
+
     // Check if item has "equipment" tag - this is the primary indicator
     if (itemData.tags && itemData.tags.includes('equipment')) {
         return 'equip';
@@ -377,7 +406,12 @@ function getItemActions(itemData, isEquipped) {
     if (isEquipped) {
         actions.push({ action: 'unequip', label: 'Unequip' });
     } else {
-        // Check for equipment tag first
+        // Check for container tag first
+        if (itemData.tags && itemData.tags.includes('container')) {
+            actions.push({ action: 'open', label: 'Open' });
+        }
+
+        // Check for equipment tag
         if (itemData.tags && itemData.tags.includes('equipment')) {
             actions.push({ action: 'equip', label: 'Equip' });
         } else {
@@ -483,6 +517,17 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
         return;
     }
 
+    // Special case: open container (no backend call needed - just show UI)
+    if (action === 'open') {
+        if (window.openContainer) {
+            await window.openContainer(itemId, fromSlot);
+        } else {
+            console.error('openContainer function not found');
+            showMessage('❌ Cannot open container', 'error');
+        }
+        return;
+    }
+
     // Special case: split stack (handle client-side for now)
     if (action === 'split') {
         await handleSplitStack(itemId, fromSlot, fromSlotType);
@@ -580,7 +625,11 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
 
         if (result.success) {
             console.log('✅ Action successful:', result.message);
-            showMessage(result.message, 'success');
+
+            // Show message with color from API response (or default to green for success)
+            if (window.showActionText && result.message) {
+                window.showActionText(result.message, result.color || 'green', 4000);
+            }
 
             // Refresh game state from Go memory
             await refreshGameState();
@@ -588,7 +637,6 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             // If this was a drop action, NOW add to ground (after successful API call)
             if (action === 'drop' && dropInfo) {
                 window.addItemToGround(dropInfo.itemId, dropInfo.quantity);
-                window.addGameLog(`Dropped ${dropInfo.quantity}x ${dropInfo.itemName} on the ground.`);
 
                 // Refresh ground modal if it's open
                 if (window.refreshGroundModal) {
@@ -597,11 +645,17 @@ async function performAction(action, itemId, fromSlot, toSlotOrType, fromSlotTyp
             }
         } else {
             console.error('❌ Action failed:', result.error);
-            showMessage(result.error || 'Action failed', 'error');
+
+            // Show error message with color from API response (or default to red for errors)
+            if (window.showActionText && result.error) {
+                window.showActionText(result.error, result.color || 'red', 4000);
+            }
         }
     } catch (error) {
         console.error('❌ Error performing action:', error);
-        showMessage(`❌ Failed to perform action: ${error.message}`, 'error');
+        if (window.showActionText) {
+            window.showActionText(`Failed to perform action: ${error.message}`, 'red', 4000);
+        }
     }
 }
 
@@ -708,7 +762,9 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
     }
 
     if (!inventoryItem || inventoryItem.quantity <= 1) {
-        window.addGameLog('Cannot split a stack of 1 item.');
+        if (window.showActionText) {
+            window.showActionText('Cannot split a stack of 1 item.', 'yellow');
+        }
         return;
     }
 
@@ -773,8 +829,9 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
 
     // If no empty slot, show error
     if (emptySlotIndex === -1) {
-        window.addGameLog('❌ Inventory full - cannot split stack');
-        window.showMessage('Inventory full - cannot split stack', 'error');
+        if (window.showActionText) {
+            window.showActionText('Inventory full - cannot split stack', 'red');
+        }
         return;
     }
 
@@ -799,8 +856,9 @@ async function handleSplitStack(itemId, fromSlot, fromSlotType) {
         // Refresh UI from Go memory
         await refreshGameState();
 
-        window.addGameLog(`Split ${splitQuantity} from stack of ${itemData?.name || itemId}`);
-        showMessage(`✂️ Split ${splitQuantity} items into new stack`, 'success');
+        if (window.showActionText) {
+            window.showActionText(`Split ${splitQuantity} from stack of ${itemData?.name || itemId}`, 'green');
+        }
 
     } catch (error) {
         console.error('Failed to split stack:', error);
@@ -1047,6 +1105,7 @@ function showItemTooltip(e, itemId, slotType) {
         'equip': 'Equip',
         'unequip': 'Unequip',
         'use': 'Use',
+        'open': 'Open',
         'examine': 'Info',
         'drop': 'Drop'
     };
@@ -1056,6 +1115,7 @@ function showItemTooltip(e, itemId, slotType) {
         'equip': '#4a9eff',      // Blue for equip
         'unequip': '#ff8c00',    // Orange for unequip
         'use': '#00ff00',        // Green for use
+        'open': '#00ff00',       // Green for open
         'examine': '#ff8c00',    // Orange for info
         'drop': '#ff0000'        // Red for drop
     };

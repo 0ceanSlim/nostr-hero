@@ -212,7 +212,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		District:            districtKey,   // Use key, not display name
 		Building:            buildingID,    // Use ID, not display name
 		CurrentDay:          1,
-		TimeOfDay:           6, // Highnoon
+		TimeOfDay:           12, // Noon (12 PM)
 		Inventory:           inventory,
 		Vaults:              vaults,
 		KnownSpells:         knownSpells,
