@@ -23,6 +23,12 @@ pixellab-gen.exe
 /.claude
 /data
 
+# Deployment secrets (server-specific, never commit)
+/scripts/webhook-hooks.json
+/scripts/webhook-listener.service
+/scripts/*.local.sh
+deploy-config.env
+
 /www/res/style/output.css
 
 /.vscode
