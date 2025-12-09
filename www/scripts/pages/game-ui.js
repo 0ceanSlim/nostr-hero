@@ -1360,86 +1360,30 @@ function showBuildingClosedMessage(building) {
 }
 
 // Enter a building
-function enterBuilding(buildingId) {
+async function enterBuilding(buildingId) {
     console.log('Entering building:', buildingId);
 
-    const state = getGameStateSync();
-
-    // Update location to include building
-    const newLocationState = {
-        ...state.location,
-        building: buildingId
-    };
-
-    updateGameState({
-        location: newLocationState
-    });
-
-    // Refresh display to show building interior
-    displayCurrentLocation();
-    showMessage(`🏛️ Entered building`, 'info');
-
-    // Auto-save when entering building
-    if (window.saveGameToLocal) {
-        window.saveGameToLocal();
+    try {
+        await window.gameAPI.sendAction('enter_building', { building_id: buildingId });
+        await refreshGameState();
+        displayCurrentLocation();
+    } catch (error) {
+        console.error('Failed to enter building:', error);
+        showMessage('❌ Failed to enter building', 'error');
     }
 }
 
 // Exit a building
-function exitBuilding() {
+async function exitBuilding() {
     console.log('Exiting building');
 
-    const state = getGameStateSync();
-
-    // Update location to remove building (back to outdoors)
-    const newLocationState = {
-        ...state.location,
-        building: null
-    };
-
-    // Handle time advancement when exiting building
-    const newCharacterState = { ...state.character };
-
-    // Advance time by 1 hour when exiting building
-    let newTimeOfDay = (newCharacterState.time_of_day !== undefined) ? newCharacterState.time_of_day : 12; // Default to noon if not set
-    let newCurrentDay = newCharacterState.current_day || 1;
-
-    newTimeOfDay += 1;
-
-    // Handle day rollover (23 (11 PM) -> 0 (midnight) = new day)
-    if (newTimeOfDay > 23) {
-        newTimeOfDay = 0;
-        newCurrentDay += 1;
-        showMessage('🌅 A new day dawns (Day ' + newCurrentDay + ')', 'info');
-    }
-
-    // Handle fatigue: increment every 4 hours
-    let movementCounter = newCharacterState.movement_counter || 0;
-    movementCounter += 1;
-
-    if (movementCounter >= 4) {
-        newCharacterState.fatigue = (newCharacterState.fatigue || 0) + 1;
-        movementCounter = 0;
-        showMessage('😓 You feel tired (Fatigue +1)', 'warning');
-    }
-
-    // Update character state with new time and counter
-    newCharacterState.time_of_day = newTimeOfDay;
-    newCharacterState.current_day = newCurrentDay;
-    newCharacterState.movement_counter = movementCounter;
-
-    updateGameState({
-        location: newLocationState,
-        character: newCharacterState
-    });
-
-    // Refresh display to show district
-    displayCurrentLocation();
-    showMessage(`🚪 Exited building`, 'info');
-
-    // Auto-save when exiting building
-    if (window.saveGameToLocal) {
-        window.saveGameToLocal();
+    try {
+        await window.gameAPI.sendAction('exit_building', {});
+        await refreshGameState();
+        displayCurrentLocation();
+    } catch (error) {
+        console.error('Failed to exit building:', error);
+        showMessage('❌ Failed to exit building', 'error');
     }
 }
 
@@ -1449,203 +1393,13 @@ function talkToNPC(npcId) {
     // TODO: Implement NPC dialogue
 }
 
-// Update combat interface
+// Update combat interface (combat system not implemented yet)
 function updateCombatInterface() {
-    const state = getGameStateSync();
     const combatInterface = document.getElementById('combat-interface');
-    const combatStatus = document.getElementById('combat-status');
-    const combatActions = document.getElementById('combat-actions');
-
-    if (!state.combat) {
-        if (combatInterface) combatInterface.classList.add('hidden');
-        return;
+    if (combatInterface) {
+        combatInterface.classList.add('hidden');
     }
-
-    if (combatInterface) combatInterface.classList.remove('hidden');
-
-    // Update combat status
-    if (combatStatus) {
-        combatStatus.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div>
-                    <h4 class="text-lg font-bold">${state.combat.monster.name}</h4>
-                    <div class="flex items-center space-x-2">
-                        <span>HP: ${state.combat.monster.hp}/${state.combat.monster.max_hp}</span>
-                        <div class="w-32 bg-gray-600 rounded-full h-2">
-                            <div class="bg-red-500 h-2 rounded-full" style="width: ${(state.combat.monster.hp / state.combat.monster.max_hp) * 100}%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div>Distance: <span class="font-bold">${state.combat.distance}</span></div>
-                    <div class="text-sm ${state.combat.player_turn ? 'text-green-400' : 'text-red-400'}">
-                        ${state.combat.player_turn ? 'Your Turn' : 'Enemy Turn'}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Update combat actions
-    if (combatActions && state.combat.player_turn) {
-        combatActions.innerHTML = '';
-
-        // Movement actions
-        if (state.combat.distance > 0) {
-            combatActions.appendChild(
-                createActionButton('→ Advance', () => combatAdvance(), 'bg-blue-600 hover:bg-blue-700')
-            );
-        }
-        if (state.combat.distance < 6) {
-            combatActions.appendChild(
-                createActionButton('← Retreat', () => combatRetreat(), 'bg-yellow-600 hover:bg-yellow-700')
-            );
-        }
-
-        // Attack actions
-        combatActions.appendChild(
-            createActionButton('⚔️ Attack', () => combatAttack(), 'bg-red-600 hover:bg-red-700')
-        );
-
-        // Spell actions
-        const preparedSpells = (state.spells || []).filter(spell => spell.prepared);
-        preparedSpells.slice(0, 2).forEach(spell => { // Limit to 2 spells for space
-            const spellData = getSpellById(spell.spell);
-            if (spellData && state.character.mana >= (spellData.mana_cost || 0)) {
-                combatActions.appendChild(
-                    createActionButton(`✨ ${spellData.name}`, () => castSpell(spell.spell), 'bg-purple-600 hover:bg-purple-700')
-                );
-            }
-        });
-
-        // Other actions
-        combatActions.appendChild(
-            createActionButton('🛡️ Defend', () => combatDefend(), 'bg-gray-600 hover:bg-gray-700')
-        );
-
-        combatActions.appendChild(
-            createActionButton('🏃 Flee', () => combatFlee(), 'bg-orange-600 hover:bg-orange-700')
-        );
-    }
-}
-
-// Basic combat actions
-function combatAdvance() {
-    const state = getGameStateSync();
-    if (!state.combat) return;
-
-    const newCombat = { ...state.combat };
-    newCombat.distance = Math.max(0, newCombat.distance - 1);
-    newCombat.player_turn = false;
-
-    updateGameState({ combat: newCombat });
-    showMessage('→ You move closer', 'info');
-
-    // Simple AI turn
-    setTimeout(enemyTurn, 1000);
-}
-
-function combatRetreat() {
-    const state = getGameStateSync();
-    if (!state.combat) return;
-
-    const newCombat = { ...state.combat };
-    newCombat.distance = Math.min(6, newCombat.distance + 1);
-    newCombat.player_turn = false;
-
-    updateGameState({ combat: newCombat });
-    showMessage('← You back away', 'info');
-
-    setTimeout(enemyTurn, 1000);
-}
-
-function combatAttack() {
-    const state = getGameStateSync();
-    if (!state.combat) return;
-
-    // Simple attack calculation
-    const damage = Math.floor(Math.random() * 6) + 1; // 1d6 damage
-    const newCombat = { ...state.combat };
-    newCombat.monster.hp = Math.max(0, newCombat.monster.hp - damage);
-    newCombat.player_turn = false;
-
-    showMessage(`⚔️ You deal ${damage} damage!`, 'success');
-
-    if (newCombat.monster.hp <= 0) {
-        // Combat over - victory
-        showMessage('🏆 Victory!', 'success');
-        updateGameState({ combat: null });
-        return;
-    }
-
-    updateGameState({ combat: newCombat });
-    setTimeout(enemyTurn, 1000);
-}
-
-function combatDefend() {
-    const state = getGameStateSync();
-    if (!state.combat) return;
-
-    const newCombat = { ...state.combat };
-    newCombat.player_turn = false;
-
-    updateGameState({ combat: newCombat });
-    showMessage('🛡️ You take a defensive stance', 'info');
-
-    setTimeout(enemyTurn, 1000);
-}
-
-function combatFlee() {
-    const state = getGameStateSync();
-    if (!state.combat) return;
-
-    // Simple flee chance
-    if (Math.random() < 0.7) {
-        showMessage('🏃 You escape!', 'success');
-
-        // Add fatigue from fleeing
-        const newCharacter = { ...state.character };
-        newCharacter.fatigue = Math.min(10, newCharacter.fatigue + 1);
-
-        updateGameState({
-            combat: null,
-            character: newCharacter
-        });
-    } else {
-        showMessage('❌ Cannot escape!', 'error');
-        const newCombat = { ...state.combat };
-        newCombat.player_turn = false;
-        updateGameState({ combat: newCombat });
-        setTimeout(enemyTurn, 1000);
-    }
-}
-
-// Simple enemy AI
-function enemyTurn() {
-    const state = getGameStateSync();
-    if (!state.combat || state.combat.player_turn) return;
-
-    // Simple enemy attack
-    const damage = Math.floor(Math.random() * 4) + 1; // 1d4 damage
-    const newCharacter = { ...state.character };
-    newCharacter.hp = Math.max(0, newCharacter.hp - damage);
-
-    const newCombat = { ...state.combat };
-    newCombat.player_turn = true;
-
-    showMessage(`💥 ${state.combat.monster.name} deals ${damage} damage!`, 'warning');
-
-    if (newCharacter.hp <= 0) {
-        // Game over
-        showMessage('💀 You have been defeated!', 'error');
-        // Could implement respawn system here
-        return;
-    }
-
-    updateGameState({
-        character: newCharacter,
-        combat: newCombat
-    });
+    // TODO: Implement combat system in Go backend
 }
 
 // Shop interface (basic)

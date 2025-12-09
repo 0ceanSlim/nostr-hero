@@ -128,6 +128,10 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleAddToContainerAction(state, action.Params)
 	case "remove_from_container":
 		return handleRemoveFromContainerAction(state, action.Params)
+	case "enter_building":
+		return handleEnterBuildingAction(state, action.Params)
+	case "exit_building":
+		return handleExitBuildingAction(state, action.Params)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -1045,6 +1049,55 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"state":   session.SaveData,
 	})
+}
+
+// handleEnterBuildingAction enters a building
+func handleEnterBuildingAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	buildingID, ok := params["building_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid building_id parameter")
+	}
+
+	// Update state to include building
+	state.Building = buildingID
+
+	log.Printf("🏛️ Entered building: %s", buildingID)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: "Entered building",
+		Color:   "blue",
+	}, nil
+}
+
+// handleExitBuildingAction exits a building
+func handleExitBuildingAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	// Update state to remove building (back outdoors)
+	state.Building = ""
+
+	// Advance time by 1 hour when exiting building
+	timeParams := map[string]interface{}{
+		"segments": float64(1),
+	}
+	_, err := handleAdvanceTimeAction(state, timeParams)
+	if err != nil {
+		log.Printf("⚠️ Failed to advance time: %v", err)
+	}
+
+	log.Printf("🚪 Exited building")
+
+	// Check if fatigue increased to warn user
+	message := "Exited building"
+	if state.Fatigue > 0 && state.FatigueCounter == 0 {
+		// Fatigue just increased
+		message = fmt.Sprintf("Exited building (Fatigue: %d)", state.Fatigue)
+	}
+
+	return &GameActionResponse{
+		Success: true,
+		Message: message,
+		Color:   "blue",
+	}, nil
 }
 
 // handleAddToContainerAction adds an item to a container
