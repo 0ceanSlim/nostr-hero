@@ -91,6 +91,20 @@ function bindInventoryEvents() {
         bindEquipmentSlotEvents(slot, slotName);
     });
 
+    // Vault slots
+    const vaultSlots = document.querySelectorAll('.vault-slot[data-vault-slot]');
+    console.log(`🏦 Found ${vaultSlots.length} vault slots`);
+    vaultSlots.forEach((slot) => {
+        // Skip if already bound
+        if (slot.hasAttribute('data-events-bound')) {
+            return;
+        }
+        slot.setAttribute('data-events-bound', 'true');
+        const slotIndex = parseInt(slot.getAttribute('data-vault-slot'), 10);
+        const buildingId = slot.getAttribute('data-vault-building');
+        bindVaultSlotEvents(slot, slotIndex, buildingId);
+    });
+
     console.log('✅ bindInventoryEvents() completed');
 }
 
@@ -176,12 +190,56 @@ function bindEquipmentSlotEvents(slotElement, slotName) {
 }
 
 /**
+ * Bind events to a vault slot
+ */
+function bindVaultSlotEvents(slotElement, slotIndex, buildingId) {
+    const itemId = slotElement.getAttribute('data-item-id');
+
+    console.log(`🏦 Binding events to vault[${slotIndex}], itemId: ${itemId || 'empty'}`);
+
+    if (!itemId) {
+        // Empty slot - only allow dropping
+        slotElement.addEventListener('dragover', handleDragOver);
+        slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId));
+        console.log(`  ✓ Bound drop event to empty vault slot`);
+        return;
+    }
+
+    // Make slot draggable
+    slotElement.setAttribute('draggable', 'true');
+
+    // Drag events
+    slotElement.addEventListener('dragstart', (e) => handleDragStart(e, itemId, 'vault', slotIndex, buildingId));
+    slotElement.addEventListener('dragend', handleDragEnd);
+    slotElement.addEventListener('dragover', handleDragOver);
+    slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId));
+
+    // Hover events
+    slotElement.addEventListener('mouseenter', (e) => showItemTooltip(e, itemId, 'vault'));
+    slotElement.addEventListener('mouseleave', hideItemTooltip);
+
+    // Click events
+    slotElement.addEventListener('click', (e) => handleLeftClick(e, itemId, 'vault', slotIndex));
+    slotElement.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        handleRightClick(e, itemId, 'vault', slotIndex);
+    });
+
+    console.log(`  ✓ Bound all events to vault slot`);
+}
+
+/**
  * Handle drag start
  */
-function handleDragStart(e, itemId, slotType, slotIndex) {
+function handleDragStart(e, itemId, slotType, slotIndex, buildingId = null) {
     draggedItem = itemId;
     draggedFromSlot = slotIndex;
     draggedFromType = slotType;
+
+    // Store buildingId for vault operations
+    if (slotType === 'vault') {
+        window.inventoryDragState.vaultBuilding = buildingId;
+    }
 
     // Update global state for container system
     window.inventoryDragState.itemId = itemId;
@@ -281,12 +339,77 @@ async function handleDropOnEquipment(e, equipSlotName) {
 }
 
 /**
+ * Handle drop on vault slot
+ */
+async function handleDropOnVault(e, toSlotIndex, buildingId) {
+    e.preventDefault();
+
+    if (!draggedItem) return;
+
+    console.log(`🏦 Vault transfer: ${draggedItem} from ${draggedFromType}[${draggedFromSlot}] to vault[${toSlotIndex}]`);
+
+    // Vaults use the same move_item system as inventory
+    // The backend handles vault slots through the Vaults array
+
+    // Determine action based on source
+    if (draggedFromType === 'vault') {
+        // Moving within vault or from vault to inventory/equipment
+        console.log('Moving item within/from vault');
+        // For now, vault-to-vault moves work like regular inventory moves
+        // The backend will handle updating the correct vault
+    }
+
+    try {
+        const result = await window.gameAPI.sendAction('move_item', {
+            item_id: draggedItem,
+            from_slot: draggedFromSlot,
+            to_slot: toSlotIndex,
+            from_slot_type: draggedFromType,
+            to_slot_type: 'vault',
+            vault_building: buildingId
+        });
+
+        if (result.success) {
+            // Refresh the vault UI
+            await refreshGameState();
+            const state = getGameStateSync();
+            const vault = state.vaults?.find(v => v.building === buildingId);
+            if (vault) {
+                showVaultUI(vault);
+            }
+        } else {
+            showMessage(result.error || '❌ Failed to move item to vault', 'error');
+        }
+    } catch (error) {
+        console.error('Error moving item to vault:', error);
+        showMessage('❌ Failed to move item to vault', 'error');
+    }
+}
+
+/**
  * Handle left click (default action)
  */
 async function handleLeftClick(e, itemId, slotType, slotIndex) {
     console.log(`🖱️ LEFT CLICK EVENT FIRED: ${itemId} in ${slotType}[${slotIndex}]`);
     e.stopPropagation();
 
+    // Check if vault is open - change default behavior
+    if (window.vaultOpen) {
+        console.log(`🏦 Vault is open, using vault transfer logic`);
+
+        if (slotType === 'vault') {
+            // Clicking vault item -> withdraw to inventory
+            console.log(`📤 Withdrawing ${itemId} from vault`);
+            await withdrawFromVault(itemId, slotIndex);
+        } else if (slotType === 'general_slots' || slotType === 'backpack') {
+            // Clicking inventory item -> store in vault
+            console.log(`📥 Storing ${itemId} in vault`);
+            await storeInVault(itemId, slotIndex, slotType);
+        }
+        return;
+    }
+
+    // Normal behavior (vault not open)
     // Get item data to determine default action
     const itemData = getItemById(itemId);
     if (!itemData) {
@@ -1157,6 +1280,139 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeInventoryInteractions);
 } else {
     initializeInventoryInteractions();
+}
+
+/**
+ * Store item from inventory into vault (when vault is open)
+ */
+async function storeInVault(itemId, fromSlot, fromSlotType) {
+    console.log(`📥 Storing ${itemId} from ${fromSlotType}[${fromSlot}] into vault`);
+
+    // Get vault building ID from the vault overlay
+    const vaultSlots = document.querySelectorAll('[data-vault-slot]');
+    if (vaultSlots.length === 0) {
+        console.error('No vault slots found');
+        return;
+    }
+
+    const buildingId = vaultSlots[0].getAttribute('data-vault-building');
+    if (!buildingId) {
+        console.error('No building ID found on vault slots');
+        return;
+    }
+
+    // Find first free vault slot
+    let freeVaultSlot = null;
+    for (let i = 0; i < vaultSlots.length; i++) {
+        const slot = vaultSlots[i];
+        const slotItemId = slot.getAttribute('data-item-id');
+        if (!slotItemId) {
+            freeVaultSlot = parseInt(slot.getAttribute('data-vault-slot'));
+            console.log(`Found free vault slot: ${freeVaultSlot}`);
+            break;
+        }
+    }
+
+    if (freeVaultSlot === null) {
+        showMessage('❌ Vault is full', 'error');
+        return;
+    }
+
+    // Perform move action
+    try {
+        const result = await window.gameAPI.sendAction('move_item', {
+            from_slot: fromSlot,
+            from_slot_type: fromSlotType,
+            to_slot: freeVaultSlot,
+            to_slot_type: 'vault',
+            vault_building: buildingId
+        });
+
+        if (result.success) {
+            showMessage('✅ Item stored in vault', 'success');
+            await refreshGameState();
+            // Refresh vault UI
+            const vaultData = result.delta?.vault_data;
+            if (vaultData && window.showVaultUI) {
+                showVaultUI(vaultData);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to store in vault:', error);
+        showMessage('❌ Failed to store item', 'error');
+    }
+}
+
+/**
+ * Withdraw item from vault to inventory (when vault is open)
+ * Priority: backpack slots first, then general slots
+ */
+async function withdrawFromVault(itemId, vaultSlot) {
+    console.log(`📤 Withdrawing ${itemId} from vault slot ${vaultSlot}`);
+
+    const state = getGameStateSync();
+    let targetSlot = null;
+    let targetSlotType = null;
+
+    // First try to find free backpack slot
+    if (state.inventory?.gear_slots?.bag?.contents) {
+        const backpackContents = state.inventory.gear_slots.bag.contents;
+        for (let i = 0; i < 20; i++) {
+            const existingItem = backpackContents.find(item => item.slot === i);
+            if (!existingItem || !existingItem.item) {
+                targetSlot = i;
+                targetSlotType = 'backpack';
+                console.log(`Found free backpack slot: ${targetSlot}`);
+                break;
+            }
+        }
+    }
+
+    // If no backpack slot, try general slots
+    if (targetSlot === null && state.inventory?.general_slots) {
+        for (let i = 0; i < state.inventory.general_slots.length; i++) {
+            const slot = state.inventory.general_slots[i];
+            if (!slot.item) {
+                targetSlot = i;
+                targetSlotType = 'general_slots';
+                console.log(`Found free general slot: ${targetSlot}`);
+                break;
+            }
+        }
+    }
+
+    if (targetSlot === null) {
+        showMessage('❌ No free inventory space', 'error');
+        return;
+    }
+
+    // Get building ID from vault
+    const vaultSlots = document.querySelectorAll('[data-vault-slot]');
+    const buildingId = vaultSlots[0]?.getAttribute('data-vault-building');
+
+    // Perform move action
+    try {
+        const result = await window.gameAPI.sendAction('move_item', {
+            from_slot: vaultSlot,
+            from_slot_type: 'vault',
+            to_slot: targetSlot,
+            to_slot_type: targetSlotType,
+            vault_building: buildingId
+        });
+
+        if (result.success) {
+            showMessage('✅ Item withdrawn from vault', 'success');
+            await refreshGameState();
+            // Refresh vault UI
+            const vaultData = result.delta?.vault_data;
+            if (vaultData && window.showVaultUI) {
+                showVaultUI(vaultData);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to withdraw from vault:', error);
+        showMessage('❌ Failed to withdraw item', 'error');
+    }
 }
 
 // Export functions for use in other modules

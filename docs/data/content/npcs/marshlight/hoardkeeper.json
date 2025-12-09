@@ -52,11 +52,5 @@
       "text": "Strength and steel. May your enemies fall swiftly.",
       "action": "end_dialogue"
     }
-  },
-  "storage_config": {
-    "free_for_races": ["Orc"],
-    "registration_fee": 65,
-    "storage_slots": 40,
-    "slot_type": "standard"
   }
 }

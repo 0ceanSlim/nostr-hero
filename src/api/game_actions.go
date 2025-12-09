@@ -132,6 +132,14 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleEnterBuildingAction(state, action.Params)
 	case "exit_building":
 		return handleExitBuildingAction(state, action.Params)
+	case "talk_to_npc":
+		return handleTalkToNPCAction(state, action.Params)
+	case "npc_dialogue_choice":
+		return handleNPCDialogueChoiceAction(state, action.Params)
+	case "register_vault":
+		return handleRegisterVaultAction(state, action.Params)
+	case "open_vault":
+		return handleOpenVaultAction(state, action.Params)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -553,49 +561,23 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*G
 	}, nil
 }
 
-// handleVaultDepositAction deposits items into vault
+// handleVaultDepositAction deposits items into vault (uses existing move_item action for vault transfers)
 func handleVaultDepositAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
-	itemID, ok := params["item_id"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing or invalid item_id parameter")
-	}
-
-	quantity, _ := params["quantity"].(float64)
-	if quantity <= 0 {
-		quantity = 1
-	}
-
-	// TODO: Validate player is at vault location
-	// TODO: Find item in inventory
-	// TODO: Find empty vault slot
-	// TODO: Move item from inventory to vault
-
+	// Vaults work like containers - use the container system
+	// This is handled by frontend calling move_item or add_to_container with vault as destination
 	return &GameActionResponse{
 		Success: true,
-		Message: fmt.Sprintf("Deposited %s to vault", itemID),
+		Message: "Item deposited to vault",
 	}, nil
 }
 
-// handleVaultWithdrawAction withdraws items from vault
+// handleVaultWithdrawAction withdraws items from vault (uses existing move_item action for vault transfers)
 func handleVaultWithdrawAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
-	itemID, ok := params["item_id"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing or invalid item_id parameter")
-	}
-
-	quantity, _ := params["quantity"].(float64)
-	if quantity <= 0 {
-		quantity = 1
-	}
-
-	// TODO: Validate player is at vault location
-	// TODO: Find item in vault
-	// TODO: Find empty inventory slot
-	// TODO: Move item from vault to inventory
-
+	// Vaults work like containers - use the container system
+	// This is handled by frontend calling move_item or remove_from_container with vault as source
 	return &GameActionResponse{
 		Success: true,
-		Message: fmt.Sprintf("Withdrew %s from vault", itemID),
+		Message: "Item withdrawn from vault",
 	}, nil
 }
 
@@ -611,7 +593,14 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 
 	// Get the appropriate slot arrays
 	var fromSlots, toSlots []interface{}
+	var vaultBuilding string
 
+	// Get vault building ID if dealing with vault
+	if params["vault_building"] != nil {
+		vaultBuilding, _ = params["vault_building"].(string)
+	}
+
+	// Get from slots
 	if fromSlotType == "general" {
 		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
 		if !ok {
@@ -626,8 +615,19 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		fromSlots = contents
+	} else if fromSlotType == "vault" {
+		vault := getVaultForLocation(state, vaultBuilding)
+		if vault == nil {
+			return nil, fmt.Errorf("vault not found for building: %s", vaultBuilding)
+		}
+		slots, ok := vault["slots"].([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid vault slots")
+		}
+		fromSlots = slots
 	}
 
+	// Get to slots
 	if toSlotType == "general" {
 		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
 		if !ok {
@@ -642,6 +642,16 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		toSlots = contents
+	} else if toSlotType == "vault" {
+		vault := getVaultForLocation(state, vaultBuilding)
+		if vault == nil {
+			return nil, fmt.Errorf("vault not found for building: %s", vaultBuilding)
+		}
+		slots, ok := vault["slots"].([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid vault slots")
+		}
+		toSlots = slots
 	}
 
 	// CRITICAL VALIDATION: Containers cannot go into backpack
@@ -774,10 +784,25 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 		log.Printf("✅ Swapped slots: %s[%d] ↔ %s[%d]", fromSlotType, fromSlot, toSlotType, toSlot)
 	}
 
-	return &GameActionResponse{
+	// If vault was involved, return updated vault data
+	delta := map[string]interface{}{}
+	if fromSlotType == "vault" || toSlotType == "vault" {
+		vault := getVaultForLocation(state, vaultBuilding)
+		if vault != nil {
+			delta["vault_data"] = vault
+			log.Printf("✅ Returning updated vault data in response")
+		}
+	}
+
+	response := &GameActionResponse{
 		Success: true,
 		Message: "", // Suppressed - no need to show success message for moves
-	}, nil
+	}
+	if len(delta) > 0 {
+		response.Delta = delta
+	}
+
+	return response, nil
 }
 
 // handleStackItemAction stacks items together
@@ -1097,6 +1122,404 @@ func handleExitBuildingAction(state *SaveFile, params map[string]interface{}) (*
 		Success: true,
 		Message: message,
 		Color:   "blue",
+	}, nil
+}
+
+// handleTalkToNPCAction initiates dialogue with an NPC
+func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	npcID, ok := params["npc_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid npc_id parameter")
+	}
+
+	// Get NPC data from database
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM npcs WHERE id = ?", npcID).Scan(&propertiesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("NPC not found: %s", npcID)
+	}
+
+	// Parse NPC properties
+	var npcData map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
+		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
+	}
+
+	// Determine greeting based on state
+	greetings, _ := npcData["greeting"].(map[string]interface{})
+	var greetingText string
+
+	// Check if this is first time talking to this NPC
+	// Check if player has registered vault at this location
+	isRegistered := isVaultRegistered(state, state.Building)
+	isNativeRace := isNativeRaceForLocation(state.Race, state.Location)
+
+	if isNativeRace {
+		greetingText, _ = greetings["native_race"].(string)
+	} else if isRegistered {
+		greetingText, _ = greetings["returning"].(string)
+	} else {
+		greetingText, _ = greetings["first_time"].(string)
+	}
+
+	// Start dialogue at "about_service" node
+	dialogue, _ := npcData["dialogue"].(map[string]interface{})
+	aboutService, _ := dialogue["about_service"].(map[string]interface{})
+	dialogueText, _ := aboutService["text"].(string)
+	options, _ := aboutService["options"].([]interface{})
+
+	// Filter options based on requirements
+	var optionsList []string
+	for _, opt := range options {
+		if optStr, ok := opt.(string); ok {
+			// Get the option node to check requirements
+			optionNode, _ := dialogue[optStr].(map[string]interface{})
+			if optionNode != nil {
+				requirements, _ := optionNode["requirements"].(map[string]interface{})
+				// Only include option if requirements are met
+				if checkDialogueRequirements(state, requirements) {
+					optionsList = append(optionsList, optStr)
+				} else {
+					log.Printf("🚫 Filtered out option '%s' (requirements not met)", optStr)
+				}
+			} else {
+				// No requirements, include it
+				optionsList = append(optionsList, optStr)
+			}
+		}
+	}
+
+	log.Printf("💬 %s: %s (showing %d/%d options)", npcID, greetingText, len(optionsList), len(options))
+
+	return &GameActionResponse{
+		Success: true,
+		Message: fmt.Sprintf("%s\n\n%s", greetingText, dialogueText),
+		Color:   "yellow",
+		Delta: map[string]interface{}{
+			"npc_dialogue": map[string]interface{}{
+				"npc_id":  npcID,
+				"node":    "about_service",
+				"text":    dialogueText,
+				"options": optionsList,
+			},
+		},
+	}, nil
+}
+
+// handleNPCDialogueChoiceAction processes player's dialogue choice
+func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	npcID, _ := params["npc_id"].(string)
+	choice, _ := params["choice"].(string)
+
+	// Get NPC data from database
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM npcs WHERE id = ?", npcID).Scan(&propertiesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("NPC not found: %s", npcID)
+	}
+
+	// Parse NPC properties
+	var npcData map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
+		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
+	}
+
+	dialogue, _ := npcData["dialogue"].(map[string]interface{})
+	choiceNode, _ := dialogue[choice].(map[string]interface{})
+
+	if choiceNode == nil {
+		return nil, fmt.Errorf("invalid dialogue choice: %s", choice)
+	}
+
+	// Check requirements
+	requirements, _ := choiceNode["requirements"].(map[string]interface{})
+	if !checkDialogueRequirements(state, requirements) {
+		return &GameActionResponse{
+			Success: false,
+			Message: "Requirements not met for this dialogue option",
+			Color:   "red",
+		}, nil
+	}
+
+	// Get action if any
+	action, _ := choiceNode["action"].(string)
+	responseText, _ := choiceNode["text"].(string)
+
+	// Process action
+	var actionResult string
+	switch action {
+	case "register_storage":
+		cost, _ := choiceNode["cost"].(float64)
+		if state.Gold >= int(cost) {
+			state.Gold -= int(cost)
+			registerVault(state, state.Building)
+			actionResult, _ = choiceNode["success"].(string)
+		} else {
+			actionResult, _ = choiceNode["failure"].(string)
+		}
+
+	case "open_storage":
+		// Return vault data
+		vault := getVaultForLocation(state, state.Building)
+		if vault == nil {
+			log.Printf("❌ Vault not found for building: %s (Location: %s)", state.Building, state.Location)
+			log.Printf("📦 Available vaults: %+v", state.Vaults)
+			return &GameActionResponse{
+				Success: false,
+				Message: "Vault not found for this building",
+				Color:   "error",
+			}, nil
+		}
+		log.Printf("✅ Opening vault for building: %s", state.Building)
+		return &GameActionResponse{
+			Success: true,
+			Message: responseText,
+			Color:   "yellow",
+			Delta: map[string]interface{}{
+				"open_vault": vault,
+				"npc_dialogue": map[string]interface{}{
+					"action": "close",
+				},
+			},
+		}, nil
+
+	case "end_dialogue":
+		return &GameActionResponse{
+			Success: true,
+			Message: responseText,
+			Color:   "yellow",
+			Delta: map[string]interface{}{
+				"npc_dialogue": map[string]interface{}{
+					"action": "close",
+				},
+			},
+		}, nil
+	}
+
+	// Get next options and filter based on requirements
+	options, _ := choiceNode["options"].([]interface{})
+	var optionsList []string
+	for _, opt := range options {
+		if optStr, ok := opt.(string); ok {
+			// Get the option node to check requirements
+			optionNode, _ := dialogue[optStr].(map[string]interface{})
+			if optionNode != nil {
+				requirements, _ := optionNode["requirements"].(map[string]interface{})
+				// Only include option if requirements are met
+				if checkDialogueRequirements(state, requirements) {
+					optionsList = append(optionsList, optStr)
+				} else {
+					log.Printf("🚫 Filtered out option '%s' (requirements not met)", optStr)
+				}
+			} else {
+				// No requirements, include it
+				optionsList = append(optionsList, optStr)
+			}
+		}
+	}
+
+	displayText := responseText
+	if actionResult != "" {
+		displayText = actionResult
+	}
+
+	return &GameActionResponse{
+		Success: true,
+		Message: displayText,
+		Color:   "yellow",
+		Delta: map[string]interface{}{
+			"npc_dialogue": map[string]interface{}{
+				"npc_id":  npcID,
+				"node":    choice,
+				"text":    displayText,
+				"options": optionsList,
+			},
+		},
+	}, nil
+}
+
+// Helper: Check if vault is registered at location
+func isVaultRegistered(state *SaveFile, buildingID string) bool {
+	if state.Vaults == nil {
+		log.Printf("🔍 isVaultRegistered: No vaults array found")
+		return false
+	}
+	log.Printf("🔍 isVaultRegistered: Checking building '%s' (location: '%s') against %d vaults", buildingID, state.Location, len(state.Vaults))
+	for i, vault := range state.Vaults {
+		// Check new format (building field)
+		if building, ok := vault["building"].(string); ok {
+			log.Printf("  - Vault %d: building = '%s' (new format)", i, building)
+			if building == buildingID {
+				log.Printf("  ✅ Match found (by building)!")
+				return true
+			}
+		} else if location, ok := vault["location"].(string); ok {
+			// Check old format (location field) - match if we're at that location
+			log.Printf("  - Vault %d: location = '%s' (old format)", i, location)
+			if location == state.Location {
+				log.Printf("  ✅ Match found (by location - old format)!")
+				return true
+			}
+		} else {
+			log.Printf("  - Vault %d: no building or location field", i)
+		}
+	}
+	log.Printf("  ❌ No match found for building '%s'", buildingID)
+	return false
+}
+
+// Helper: Check if race is native to location
+func isNativeRaceForLocation(race, location string) bool {
+	nativeRaces := map[string][]string{
+		"kingdom":           {"Human", "Half-Elf", "Half-Orc", "Tiefling"},
+		"village-southwest": {"Orc"},
+		"forest-kingdom":    {"Elf"},
+		"hill-kingdom":      {"Dwarf"},
+		"village-west":      {"Halfling"},
+	}
+
+	races, ok := nativeRaces[location]
+	if !ok {
+		return false
+	}
+
+	for _, r := range races {
+		if r == race {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper: Check dialogue requirements
+func checkDialogueRequirements(state *SaveFile, requirements map[string]interface{}) bool {
+	if requirements == nil {
+		return true
+	}
+
+	if notNative, ok := requirements["not_native"].(bool); ok && notNative {
+		if isNativeRaceForLocation(state.Race, state.Location) {
+			return false
+		}
+	}
+
+	if notRegistered, ok := requirements["not_registered"].(bool); ok && notRegistered {
+		if isVaultRegistered(state, state.Building) {
+			return false
+		}
+	}
+
+	if registered, ok := requirements["registered"].(bool); ok && registered {
+		if !isVaultRegistered(state, state.Building) {
+			return false
+		}
+	}
+
+	if goldReq, ok := requirements["gold"].(float64); ok {
+		if state.Gold < int(goldReq) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Helper: Register vault at location
+func registerVault(state *SaveFile, buildingID string) {
+	if state.Vaults == nil {
+		state.Vaults = []map[string]interface{}{}
+	}
+
+	// Check if already registered
+	for _, vault := range state.Vaults {
+		if building, ok := vault["building"].(string); ok && building == buildingID {
+			return // Already registered
+		}
+	}
+
+	// Create new vault with 40 empty slots
+	slots := make([]map[string]interface{}, 40)
+	for i := 0; i < 40; i++ {
+		slots[i] = map[string]interface{}{
+			"slot":     i,
+			"item":     nil,
+			"quantity": 0,
+		}
+	}
+
+	vault := map[string]interface{}{
+		"building": buildingID,
+		"slots":    slots,
+	}
+
+	state.Vaults = append(state.Vaults, vault)
+	log.Printf("✅ Registered vault at %s", buildingID)
+}
+
+// Helper: Get vault for location
+func getVaultForLocation(state *SaveFile, buildingID string) map[string]interface{} {
+	if state.Vaults == nil {
+		return nil
+	}
+
+	for _, vault := range state.Vaults {
+		// Check new format (building field)
+		if building, ok := vault["building"].(string); ok && building == buildingID {
+			return vault
+		}
+		// Check old format (location field) - return if we're at that location
+		if location, ok := vault["location"].(string); ok && location == state.Location {
+			return vault
+		}
+	}
+
+	return nil
+}
+
+// handleRegisterVaultAction registers a vault (called after payment)
+func handleRegisterVaultAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	buildingID := state.Building
+	if buildingID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	registerVault(state, buildingID)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: "Vault registered successfully",
+		Color:   "green",
+	}, nil
+}
+
+// handleOpenVaultAction returns vault data for UI
+func handleOpenVaultAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	buildingID := state.Building
+	if buildingID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	vault := getVaultForLocation(state, buildingID)
+	if vault == nil {
+		return nil, fmt.Errorf("no vault registered at this location")
+	}
+
+	return &GameActionResponse{
+		Success: true,
+		Message: "Vault opened",
+		Delta: map[string]interface{}{
+			"vault": vault,
+		},
 	}, nil
 }
 

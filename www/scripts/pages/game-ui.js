@@ -1387,10 +1387,296 @@ async function exitBuilding() {
     }
 }
 
-function talkToNPC(npcId) {
-    console.log('Talking to NPC:', npcId);
-    showMessage(`💬 Talking to ${npcId.replace(/_/g, ' ')}...`, 'info');
-    // TODO: Implement NPC dialogue
+async function talkToNPC(npcId) {
+    console.log('💬 Initiating dialogue with NPC:', npcId);
+
+    try {
+        const result = await window.gameAPI.sendAction('talk_to_npc', { npc_id: npcId });
+
+        if (result.success && result.delta?.npc_dialogue) {
+            showNPCDialogue(result.delta.npc_dialogue, result.message);
+        } else {
+            showMessage('❌ Failed to talk to NPC', 'error');
+        }
+    } catch (error) {
+        console.error('Error talking to NPC:', error);
+        showMessage('❌ Failed to talk to NPC', 'error');
+    }
+}
+
+// Show NPC dialogue UI - replaces bottom UI with dialogue options
+function showNPCDialogue(dialogueData, npcMessage) {
+    console.log('📜 Showing NPC dialogue:', dialogueData);
+
+    // Show NPC message in yellow
+    if (npcMessage) {
+        showMessage(npcMessage, 'warning'); // warning = yellow
+    }
+
+    // Get the action-buttons container (parent of all three columns)
+    const actionButtonsArea = document.getElementById('action-buttons');
+    if (!actionButtonsArea) {
+        console.error('❌ action-buttons container not found!');
+        return;
+    }
+
+    // Hide the normal action buttons
+    actionButtonsArea.style.display = 'none';
+
+    // Create or get dialogue overlay container
+    let dialogueOverlay = document.getElementById('npc-dialogue-overlay');
+    if (!dialogueOverlay) {
+        dialogueOverlay = document.createElement('div');
+        dialogueOverlay.id = 'npc-dialogue-overlay';
+        dialogueOverlay.className = 'p-4 bg-gray-800 border-t-4 border-yellow-500';
+        dialogueOverlay.style.height = '125px'; // Match action-buttons height
+
+        // Insert right after action-buttons
+        actionButtonsArea.parentNode.insertBefore(dialogueOverlay, actionButtonsArea.nextSibling);
+    }
+
+    // Clear previous content
+    dialogueOverlay.innerHTML = '';
+
+    // Create dialogue options grid
+    const optionsGrid = document.createElement('div');
+    optionsGrid.className = 'grid grid-cols-3 gap-1';
+
+    // Add dialogue option buttons
+    if (dialogueData.options && dialogueData.options.length > 0) {
+        dialogueData.options.forEach(optionKey => {
+            const button = document.createElement('button');
+            button.className = 'bg-yellow-700 hover:bg-yellow-600 border-2 border-yellow-900 text-white px-2 py-1 font-bold transition-all';
+            button.style.fontSize = '10px';
+            button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
+
+            // Format option text (convert snake_case to readable)
+            const optionText = formatDialogueOption(optionKey);
+            button.textContent = optionText;
+
+            button.addEventListener('click', () => selectDialogueOption(dialogueData.npc_id, optionKey));
+            optionsGrid.appendChild(button);
+        });
+    } else {
+        console.warn('⚠️ No dialogue options provided!');
+    }
+
+    dialogueOverlay.appendChild(optionsGrid);
+    dialogueOverlay.style.display = 'block';
+
+    console.log('✅ Dialogue overlay created with', dialogueData.options?.length || 0, 'options');
+}
+
+// Format dialogue option key to readable text
+function formatDialogueOption(optionKey) {
+    const optionNames = {
+        'ask_about_fee': 'Ask about fee',
+        'ask_about_tribute': 'Ask about tribute',
+        'pay_fee': 'Pay the fee',
+        'pay_tribute': 'Pay tribute',
+        'use_storage': 'Use storage',
+        'maybe_later': 'Maybe later',
+        'goodbye': 'Goodbye'
+    };
+
+    return optionNames[optionKey] || optionKey.replace(/_/g, ' ');
+}
+
+// Handle dialogue option selection
+async function selectDialogueOption(npcId, choice) {
+    console.log('💬 Selected dialogue option:', choice);
+
+    try {
+        const result = await window.gameAPI.sendAction('npc_dialogue_choice', {
+            npc_id: npcId,
+            choice: choice
+        });
+
+        if (result.success) {
+            // Show NPC response in yellow
+            if (result.message) {
+                showMessage(result.message, 'warning');
+            }
+
+            // Check if vault should open (check this first before close action)
+            if (result.delta?.open_vault) {
+                console.log('🏦 Opening vault with data:', result.delta.open_vault);
+                closeNPCDialogue();
+                await refreshGameState();
+                showVaultUI(result.delta.open_vault);
+            }
+            // Check if dialogue should close
+            else if (result.delta?.npc_dialogue?.action === 'close') {
+                closeNPCDialogue();
+                await refreshGameState();
+            }
+            // Continue dialogue with new options
+            else if (result.delta?.npc_dialogue) {
+                showNPCDialogue(result.delta.npc_dialogue, result.message);
+            }
+        } else {
+            console.error('❌ Dialogue option failed:', result.error);
+            showMessage(result.error || 'Dialogue option failed', 'error');
+        }
+    } catch (error) {
+        console.error('Error selecting dialogue option:', error);
+        showMessage('❌ Failed to process dialogue', 'error');
+    }
+}
+
+// Close NPC dialogue and restore normal UI
+function closeNPCDialogue() {
+    console.log('🚪 Closing NPC dialogue');
+
+    // Hide dialogue overlay
+    const dialogueOverlay = document.getElementById('npc-dialogue-overlay');
+    if (dialogueOverlay) {
+        dialogueOverlay.style.display = 'none';
+    }
+
+    // Restore action buttons
+    const actionButtonsArea = document.getElementById('action-buttons');
+    if (actionButtonsArea) {
+        actionButtonsArea.style.display = 'grid'; // Restore grid display
+    }
+
+    console.log('✅ Dialogue closed, action buttons restored');
+}
+
+// Show vault UI overlay (40 slots over main scene)
+function showVaultUI(vaultData) {
+    console.log('🏦 Opening vault:', vaultData);
+
+    // Get scene container to overlay on top of it
+    const sceneContainer = document.getElementById('scene-container');
+    if (!sceneContainer) {
+        console.error('Scene container not found');
+        return;
+    }
+
+    // Create or get vault overlay
+    let vaultOverlay = document.getElementById('vault-overlay');
+    if (!vaultOverlay) {
+        vaultOverlay = document.createElement('div');
+        vaultOverlay.id = 'vault-overlay';
+        vaultOverlay.className = 'absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center';
+        vaultOverlay.style.zIndex = '100';
+        sceneContainer.appendChild(vaultOverlay);
+    }
+
+    // Clear previous content
+    vaultOverlay.innerHTML = '';
+
+    // Create vault container
+    const vaultContainer = document.createElement('div');
+    vaultContainer.className = 'p-2 w-full h-full flex flex-col';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'flex justify-between items-center mb-2';
+
+    const title = document.createElement('h2');
+    title.className = 'text-yellow-400 font-bold';
+    title.style.fontSize = '12px';
+    title.textContent = '🏦 Vault Storage';
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'text-white px-2 py-1 font-bold';
+    closeButton.style.cssText = 'background: #dc2626; border-top: 2px solid #ef4444; border-left: 2px solid #ef4444; border-right: 2px solid #991b1b; border-bottom: 2px solid #991b1b; font-size: 10px;';
+    closeButton.textContent = 'Close';
+    closeButton.addEventListener('click', closeVaultUI);
+
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    vaultContainer.appendChild(header);
+
+    // Vault slots grid (40 slots in 8x5 grid)
+    const slotsGrid = document.createElement('div');
+    slotsGrid.className = 'grid grid-cols-8 gap-1 flex-1';
+    slotsGrid.id = 'vault-slots-grid';
+    slotsGrid.style.gridAutoRows = '1fr';
+
+    const slots = vaultData.slots || [];
+    for (let i = 0; i < 40; i++) {
+        const slotData = slots[i] || { slot: i, item: null, quantity: 0 };
+        const slotElement = createVaultSlot(slotData, i, vaultData.building || vaultData.location);
+        slotsGrid.appendChild(slotElement);
+    }
+
+    vaultContainer.appendChild(slotsGrid);
+
+    // Instructions
+    const instructions = document.createElement('div');
+    instructions.className = 'text-gray-400 text-center mt-1';
+    instructions.style.fontSize = '8px';
+    instructions.textContent = 'Click inventory items to store. Click vault items to withdraw.';
+    vaultContainer.appendChild(instructions);
+
+    vaultOverlay.appendChild(vaultContainer);
+    vaultOverlay.style.display = 'flex';
+
+    // Mark vault as open
+    window.vaultOpen = true;
+
+    // Initialize drag-and-drop for vault
+    if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
+        setTimeout(() => {
+            window.inventoryInteractions.bindInventoryEvents();
+        }, 100);
+    }
+}
+
+// Create a single vault slot element (styled like backpack slots)
+function createVaultSlot(slotData, slotIndex, buildingId) {
+    const slot = document.createElement('div');
+    slot.className = 'vault-slot relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
+    // Match backpack slot styling exactly
+    slot.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+
+    // Data attributes for drag-and-drop
+    slot.setAttribute('data-vault-slot', slotIndex);
+    slot.setAttribute('data-vault-building', buildingId);
+    slot.setAttribute('data-slot-type', 'vault');
+
+    if (slotData.item && slotData.quantity > 0) {
+        slot.setAttribute('data-item-id', slotData.item);
+
+        // Create image container
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+        const img = document.createElement('img');
+        img.src = `/res/img/items/${slotData.item}.png`;
+        img.alt = slotData.item;
+        img.className = 'w-full h-full object-contain';
+        img.style.imageRendering = 'pixelated';
+        imgDiv.appendChild(img);
+        slot.appendChild(imgDiv);
+
+        // Add quantity label if > 1
+        if (slotData.quantity > 1) {
+            const quantityLabel = document.createElement('div');
+            quantityLabel.className = 'absolute bottom-0 right-0 text-white';
+            quantityLabel.style.fontSize = '10px';
+            quantityLabel.textContent = `${slotData.quantity}`;
+            slot.appendChild(quantityLabel);
+        }
+    }
+
+    return slot;
+}
+
+// Close vault UI
+function closeVaultUI() {
+    const vaultOverlay = document.getElementById('vault-overlay');
+    if (vaultOverlay) {
+        vaultOverlay.style.display = 'none';
+    }
+
+    // Mark vault as closed
+    window.vaultOpen = false;
+
+    // Refresh inventory display
+    updateCharacterDisplay();
 }
 
 // Update combat interface (combat system not implemented yet)
@@ -1713,5 +1999,9 @@ window.openGroundModal = openGroundModal;
 window.closeGroundModal = closeGroundModal;
 window.refreshGroundModal = refreshGroundModal;
 window.pickupGroundItem = pickupGroundItem;
+
+// Export vault functions
+window.showVaultUI = showVaultUI;
+window.closeVaultUI = closeVaultUI;
 
 console.log('Game UI functions loaded');

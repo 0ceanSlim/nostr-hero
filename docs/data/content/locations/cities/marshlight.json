@@ -35,37 +35,17 @@
           "open": "always",
           "close": null
         },
-        {
-          "id": "marsh_inn",
-          "name": "The Glowing Lantern",
-          "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
-          "npcs": ["swamp-innkeeper", "swamp-doorman"],
-          "open": 7,
-          "close": 4
-        },
+
         {
           "id": "bog_trader",
           "name": "Swamp Treasures",
           "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
           "npcs": ["swamp-trader"],
-          "open": 7,
-          "close": 8
-        },
-        {
-          "id": "spirit_shrine",
-          "name": "Shrine of Peaceful Spirits",
-          "description": "A shrine dedicated to keeping the restless spirits of the marsh at peace.",
-          "npcs": [],
-          "open": "always",
-          "close": null
+          "open": 8,
+          "close": 16
         }
       ],
-      "npcs": [
-        "hoardkeeper",
-        "swamp-trader",
-        "swamp-innkeeper",
-        "swamp-doorman"
-      ]
+      "npcs": []
     },
     "east": {
       "id": "marshlight-east",
@@ -77,12 +57,12 @@
       },
       "buildings": [
         {
-          "id": "boat_dock",
-          "name": "Marsh Boat Rental",
-          "description": "Where shallow-draft boats are rented for swamp navigation.",
-          "npcs": [],
-          "open": 6,
-          "close": 9
+          "id": "marsh_inn",
+          "name": "The Glowing Lantern",
+          "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
+          "npcs": ["swamp-innkeeper", "swamp-doorman"],
+          "open": 14,
+          "close": 8
         }
       ],
       "npcs": [],
