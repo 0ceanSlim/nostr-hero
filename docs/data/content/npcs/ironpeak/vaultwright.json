@@ -52,11 +52,5 @@
       "text": "Stone and steel keep ye safe, friend. Until next time.",
       "action": "end_dialogue"
     }
-  },
-  "storage_config": {
-    "free_for_races": ["Dwarf"],
-    "registration_fee": 55,
-    "storage_slots": 40,
-    "slot_type": "standard"
   }
 }

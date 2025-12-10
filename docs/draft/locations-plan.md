@@ -7,30 +7,36 @@ Current plan for location-based services in starting cities.
 Each starting city needs these core services:
 
 ### 1. General Store
+
 **Purpose**: Buy/sell basic items and equipment
 
 **Features**:
+
 - Buy items from curated inventory
 - Sell items from player inventory
 - Pricing based on shop-pricing-system.md
 - Stock based on location tier/size
 
 **TODO**:
+
 - Implement shop UI
 - Create shop inventory lists per city
 - Implement buy/sell transactions
 - Add price calculations
 
 ### 2. Vault (House of Keeping)
+
 **Purpose**: Long-term item storage
 
 **Features**:
+
 - Store items beyond inventory limits
 - Safe storage (items don't decay/disappear)
 - Per-character storage (not shared between saves)
-- Access from any vault location
+- Access from any vault location (TODO THIS IS WRONG, YOU CAN ONLY ACCESS VAULTS FROM THEIR LOCATION AND WHEN YOU UNLOCK ONE A NEW HOST OF SLOTS IS ADDED TO YOUR SAVE FILE FOR THAT LOCATION)
 
 **TODO**:
+
 - Implement vault UI
 - Add storage capacity limits
 - Create vault data structure in save files
@@ -39,15 +45,18 @@ Each starting city needs these core services:
 **See**: `house-of-keeping-system.md` for initial design (needs updates)
 
 ### 3. Inn/Tavern
+
 **Purpose**: Rest, recover, and social hub
 
 **Features**:
+
 - Rest to recover HP/mana/hunger/fatigue
 - Cost to rest based on room quality
 - Social interactions (future: NPCs, quests)
 - Performance opportunities (future: bard performances)
 
 **TODO**:
+
 - Implement rest system
 - Add pricing tiers (poor/common/fine rooms)
 - Create rest recovery calculations
@@ -64,6 +73,7 @@ Each starting city needs these core services:
 ## Future Services
 
 These may be added to larger cities later:
+
 - Blacksmith (equipment upgrades/repairs)
 - Alchemist (potion crafting)
 - Magic shop (spell scrolls, wands)
@@ -84,6 +94,7 @@ These may be added to larger cities later:
 **Last Updated**: 2025-11-03
 **Status**: Planning phase
 **Related Docs**:
+
 - `shop-pricing-system.md`
 - `shop-system.md`
 - `specialized-shops-design.md`

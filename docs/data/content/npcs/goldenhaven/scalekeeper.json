@@ -52,11 +52,5 @@
       "text": "May the fire within you burn eternal. Farewell.",
       "action": "end_dialogue"
     }
-  },
-  "storage_config": {
-    "free_for_races": ["Dragonborn"],
-    "registration_fee": 70,
-    "storage_slots": 40,
-    "slot_type": "standard"
   }
 }

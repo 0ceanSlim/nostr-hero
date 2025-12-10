@@ -187,21 +187,10 @@ function getEmptyGameState() {
 // Update the game state (triggers UI refresh)
 // This is now just for UI updates - game actions should use gameAPI.sendAction()
 async function refreshGameState() {
-    console.log('🔄 Refreshing game state from Go...');
-
     // Fetch fresh state from Go
     const newState = await getGameState(true);
 
-    console.log('📦 Fetched state:', {
-        hasCharacter: !!newState.character,
-        hasInventory: !!newState.inventory,
-        hasEquipment: !!newState.equipment,
-        inventorySlots: newState.inventory?.length,
-        characterInventory: !!newState.character?.inventory
-    });
-
     // Trigger UI updates
-    console.log('📢 Dispatching gameStateChange event...');
     document.dispatchEvent(new CustomEvent('gameStateChange', { detail: newState }));
 
     return newState;

@@ -69,12 +69,9 @@ async function loadItemsFromDatabase() {
       throw new Error('Failed to fetch items from database');
     }
     const data = await response.json();
-    console.log('Raw API response:', data);
-    console.log('Type of data:', typeof data, 'Is array:', Array.isArray(data));
 
     // The API returns an array directly, not wrapped in an object
     itemsDatabaseCache = Array.isArray(data) ? data : (data.items || []);
-    console.log('Cached items:', itemsDatabaseCache.length);
     return itemsDatabaseCache;
   } catch (error) {
     console.error('Error loading items from database:', error);
@@ -109,11 +106,7 @@ async function loadAdvancementData() {
 async function getItemByIdAsync(itemId) {
   try {
     const items = await loadItemsFromDatabase();
-    console.log(`Looking for item '${itemId}' in ${items.length} items`);
     const item = items.find(i => i.id === itemId);
-    if (!item) {
-      console.warn(`Item '${itemId}' not found. Available IDs:`, items.slice(0, 5).map(i => i.id));
-    }
     return item || null;
   } catch (error) {
     console.error(`Error getting item ${itemId}:`, error);
@@ -157,8 +150,6 @@ window.showActionText = function showActionText(text, color = 'white', duration 
     if (textContainer) {
         textContainer.scrollTop = textContainer.scrollHeight;
     }
-
-    console.log(`📝 ${color.toUpperCase()}: ${text}`);
 }
 
 // Legacy showMessage function - now uses showActionText
@@ -191,7 +182,6 @@ async function calculateMaxCapacity(character) {
                 if (itemData) {
                     const weightIncrease = itemData.weight_increase || itemData.properties?.weight_increase || 0;
                     if (weightIncrease > 0) {
-                        console.log(`Item ${slot.item} adds ${weightIncrease} lbs capacity`);
                         capacityBonus += weightIncrease;
                     }
                 }
@@ -200,7 +190,6 @@ async function calculateMaxCapacity(character) {
     }
 
     const totalCapacity = baseCapacity + capacityBonus;
-    console.log(`Max capacity: ${baseCapacity} (base) + ${capacityBonus} (items) = ${totalCapacity} lbs`);
     return totalCapacity;
 }
 
@@ -209,24 +198,20 @@ async function calculateMaxCapacity(character) {
  */
 async function calculateAndDisplayWeight(character) {
     if (!character.inventory) {
-        console.log('No inventory found');
         return 0;
     }
 
     let totalWeight = 0;
     const items = await loadItemsFromDatabase();
-    console.log('Calculating weight with', items.length, 'items in database');
 
     // Function to get item weight by ID
     const getItemWeight = (itemId) => {
         const item = items.find(i => i.id === itemId);
         if (!item) {
-            console.log(`Item ${itemId}: not found`);
             return 0;
         }
         // Weight can be at top level or in properties object
         const weight = item.weight || item.properties?.weight || 0;
-        console.log(`Item ${itemId}: weight = ${weight}`);
         return weight;
     };
 
@@ -242,7 +227,6 @@ async function calculateAndDisplayWeight(character) {
             if (slot && slot.item) {
                 const weight = getItemWeight(slot.item);
                 const itemWeight = weight * (slot.quantity || 1);
-                console.log(`Gear slot ${slotName}: ${slot.item} x${slot.quantity || 1} = ${itemWeight} lb`);
                 totalWeight += itemWeight;
             }
         }
@@ -252,18 +236,15 @@ async function calculateAndDisplayWeight(character) {
             // Add bag weight
             if (gearSlots.bag.item) {
                 const bagWeight = getItemWeight(gearSlots.bag.item);
-                console.log(`Bag itself: ${gearSlots.bag.item} = ${bagWeight} lb`);
                 totalWeight += bagWeight;
             }
 
             // Add contents weight
             if (gearSlots.bag.contents && Array.isArray(gearSlots.bag.contents)) {
-                console.log(`Bag has ${gearSlots.bag.contents.length} slots`);
                 gearSlots.bag.contents.forEach(slot => {
                     if (slot && slot.item) {
                         const weight = getItemWeight(slot.item);
                         const itemWeight = weight * (slot.quantity || 1);
-                        console.log(`Bag slot: ${slot.item} x${slot.quantity || 1} = ${itemWeight} lb`);
                         totalWeight += itemWeight;
                     }
                 });
@@ -273,12 +254,10 @@ async function calculateAndDisplayWeight(character) {
 
     // Calculate general slots weight
     if (character.inventory.general_slots && Array.isArray(character.inventory.general_slots)) {
-        console.log(`General slots: ${character.inventory.general_slots.length}`);
         character.inventory.general_slots.forEach(slot => {
             if (slot && slot.item) {
                 const weight = getItemWeight(slot.item);
                 const itemWeight = weight * (slot.quantity || 1);
-                console.log(`General slot: ${slot.item} x${slot.quantity || 1} = ${itemWeight} lb`);
                 totalWeight += itemWeight;
             }
         });
@@ -286,26 +265,15 @@ async function calculateAndDisplayWeight(character) {
 
     // Add gold weight (50 gold = 1 lb)
     const goldWeight = Math.floor((character.gold || 0) / 50);
-    console.log(`Gold weight: ${character.gold || 0} gp = ${goldWeight} lb`);
     totalWeight += goldWeight;
 
-    console.log(`Total weight: ${totalWeight} lb`);
     return Math.round(totalWeight);
 }
 
 // Update full character display from save data
 async function updateCharacterDisplay() {
-    console.log('🎨 updateCharacterDisplay() starting...');
     const state = getGameStateSync();
     const character = state.character;
-
-    console.log('🎨 Character data:', {
-        hasInventory: !!character.inventory,
-        hasGeneralSlots: !!(character.inventory?.general_slots),
-        generalSlotsCount: character.inventory?.general_slots?.length,
-        hasBag: !!(character.inventory?.gear_slots?.bag),
-        bagContentsCount: character.inventory?.gear_slots?.bag?.contents?.length
-    });
 
     if (!character) {
         console.error('❌ No character data found!');
@@ -481,7 +449,6 @@ async function updateCharacterDisplay() {
             if (slotEl) {
                 const itemId = gear[slotName]?.item;
                 const quantity = gear[slotName]?.quantity || 1;
-                console.log(`Equipment slot ${slotName}:`, itemId, `(qty: ${quantity})`);
 
                 if (itemId) {
                     // Add data-item-id attribute to the slot for interaction system
@@ -489,16 +456,12 @@ async function updateCharacterDisplay() {
 
                     // Fetch item data
                     const itemData = await getItemByIdAsync(itemId);
-                    console.log(`Item data for ${itemId}:`, itemData);
 
                     if (itemData) {
                         // Replace placeholder with item image
                         const imageContainer = slotEl.querySelector('.w-10.h-10');
                         if (imageContainer) {
                             imageContainer.innerHTML = `<img src="/res/img/items/${itemId}.png" alt="${itemData.name}" class="w-full h-full object-contain" style="image-rendering: pixelated;">`;
-                            console.log(`✅ Loaded image for ${slotName}: ${itemId}`);
-                        } else {
-                            console.warn(`⚠️ No image container found for ${slotName}`);
                         }
 
                         // Add quantity label if > 1 (for ammunition, potions, etc.)
@@ -554,7 +517,6 @@ async function updateCharacterDisplay() {
 
     // Update general slots (4x1 grid) - ALWAYS create slots even if empty
     const generalSlotsDiv = document.getElementById('general-slots');
-    console.log('🎨 Rendering general slots, element found:', !!generalSlotsDiv);
     if (generalSlotsDiv) {
         generalSlotsDiv.innerHTML = '';
 
@@ -577,7 +539,6 @@ async function updateCharacterDisplay() {
                 }
             }
         });
-        console.log('🎨 General slot map:', slotMap);
 
         // Create all 4 general slots
         for (let i = 0; i < 4; i++) {
@@ -619,7 +580,6 @@ async function updateCharacterDisplay() {
 
     // Update backpack items (4x5 grid = 20 slots) - ONLY show if bag is equipped
     const backpackDiv = document.getElementById('backpack-slots');
-    console.log('🎨 Rendering backpack slots, element found:', !!backpackDiv);
     if (backpackDiv) {
         backpackDiv.innerHTML = '';
 
@@ -631,7 +591,6 @@ async function updateCharacterDisplay() {
             if (backpackDiv.parentElement) {
                 backpackDiv.parentElement.style.display = 'none';
             }
-            console.log('🎒 No bag equipped - hiding backpack slots');
             return; // Exit early, don't render any slots
         }
 
@@ -639,7 +598,6 @@ async function updateCharacterDisplay() {
         if (backpackDiv.parentElement) {
             backpackDiv.parentElement.style.display = 'grid';
         }
-        console.log('🎒 Bag equipped - showing backpack slots');
 
         // Get or initialize contents
         if (!character.inventory.gear_slots.bag.contents) {
@@ -659,7 +617,6 @@ async function updateCharacterDisplay() {
                 }
             }
         });
-        console.log('🎨 Backpack slot map has', Object.keys(bagSlotMap).length, 'items');
 
         let itemCount = 0;
 
@@ -1545,14 +1502,9 @@ function closeNPCDialogue() {
 
 // Show vault UI overlay (40 slots over main scene)
 function showVaultUI(vaultData) {
-    console.log('🏦 Opening vault:', vaultData);
-
     // Get scene container to overlay on top of it
     const sceneContainer = document.getElementById('scene-container');
-    if (!sceneContainer) {
-        console.error('Scene container not found');
-        return;
-    }
+    if (!sceneContainer) return;
 
     // Create or get vault overlay
     let vaultOverlay = document.getElementById('vault-overlay');
@@ -1618,12 +1570,12 @@ function showVaultUI(vaultData) {
     // Mark vault as open
     window.vaultOpen = true;
 
-    // Initialize drag-and-drop for vault
-    if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
-        setTimeout(() => {
+    // Force DOM to update before binding events
+    requestAnimationFrame(() => {
+        if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
             window.inventoryInteractions.bindInventoryEvents();
-        }, 100);
-    }
+        }
+    });
 }
 
 // Create a single vault slot element (styled like backpack slots)
