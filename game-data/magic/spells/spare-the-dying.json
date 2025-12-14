@@ -1,0 +1,28 @@
+{
+  "name": "Spare the Dying",
+  "description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs.",
+  "level": 0,
+  "school": "necromancy",
+  "casting_time": "action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "instantaneous",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "healing",
+    "cantrip"
+  ],
+  "classes": [
+    "cleric"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ]
+}

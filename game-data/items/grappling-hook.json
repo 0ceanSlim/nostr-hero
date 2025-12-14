@@ -1,0 +1,23 @@
+{
+  "id": "grappling-hook",
+  "name": "Grappling Hook",
+  "description": "A three-pronged metal hook attached to a length of rope, used for climbing.",
+  "ai_description": "iron hook with three curved prongs and central shaft attached to coiled rope, climbing tool with sharp metal claws",
+  "price": 200,
+  "type": "Adventuring Gear",
+  "weight": 4,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be thrown to catch onto ledges for climbing"
+  ],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/grappling-hook.png"
+}

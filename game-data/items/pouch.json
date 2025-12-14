@@ -1,0 +1,27 @@
+{
+  "id": "pouch",
+  "name": "Pouch",
+  "description": "",
+  "ai_description": "small leather belt pouch with drawstring closure and metal clasps, worn coin purse for storing small items",
+  "price": 0,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "contains": "any",
+  "gear_slot": "bag",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "slots": "4",
+  "tags": [
+    "container",
+    "equipment"
+  ],
+  "notes": [],
+  "image": "/res/img/items/pouch.png"
+}

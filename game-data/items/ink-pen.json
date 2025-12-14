@@ -1,0 +1,23 @@
+{
+  "id": "ink-pen",
+  "name": "Ink pen",
+  "description": "A simple writing implement with a metal nib for dipping in ink.",
+  "ai_description": "wooden shaft with metal writing nib, quill pen replacement with sharp point for ink writing",
+  "price": 2,
+  "type": "Adventuring Gear",
+  "weight": 0.025,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Used for writing with ink"
+  ],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/ink-pen.png"
+}

@@ -1,0 +1,16 @@
+{
+  "id": 176,
+  "name": "Red Slaad",
+  "challenge_rating": 5.0,
+  "type": "Aberration",
+  "size": "Large",
+  "armor_class": 14,
+  "hit_points": 93,
+  "alignment": "chaotic neutral",
+  "img": "/static/img/monster/red-slaad.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

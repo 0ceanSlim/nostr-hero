@@ -1,0 +1,20 @@
+{
+  "id": 222,
+  "name": "Green Slaad",
+  "challenge_rating": 8.0,
+  "type": "Aberration",
+  "size": "Large",
+  "armor_class": 16,
+  "hit_points": 127,
+  "alignment": "chaotic neutral",
+  "tags": [
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/green-slaad.svg",
+  "enviornment": [
+    "forest",
+    "swamp",
+    "underwater",
+    "urban"
+  ]
+}

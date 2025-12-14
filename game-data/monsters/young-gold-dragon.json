@@ -1,0 +1,20 @@
+{
+  "id": 245,
+  "name": "Young Gold Dragon",
+  "challenge_rating": 10.0,
+  "type": "Dragon",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 178,
+  "alignment": "lawful good",
+  "tags": [
+    "Metallic",
+    "fly"
+  ],
+  "img": "/static/img/monster/young-gold-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

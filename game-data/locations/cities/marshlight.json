@@ -1,0 +1,72 @@
+{
+  "id": "marshlight",
+  "name": "Marshlight Village",
+  "type": "village",
+  "image": "/res/img/locations/marshlight.png",
+  "music": "Mellow Times",
+  "description": "A small village built on raised platforms over the wetlands. The residents have learned to live in harmony with the swamp, using its resources while respecting its dangers.",
+  "starting_races": ["Orc"],
+  "racial_entry_fees": {
+    "Human": 2,
+    "Half-Elf": 3,
+    "Half-Orc": 0,
+    "Tiefling": 0,
+    "Elf": 4,
+    "Dwarf": 3,
+    "Halfling": 2,
+    "Gnome": 2,
+    "Orc": 0,
+    "Dragonborn": 3
+  },
+  "districts": {
+    "center": {
+      "id": "marshlight-center",
+      "name": "Stilt Houses",
+      "description": "The village consists of houses built on stilts connected by wooden walkways. Lanterns filled with phosphorescent moss provide an eerie but practical light source.",
+      "connections": {
+        "east": "marshlight-east"
+      },
+      "buildings": [
+        {
+          "id": "warhoard",
+          "name": "The Warhoard",
+          "description": "Communal caches where orcs store spoils of war. Battle-scarred vaults in the lower levels, guarded fiercely by the clan's most trusted warriors.",
+          "npcs": ["hoardkeeper"],
+          "open": "always",
+          "close": null
+        },
+
+        {
+          "id": "bog_trader",
+          "name": "Swamp Treasures",
+          "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
+          "npcs": ["swamp-trader"],
+          "open": 8,
+          "close": 16
+        }
+      ],
+      "npcs": []
+    },
+    "east": {
+      "id": "marshlight-east",
+      "name": "Eastern Dock",
+      "description": "A small dock where boats can be hired for safer passage through the treacherous swamplands.",
+      "connections": {
+        "center": "marshlight-center",
+        "east": "shadowmere-wetlands"
+      },
+      "buildings": [
+        {
+          "id": "marsh_inn",
+          "name": "The Glowing Lantern",
+          "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
+          "npcs": ["swamp-innkeeper", "swamp-doorman"],
+          "open": 14,
+          "close": 8
+        }
+      ],
+      "npcs": [],
+      "exit_to_environment": "shadowmere-wetlands"
+    }
+  }
+}

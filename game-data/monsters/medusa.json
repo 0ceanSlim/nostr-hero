@@ -1,0 +1,16 @@
+{
+  "id": 205,
+  "name": "Medusa",
+  "challenge_rating": 6.0,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 127,
+  "alignment": "lawful evil",
+  "img": "/static/img/monster/medusa.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "Hex",
+  "description": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack.",
+  "level": 1,
+  "school": "enchantment",
+  "casting_time": "bonus action",
+  "range": "18",
+  "range_long": "18",
+  "duration": "1 hour",
+  "damage": "1d6",
+  "damage_type": "necrotic",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "necrotic",
+    "curse"
+  ],
+  "classes": [
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "bonus action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "ether-essence",
+        "quantity": 2
+      },
+      {
+        "component": "mana-crystals",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Orb provides unlimited ether-essence, Staff provides unlimited mana-crystals"
+  }
+}

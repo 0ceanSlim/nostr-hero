@@ -1,0 +1,15 @@
+{
+  "id": 4,
+  "name": "Shrieker",
+  "challenge_rating": 0.0,
+  "type": "Plant",
+  "size": "Medium",
+  "armor_class": 5,
+  "hit_points": 13,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/shrieker.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

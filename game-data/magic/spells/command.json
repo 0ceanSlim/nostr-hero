@@ -1,0 +1,30 @@
+{
+  "name": "Command",
+  "description": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn.",
+  "level": 1,
+  "school": "enchantment",
+  "casting_time": "action",
+  "range": "12",
+  "range_long": "12",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "wisdom",
+  "tags": [
+    "control",
+    "enchantment"
+  ],
+  "classes": [
+    "cleric",
+    "paladin"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

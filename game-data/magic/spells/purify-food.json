@@ -1,0 +1,29 @@
+{
+  "name": "Purify Food and Drink",
+  "description": "All nonmagical food and drink within a 5-foot-radius sphere centered on a point of your choice within range is purified and rendered free of poison and disease.",
+  "level": 1,
+  "school": "transmutation",
+  "casting_time": "action",
+  "range": "2",
+  "range_long": "2",
+  "duration": "instantaneous",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility"
+  ],
+  "classes": [
+    "cleric",
+    "paladin"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

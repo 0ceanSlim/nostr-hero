@@ -1,0 +1,20 @@
+{
+  "id": 170,
+  "name": "Sahuagin Baron",
+  "challenge_rating": 5.0,
+  "type": "Humanoid",
+  "size": "Large",
+  "armor_class": 16,
+  "hit_points": 76,
+  "alignment": "lawful evil",
+  "tags": [
+    "Sahuagin"
+  ],
+  "img": "/static/img/monster/sahuagin-baron.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "underwater",
+    "urban"
+  ]
+}

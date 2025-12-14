@@ -1,0 +1,25 @@
+{
+  "id": "mace",
+  "name": "Mace",
+  "description": "",
+  "ai_description": "heavy blunt weapon with flanged iron head on wooden handle, medieval crushing weapon with studded striking surface",
+  "price": 5,
+  "type": "Simple Melee Weapons",
+  "weight": 5,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "bludgeon",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/mace.png"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "hunting-trap",
+  "name": "Hunting Trap",
+  "description": "A steel trap with sharp teeth designed to catch and hold small to medium creatures.",
+  "ai_description": "iron jaw trap with serrated teeth, spring-loaded snare device that clamps shut when triggered",
+  "price": 500,
+  "type": "Adventuring Gear",
+  "weight": 25,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be set to catch creatures",
+    "Deals damage when triggered"
+  ],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/hunting-trap.png"
+}

@@ -1,0 +1,16 @@
+{
+  "id": 279,
+  "name": "Death Knight",
+  "challenge_rating": 17.0,
+  "type": "Undead",
+  "size": "Medium",
+  "armor_class": 20,
+  "hit_points": 180,
+  "alignment": "chaotic evil",
+  "img": "/static/img/monster/death-knight.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

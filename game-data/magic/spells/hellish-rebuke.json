@@ -1,0 +1,42 @@
+{
+  "name": "Hellish Rebuke",
+  "description": "You point your finger, and the creature that damaged you is momentarily surrounded by hellish flames. The creature must make a Dexterity saving throw.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "reaction",
+  "range": "12",
+  "range_long": "12",
+  "duration": "instantaneous",
+  "damage": "2d10",
+  "damage_type": "fire",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "dexterity",
+  "tags": [
+    "combat",
+    "damage",
+    "fire"
+  ],
+  "classes": [
+    "warlock"
+  ],
+  "rarity": "common",
+  "action_cost": "reaction",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "sulfur",
+        "quantity": 2
+      },
+      {
+        "component": "arcane-powder",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Rod provides unlimited sulfur, Wand provides unlimited arcane-powder"
+  }
+}

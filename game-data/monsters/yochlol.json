@@ -1,0 +1,21 @@
+{
+  "id": 242,
+  "name": "Yochlol",
+  "challenge_rating": 10.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 136,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Demon",
+    "Shapechanger"
+  ],
+  "img": "/static/img/monster/yochlol.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "crystal",
+  "name": "Crystal",
+  "description": "A perfectly cut crystal that resonates with magical energy, allowing spellcasters to focus their power.",
+  "ai_description": "faceted crystal orb with inner magical glow, clear quartz focus with prismatic light refractions and mystical energy",
+  "price": 1000,
+  "type": "Arcane Focus",
+  "weight": 1,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/arcane-focus.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "substitues": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "provides": "quartz-dust",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Quartz Dust for light and divination spells"
+  ],
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/crystal.png"
+}

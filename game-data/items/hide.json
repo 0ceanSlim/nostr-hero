@@ -1,0 +1,23 @@
+{
+  "id": "hide",
+  "name": "Hide",
+  "ai_description": "rough animal leather armor with thick fur trim, primitive protection made from beast hides",
+  "price": 1000,
+  "type": "Medium Armor",
+  "weight": 12,
+  "stack": 1,
+  "ac": "12 + Dex(max2)",
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "armor",
+  "image": "/res/img/items/hide.png"
+}

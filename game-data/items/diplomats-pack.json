@@ -1,0 +1,66 @@
+{
+  "id": "diplomats-pack",
+  "name": "Diplomat's Pack",
+  "description": "A sophisticated kit for diplomats and noble travelers, containing writing supplies and fine clothing. Unpacking equips a backpack and places all contents inside it.",
+  "price": 3402,
+  "type": "Pack",
+  "weight": 39,
+  "stack": 1,
+  "gear_slot": "consumable",
+  "rarity": "common",
+  "tags": [
+    "pack"
+  ],
+  "ai_description": "Polished leather pack with gold clasps, quills, and fine papers",
+  "contents": [
+    [
+      "backpack",
+      1
+    ],
+    [
+      "case-map-and-scroll",
+      2
+    ],
+    [
+      "clothes-fine",
+      1
+    ],
+    [
+      "rations",
+      2
+    ],
+    [
+      "ink",
+      1
+    ],
+    [
+      "ink-pen",
+      5
+    ],
+    [
+      "lamp",
+      1
+    ],
+    [
+      "oil",
+      4
+    ],
+    [
+      "paper",
+      5
+    ],
+    [
+      "parchment",
+      5
+    ],
+    [
+      "perfume-vial",
+      1
+    ],
+    [
+      "tinderbox",
+      1
+    ]
+  ],
+  "image": "/res/img/items/diplomats-pack.png"
+}

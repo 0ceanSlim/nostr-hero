@@ -1,0 +1,31 @@
+{
+  "name": "Produce Flame",
+  "description": "A flickering flame appears in your hand. The flame remains there for the duration and harms neither you nor your equipment. The flame sheds bright light in a 10-foot radius and dim light for an additional 10 feet.",
+  "level": 0,
+  "school": "conjuration",
+  "casting_time": "action",
+  "range": "self",
+  "range_long": "self",
+  "duration": "10 minutes",
+  "damage": "1d8",
+  "damage_type": "fire",
+  "type": "Spell",
+  "spell_attack": "ranged",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "fire",
+    "cantrip",
+    "utility"
+  ],
+  "classes": [
+    "druid"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "bone-dust",
+  "name": "Bone Dust",
+  "description": "Fine powder ground from the bones of cursed creatures. It feels cold and seems to absorb light around it. Required for casting Bane spells.",
+  "ai_description": "pale white bone powder with dark shadows, cursed dust that absorbs light and radiates cold energy",
+  "price": 200,
+  "type": "Spell Component",
+  "weight": 0,
+  "stack": 5,
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "focus_provided"
+  ],
+  "notes": [
+    "Used for necromancy and summoning magic",
+    "Unlimited when Totem focus is equipped",
+    "Consumed on use if no Totem focus"
+  ],
+  "range": "null",
+  "range-long": "null",
+  "img": "equipment/spell-component.jpg",
+  "image": "/res/img/items/bone-dust.png"
+}

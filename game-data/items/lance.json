@@ -1,0 +1,29 @@
+{
+  "id": "lance",
+  "name": "Lance",
+  "description": "",
+  "ai_description": "long wooden pole with sharp steel spearhead, cavalry weapon with extended reach and pointed tip",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 6,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d12",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "reach",
+    "topple",
+    "heavy",
+    "two-handed",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/lance.png"
+}

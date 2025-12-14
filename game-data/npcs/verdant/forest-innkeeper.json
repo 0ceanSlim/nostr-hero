@@ -1,0 +1,54 @@
+{
+  "id": "forest-innkeeper",
+  "name": "Faelyn Nightbreeze",
+  "title": "Innkeeper",
+  "race": "Elf",
+  "location": "city-south",
+  "building": "moonlit_glade_inn",
+  "description": "A serene elf with silver hair and gentle eyes. Her inn is a peaceful sanctuary infused with the calm of the surrounding forest.",
+  "greeting": {
+    "first_time": "Mae govannen, traveler. Welcome to the Moonlit Glade. I am Faelyn. May I offer you rest beneath our trees?",
+    "returning": "You return to us. The forest welcomes you back.",
+    "tired": "You carry weariness like a heavy cloak. Let us ease your burden."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "How may I serve you this evening?",
+      "options": ["rent_room", "buy_drink", "ask_about_entertainment", "goodbye"]
+    },
+    "rent_room": {
+      "text": "A room among the branches? 45 gold for a night's rest in harmony with nature. You will wake refreshed, as if the forest itself has renewed you.",
+      "action": "rent_room",
+      "cost": 45,
+      "requirements": {"gold": 45},
+      "success": "Your room awaits. The trees will watch over you. Sleep well.",
+      "failure": "I require 45 gold for lodging.",
+      "options": ["main_menu"]
+    },
+    "buy_drink": {
+      "text": "May I offer you moonberry wine? A specialty of our house. 6 gold.",
+      "action": "buy_drink",
+      "cost": 6,
+      "requirements": {"gold": 6},
+      "success": "Here you are. May it bring you peace.",
+      "failure": "6 gold for the wine.",
+      "options": ["main_menu"]
+    },
+    "ask_about_entertainment": {
+      "text": "We welcome musicians who understand the language of the forest. Speak with Theren by the entrance—he selects only those whose music complements our tranquil atmosphere.",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "Namárië. May the stars light your path.",
+      "action": "end_dialogue"
+    }
+  },
+  "inn_config": {
+    "rest_cost": 45,
+    "rest_benefits": {
+      "fatigue_restored": 100,
+      "hp_restored": "full",
+      "special_effects": ["well_rested_buff", "forest_blessing"]
+    }
+  }
+}

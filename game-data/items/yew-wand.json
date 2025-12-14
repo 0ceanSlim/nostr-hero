@@ -1,0 +1,29 @@
+{
+  "id": "yew-wand",
+  "name": "Yew Wand",
+  "ai_description": "slender wand carved from pale yew wood, smooth druidic focus with natural grain patterns",
+  "price": 1000,
+  "type": "Druidic Focus",
+  "weight": 1,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/druidic-focus.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "substitutes": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "provides": "tree-sap",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Tree Sap for poison and transformation magic"
+  ],
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/yew-wand.png"
+}

@@ -1,0 +1,20 @@
+{
+  "id": 267,
+  "name": "Ice Devil",
+  "challenge_rating": 14.0,
+  "type": "Fiend",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 180,
+  "alignment": "lawful evil",
+  "tags": [
+    "Devil"
+  ],
+  "img": "/static/img/monster/ice-devil.svg",
+  "enviornment": [
+    "arctic",
+    "desert",
+    "mountain",
+    "urban"
+  ]
+}

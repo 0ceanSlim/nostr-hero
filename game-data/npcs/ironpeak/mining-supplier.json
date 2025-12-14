@@ -1,0 +1,69 @@
+{
+  "id": "mining-supplier",
+  "name": "Brogni Ironhand",
+  "title": "Supply Master",
+  "race": "Dwarf",
+  "location": "town-northeast",
+  "building": "ironpeak_general_supplies",
+  "description": "A stocky dwarf with soot-stained hands and a no-nonsense demeanor. His shop is crammed with sturdy, practical gear that can survive the harsh mountain conditions.",
+  "greeting": {
+    "first_time": "Aye, welcome! Brogni Ironhand's the name. Ye need supplies that won't fail ye in the depths? Ye've come to the right place!",
+    "returning": "Back again, eh? Good to see ye. What'll it be?",
+    "low_gold": "Business has been brisk today—my coin pouch is runnin' dry. Can't buy much more 'til I make some sales."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "What can I get for ye?",
+      "options": ["browse_shop", "sell_items", "ask_about_durability", "goodbye"]
+    },
+    "browse_shop": {
+      "text": "Take a look! Every item built to last—dwarven quality, guaranteed. No shoddy goods here!",
+      "action": "open_shop",
+      "options": ["main_menu"]
+    },
+    "sell_items": {
+      "text": "Sellin', are ye? I'll take a look at what ye've got, long as I've got the coin for it.",
+      "action": "open_sell",
+      "requirements": {
+        "shop_gold": 1
+      },
+      "failure": "Coin's run dry, friend. Come back tomorrow when I've restocked me purse.",
+      "options": ["main_menu"]
+    },
+    "ask_about_durability": {
+      "text": "Every piece o' gear in this shop is tested personal-like. If it can't survive a trip into the mines, it don't make it onto me shelves. That's the dwarven way!",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "Stone and steel keep ye safe! Come back anytime!",
+      "action": "end_dialogue"
+    }
+  },
+  "shop_config": {
+    "shop_type": "general",
+    "buys_items": true,
+    "buy_price_multiplier": 0.5,
+    "sell_price_multiplier": 1.0,
+    "starting_gold": 550,
+    "max_gold": 1100,
+    "gold_regen_rate": 110,
+    "gold_regen_interval": "daily",
+    "inventory": [
+      {"item_id": "rope-hemp", "stock": 15, "max_stock": 15, "restock_rate": 10, "restock_interval": "daily"},
+      {"item_id": "torch", "stock": 30, "max_stock": 30, "restock_rate": 25, "restock_interval": "daily"},
+      {"item_id": "rations", "stock": 25, "max_stock": 25, "restock_rate": 20, "restock_interval": "daily"},
+      {"item_id": "waterskin", "stock": 12, "max_stock": 12, "restock_rate": 10, "restock_interval": "daily"},
+      {"item_id": "backpack", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
+      {"item_id": "bedroll", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "tinderbox", "stock": 15, "max_stock": 15, "restock_rate": 10, "restock_interval": "daily"},
+      {"item_id": "oil-flask", "stock": 15, "max_stock": 15, "restock_rate": 12, "restock_interval": "daily"},
+      {"item_id": "lantern-hooded", "stock": 10, "max_stock": 10, "restock_rate": 6, "restock_interval": "daily"},
+      {"item_id": "piton", "stock": 40, "max_stock": 40, "restock_rate": 30, "restock_interval": "daily"},
+      {"item_id": "hammer", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
+      {"item_id": "pickaxe", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "crowbar", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
+      {"item_id": "chain", "stock": 4, "max_stock": 4, "restock_rate": 2, "restock_interval": "daily"},
+      {"item_id": "miners-pick", "stock": 5, "max_stock": 5, "restock_rate": 3, "restock_interval": "daily"}
+    ]
+  }
+}

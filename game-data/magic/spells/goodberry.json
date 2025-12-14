@@ -1,0 +1,43 @@
+{
+  "name": "Goodberry",
+  "description": "You create 5 magical berries that can restore health in combat. As a bonus action, you or an ally within 5 feet can consume a berry to regain 1d4+1 hit points. All berries must be used within 1 hour or they lose their magic.",
+  "level": 1,
+  "school": "transmutation",
+  "casting_time": "action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "1 hour",
+  "damage": "1d4+1",
+  "damage_type": "healing",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "healing",
+    "combat",
+    "bonus_action"
+  ],
+  "classes": [
+    "druid",
+    "ranger"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "tree-sap",
+        "quantity": 1
+      },
+      {
+        "component": "pollen",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Yew Wand provides unlimited tree-sap (still need pollen)"
+  }
+}

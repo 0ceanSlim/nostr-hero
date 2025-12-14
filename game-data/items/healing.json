@@ -1,0 +1,27 @@
+{
+  "id": "healing",
+  "name": "Healing",
+  "description": "A crimson liquid that glows faintly when agitated. Drinking it restores vitality and closes minor wounds.",
+  "ai_description": "small glass vial with cork stopper, filled with bright red glowing healing potion, magical liquid with swirling energy",
+  "price": 5000,
+  "ac": null,
+  "damage": null,
+  "heal": "2d4 + 2",
+  "stack": 1,
+  "weight": 0.5,
+  "type": "Potion",
+  "notes": [
+    "Single use item",
+    "Takes an action to drink"
+  ],
+  "tags": [
+    "consumable",
+    "healing"
+  ],
+  "rarity": "common",
+  "img": "equipment/potion.jpg",
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/healing.png"
+}

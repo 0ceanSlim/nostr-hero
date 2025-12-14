@@ -1,0 +1,16 @@
+{
+  "id": 183,
+  "name": "Fire Elemental",
+  "challenge_rating": 5.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 102,
+  "alignment": "neutral",
+  "img": "/static/img/monster/fire-elemental.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "mountain"
+  ]
+}

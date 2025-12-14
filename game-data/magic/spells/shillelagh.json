@@ -1,0 +1,29 @@
+{
+  "name": "Shillelagh",
+  "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon.",
+  "level": 0,
+  "school": "transmutation",
+  "casting_time": "bonus action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "1 minute",
+  "damage": "1d8",
+  "damage_type": "bludgeoning",
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "combat",
+    "buff",
+    "cantrip"
+  ],
+  "classes": [
+    "druid"
+  ],
+  "rarity": "common",
+  "action_cost": "bonus action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": 60,
+  "name": "Faerie Dragon",
+  "challenge_rating": 1.0,
+  "type": "Dragon",
+  "size": "Tiny",
+  "armor_class": 15,
+  "hit_points": 14,
+  "alignment": "chaotic good",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/faerie-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

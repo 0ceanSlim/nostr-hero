@@ -1,0 +1,19 @@
+{
+  "id": 201,
+  "name": "Wyvern",
+  "challenge_rating": 6.0,
+  "type": "Dragon",
+  "size": "Large",
+  "armor_class": 13,
+  "hit_points": 110,
+  "alignment": "unaligned",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/wyvern.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

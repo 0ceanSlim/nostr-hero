@@ -1,0 +1,54 @@
+{
+  "id": "explorers-pack",
+  "name": "Explorer's Pack",
+  "description": "A complete adventure kit containing essential supplies for exploration and survival in the wilderness. Unpacking equips a backpack and places all contents inside it.",
+  "price": 850,
+  "type": "Pack",
+  "weight": 59,
+  "stack": 1,
+  "gear_slot": "consumable",
+  "rarity": "common",
+  "tags": [
+    "pack"
+  ],
+  "ai_description": "Weather-worn leather pack with bedroll, rope coils, and torches",
+  "contents": [
+    [
+      "backpack",
+      1
+    ],
+    [
+      "bedroll",
+      1
+    ],
+    [
+      "rations",
+      10
+    ],
+    [
+      "rope",
+      1
+    ],
+    [
+      "tinderbox",
+      1
+    ],
+    [
+      "torch",
+      10
+    ],
+    [
+      "waterskin",
+      1
+    ],
+    [
+      "mess-kit",
+      1
+    ],
+    [
+      "clothes-common",
+      1
+    ]
+  ],
+  "image": "/res/img/items/explorers-pack.png"
+}

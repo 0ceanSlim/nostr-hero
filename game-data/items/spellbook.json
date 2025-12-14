@@ -1,0 +1,21 @@
+{
+  "id": "spellbook",
+  "name": "Spellbook",
+  "description": "A leather-bound tome with 100 blank vellum pages suitable for recording spells. Essential for wizards and other spellcasters who prepare spells from written sources. The book has brass fittings and a clasp.",
+  "price": 5000,
+  "type": "Adventuring Gear",
+  "weight": 3,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "ai_description": "Leather tome with brass clasp, arcane symbols, and blank pages",
+  "notes": [],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/spellbook.png"
+}

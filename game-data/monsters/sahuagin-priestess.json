@@ -1,0 +1,20 @@
+{
+  "id": 85,
+  "name": "Sahuagin Priestess",
+  "challenge_rating": 2.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 12,
+  "hit_points": 33,
+  "alignment": "lawful evil",
+  "tags": [
+    "Sahuagin"
+  ],
+  "img": "/static/img/monster/sahuagin-priestess.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "underwater",
+    "urban"
+  ]
+}

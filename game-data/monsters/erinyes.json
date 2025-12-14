@@ -1,0 +1,21 @@
+{
+  "id": 257,
+  "name": "Erinyes",
+  "challenge_rating": 12.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 18,
+  "hit_points": 153,
+  "alignment": "lawful evil",
+  "tags": [
+    "Devil",
+    "fly"
+  ],
+  "img": "/static/img/monster/erinyes.svg",
+  "enviornment": [
+    "desert",
+    "hill",
+    "mountain",
+    "urban"
+  ]
+}

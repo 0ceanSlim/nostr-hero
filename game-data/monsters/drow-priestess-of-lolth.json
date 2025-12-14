@@ -1,0 +1,20 @@
+{
+  "id": 217,
+  "name": "Drow Priestess of Lolth",
+  "challenge_rating": 8.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 16,
+  "hit_points": 71,
+  "alignment": "neutral evil",
+  "tags": [
+    "Elf"
+  ],
+  "img": "/static/img/monster/drow-priestess-of-lolth.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "mountain",
+    "urban"
+  ]
+}

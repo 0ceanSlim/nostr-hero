@@ -1,0 +1,30 @@
+{
+  "id": "chain-mail",
+  "name": "Chain Mail",
+  "description": "Interlocking metal rings that provide excellent protection at the cost of mobility and stealth.",
+  "ai_description": "heavy armor made of thousands of interlocked iron rings, medieval mail hauberk with long sleeves and protective coif",
+  "price": 0,
+  "type": "Heavy Armor",
+  "weight": 55,
+  "stack": 1,
+  "ac": "16",
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "gear_slot": "armor",
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "stealth": "-1",
+  "str": "13",
+  "tags": [
+    "heavy",
+    "equipment"
+  ],
+  "notes": [
+    "Requires Strength 13 to wear effectively",
+    "Makes stealth more difficult"
+  ],
+  "image": "/res/img/items/chain-mail.png"
+}

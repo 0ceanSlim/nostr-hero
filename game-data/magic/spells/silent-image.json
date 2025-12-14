@@ -1,0 +1,31 @@
+{
+  "name": "Silent Image",
+  "description": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 15-foot cube. The image appears at a spot within range and lasts for the duration.",
+  "level": 1,
+  "school": "illusion",
+  "casting_time": "action",
+  "range": "12",
+  "range_long": "12",
+  "duration": "10 minutes",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "investigation",
+  "tags": [
+    "utility",
+    "illusion"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

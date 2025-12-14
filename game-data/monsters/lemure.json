@@ -1,0 +1,19 @@
+{
+  "id": 5,
+  "name": "Lemure",
+  "challenge_rating": 0.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 7,
+  "hit_points": 13,
+  "alignment": "lawful evil",
+  "tags": [
+    "Devil"
+  ],
+  "img": "/static/img/monster/lemure.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "urban"
+  ]
+}

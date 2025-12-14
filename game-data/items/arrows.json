@@ -1,0 +1,14 @@
+{
+  "id": "arrows",
+  "name": "Arrows",
+  "description": "",
+  "ai_description": "bundle of wooden arrows with steel points and feathered fletching, straight shafts for bow shooting with sharp tips",
+  "price": 5,
+  "type": "Ammunition",
+  "weight": 0,
+  "stack": 20,
+  "rarity": "common",
+  "img": "equipment/ammunition.jpg",
+  "image": "/res/img/items/arrows.png",
+  "gear_slot": "ammunition"
+}

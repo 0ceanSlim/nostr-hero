@@ -1,0 +1,31 @@
+{
+  "name": "Disguise Self",
+  "description": "You make yourself—including your clothing, armor, weapons, and other belongings on your person—look different until the spell ends or until you use your action to dismiss it.",
+  "level": 1,
+  "school": "illusion",
+  "casting_time": "action",
+  "range": "self",
+  "range_long": "self",
+  "duration": "1 hour",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "illusion"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

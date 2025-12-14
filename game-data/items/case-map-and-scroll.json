@@ -1,0 +1,28 @@
+{
+  "id": "case-map-and-scroll",
+  "name": "Map and Scroll Case",
+  "description": "A waterproof leather case designed to protect maps, scrolls, and important documents.",
+  "ai_description": "cylindrical leather scroll case with brass caps, waterproof tube for storing maps and documents with shoulder strap",
+  "price": 1,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "contains": "",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "slots": "8",
+  "tags": [
+    "container"
+  ],
+  "notes": [
+    "Protects documents from water damage",
+    "contains paper items"
+  ],
+  "image": "/res/img/items/case-map-and-scroll.png"
+}

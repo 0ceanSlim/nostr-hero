@@ -1,0 +1,23 @@
+{
+  "id": "lute",
+  "name": "Lute",
+  "description": "A stringed instrument with a rounded body and graceful neck, favored by bards and traveling musicians.",
+  "ai_description": "wooden stringed instrument with pear-shaped body, long neck with tuning pegs, classical bard's lute with sound hole",
+  "price": 3500,
+  "type": "Musical Instrument",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [],
+  "notes": [
+    "Can be used to perform music and entertain crowds"
+  ],
+  "image": "/res/img/items/lute.png"
+}

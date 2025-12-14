@@ -1,0 +1,29 @@
+{
+  "id": "shortbow",
+  "name": "Shortbow",
+  "description": "A compact recurved bow made for mobility and quick shots in combat.",
+  "ai_description": "compact curved bow made from flexible wood, shorter archery weapon with wrapped grip and taut bowstring",
+  "price": 0,
+  "type": "Simple Ranged Weapons",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "ammunition": "arrows",
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "2",
+  "range-long": "4",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "two-handed",
+    "equipment"
+  ],
+  "notes": [
+    "Requires arrows to fire"
+  ],
+  "gear_slot": "hands",
+  "image": "/res/img/items/shortbow.png"
+}

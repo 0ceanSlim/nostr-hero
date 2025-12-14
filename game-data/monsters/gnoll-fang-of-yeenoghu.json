@@ -1,0 +1,19 @@
+{
+  "id": 150,
+  "name": "Gnoll Fang of Yeenoghu",
+  "challenge_rating": 4.0,
+  "type": "Fiend",
+  "size": "Medium",
+  "armor_class": 14,
+  "hit_points": 65,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Gnoll"
+  ],
+  "img": "/static/img/monster/gnoll-fang-of-yeenoghu.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "urban"
+  ]
+}

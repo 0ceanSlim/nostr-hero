@@ -1,0 +1,27 @@
+{
+  "id": "lamp",
+  "name": "Lamp",
+  "description": "An oil-burning lamp that provides steady light when fueled.",
+  "ai_description": "metal oil lamp with glass chimney and carrying handle, fuel-burning light source with wick and reservoir",
+  "price": 50,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 1,
+  "type": "Adventuring Gear",
+  "notes": [
+    "Burns for 6 hours on one flask of oil",
+    "Provides bright light in 15-foot radius"
+  ],
+  "tags": [
+    "light-source",
+    "oil-burning"
+  ],
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/lamp.png"
+}

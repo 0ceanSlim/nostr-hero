@@ -1,0 +1,15 @@
+{
+  "id": 157,
+  "name": "Ettin",
+  "challenge_rating": 4.0,
+  "type": "Giant",
+  "size": "Large",
+  "armor_class": 12,
+  "hit_points": 85,
+  "alignment": "chaotic evil",
+  "img": "/static/img/monster/ettin.svg",
+  "enviornment": [
+    "hill",
+    "mountain"
+  ]
+}

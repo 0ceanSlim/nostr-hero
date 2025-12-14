@@ -1,0 +1,25 @@
+{
+  "id": "morningstar",
+  "name": "Morningstar",
+  "description": "",
+  "ai_description": "wooden-handled weapon with iron head covered in sharp metal spikes, medieval mace with protruding points",
+  "price": 15,
+  "type": "Martial Melee Weapons",
+  "weight": 4,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/morningstar.png"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "village-innkeeper",
+  "name": "Marigold Sweetwater",
+  "title": "Innkeeper",
+  "race": "Halfling",
+  "location": "village-west",
+  "building": "village_inn",
+  "description": "A cheerful halfling with rosy cheeks and a welcoming demeanor. Her inn smells of fresh bread and feels like home, no matter where you're from.",
+  "greeting": {
+    "first_time": "Oh hello, dear! Welcome to the Grain & Grape! I'm Marigold. Can I get you something? A room? A meal? You look like you could use both!",
+    "returning": "Back again! Always lovely to see a friendly face!",
+    "tired": "Oh my, you look exhausted, dear! A good night's sleep will do wonders!"
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "What can I get for you today, dear?",
+      "options": ["rent_room", "buy_drink", "ask_about_entertainment", "goodbye"]
+    },
+    "rent_room": {
+      "text": "A room for the night? Just 25 gold—that's our village rate! Includes a hearty breakfast with eggs from our own chickens and bread I baked this morning. You'll sleep like a baby!",
+      "action": "rent_room",
+      "cost": 25,
+      "requirements": {"gold": 25},
+      "success": "Wonderful! Your room is all ready. Upstairs, first door on the left. Sleep tight!",
+      "failure": "Oh, you'll need 25 gold for a room, dear.",
+      "options": ["main_menu"]
+    },
+    "buy_drink": {
+      "text": "How about some of our apple cider? Made locally—sweet and refreshing! Just 3 gold.",
+      "action": "buy_drink",
+      "cost": 3,
+      "requirements": {"gold": 3},
+      "success": "Here you are, dear! Enjoy!",
+      "failure": "It's 3 gold for the cider, love.",
+      "options": ["main_menu"]
+    },
+    "ask_about_entertainment": {
+      "text": "Oh, we love music here! Makes the whole village feel alive! Talk to Toby by the door—he books all our performers. Everyone's welcome here, no matter what instrument you play!",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "Safe travels, dear! Come back soon!",
+      "action": "end_dialogue"
+    }
+  },
+  "inn_config": {
+    "rest_cost": 25,
+    "rest_benefits": {
+      "fatigue_restored": 100,
+      "hp_restored": "full",
+      "special_effects": ["well_rested_buff", "homely_comfort"]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": 240,
+  "name": "Guardian Naga",
+  "challenge_rating": 10.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 127,
+  "alignment": "lawful good",
+  "img": "/static/img/monster/guardian-naga.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

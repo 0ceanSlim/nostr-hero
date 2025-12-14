@@ -1,0 +1,16 @@
+{
+  "id": 55,
+  "name": "Rust Monster",
+  "challenge_rating": 0.5,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 14,
+  "hit_points": 27,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/rust-monster.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

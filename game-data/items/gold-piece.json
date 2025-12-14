@@ -1,0 +1,21 @@
+{
+  "id": "gold-piece",
+  "name": "Gold Piece",
+  "description": "",
+  "ai_description": "a large stack of gold coins",
+  "price": 1,
+  "type": "Gold",
+  "weight": 0.006,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/gold-piece.png"
+}

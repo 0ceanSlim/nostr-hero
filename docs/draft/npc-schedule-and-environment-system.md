@@ -17,7 +17,7 @@ NPCs have schedules that determine their location throughout the day. Each NPC c
 
 ### Schedule Structure
 
-Each NPC has a schedule defining their location by time of day:
+Each NPC has a schedule defining their location and available dialogue throughout the day:
 
 ```json
 {
@@ -26,27 +26,46 @@ Each NPC has a schedule defining their location by time of day:
     {
       "time_range": "06:00-12:00",
       "location": "general_store",
-      "activity": "working"
+      "activity": "working",
+      "dialogue_options": [
+        {"id": "buy_items", "text": "I'd like to buy something"},
+        {"id": "sell_items", "text": "I have items to sell"},
+        {"id": "chat_work", "text": "How's business?"}
+      ]
     },
     {
       "time_range": "12:00-13:00",
       "location": "tavern",
-      "activity": "lunch"
+      "activity": "lunch",
+      "dialogue_options": [
+        {"id": "chat_meal", "text": "Enjoying your lunch?"},
+        {"id": "rumors", "text": "Heard any rumors lately?"}
+      ]
     },
     {
       "time_range": "13:00-18:00",
       "location": "general_store",
-      "activity": "working"
+      "activity": "working",
+      "dialogue_options": [
+        {"id": "buy_items", "text": "I'd like to buy something"},
+        {"id": "sell_items", "text": "I have items to sell"},
+        {"id": "chat_work", "text": "How's business?"}
+      ]
     },
     {
       "time_range": "18:00-22:00",
       "location": "home",
-      "activity": "resting"
+      "activity": "resting",
+      "dialogue_options": [
+        {"id": "chat_evening", "text": "Good evening"},
+        {"id": "chat_day", "text": "How was your day?"}
+      ]
     },
     {
       "time_range": "22:00-06:00",
       "location": "home",
-      "activity": "sleeping"
+      "activity": "sleeping",
+      "dialogue_options": []
     }
   ]
 }
@@ -55,12 +74,13 @@ Each NPC has a schedule defining their location by time of day:
 ### Implementation Notes
 - Time is checked against current game time (from 144x-time-progression.md)
 - NPCs appear/disappear from locations based on schedule
-- If player tries to interact with NPC at wrong time, show message: "Bob is not here right now"
-- Optional: Add hints about NPC location ("Try the tavern around noon")
+- Dialogue options change based on current schedule entry
+- NPCs only appear in locations during their scheduled times
 
 ### Data Storage
-- Add `schedule` field to NPC JSON files
-- Backend resolves current location based on game time when loading location data
+- Add `schedule` field to NPC JSON files with dialogue options per time slot
+- Backend resolves current location and available dialogue based on game time
+- Empty dialogue_options array means NPC cannot be interacted with (sleeping, etc.)
 
 ---
 
@@ -72,27 +92,43 @@ Each NPC has a schedule defining their location by time of day:
 - Time moves at 144x speed (as per 144x-time-progression.md)
 - Always accessible pause/play buttons
 - Player can pause time to plan, check inventory, etc.
-- Time resumes when player clicks play
+- Time resumes when:
+  - Player clicks play button
+  - Player interacts with any inventory tab
+  - Player uses wait button
 
 **Entering Environment**:
 - Time PAUSES automatically
-- Player sees environment description and options
+- Player sees environment description and directional options
 - No time passes until player makes movement decision
 
 **Traversing Environment** (Moving between locations):
-- Player chooses cardinal direction (N, S, E, W, NE, NW, SE, SW)
-- Time RESUMES and advances during travel
-- Time advancement based on distance/terrain difficulty
+- Player chooses from 2 cardinal directions (N/S or E/W depending on environment)
+- Progress bar shows advancement toward destination
+- Time moves at 144x speed during traversal
+- Travel time modified by: terrain, weather, encumbrance
+- Player can: stop, continue forward, or turn back
 - Encounter checks happen during travel (see section 3)
 
 **In Combat/Encounters**:
 - Time pauses during combat resolution
 - Small time increment after combat ends
 
+### Wait System
+
+**Wait Button**:
+- Available when time is paused
+- Allows player to wait up to 6 hours
+- Progression: 1 in-game hour per real-time second
+- Player can cancel wait at any point
+- Useful for waiting until specific NPC schedule times
+
 ### UI Requirements
 - Persistent pause/play controls
+- Wait button with hour slider (1-6 hours)
 - Current time always visible
-- Time flow indicator (paused/moving)
+- Time flow indicator (paused/moving/waiting)
+- Progress bar during environment traversal
 - Clear feedback when time state changes
 
 ### Implementation Notes
@@ -100,6 +136,8 @@ Each NPC has a schedule defining their location by time of day:
 - Add time state to game state: `time_paused: bool`
 - Movement actions calculate travel time and advance time accordingly
 - Pause button sets `time_paused = true`, play sets to `false`
+- Inventory tab interactions automatically resume time
+- Wait button advances time in 1-hour increments per second
 
 ---
 
@@ -107,12 +145,24 @@ Each NPC has a schedule defining their location by time of day:
 
 ### Environment Properties
 
-Each environment has encounter rates and difficulty settings:
+Each environment has traversal settings, encounter rates, and difficulty settings:
 
 ```json
 {
   "environment_id": "dark_forest",
   "name": "Dark Forest",
+  "navigation": {
+    "axis": "north_south",
+    "north_destination": "mountain_pass",
+    "south_destination": "kingdom",
+    "base_travel_time_minutes": 45,
+    "terrain_modifier": 1.2,
+    "weather_effects": {
+      "clear": 1.0,
+      "rain": 1.3,
+      "storm": 1.5
+    }
+  },
   "encounter_rates": {
     "day": {
       "monsters_per_hour": 2.5,
@@ -128,10 +178,27 @@ Each environment has encounter rates and difficulty settings:
     "goblin",
     "spider"
   ],
-  "terrain_type": "forest",
-  "travel_speed_modifier": 0.8
+  "terrain_type": "forest"
 }
 ```
+
+**Navigation Axis**:
+- `north_south`: Player can travel North or South
+- `east_west`: Player can travel East or West
+- Only 2 directions available per environment
+
+**Travel Time Calculation**:
+```
+actual_time = base_travel_time_minutes
+              × terrain_modifier
+              × weather_modifier
+              × encumbrance_modifier
+```
+
+**Player Options During Traversal**:
+- Continue toward destination (progress increases)
+- Stop at current position (can discover dungeons here)
+- Turn back toward origin (progress decreases)
 
 ### Encounter Mechanics
 
@@ -166,7 +233,7 @@ Each environment has encounter rates and difficulty settings:
 ## 4. Dungeon Discovery System
 
 ### Concept
-Dungeons are special locations discovered while traversing environments. Once discovered, they can be revisited. They are linear with explicit encounters and rewards.
+Dungeons are special locations positioned at specific intervals within environments. They have static mobs and linear event sequences. Once discovered, they can be revisited by stopping at that interval during traversal.
 
 ### Dungeon Properties
 
@@ -175,10 +242,27 @@ Dungeons are special locations discovered while traversing environments. Once di
   "dungeon_id": "abandoned_mine",
   "name": "Abandoned Mine",
   "parent_environment": "mountain_pass",
+  "location": {
+    "direction": "south",
+    "distance_minutes": 30,
+    "description": "30 minutes south into the mountain pass"
+  },
+  "access_requirements": [
+    {
+      "item_id": "rope-hempen-50-feet",
+      "consumed": false,
+      "description": "Requires rope to descend into the mine"
+    }
+  ],
   "discovery": {
-    "rarity": "uncommon",
-    "chance_per_traversal": 0.15,
-    "requires_conditions": []
+    "base_chance": 0.20,
+    "level_modifier": 0.05,
+    "max_chance": 0.95,
+    "calculation": "base_chance + (player_level × level_modifier)"
+  },
+  "completion_effect": {
+    "type": "none",
+    "description": "No traversal progression"
   },
   "layout": {
     "type": "linear",
@@ -188,7 +272,8 @@ Dungeons are special locations discovered while traversing environments. Once di
         "step": 1,
         "type": "monster",
         "enemy": "kobold",
-        "count": 2
+        "count": 2,
+        "static": true
       },
       {
         "step": 3,
@@ -203,70 +288,163 @@ Dungeons are special locations discovered while traversing environments. Once di
         "reward": {
           "item": "rusty_key",
           "location_unlock": "secret_cache"
-        }
+        },
+        "static": true
       }
     ]
   }
 }
 ```
 
-### Discovery Rarity Tiers
-- **Common**: 25-40% chance per traversal
-- **Uncommon**: 10-20% chance per traversal
-- **Rare**: 3-8% chance per traversal
-- **Very Rare**: 1-2% chance per traversal
-- **Legendary**: 0.1-0.5% chance per traversal
+**Access Requirements Example** (Mountain Cave with progression):
+```json
+{
+  "dungeon_id": "mountain_cave_passage",
+  "name": "Mountain Cave Passage",
+  "parent_environment": "mountain_pass",
+  "location": {
+    "direction": "north",
+    "distance_minutes": 20,
+    "description": "20 minutes north into the mountain pass"
+  },
+  "access_requirements": [
+    {
+      "item_id": "torch",
+      "consumed": true,
+      "description": "Need a torch to see in the dark cave"
+    }
+  ],
+  "completion_effect": {
+    "type": "traversal_progress",
+    "amount_minutes": 40,
+    "description": "Shortcut through the mountain, saves 40 minutes of travel"
+  },
+  "layout": {
+    "type": "linear",
+    "length": 3,
+    "encounters": [
+      {
+        "step": 2,
+        "type": "monster",
+        "enemy": "bat",
+        "count": 3,
+        "static": true
+      }
+    ]
+  }
+}
+```
+
+**Location Within Environment**:
+- `direction`: Which direction from origin (north, south, east, west)
+- `distance_minutes`: How many minutes of travel from origin
+- Dungeons exist at specific intervals along the environment path
+
+**Access Requirements**:
+- `item_id`: Required item in player's inventory
+- `consumed`: If true, item is consumed on entry; if false, item just needs to be present
+- `description`: Flavor text explaining why item is needed
+- Player must have ALL required items to enter
+- If requirements not met, show message explaining what's needed
+
+**Completion Effects**:
+- `type: "none"`: No special effect, just loot/XP from encounters
+- `type: "traversal_progress"`: Advances player position in environment
+  - `amount_minutes`: How many minutes forward the player is moved
+  - Useful for shortcuts, passages through mountains, etc.
+  - Player emerges from dungeon further along the path
+- Other types could be added: location unlocks, story flags, etc.
+
+**Discovery Calculation**:
+```
+discovery_chance = base_chance + (player_level × level_modifier)
+discovery_chance = min(discovery_chance, max_chance)
+```
+
+Example:
+- Base chance: 20%
+- Level modifier: 5% per level
+- Player level 3: 20% + (3 × 5%) = 35% chance
+- Player level 15: 20% + (15 × 5%) = 95% (capped at max_chance)
 
 ### Discovery Flow
 
 1. **During Environment Traversal**:
-   - Roll for dungeon discovery
-   - If discovered: Pause time, show discovery message
+   - Player stops at a position during travel
+   - System checks if player is within dungeon interval (±2 minutes)
+   - If position matches dungeon location and not yet discovered:
+     - Roll for discovery based on player level
+     - If successful: Show discovery message, mark as discovered
 
-2. **Player Choice**:
-   - "Enter Now" - Immediately enter dungeon
+2. **Player Choice After Discovery**:
+   - "Enter Now" - Check access requirements, enter if met
    - "Mark and Continue" - Save location, continue travel
-   - "Ignore" - Continue travel (can still revisit if already discovered)
+   - Dungeon is permanently marked on this environment path
 
-3. **Dungeon Entry**:
+3. **Revisiting Dungeons**:
+   - During traversal, if player stops at discovered dungeon's interval
+   - "Enter [Dungeon Name]" option appears
+   - Access requirements checked on every entry attempt
+   - Can be entered multiple times (static encounters respawn)
+
+4. **Dungeon Entry**:
    - Time pauses
    - Player progresses step-by-step through linear layout
    - Each step presents encounter or event
+   - Static encounters (marked `"static": true`) always spawn
    - No backtracking in linear dungeons
 
-4. **Dungeon Completion**:
-   - Mark as completed (can still revisit)
-   - Return to environment or parent location
-   - Time resumes
+5. **Dungeon Completion**:
+   - Add dungeon_id to locations_discovered (if not already there)
+   - Apply completion effect:
+     - **none**: Return to same position in environment
+     - **traversal_progress**: Advance player position by amount_minutes
+   - Time resumes from new position
 
 ### Dungeon State Tracking
 
-Track in save file:
+Track in save file (same field as other locations):
 ```json
 {
-  "discovered_dungeons": [
-    {
-      "dungeon_id": "abandoned_mine",
-      "discovered_at": "game_timestamp",
-      "completed": true,
-      "completion_count": 2
-    }
-  ]
+  "locations_discovered": [
+    "kingdom",
+    "dark_forest",
+    "abandoned_mine",
+    "mountain_cave_passage"
+  ],
+  "current_environment_position": {
+    "environment_id": "mountain_pass",
+    "position_minutes": 15,
+    "direction": "south",
+    "origin_location": "kingdom"
+  }
 }
 ```
 
+**Discovery Tracking**:
+- Dungeons are stored as simple IDs in `locations_discovered` array
+- No separate dungeon tracking structure needed
+- Dungeon position and requirements defined in dungeon JSON file
+- Check if dungeon ID exists in `locations_discovered` to determine if discovered
+
 ### Revisiting Dungeons
-- Once discovered, dungeon appears as option when entering parent environment
-- "Enter [Dungeon Name]" option added to environment menu
-- Can be run multiple times (respawns encounters/loot based on rules)
-- Optional: Cooldown timer between runs
+- When player stops during traversal, check if current position matches any dungeon's location
+- Cross-reference with `locations_discovered` to see if dungeon is known
+- If discovered: Show "Enter [Dungeon Name]" option
+- If not discovered: Roll for discovery
+- Can be run multiple times (static encounters always respawn)
+- Check access requirements on each entry attempt
 
 ### Implementation Notes
-- Add dungeon discovery roll to environment traversal
-- Store discovered dungeons in save file
-- Each environment can have multiple dungeons
-- Dungeons with `requires_conditions` only available after prerequisites met
+- Track player position during environment traversal (minutes from origin)
+- Load all dungeons for current environment from JSON files
+- Check dungeon positions when player stops (±2 minute tolerance)
+- Discovery roll only happens if dungeon not in `locations_discovered`
+- On discovery, add dungeon_id to `locations_discovered` array
+- Each environment can have multiple dungeons at different intervals
 - Linear layout means simple progression: step 1 → step 2 → ... → end
+- Static mobs always respawn, dynamic loot may or may not respawn
+- Access requirements checked before allowing entry
 
 ---
 
@@ -299,23 +477,40 @@ Track in save file:
 ## 6. Open Questions / Workshop Items
 
 ### Time Mechanics
+- ✅ **RESOLVED**: Time resumes on play, inventory interactions, or wait button
+- ✅ **RESOLVED**: Wait button allows 1-6 hours at 1 hour/second
+- ✅ **RESOLVED**: Travel time calculated with base time × terrain × weather × encumbrance
 - Should time advance during dialogue/NPC interactions?
-- How much time should different terrain types take to traverse?
-- Should there be weather that affects travel time/encounters?
+- Should weather be dynamic or based on time/location?
 
 ### NPC Schedules
+- ✅ **RESOLVED**: Dialogue options tied to schedule times/locations
 - Should NPCs have different schedules on different days?
 - Should special events override regular schedules?
 - Do NPCs travel between locations (visible on road) or teleport?
+
+### Environment Traversal
+- ✅ **RESOLVED**: Only 2 cardinal directions per environment (N/S or E/W)
+- ✅ **RESOLVED**: Progress bar with stop/continue/turn back options
+- ✅ **RESOLVED**: Time moves at 144x during traversal
+- Should player see exact percentage progress or vague descriptions?
+- Should encumbrance have breakpoints (light/medium/heavy)?
 
 ### Encounters
 - Should encounter rate decrease if player is much higher level?
 - Should player be able to flee from encounters?
 - Should repeated encounters in same environment give reduced XP?
+- Should encounters be visible on the map before triggering?
 
 ### Dungeons
+- ✅ **RESOLVED**: Dungeons at specific intervals (e.g., 30 min south)
+- ✅ **RESOLVED**: Discovery based on player level formula
+- ✅ **RESOLVED**: Static mobs always respawn
+- ✅ **RESOLVED**: Access requirements (items needed, consumed or not)
+- ✅ **RESOLVED**: Completion effects (none vs traversal_progress)
+- ✅ **RESOLVED**: State tracked in same field as locations (simple IDs)
 - Should dungeons have consumable loot that doesn't respawn?
-- How often can dungeons be re-run?
+- How often can dungeons be re-run (cooldown)?
 - Should dungeon difficulty scale with player level?
 - Should there be branching paths in some dungeons (non-linear)?
 
@@ -337,43 +532,79 @@ Track in save file:
 
 ## Implementation Checklist
 
-### Phase 1: NPC Schedules
-- [ ] Add schedule data structure to NPC JSON schema
-- [ ] Implement schedule parser
-- [ ] Add current location resolver based on time
-- [ ] Update location loading to check NPC schedules
-- [ ] Add UI feedback when NPC is elsewhere
+### Phase 1: NPC Schedules & Dialogue
+- [ ] Add schedule data structure to NPC JSON schema with dialogue options
+- [ ] Implement schedule parser in backend
+- [ ] Add current location and dialogue resolver based on time
+- [ ] Update NPC interaction to show schedule-appropriate dialogue options
+- [ ] Test NPCs appearing/disappearing at correct times
 
-### Phase 2: Time Controls
+### Phase 2: Time Controls & Wait System
 - [ ] Add pause/play buttons to UI
-- [ ] Implement time state management
-- [ ] Update time advancement to respect pause state
-- [ ] Add automatic pause on environment entry
-- [ ] Add time flow indicator to UI
+- [ ] Implement time state management (paused/playing/waiting)
+- [ ] Add wait button with 1-6 hour slider
+- [ ] Implement wait progression (1 hour/second)
+- [ ] Resume time on inventory tab interactions
+- [ ] Add time flow indicator to UI (paused/moving/waiting)
 
-### Phase 3: Environment Encounters
+### Phase 3: Environment Navigation System
+- [ ] Add navigation data to environment JSON (axis, destinations, base_travel_time)
+- [ ] Implement 2-direction navigation (N/S or E/W only)
+- [ ] Create progress bar UI for traversal
+- [ ] Track player position in environment (minutes from origin)
+- [ ] Add stop/continue/turn back options during traversal
+- [ ] Implement travel time calculation (base × terrain × weather × encumbrance)
+- [ ] Time advances at 144x during traversal
+
+### Phase 4: Environment Encounters
 - [ ] Add encounter data to environment JSON files
-- [ ] Implement encounter probability calculations
-- [ ] Add day/night detection
-- [ ] Implement difficulty multipliers
+- [ ] Implement encounter probability during traversal
+- [ ] Add day/night detection (6am-6pm vs 6pm-6am)
+- [ ] Implement difficulty multipliers for night encounters
 - [ ] Connect encounters to combat system
+- [ ] Pause time when encounter triggers
 
-### Phase 4: Dungeon Discovery
-- [ ] Create dungeon JSON schema
-- [ ] Implement discovery roll system
-- [ ] Add dungeon state to save files
+### Phase 5: Dungeon Discovery & Positioning
+- [ ] Create dungeon JSON schema with location intervals
+- [ ] Add access_requirements field (item_id, consumed, description)
+- [ ] Add completion_effect field (type: none | traversal_progress)
+- [ ] Implement position-based discovery (±2 minute tolerance)
+- [ ] Implement level-based discovery formula (base + level × modifier)
+- [ ] Add current_environment_position to save file
+- [ ] Use existing locations_discovered array for dungeon IDs
+- [ ] Check for dungeons when player stops during traversal
+- [ ] Show "Enter [Dungeon Name]" option if at discovered dungeon position
+
+### Phase 6: Dungeon Access & Requirements
+- [ ] Implement access requirement checking before dungeon entry
+- [ ] Check player inventory for required items
+- [ ] Consume items if marked as consumed in requirements
+- [ ] Show requirement messages if player lacks items
+- [ ] Allow entry only if all requirements met
+
+### Phase 7: Dungeon Linear Progression
 - [ ] Create dungeon entry UI
-- [ ] Implement linear progression system
-- [ ] Add explicit mob spawns
-- [ ] Add reward/loot system for dungeons
+- [ ] Implement step-by-step linear progression
+- [ ] Add static mob spawns (marked encounters always appear)
+- [ ] Add treasure/reward system for dungeon steps
+- [ ] Allow re-entry at discovered positions (respawn static mobs)
 
-### Phase 5: Integration & Polish
+### Phase 8: Dungeon Completion Effects
+- [ ] Implement "none" completion type (just return to position)
+- [ ] Implement "traversal_progress" completion type
+- [ ] Advance player position by amount_minutes when traversal_progress dungeon completed
+- [ ] Update progress bar after dungeon completion with progression
+- [ ] Test shortcuts properly advance player toward destination
+
+### Phase 9: Integration & Polish
 - [ ] Test all systems together
-- [ ] Balance encounter rates
-- [ ] Balance dungeon discovery rates
-- [ ] Create sample dungeons for each environment
+- [ ] Balance travel times for each environment
+- [ ] Balance encounter rates (day vs night)
+- [ ] Balance dungeon discovery rates by level
+- [ ] Create 2-3 sample dungeons per environment type
 - [ ] Add tutorial/help text for new mechanics
-- [ ] Performance testing with many NPCs/schedules
+- [ ] Test position tracking and dungeon revisiting
+- [ ] Performance testing with traversal calculations
 
 ---
 

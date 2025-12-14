@@ -1,0 +1,28 @@
+{
+  "id": "glaive",
+  "name": "Glaive",
+  "description": "",
+  "ai_description": "long polearm with single-edged blade on long wooden shaft, slashing poleweapon with curved cutting edge and spike tip",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 6,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d10",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "",
+  "gear_slot": "hands",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "heavy",
+    "reach",
+    "two-handed",
+    "equipment"
+  ],
+  "notes": [],
+  "image": "/res/img/items/glaive.png"
+}

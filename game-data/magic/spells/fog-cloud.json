@@ -1,0 +1,32 @@
+{
+  "name": "Fog Cloud",
+  "description": "You create a 20-foot-radius sphere of fog centered on a point within range. The sphere spreads around corners, and its area is heavily obscured.",
+  "level": 1,
+  "school": "conjuration",
+  "casting_time": "action",
+  "range": "24",
+  "range_long": "24",
+  "duration": "1 hour",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "terrain"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "druid",
+    "ranger"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

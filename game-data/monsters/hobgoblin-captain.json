@@ -1,0 +1,20 @@
+{
+  "id": 121,
+  "name": "Hobgoblin Captain",
+  "challenge_rating": 3.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 17,
+  "hit_points": 39,
+  "alignment": "lawful evil",
+  "tags": [
+    "Goblinoid"
+  ],
+  "img": "/static/img/monster/hobgoblin-captain.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "mountain",
+    "urban"
+  ]
+}

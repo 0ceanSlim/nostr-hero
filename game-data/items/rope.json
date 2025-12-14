@@ -1,0 +1,14 @@
+{
+  "id": "rope",
+  "name": "Rope",
+  "description": "A heavy rope made of hemp fibers, useful for climbing and securing objects.",
+  "ai_description": "thick coiled hemp rope with natural brown fiber texture, sturdy braided strands, climbing equipment",
+  "price": 100,
+  "type": "Adventuring Gear",
+  "weight": 10,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": [],
+  "image": "/res/img/items/rope.png"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "horn",
+  "name": "Horn",
+  "description": "A wind instrument, typically made of metal or horn, that produces sound from the vibration of the player's lips. Can also be used as a signaling device. Proficiency with this instrument allows you to add your proficiency bonus to any ability checks you make to play music with it.",
+  "ai_description": "curved hunting horn made from animal horn or brass, wind instrument with wide bell and narrow mouthpiece",
+  "price": 300,
+  "type": "Musical Instrument",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/horn.png"
+}

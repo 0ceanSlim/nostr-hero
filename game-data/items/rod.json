@@ -1,0 +1,29 @@
+{
+  "id": "rod",
+  "name": "Rod",
+  "ai_description": "polished metal rod with elemental gemstone tip, arcane focus staff with crystalline head and runes",
+  "price": 1000,
+  "type": "Arcane Focus",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/arcane-focus.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "substitues": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "provides": "sulfur",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Sulfur for fire and explosion spells"
+  ],
+  "Gear_Slot": "hands",
+  "image": "/res/img/items/rod.png"
+}

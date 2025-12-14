@@ -1,0 +1,20 @@
+{
+  "id": 72,
+  "name": "Thri-kreen",
+  "challenge_rating": 1.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 33,
+  "alignment": "chaotic neutral",
+  "tags": [
+    "Thri-kreen"
+  ],
+  "img": "/static/img/monster/thri-kreen.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

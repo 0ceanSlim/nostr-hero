@@ -1,0 +1,21 @@
+{
+  "id": "mushroom-spores",
+  "name": "Mushroom Spores",
+  "description": "Microscopic fungal seeds that spread decay and disease, glowing faintly with sickly green light.",
+  "price": 45,
+  "type": "Spell Component",
+  "weight": 0.05,
+  "stack": 20,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "ai_description": "Tiny green glowing particles floating in glass vial",
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for decay and disease magic",
+    "Commonly drops from fungal creatures",
+    "Must be gathered or purchased"
+  ],
+  "image": "/res/img/items/mushroom-spores.png"
+}

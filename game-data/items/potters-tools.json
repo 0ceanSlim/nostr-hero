@@ -1,0 +1,21 @@
+{
+  "id": "potters-tools",
+  "name": "Potter's tools",
+  "description": "These special tools include potter's needles, ribs, scrapers, a knife, and calipers. Proficiency with potter's tools lets you add your proficiency bonus to any ability checks you make to craft objects with clay.",
+  "ai_description": "clay-working tools with shaping needles and scrapers, pottery implements for crafting vessels and bowls",
+  "price": 1000,
+  "type": "Artisan's Tools",
+  "weight": 3,
+  "stack": 1,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "img": "equipment/tool.jpg",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/potters-tools.png"
+}

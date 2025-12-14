@@ -1,0 +1,30 @@
+{
+  "name": "Druidcraft",
+  "description": "You call upon nature's wrath to hinder enemies. Choose one: create difficult terrain in a 5-foot square, obscure vision with thick foliage, or cause plants to grasp at an enemy (target must make Dex save or speed reduced by 10 feet for 1 round).",
+  "level": 0,
+  "school": "transmutation",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "dexterity",
+  "tags": [
+    "combat",
+    "cantrip",
+    "control",
+    "terrain"
+  ],
+  "classes": [
+    "druid"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ]
+}

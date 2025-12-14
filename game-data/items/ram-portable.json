@@ -1,0 +1,21 @@
+{
+  "id": "ram-portable",
+  "name": "Portable Ram",
+  "description": "You can use a portable ram to break down doors. When doing so, you gain a +4 bonus on the Strength check. One other character can help you use the ram, giving you advantage on this check.",
+  "price": 400,
+  "type": "Adventuring Gear",
+  "weight": 35,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "img": "equipment/adventuring-gear.jpg",
+  "rarity": "common",
+  "tags": [],
+  "ai_description": "Heavy wooden log with iron caps and side handles",
+  "notes": [],
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/ram-portable.png"
+}

@@ -1,0 +1,16 @@
+{
+  "id": 128,
+  "name": "Basilisk",
+  "challenge_rating": 3.0,
+  "type": "Monstrosity",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 52,
+  "alignment": "unaligned",
+  "img": "/static/img/monster/basilisk.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

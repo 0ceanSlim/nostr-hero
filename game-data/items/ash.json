@@ -1,0 +1,21 @@
+{
+  "id": "ash",
+  "name": "Ash",
+  "description": "Fine gray powder from burned magical creatures, still warm with destructive energy.",
+  "ai_description": "fine gray ash with glowing embers, warm powder from cremated creatures with orange sparks",
+  "price": 15,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 15,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for destruction magic",
+    "Commonly drops from fire creatures",
+    "Must be gathered or purchased"
+  ],
+  "image": "/res/img/items/ash.png"
+}

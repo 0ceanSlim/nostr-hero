@@ -1,0 +1,61 @@
+{
+  "id": "swamp-doorman",
+  "name": "Rokgar the Grim",
+  "title": "Bouncer",
+  "race": "Orc",
+  "location": "village-southwest",
+  "building": "marsh_inn",
+  "description": "An intimidating orc with battle scars and a grim expression. He judges musicians by strength and power, not delicacy. Weak music earns only contempt.",
+  "greeting": {
+    "first_time": "I am Rokgar. I choose music here. You perform?",
+    "returning": "You play again?",
+    "already_performed": "Already played today. Return tomorrow."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "What?",
+      "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]
+    },
+    "ask_about_performing": {
+      "text": "We want strong music. Drums that sound like war. Horns that carry far. Weak instruments—flutes, lyres—not wanted. Charisma matters. Strong presence, more gold.",
+      "options": ["main_menu"]
+    },
+    "ask_about_rates": {
+      "text": "We pay for strength:\n\nDrum: 16 gold - tribal rhythms, best\nHorn: 13 gold - war calls\nShawm: 12 gold - harsh and loud, good\nBagpipe: 11 gold - loud, acceptable\nLute: 8 gold - weak but allowed\n\nNo flutes, lyres, pan flutes, viols. Too soft. Shows weakness. Plus charisma.",
+      "options": ["main_menu"]
+    },
+    "book_performance": {
+      "text": "What instrument you have?",
+      "action": "select_instrument",
+      "requirements": {
+        "has_instrument": true,
+        "not_performed_today": true
+      },
+      "failure_no_instrument": "Need instrument first.",
+      "failure_already_performed": "Played today. Come back tomorrow.",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "Go.",
+      "action": "end_dialogue"
+    }
+  },
+  "performance_config": {
+    "venue_type": "swamp_tavern",
+    "performances_per_day": 1,
+    "accepted_instruments": {
+      "drum": {"base_pay": 16, "allowed": true},
+      "horn": {"base_pay": 13, "allowed": true},
+      "shawm": {"base_pay": 12, "allowed": true},
+      "bagpipe": {"base_pay": 11, "allowed": true},
+      "lute": {"base_pay": 8, "allowed": true},
+      "flute": {"base_pay": 0, "allowed": false, "reason": "Too soft, shows weakness"},
+      "lyre": {"base_pay": 0, "allowed": false, "reason": "Too fancy, not wanted"},
+      "pan-flute": {"base_pay": 0, "allowed": false, "reason": "Too gentle, weak"},
+      "viol": {"base_pay": 0, "allowed": false, "reason": "Too refined, not for warriors"}
+    },
+    "charisma_bonus": {
+      "formula": "(charisma - 10) * 2"
+    }
+  }
+}

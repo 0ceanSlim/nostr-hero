@@ -1,0 +1,20 @@
+{
+  "id": "spirit-dust",
+  "name": "Spirit Dust",
+  "description": "Ethereal powder that glows with ancestral spirits and animal essence.",
+  "price": 75,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "uncommon",
+  "tags": [
+    "spell_component"
+  ],
+  "ai_description": "Ghostly white powder swirling with animal spirit shapes",
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for summoning and animal magic",
+    "Must be gathered or purchased"
+  ],
+  "image": "/res/img/items/spirit-dust.png"
+}

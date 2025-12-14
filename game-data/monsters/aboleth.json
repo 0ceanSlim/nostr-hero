@@ -1,0 +1,19 @@
+{
+  "id": 241,
+  "name": "Aboleth",
+  "challenge_rating": 10.0,
+  "type": "Aberration",
+  "size": "Large",
+  "armor_class": 17,
+  "hit_points": 135,
+  "alignment": "lawful evil",
+  "tags": [
+    "Legendary"
+  ],
+  "img": "/static/img/monster/aboleth.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

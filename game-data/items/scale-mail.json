@@ -1,0 +1,27 @@
+{
+  "id": "scale-mail",
+  "name": "Scale Mail",
+  "description": "",
+  "ai_description": "armor made of overlapping metal scales sewn to leather backing, dragon-like protective covering with bronze or steel plates",
+  "price": 5000,
+  "type": "Medium Armor",
+  "weight": 45,
+  "stack": 1,
+  "ac": "14 + Dex(max2)",
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "img": "equipment/armor.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "stealth": "-1",
+  "tags": [
+    "equipment"
+  ],
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "gear_slot": "armor",
+  "image": "/res/img/items/scale-mail.png"
+}

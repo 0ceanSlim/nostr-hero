@@ -1,0 +1,20 @@
+{
+  "id": 33,
+  "name": "Mud Mephit",
+  "challenge_rating": 0.25,
+  "type": "Elemental",
+  "size": "Small",
+  "armor_class": 11,
+  "hit_points": 27,
+  "alignment": "neutral evil",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/mud-mephit.svg",
+  "enviornment": [
+    "coastal",
+    "hill",
+    "mountain",
+    "swamp"
+  ]
+}

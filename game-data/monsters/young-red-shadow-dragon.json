@@ -1,0 +1,19 @@
+{
+  "id": 262,
+  "name": "Young Red Shadow Dragon",
+  "challenge_rating": 13.0,
+  "type": "Dragon",
+  "size": "Large",
+  "armor_class": 18,
+  "hit_points": 178,
+  "alignment": "chaotic evil",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/young-red-shadow-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

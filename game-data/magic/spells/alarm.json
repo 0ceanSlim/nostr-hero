@@ -1,0 +1,29 @@
+{
+  "name": "Alarm",
+  "description": "You set an alarm against unwanted intrusion. Choose a door, a window, or an area within range that is no larger than a 20-foot cube. Until the spell ends, an alarm alerts you whenever a Tiny or larger creature touches or enters the warded area.",
+  "level": 1,
+  "school": "abjuration",
+  "casting_time": "1 minute",
+  "range": "6",
+  "range_long": "6",
+  "duration": "8 hours",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "utility",
+    "protection"
+  ],
+  "classes": [
+    "ranger"
+  ],
+  "rarity": "common",
+  "action_cost": "1 minute",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

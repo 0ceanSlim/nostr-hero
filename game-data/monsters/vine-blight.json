@@ -1,0 +1,15 @@
+{
+  "id": 52,
+  "name": "Vine Blight",
+  "challenge_rating": 0.5,
+  "type": "Plant",
+  "size": "Medium",
+  "armor_class": 12,
+  "hit_points": 26,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/vine-blight.svg",
+  "enviornment": [
+    "forest",
+    "swamp"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Speak with Animals",
+  "description": "You forge a temporary bond with nearby beasts, gaining tactical advantage. For the duration, you have advantage on Perception checks, beasts won't attack you unless provoked, and you can use an action to command a beast within 30 feet to make one attack against a target of your choice.",
+  "level": 1,
+  "school": "divination",
+  "casting_time": "action",
+  "range": "self",
+  "range_long": "self",
+  "duration": "10 minutes",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": null,
+  "tags": [
+    "combat",
+    "buff",
+    "summoning"
+  ],
+  "classes": [
+    "druid",
+    "ranger",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "pollen",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
+}

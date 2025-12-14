@@ -1,0 +1,18 @@
+{
+  "id": "breastplate",
+  "name": "Breastplate",
+  "description": "",
+  "ai_description": "fitted steel chestplate with shoulder straps, partial armor covering torso with decorative engravings",
+  "price": 40000,
+  "type": "Medium Armor",
+  "weight": 20,
+  "stack": 1,
+  "gear_slot": "armor",
+  "rarity": "common",
+  "tags": [
+    "equipment"
+  ],
+  "ac": "14 + Dex(max2)",
+  "img": "equipment/armor.jpg",
+  "image": "/res/img/items/breastplate.png"
+}

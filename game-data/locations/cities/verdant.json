@@ -1,0 +1,96 @@
+{
+  "id": "verdant",
+  "name": "Verdant City",
+  "type": "city",
+  "image": "/res/img/locations/verdant.png",
+  "music": "Folklore",
+  "description": "A lush city built where the great forest meets fertile farmlands. Green terraced gardens rise up the hillsides, and the scent of blooming flowers fills the air. This is a center of learning and nature magic.",
+  "starting_races": ["Elf"],
+  "racial_entry_fees": {
+    "Human": 3,
+    "Half-Elf": 2,
+    "Half-Orc": 4,
+    "Tiefling": 5,
+    "Elf": 0,
+    "Dwarf": 4,
+    "Halfling": 2,
+    "Gnome": 2,
+    "Orc": 5,
+    "Dragonborn": 4
+  },
+  "districts": {
+    "center": {
+      "id": "verdant-center",
+      "name": "Garden Plaza",
+      "description": "The city center is a magnificent botanical garden with fountains, rare flowers, and ancient trees. Scholars and druids walk peaceful paths between schools and libraries.",
+      "connections": {
+        "north": "verdant-north",
+        "west": "verdant-west",
+        "south": "verdant-south"
+      },
+      "buildings": [
+        {
+          "id": "glade_of_safekeeping",
+          "name": "The Glade of Safekeeping",
+          "description": "Enchanted trees store belongings within hollow roots, kept safe by ancient elven magic. The eldest trees of the enclave offer this blessing to their kin and those who earn it.",
+          "npcs": ["warden-of-roots"],
+          "open": "always",
+          "close": null
+        },
+        {
+          "id": "verdant_supplies",
+          "name": "Greenleaf Provisions",
+          "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
+          "npcs": ["nature-supplier"],
+          "open": 7,
+          "close": 8
+        },
+        {
+          "id": "moonlit_glade_inn",
+          "name": "The Moonlit Glade",
+          "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
+          "npcs": ["forest-innkeeper", "forest-doorman"],
+          "open": 7,
+          "close": 4
+        }
+      ],
+      "npcs": []
+    },
+    "north": {
+      "id": "verdant-north",
+      "name": "Forest Quarter",
+      "description": "The northern district blends seamlessly with the great forest. Tree-houses and elevated walkways connect buildings built among the ancient trees.",
+      "connections": {
+        "center": "verdant-center",
+        "north": "darkwood-forest"
+      },
+      "buildings": [],
+      "npcs": [],
+      "exit_to_environment": "darkwood-forest"
+    },
+    "west": {
+      "id": "verdant-west",
+      "name": "Artisan Quarter",
+      "description": "The western district houses craftsmen who work with natural materials. Woodcarvers, weavers, and botanical alchemists create beautiful and useful items.",
+      "connections": {
+        "center": "verdant-center",
+        "west": "shadowmere-wetlands"
+      },
+      "buildings": [],
+      "npcs": [],
+      "exit_to_environment": "shadowmere-wetlands"
+    },
+    "south": {
+      "id": "verdant-south",
+      "name": "Coastal Road",
+      "description": "The southern district opens onto the road leading to the coast. Sea breezes carry the salt scent inland, mixing with the forest aromas.",
+      "connections": {
+        "center": "verdant-center",
+        "south": "suncrest-coastlands"
+      },
+      "buildings": [],
+      "npcs": [],
+      "exit_to_environment": "suncrest-coastlands"
+    }
+  }
+}

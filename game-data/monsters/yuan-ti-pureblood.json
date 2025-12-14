@@ -1,0 +1,20 @@
+{
+  "id": 75,
+  "name": "Yuan-ti Pureblood",
+  "challenge_rating": 1.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 11,
+  "hit_points": 40,
+  "alignment": "neutral evil",
+  "tags": [
+    "Yuan-ti"
+  ],
+  "img": "/static/img/monster/yuan-ti-pureblood.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "hill",
+    "urban"
+  ]
+}

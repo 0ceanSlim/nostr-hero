@@ -1,0 +1,16 @@
+{
+  "id": 180,
+  "name": "Roper",
+  "challenge_rating": 5.0,
+  "type": "Monstrosity",
+  "size": "Large",
+  "armor_class": 20,
+  "hit_points": 93,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/roper.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

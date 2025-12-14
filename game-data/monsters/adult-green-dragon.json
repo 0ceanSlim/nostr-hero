@@ -1,0 +1,21 @@
+{
+  "id": 272,
+  "name": "Adult Green Dragon",
+  "challenge_rating": 15.0,
+  "type": "Dragon",
+  "size": "Huge",
+  "armor_class": 19,
+  "hit_points": 207,
+  "alignment": "lawful evil",
+  "tags": [
+    "Chromatic",
+    "Legendary",
+    "fly"
+  ],
+  "img": "/static/img/monster/adult-green-dragon.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

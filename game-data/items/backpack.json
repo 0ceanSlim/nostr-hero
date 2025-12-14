@@ -1,0 +1,27 @@
+{
+  "id": "backpack",
+  "name": "Backpack",
+  "description": "A sturdy leather backpack with multiple compartments for organizing gear and supplies.",
+  "ai_description": "brown leather adventurer's pack with buckled straps and multiple pockets, worn traveling bag with reinforced seams",
+  "price": 1000,
+  "type": "Adventuring Gear",
+  "weight": 5,
+  "weight_increase": 35,
+  "stack": 1,
+  "gear_slot": "bag",
+  "rarity": "common",
+  "tags": [
+    "container",
+    "equipment"
+  ],
+  "container_slots": 20,
+  "allowed_types": "any",
+  "img": "equipment/adventuring-gear.jpg",
+  "notes": [
+    "Expands carrying capacity for adventuring",
+    "adds 20 slots to inventory",
+    "Increases weight capacity by 35 lbs",
+    "Cannot be placed inside of another container"
+  ],
+  "image": "/res/img/items/backpack.png"
+}

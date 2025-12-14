@@ -1,0 +1,20 @@
+{
+  "id": 81,
+  "name": "Lizardfolk Shaman",
+  "challenge_rating": 2.0,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 27,
+  "alignment": "neutral",
+  "tags": [
+    "Lizardfolk"
+  ],
+  "img": "/static/img/monster/lizardfolk-shaman.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "swamp",
+    "urban"
+  ]
+}

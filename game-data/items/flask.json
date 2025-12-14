@@ -1,0 +1,14 @@
+{
+  "id": "flask",
+  "name": "Flask",
+  "description": "A metal drinking vessel that can hold ale, wine, or other beverages.",
+  "ai_description": "metal drinking flask with screw cap, curved hip flask for storing liquids with engraved surface",
+  "price": 2,
+  "type": "Adventuring Gear",
+  "weight": 1,
+  "stack": 1,
+  "gear_slot": "",
+  "rarity": "common",
+  "tags": [],
+  "image": "/res/img/items/flask.png"
+}

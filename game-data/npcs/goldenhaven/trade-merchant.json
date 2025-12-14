@@ -1,0 +1,69 @@
+{
+  "id": "trade-merchant",
+  "name": "Aurelia Goldscale",
+  "title": "Trade Merchant",
+  "race": "Dragonborn",
+  "location": "city-east",
+  "building": "goldenhaven_trade_goods",
+  "description": "A bronze-scaled dragonborn with sharp golden eyes and an even sharper mind for business. Her shop caters to wealthy travelers and adventurers with coin to spend.",
+  "greeting": {
+    "first_time": "Welcome to Goldenhaven's finest trading house. I am Aurelia Goldscale. If you seek quality supplies, you have found them.",
+    "returning": "Ah, a returning customer. Excellent. How may I assist you?",
+    "low_gold": "I've been making many purchases today. My coffers are nearly empty—return later if you wish to sell."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "What business do you have with me?",
+      "options": ["browse_shop", "sell_items", "ask_about_quality", "goodbye"]
+    },
+    "browse_shop": {
+      "text": "Browse as you will. Every item is of the highest quality—I accept nothing less in my establishment.",
+      "action": "open_shop",
+      "options": ["main_menu"]
+    },
+    "sell_items": {
+      "text": "I will purchase goods of value, provided they meet my standards and I have sufficient gold.",
+      "action": "open_sell",
+      "requirements": {
+        "shop_gold": 1
+      },
+      "failure": "My coffers are depleted at the moment. Return when I have replenished my gold reserves.",
+      "options": ["main_menu"]
+    },
+    "ask_about_quality": {
+      "text": "I deal only in quality merchandise. Every item I stock comes from trusted suppliers across the trading routes. Inferior goods tarnish one's reputation.",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "May your ventures prove profitable. Farewell.",
+      "action": "end_dialogue"
+    }
+  },
+  "shop_config": {
+    "shop_type": "general",
+    "buys_items": true,
+    "buy_price_multiplier": 0.6,
+    "sell_price_multiplier": 1.2,
+    "starting_gold": 800,
+    "max_gold": 1500,
+    "gold_regen_rate": 150,
+    "gold_regen_interval": "daily",
+    "inventory": [
+      {"item_id": "rope-silk", "stock": 8, "max_stock": 8, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "torch", "stock": 15, "max_stock": 15, "restock_rate": 15, "restock_interval": "daily"},
+      {"item_id": "rations", "stock": 25, "max_stock": 25, "restock_rate": 25, "restock_interval": "daily"},
+      {"item_id": "waterskin", "stock": 12, "max_stock": 12, "restock_rate": 8, "restock_interval": "daily"},
+      {"item_id": "backpack", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "bedroll", "stock": 10, "max_stock": 10, "restock_rate": 6, "restock_interval": "daily"},
+      {"item_id": "tinderbox", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
+      {"item_id": "oil-flask", "stock": 10, "max_stock": 10, "restock_rate": 8, "restock_interval": "daily"},
+      {"item_id": "lantern-hooded", "stock": 8, "max_stock": 8, "restock_rate": 4, "restock_interval": "daily"},
+      {"item_id": "spyglass", "stock": 2, "max_stock": 2, "restock_rate": 1, "restock_interval": "daily"},
+      {"item_id": "crowbar", "stock": 5, "max_stock": 5, "restock_rate": 3, "restock_interval": "daily"},
+      {"item_id": "grappling-hook", "stock": 4, "max_stock": 4, "restock_rate": 2, "restock_interval": "daily"},
+      {"item_id": "piton", "stock": 25, "max_stock": 25, "restock_rate": 20, "restock_interval": "daily"},
+      {"item_id": "healers-kit", "stock": 5, "max_stock": 5, "restock_rate": 3, "restock_interval": "daily"},
+      {"item_id": "parchment", "stock": 20, "max_stock": 20, "restock_rate": 15, "restock_interval": "daily"}
+    ]
+  }
+}

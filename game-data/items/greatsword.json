@@ -1,0 +1,27 @@
+{
+  "id": "greatsword",
+  "name": "Greatsword",
+  "description": "",
+  "ai_description": "massive two-handed sword with long straight steel blade, crossguard and leather-wrapped grip, heavy ceremonial weapon",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 6,
+  "stack": 1,
+  "ac": null,
+  "damage": "2d6",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "slashing",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "heavy",
+    "two-handed",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/greatsword.png"
+}

@@ -1,0 +1,20 @@
+{
+  "id": 91,
+  "name": "Green Dragon Wyrmling",
+  "challenge_rating": 2.0,
+  "type": "Dragon",
+  "size": "Medium",
+  "armor_class": 17,
+  "hit_points": 38,
+  "alignment": "lawful evil",
+  "tags": [
+    "Chromatic",
+    "fly"
+  ],
+  "img": "/static/img/monster/green-dragon-wyrmling.svg",
+  "enviornment": [
+    "forest",
+    "hill",
+    "mountain"
+  ]
+}

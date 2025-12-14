@@ -1,0 +1,22 @@
+{
+  "name": "Crossbow Bolts",
+  "description": "",
+  "ai_description": "short heavy arrows with steel points and wooden shafts, thick crossbow ammunition with metal tips and fletching",
+  "price": 5,
+  "type": "Ammunition",
+  "weight": 0.015,
+  "stack": 20,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "ammunition": "",
+  "id": "crossbow-bolts",
+  "img": "equipment/ammunition.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [],
+  "notes": [],
+  "image": "/res/img/items/crossbow-bolts.png",
+  "gear_slot": "ammunition"
+}

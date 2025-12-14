@@ -1,0 +1,26 @@
+{
+  "id": "warhammer",
+  "name": "Warhammer",
+  "description": "",
+  "ai_description": "balanced hammer with steel head and wooden grip, versatile one-handed weapon with flat striking surface",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8,1d10",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "bludgeon",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "versatile",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/warhammer.png"
+}

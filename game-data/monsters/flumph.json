@@ -1,0 +1,20 @@
+{
+  "id": 9,
+  "name": "Flumph",
+  "challenge_rating": 0.125,
+  "type": "Aberration",
+  "size": "Small",
+  "armor_class": 12,
+  "hit_points": 7,
+  "alignment": "lawful good",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/flumph.svg",
+  "enviornment": [
+    "hill",
+    "mountain",
+    "swamp",
+    "underwater"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": "miners-doorman",
+  "name": "Durin Ironlung",
+  "title": "Entertainment Manager",
+  "race": "Dwarf",
+  "location": "town-northeast",
+  "building": "miners_inn",
+  "description": "A grizzled dwarf with a voice that can be heard across the mine shaft. He books entertainment for miners who want to blow off steam after long shifts.",
+  "greeting": {
+    "first_time": "Aye? I'm Durin. Handle the music here. Ye a performer?",
+    "returning": "Back to play again, eh? Good!",
+    "already_performed": "Already played today. Come back tomorrow if ye want another go."
+  },
+  "dialogue": {
+    "main_menu": {
+      "text": "What d'ye need?",
+      "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]
+    },
+    "ask_about_performing": {
+      "text": "Miners like loud music—work songs, drinking songs, somethin' with rhythm. Ye play once a day, we pay based on what ye play and how well ye work the crowd. Charisma counts.",
+      "options": ["main_menu"]
+    },
+    "ask_about_rates": {
+      "text": "Here's what we pay for:\n\nDrum: 15 gold - best for work rhythms\nHorn: 14 gold - drinking songs\nBagpipe: 13 gold - dwarven tradition\nShawm: 11 gold - loud enough\nLute: 10 gold\nViol: 8 gold\n\nNo flutes, lyres, or pan flutes. Too soft—can't hear 'em over the miners! Plus yer charisma bonus.",
+      "options": ["main_menu"]
+    },
+    "book_performance": {
+      "text": "What instrument ye got?",
+      "action": "select_instrument",
+      "requirements": {
+        "has_instrument": true,
+        "not_performed_today": true
+      },
+      "failure_no_instrument": "Need an instrument first, friend.",
+      "failure_already_performed": "Already played today. Tomorrow!",
+      "options": ["main_menu"]
+    },
+    "goodbye": {
+      "text": "Stone and steel!",
+      "action": "end_dialogue"
+    }
+  },
+  "performance_config": {
+    "venue_type": "miners_tavern",
+    "performances_per_day": 1,
+    "accepted_instruments": {
+      "drum": {"base_pay": 15, "allowed": true},
+      "horn": {"base_pay": 14, "allowed": true},
+      "bagpipe": {"base_pay": 13, "allowed": true},
+      "shawm": {"base_pay": 11, "allowed": true},
+      "lute": {"base_pay": 10, "allowed": true},
+      "viol": {"base_pay": 8, "allowed": true},
+      "flute": {"base_pay": 0, "allowed": false, "reason": "Too soft, can't hear it"},
+      "lyre": {"base_pay": 0, "allowed": false, "reason": "Too fancy for miners"},
+      "pan-flute": {"base_pay": 0, "allowed": false, "reason": "Too delicate"}
+    },
+    "charisma_bonus": {
+      "formula": "(charisma - 10) * 2"
+    }
+  }
+}

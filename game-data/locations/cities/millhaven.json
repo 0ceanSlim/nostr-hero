@@ -1,0 +1,71 @@
+{
+  "id": "millhaven",
+  "name": "Millhaven Village",
+  "type": "village",
+  "image": "/res/img/locations/millhaven.png",
+  "music": "Healing",
+  "description": "A peaceful farming village nestled in rolling hills, where windmills turn lazily in the breeze and fields of grain stretch to the horizon.",
+  "starting_races": ["Halfling", "Gnome"],
+  "racial_entry_fees": {
+    "Human": 2,
+    "Half-Elf": 2,
+    "Half-Orc": 4,
+    "Tiefling": 5,
+    "Elf": 2,
+    "Dwarf": 2,
+    "Halfling": 0,
+    "Gnome": 0,
+    "Orc": 5,
+    "Dragonborn": 4
+  },
+  "districts": {
+    "center": {
+      "id": "millhaven-center",
+      "name": "Village Center",
+      "description": "The small village square centers around an ancient well. Farmers and their families go about their daily business with unhurried contentment.",
+      "connections": {
+        "east": "millhaven-east"
+      },
+      "buildings": [
+        {
+          "id": "burrowlock",
+          "name": "The Burrowlock",
+          "description": "Each family in Millhaven maintains shared storage burrows beneath their villages. Cozy underground chambers lined with cedar, each secured with unique brass locks.",
+          "npcs": ["keywarden"],
+          "open": "always",
+          "close": null
+        },
+
+        {
+          "id": "general_store",
+          "name": "Haversham's General Store",
+          "description": "Pip Haversham's tidy family shop, offering honest prices on essential supplies for village life and adventuring.",
+          "npcs": ["village-shopkeeper"],
+          "open": 3,
+          "close": 8
+        }
+      ],
+      "npcs": []
+    },
+    "east": {
+      "id": "millhaven-east",
+      "name": "Eastern Farms",
+      "description": "The eastern edge of the village gives way to rolling farmland. A well-traveled road leads toward the distant hills.",
+      "connections": {
+        "center": "millhaven-center",
+        "east": "windswept-hills"
+      },
+      "buildings": [
+        {
+          "id": "village_inn",
+          "name": "The Grain & Grape Inn",
+          "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
+          "npcs": ["village-innkeeper", "village-doorman"],
+          "open": 7,
+          "close": 4
+        }
+      ],
+      "exit_to_environment": "windswept-hills"
+    }
+  }
+}

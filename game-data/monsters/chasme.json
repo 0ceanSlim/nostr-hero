@@ -1,0 +1,21 @@
+{
+  "id": 194,
+  "name": "Chasme",
+  "challenge_rating": 6.0,
+  "type": "Fiend",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 84,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Demon",
+    "fly"
+  ],
+  "img": "/static/img/monster/chasme.svg",
+  "enviornment": [
+    "hill",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

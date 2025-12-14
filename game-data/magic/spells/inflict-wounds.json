@@ -1,0 +1,42 @@
+{
+  "name": "Inflict Wounds",
+  "description": "Make a melee spell attack against a creature you can reach. On a hit, the target takes 3d10 necrotic damage.",
+  "level": 1,
+  "school": "necromancy",
+  "casting_time": "action",
+  "range": "0",
+  "range_long": "0",
+  "duration": "instantaneous",
+  "damage": "3d10",
+  "damage_type": "necrotic",
+  "type": "Spell",
+  "spell_attack": "melee",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "necrotic"
+  ],
+  "classes": [
+    "cleric"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "holy-water",
+        "quantity": 2
+      },
+      {
+        "component": "blessed-incense",
+        "quantity": 1
+      }
+    ],
+    "focus_provided": "Reliquary provides unlimited holy-water, Amulet provides unlimited blessed-incense"
+  }
+}

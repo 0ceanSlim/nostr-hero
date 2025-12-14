@@ -1,0 +1,155 @@
+{
+  "id": "goldenhaven",
+  "name": "Goldenhaven City",
+  "type": "city",
+  "image": "/res/img/locations/kingdom.png",
+  "music": "God of Dreams",
+  "description": "A prosperous trading city where merchant ships dock at busy harbors and exotic goods from distant lands fill the markets. Golden banners flutter from tall buildings built with wealth from maritime commerce.",
+  "starting_races": ["Dragonborn"],
+  "racial_entry_fees": {
+    "Human": 5,
+    "Half-Elf": 5,
+    "Half-Orc": 7,
+    "Tiefling": 4,
+    "Elf": 5,
+    "Dwarf": 5,
+    "Halfling": 6,
+    "Gnome": 6,
+    "Orc": 10,
+    "Dragonborn": 0
+  },
+  "districts": {
+    "center": {
+      "id": "goldenhaven-center",
+      "name": "Golden Square",
+      "description": "The magnificent city center features a golden fountain surrounded by the finest shops and guildhalls. Wealthy merchants and nobles conduct business in the shadow of the Grand Exchange building.",
+      "connections": {
+        "west": "goldenhaven-west",
+        "north": "goldenhaven-north",
+        "east": "goldenhaven-east"
+      },
+      "buildings": [
+        {
+          "id": "ember_vault",
+          "name": "The Ember Vault",
+          "description": "A place of fire and honor where dragonborn clan relics are preserved in magically sealed chests heated by dragonfire. The vaults are guarded by ancient draconic magic.",
+          "npcs": ["scalekeeper"],
+          "open": "always",
+          "close": null
+        },
+        {
+          "id": "goldenhaven_trade_goods",
+          "name": "Goldscale Trading House",
+          "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
+          "npcs": ["trade-merchant"],
+          "open": 7,
+          "close": 8
+        },
+        {
+          "id": "grand_exchange",
+          "name": "Grand Exchange",
+          "description": "The financial heart of the city where currencies are exchanged and large transactions occur.",
+          "npcs": [],
+          "open": 8,
+          "close": 6
+        },
+        {
+          "id": "luxury_market",
+          "name": "Golden Bazaar",
+          "description": "An upscale market selling rare and exotic goods from across the world.",
+          "npcs": [],
+          "open": 7,
+          "close": 9
+        },
+        {
+          "id": "merchants_guild",
+          "name": "Merchant Princes Guild",
+          "description": "The most powerful guild in the city, controlling trade routes and merchant licenses.",
+          "npcs": [],
+          "open": 8,
+          "close": 7
+        }
+      ],
+      "npcs": ["scalekeeper", "trade-merchant"]
+    },
+    "west": {
+      "id": "goldenhaven-west",
+      "name": "Western Gate",
+      "description": "The main entrance from the kingdom highway, fortified with impressive gates and guard towers. Merchant caravans line up for inspection before entering the city.",
+      "connections": {
+        "center": "goldenhaven-center",
+        "west": "merchants-highway"
+      },
+      "buildings": [
+        {
+          "id": "customs_house",
+          "name": "Customs House",
+          "description": "Where all goods entering the city are inspected and taxed.",
+          "npcs": [],
+          "open": 6,
+          "close": 10
+        },
+        {
+          "id": "caravan_rest",
+          "name": "Caravan Rest Inn",
+          "description": "A large inn designed to accommodate merchant caravans and their guards.",
+          "npcs": [],
+          "open": 7,
+          "close": 4
+        }
+      ],
+      "npcs": [],
+      "exit_to_environment": "merchants-highway"
+    },
+    "north": {
+      "id": "goldenhaven-north",
+      "name": "Mountain District",
+      "description": "The northern district built against the foothills, where miners and mountain traders conduct business. The air is cleaner here and mountain springs provide fresh water.",
+      "connections": {
+        "center": "goldenhaven-center",
+        "north": "cragspire-mountains"
+      },
+      "buildings": [
+        {
+          "id": "miners_exchange",
+          "name": "Mountain Ore Exchange",
+          "description": "A major trading post for ores, gems, and mining equipment.",
+          "npcs": [],
+          "open": 7,
+          "close": 7
+        }
+      ],
+      "npcs": [],
+      "exit_to_environment": "cragspire-mountains"
+    },
+    "east": {
+      "id": "goldenhaven-east",
+      "name": "Eastern Port",
+      "description": "The bustling harbor district where ships from distant lands dock. The salty air carries the sounds of creaking rigging and merchant auctions.",
+      "connections": {
+        "center": "goldenhaven-center",
+        "east": "sunscorch-desert"
+      },
+      "buildings": [
+        {
+          "id": "harbor_master",
+          "name": "Harbor Master's Office",
+          "description": "Where ship passages are booked and cargo is registered.",
+          "npcs": [],
+          "open": 6,
+          "close": 8
+        },
+        {
+          "id": "sailors_tavern",
+          "name": "The Salty Anchor",
+          "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
+          "npcs": ["port-innkeeper", "port-doorman"],
+          "open": 7,
+          "close": 4
+        }
+      ],
+      "npcs": ["port-innkeeper", "port-doorman"],
+      "exit_to_environment": "sunscorch-desert"
+    }
+  }
+}

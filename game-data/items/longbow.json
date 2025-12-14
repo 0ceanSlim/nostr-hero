@@ -1,0 +1,28 @@
+{
+  "id": "longbow",
+  "name": "Longbow",
+  "description": "",
+  "ai_description": "tall recurved bow made from yew wood, elegant archery weapon with leather grip and bowstring, traditional ranger's weapon",
+  "price": 0,
+  "type": "Martial Ranged Weapons",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8",
+  "heal": null,
+  "ammunition": "arrows",
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "3",
+  "range-long": "6",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "heavy",
+    "two-handed",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/longbow.png"
+}

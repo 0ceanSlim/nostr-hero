@@ -1,0 +1,22 @@
+{
+  "id": "arcane-powder",
+  "name": "Arcane Powder",
+  "description": "Pure magical energy in powdered form that crackles with raw power. Provided unlimited when using a Wand focus.",
+  "ai_description": "shimmering blue powder that sparks with magical energy, fine crystalline dust with electric crackles",
+  "price": 75,
+  "type": "Spell Component",
+  "weight": 0.1,
+  "stack": 10,
+  "rarity": "common",
+  "tags": [
+    "spell_component",
+    "focus_provided"
+  ],
+  "img": "equipment/spell-component.jpg",
+  "notes": [
+    "Used for evocation and force spells",
+    "Unlimited when Wand focus is equipped",
+    "Consumed on use if no Wand focus"
+  ],
+  "image": "/res/img/items/arcane-powder.png"
+}

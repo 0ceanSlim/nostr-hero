@@ -1,0 +1,15 @@
+{
+  "id": 71,
+  "name": "Half-Ogre",
+  "challenge_rating": 1.0,
+  "type": "Giant",
+  "size": "Large",
+  "armor_class": 12,
+  "hit_points": 30,
+  "alignment": "any chaotic alignment",
+  "img": "/static/img/monster/half-ogre.svg",
+  "enviornment": [
+    "hill",
+    "mountain"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "name": "Crawling Claw",
+  "challenge_rating": 0.0,
+  "type": "Undead",
+  "size": "Tiny",
+  "armor_class": 12,
+  "hit_points": 2,
+  "alignment": "neutral evil",
+  "img": "/static/img/monster/crawling-claw.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

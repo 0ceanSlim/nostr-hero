@@ -1,0 +1,20 @@
+{
+  "id": 303,
+  "name": "Tarrasque",
+  "challenge_rating": 30.0,
+  "type": "Monstrosity",
+  "size": "Gargantuan",
+  "armor_class": 25,
+  "hit_points": 676,
+  "alignment": "unaligned",
+  "tags": [
+    "Titan",
+    "Legendary"
+  ],
+  "img": "/static/img/monster/tarrasque.svg",
+  "enviornment": [
+    "forest",
+    "mountain",
+    "swamp"
+  ]
+}

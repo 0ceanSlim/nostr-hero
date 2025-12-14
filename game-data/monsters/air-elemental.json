@@ -1,0 +1,20 @@
+{
+  "id": 174,
+  "name": "Air Elemental",
+  "challenge_rating": 5.0,
+  "type": "Elemental",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 90,
+  "alignment": "neutral",
+  "tags": [
+    "fly"
+  ],
+  "img": "/static/img/monster/air-elemental.svg",
+  "enviornment": [
+    "coastal",
+    "desert",
+    "hill",
+    "mountain"
+  ]
+}

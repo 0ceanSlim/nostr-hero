@@ -1,0 +1,29 @@
+{
+  "name": "Thorn Whip",
+  "description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target.",
+  "level": 0,
+  "school": "transmutation",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "instantaneous",
+  "damage": "1d6",
+  "damage_type": "piercing",
+  "type": "Spell",
+  "spell_attack": "melee",
+  "save_type": null,
+  "tags": [
+    "combat",
+    "damage",
+    "cantrip"
+  ],
+  "classes": [
+    "druid"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots"
+  ]
+}

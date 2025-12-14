@@ -1,0 +1,29 @@
+{
+  "name": "Compelled Duel",
+  "description": "You attempt to compel a creature into a duel. One creature that you can see within range must make a Wisdom saving throw.",
+  "level": 1,
+  "school": "enchantment",
+  "casting_time": "bonus action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 minute",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "wisdom",
+  "tags": [
+    "control",
+    "enchantment"
+  ],
+  "classes": [
+    "paladin"
+  ],
+  "rarity": "common",
+  "action_cost": "bonus action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": null
+}

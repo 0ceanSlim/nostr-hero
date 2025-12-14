@@ -1,0 +1,20 @@
+{
+  "id": 25,
+  "name": "Drow",
+  "challenge_rating": 0.25,
+  "type": "Humanoid",
+  "size": "Medium",
+  "armor_class": 15,
+  "hit_points": 13,
+  "alignment": "neutral evil",
+  "tags": [
+    "Elf"
+  ],
+  "img": "/static/img/monster/drow.svg",
+  "enviornment": [
+    "forest",
+    "grassland",
+    "mountain",
+    "urban"
+  ]
+}

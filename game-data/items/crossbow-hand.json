@@ -1,0 +1,32 @@
+{
+  "id": "crossbow-hand",
+  "name": "Crossbow hand",
+  "description": "A small hand-held crossbow that can be fired with one hand.",
+  "ai_description": "compact hand crossbow with pistol grip, small one-handed weapon with steel prod and simple trigger mechanism",
+  "price": 0,
+  "type": "Martial Ranged Weapons",
+  "weight": 3,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d6",
+  "heal": null,
+  "ammunition": "bolts",
+  "damage-type": "piercing",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "3",
+  "rarity": "common",
+  "tags": [
+    "ammunition",
+    "loading",
+    "light",
+    "equipment"
+  ],
+  "notes": [
+    "Requires bolts to fire",
+    "Light weapon",
+    "Loading property requires action to reload"
+  ],
+  "gear_slot": "hands",
+  "image": "/res/img/items/crossbow-hand.png"
+}

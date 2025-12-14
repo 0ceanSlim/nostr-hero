@@ -1,0 +1,20 @@
+{
+  "id": 166,
+  "name": "Barlgura",
+  "challenge_rating": 5.0,
+  "type": "Fiend",
+  "size": "Large",
+  "armor_class": 15,
+  "hit_points": 68,
+  "alignment": "chaotic evil",
+  "tags": [
+    "Demon"
+  ],
+  "img": "/static/img/monster/barlgura.svg",
+  "enviornment": [
+    "desert",
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

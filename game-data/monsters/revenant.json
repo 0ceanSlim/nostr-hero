@@ -1,0 +1,16 @@
+{
+  "id": 192,
+  "name": "Revenant",
+  "challenge_rating": 5.0,
+  "type": "Undead",
+  "size": "Medium",
+  "armor_class": 13,
+  "hit_points": 136,
+  "alignment": "neutral",
+  "img": "/static/img/monster/revenant.svg",
+  "enviornment": [
+    "mountain",
+    "swamp",
+    "urban"
+  ]
+}

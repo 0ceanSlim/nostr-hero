@@ -1,0 +1,19 @@
+{
+  "id": "alchemists-supplies",
+  "name": "Alchemist's supplies",
+  "description": "",
+  "ai_description": "wooden case filled with glass vials, copper distillery apparatus, mortar and pestle, chemical brewing equipment",
+  "price": 5000,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 8,
+  "type": "Artisan's Tools",
+  "rarity": "common",
+  "img": "equipment/tool.jpg",
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/alchemists-supplies.png"
+}

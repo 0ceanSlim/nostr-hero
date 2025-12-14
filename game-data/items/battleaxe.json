@@ -1,0 +1,26 @@
+{
+  "id": "battleaxe",
+  "name": "Battleaxe",
+  "description": "",
+  "ai_description": "large double-bladed axe with long wooden handle, broad steel blade on both sides, heavy weapon for two-handed combat",
+  "price": 0,
+  "type": "Martial Melee Weapons",
+  "weight": 4,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d8,1d10",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "slashing",
+  "img": "equipment/weapon.jpg",
+  "range": "null",
+  "range-long": "null",
+  "rarity": "common",
+  "tags": [
+    "versatile",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/battleaxe.png"
+}

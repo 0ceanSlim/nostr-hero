@@ -1,0 +1,19 @@
+{
+  "id": "bottle-glass",
+  "name": "Bottle Glass",
+  "description": "",
+  "ai_description": "clear glass bottle with narrow neck and cork stopper, transparent container for storing liquids and potions",
+  "price": 200,
+  "ac": null,
+  "damage": null,
+  "heal": null,
+  "stack": 1,
+  "weight": 2,
+  "type": "Adventuring Gear",
+  "rarity": "common",
+  "img": "equipment/adventuring-gear.jpg",
+  "range": "null",
+  "range-long": "null",
+  "ammunition": "",
+  "image": "/res/img/items/bottle-glass.png"
+}

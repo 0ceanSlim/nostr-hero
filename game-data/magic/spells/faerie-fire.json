@@ -1,0 +1,38 @@
+{
+  "name": "Faerie Fire",
+  "description": "Each object in a 20-foot cube within range is outlined in blue, green, or violet light (your choice). Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw.",
+  "level": 1,
+  "school": "evocation",
+  "casting_time": "action",
+  "range": "12",
+  "range_long": "12",
+  "duration": "1 minute",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "dexterity",
+  "tags": [
+    "utility",
+    "debuff"
+  ],
+  "classes": [
+    "druid",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 2,
+  "notes": [
+    "Level 1 spell - costs 1 mana to cast"
+  ],
+  "material_component": {
+    "required": [
+      {
+        "component": "pollen",
+        "quantity": 2
+      }
+    ],
+    "focus_provided": "No focus provides this component - must be obtained"
+  }
+}

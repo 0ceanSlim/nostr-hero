@@ -1,0 +1,35 @@
+{
+  "name": "Combat Illusion",
+  "description": "You create a brief illusion to confuse an enemy. Target must make a Wisdom saving throw or have disadvantage on their next attack roll as they target the illusion instead.",
+  "level": 0,
+  "school": "illusion",
+  "casting_time": "action",
+  "range": "6",
+  "range_long": "6",
+  "duration": "1 round",
+  "damage": null,
+  "damage_type": null,
+  "type": "Spell",
+  "spell_attack": null,
+  "save_type": "wisdom",
+  "tags": [
+    "combat",
+    "cantrip",
+    "illusion",
+    "debuff"
+  ],
+  "classes": [
+    "wizard",
+    "sorcerer",
+    "warlock",
+    "bard"
+  ],
+  "rarity": "common",
+  "action_cost": "action",
+  "mana_cost": 1,
+  "notes": [
+    "Cantrip - can be cast without using spell slots",
+    "Can create sound or visual illusion",
+    "Investigation check to discern it's an illusion"
+  ]
+}

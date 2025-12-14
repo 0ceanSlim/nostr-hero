@@ -1,0 +1,27 @@
+{
+  "id": "light-hammer",
+  "name": "Light hammer",
+  "description": "",
+  "ai_description": "small iron hammer with flat striking head and wooden handle, light throwing hammer for combat and utility",
+  "price": 0,
+  "type": "Simple Melee Weapons",
+  "weight": 2,
+  "stack": 1,
+  "ac": null,
+  "damage": "1d4",
+  "heal": null,
+  "ammunition": "",
+  "damage-type": "bludgeon",
+  "img": "equipment/weapon.jpg",
+  "range": "1",
+  "range-long": "2",
+  "rarity": "common",
+  "tags": [
+    "light",
+    "thrown",
+    "equipment"
+  ],
+  "notes": [],
+  "gear_slot": "hands",
+  "image": "/res/img/items/light-hammer.png"
+}
