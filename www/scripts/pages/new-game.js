@@ -664,65 +664,6 @@ function editCharacterName() {
   nameInput.onblur = saveName;
 }
 
-// Cache for item data from database
-let itemsCache = null;
-
-// Load all items from database once
-async function loadItemsFromDatabase() {
-  if (itemsCache) {
-    return itemsCache;
-  }
-
-  try {
-    const response = await fetch('/api/items');
-    if (response.ok) {
-      itemsCache = await response.json();
-      console.log(`📦 Loaded ${itemsCache.length} items from database`);
-      return itemsCache;
-    }
-  } catch (error) {
-    console.warn('Could not load items from database:', error);
-  }
-  return [];
-}
-
-// Helper function to get item data from database cache by ID
-async function getItemById(itemId) {
-  try {
-    const items = await loadItemsFromDatabase();
-
-    // Find item by ID (exact match)
-    const item = items.find(i => i.id === itemId);
-
-    if (item) {
-      // Convert database format to expected frontend format
-      return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        type: item.item_type,
-        tags: item.tags || [],
-        rarity: item.rarity,
-        gear_slot: item.properties?.gear_slot,
-        slots: item.properties?.slots,
-        contents: item.properties?.contents,
-        ...item.properties // Spread all other properties
-      };
-    } else {
-      console.warn(`❌ Item ID "${itemId}" not found in database`);
-    }
-  } catch (error) {
-    console.warn(`Could not load item data for ID: ${itemId}`, error);
-  }
-  return null;
-}
-
-// Legacy function for backwards compatibility - now uses ID lookup
-async function getItemData(itemName) {
-  console.warn(`⚠️ getItemData(${itemName}) is deprecated, use getItemById() instead`);
-  return await getItemById(itemName);
-}
-
 // Dynamic inventory creation with proper equipment placement
 async function createInventoryFromItems(allItems) {
   // Initialize empty inventory structure

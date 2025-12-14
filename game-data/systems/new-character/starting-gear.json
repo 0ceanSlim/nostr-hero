@@ -88,7 +88,7 @@
             },
             {
               "type": "single",
-              "item": "war pick",
+              "item": "war-pick",
               "quantity": 1
             },
             {
@@ -1187,7 +1187,7 @@
                     "scimitar",
                     "shortsword",
                     "trident",
-                    "war pick",
+                    "war-pick",
                     "warhammer",
                     "whip"
                   ]

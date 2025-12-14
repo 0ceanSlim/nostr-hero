@@ -10,43 +10,6 @@ let itemStatsCache = {}; // Cache for item stats
 let selectionHistory = []; // Track history for back button
 let currentBackButton = null; // Current back button element
 let backButtonCallback = null; // Callback to go back
-let itemsDatabaseCache = null; // Cache for items from database
-
-/**
- * Load items from database cache
- */
-async function loadItemsFromDatabase() {
-  if (itemsDatabaseCache) {
-    return itemsDatabaseCache;
-  }
-
-  try {
-    const response = await fetch('/api/items');
-    if (!response.ok) {
-      throw new Error('Failed to fetch items from database');
-    }
-    const data = await response.json();
-    itemsDatabaseCache = data.items || [];
-    return itemsDatabaseCache;
-  } catch (error) {
-    console.error('Error loading items from database:', error);
-    return [];
-  }
-}
-
-/**
- * Get item data from database cache by ID
- */
-async function getItemById(itemId) {
-  try {
-    const items = await loadItemsFromDatabase();
-    const item = items.find(i => i.id === itemId);
-    return item || null;
-  } catch (error) {
-    console.error(`Error getting item ${itemId}:`, error);
-    return null;
-  }
-}
 
 /**
  * Start equipment selection flow (excluding pack)
@@ -1273,8 +1236,8 @@ async function createSimpleItemCard(itemName, quantity, isInBundle = false) {
 
   // Item image (fills 80% of container)
   const img = document.createElement('img');
-  img.src = itemData?.image || `/res/img/items/${itemName}.png`;
-  img.alt = itemName;
+  img.src = itemData?.image || `/res/img/items/${itemData?.id || itemName}.png`;
+  img.alt = itemData?.name || itemName;
   img.className = 'absolute inset-0 w-full h-full object-contain p-3';
   img.style.imageRendering = 'pixelated';
   img.style.imageRendering = '-moz-crisp-edges';
@@ -1350,8 +1313,8 @@ async function createSimpleItemContent(option) {
 
   // Item image
   const img = document.createElement('img');
-  img.src = itemData?.image || `/res/img/items/${option.item}.png`;
-  img.alt = option.item;
+  img.src = itemData?.image || `/res/img/items/${itemData?.id || option.item}.png`;
+  img.alt = itemData?.name || option.item;
   img.className = 'w-20 h-20 mx-auto mb-2 object-contain';
   img.style.imageRendering = 'pixelated';
   img.style.imageRendering = '-moz-crisp-edges';

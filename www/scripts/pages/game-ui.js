@@ -1,9 +1,6 @@
 // Game UI Functions
 // Handles all user interface updates and interactions
 
-// Item database cache
-let itemsDatabaseCache = null;
-
 // Advancement data cache
 let advancementDataCache = null;
 
@@ -53,30 +50,6 @@ function addGameLog(message) {
     if (textContainer) {
         textContainer.scrollTop = textContainer.scrollHeight;
     }
-}
-
-/**
- * Load items from database cache
- */
-async function loadItemsFromDatabase() {
-  if (itemsDatabaseCache) {
-    return itemsDatabaseCache;
-  }
-
-  try {
-    const response = await fetch('/api/items');
-    if (!response.ok) {
-      throw new Error('Failed to fetch items from database');
-    }
-    const data = await response.json();
-
-    // The API returns an array directly, not wrapped in an object
-    itemsDatabaseCache = Array.isArray(data) ? data : (data.items || []);
-    return itemsDatabaseCache;
-  } catch (error) {
-    console.error('Error loading items from database:', error);
-    return [];
-  }
 }
 
 /**
