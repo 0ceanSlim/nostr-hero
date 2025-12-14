@@ -50,7 +50,7 @@ func main() {
 	mux.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("www/res/"))))
 
 	// Serve data files
-	mux.Handle("/data/", http.StripPrefix("/data/", http.FileServer(http.Dir("docs/data/"))))
+	mux.Handle("/data/", http.StripPrefix("/data/", http.FileServer(http.Dir("game-data/"))))
 
 	// Initialize Routes
 	routes.InitializeRoutes(mux)

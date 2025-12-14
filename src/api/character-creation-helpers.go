@@ -15,7 +15,7 @@ import (
 // ============================================================================
 
 func loadStartingGearForClass(class string) (*StartingGearData, error) {
-	data, err := os.ReadFile("docs/data/character/starting-gear.json")
+	data, err := os.ReadFile("game-data/systems/new-character/starting-gear.json")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read starting-gear.json: %v", err)
 	}
@@ -511,7 +511,7 @@ func getKeys(m map[string]string) []string {
 // ============================================================================
 
 func generateSpellSlots(class string) (map[string]interface{}, error) {
-	data, err := os.ReadFile("docs/data/character/spell-slots.json")
+	data, err := os.ReadFile("game-data/magic/spell-slots.json")
 	if err != nil {
 		return nil, err
 	}
@@ -566,7 +566,7 @@ func generateSpellSlots(class string) (map[string]interface{}, error) {
 }
 
 func loadKnownSpells(class string) ([]string, error) {
-	data, err := os.ReadFile("docs/data/character/starting-spells.json")
+	data, err := os.ReadFile("game-data/systems/new-character/starting-spells.json")
 	if err != nil {
 		return nil, err
 	}
@@ -600,7 +600,7 @@ func loadKnownSpells(class string) ([]string, error) {
 // ============================================================================
 
 func getStartingCityForRace(race string) (string, error) {
-	data, err := os.ReadFile("docs/data/character/racial-starting-cities.json")
+	data, err := os.ReadFile("game-data/systems/new-character/starting-locations.json")
 	if err != nil {
 		return "millhaven", err
 	}
@@ -665,7 +665,7 @@ func getDisplayNamesForSave(database *sql.DB, locationID, districtKey, buildingI
 }
 
 func getMusicTrackForLocation(locationID string) string {
-	data, err := os.ReadFile("docs/data/content/music.json")
+	data, err := os.ReadFile("game-data/systems/music.json")
 	if err != nil {
 		log.Printf("⚠️  Failed to read music.json: %v", err)
 		return ""
@@ -696,7 +696,7 @@ func getMusicTrackForLocation(locationID string) string {
 }
 
 func getAutoUnlockMusicTracks() []string {
-	data, err := os.ReadFile("docs/data/content/music.json")
+	data, err := os.ReadFile("game-data/systems/music.json")
 	if err != nil {
 		log.Printf("⚠️  Failed to read music.json: %v", err)
 		return []string{}
@@ -751,7 +751,7 @@ func generateStartingVault(locationID string) map[string]interface{} {
 // ============================================================================
 
 func getStartingGold(background string) (int, error) {
-	data, err := os.ReadFile("docs/data/character/starting-gold.json")
+	data, err := os.ReadFile("game-data/systems/new-character/starting-gold.json")
 	if err != nil {
 		return 1000, err
 	}

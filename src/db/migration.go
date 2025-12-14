@@ -14,17 +14,12 @@ import (
 func MigrateFromJSON() error {
 	log.Println("Starting JSON to DuckDB migration...")
 
-	// Migrate equipment packs
-	if err := migrateEquipmentPacks(); err != nil {
-		return fmt.Errorf("failed to migrate equipment packs: %v", err)
-	}
-
 	// Migrate character data
 	if err := migrateCharacterData(); err != nil {
 		return fmt.Errorf("failed to migrate character data: %v", err)
 	}
 
-	// Migrate items
+	// Migrate items (includes packs as items now)
 	if err := migrateItems(); err != nil {
 		return fmt.Errorf("failed to migrate items: %v", err)
 	}
@@ -34,7 +29,7 @@ func MigrateFromJSON() error {
 		return fmt.Errorf("failed to migrate spells: %v", err)
 	}
 
-	// Migrate content data (monsters, locations)
+	// Migrate content data (monsters, locations, NPCs)
 	if err := migrateContentData(); err != nil {
 		return fmt.Errorf("failed to migrate content data: %v", err)
 	}
@@ -43,64 +38,21 @@ func MigrateFromJSON() error {
 	return nil
 }
 
-// migrateEquipmentPacks migrates equipment packs from JSON
-func migrateEquipmentPacks() error {
-	log.Println("Migrating equipment packs...")
-
-	packsPath := filepath.Join("docs", "data", "equipment", "packs.json")
-	data, err := os.ReadFile(packsPath)
-	if err != nil {
-		return fmt.Errorf("failed to read packs.json: %v", err)
-	}
-
-	var packsData struct {
-		Packs map[string][][2]interface{} `json:"packs"`
-	}
-
-	if err := json.Unmarshal(data, &packsData); err != nil {
-		return fmt.Errorf("failed to unmarshal packs data: %v", err)
-	}
-
-	// Clear existing data
-	if _, err := db.Exec("DELETE FROM equipment_packs"); err != nil {
-		return fmt.Errorf("failed to clear equipment_packs table: %v", err)
-	}
-
-	// Insert equipment packs
-	stmt := `INSERT INTO equipment_packs (id, name, items) VALUES (?, ?, ?)`
-	for name, items := range packsData.Packs {
-		id := strings.ToLower(strings.ReplaceAll(name, "'", ""))
-		id = strings.ReplaceAll(id, " ", "-")
-
-		itemsJSON, err := json.Marshal(items)
-		if err != nil {
-			return fmt.Errorf("failed to marshal items for pack %s: %v", name, err)
-		}
-
-		if _, err := db.Exec(stmt, id, name, string(itemsJSON)); err != nil {
-			return fmt.Errorf("failed to insert pack %s: %v", name, err)
-		}
-	}
-
-	log.Printf("Migrated %d equipment packs", len(packsData.Packs))
-	return nil
-}
-
 // migrateCharacterData migrates character-related JSON files
 func migrateCharacterData() error {
 	log.Println("Migrating character data...")
 
-	characterDataPath := filepath.Join("docs", "data", "character")
+	characterDataPath := filepath.Join("game-data", "systems", "new-character")
 
 	// Define the files we want to migrate for character data
 	characterFiles := map[string]string{
-		"advancement.json":           "character_advancement",
 		"base-hp.json":              "character_base_hp",
-		"racial-starting-cities.json": "racial_starting_cities",
-		"spell-progression.json":     "spell_progression",
-		"starting-gear.json":         "starting_gear",
-		"starting-gold.json":         "starting_gold",
-		"starting-spells.json":       "starting_spells",
+		"generation-weights.json":   "generation_weights",
+		"introductions.json":        "introductions",
+		"starting-gear.json":        "starting_gear",
+		"starting-gold.json":        "starting_gold",
+		"starting-locations.json":   "starting_locations",
+		"starting-spells.json":      "starting_spells",
 	}
 
 	for filename, tableName := range characterFiles {
@@ -117,7 +69,7 @@ func migrateCharacterData() error {
 func migrateItems() error {
 	log.Println("Migrating items...")
 
-	itemsPath := filepath.Join("docs", "data", "equipment", "items")
+	itemsPath := filepath.Join("game-data", "items")
 
 	// Clear existing items
 	if _, err := db.Exec("DELETE FROM items"); err != nil {
@@ -184,7 +136,7 @@ func migrateItemFile(filePath string) error {
 func migrateSpells() error {
 	log.Println("Migrating spells...")
 
-	spellsPath := filepath.Join("docs", "data", "content", "spells")
+	spellsPath := filepath.Join("game-data", "magic", "spells")
 
 	// Clear existing spells
 	if _, err := db.Exec("DELETE FROM spells"); err != nil {
@@ -275,7 +227,7 @@ func migrateContentData() error {
 
 // migrateMonsters migrates all monster JSON files
 func migrateMonsters() error {
-	monstersPath := filepath.Join("docs", "data", "content", "monsters")
+	monstersPath := filepath.Join("game-data", "monsters")
 
 	// Clear existing monsters
 	if _, err := db.Exec("DELETE FROM monsters"); err != nil {
@@ -336,7 +288,7 @@ func migrateMonsterFile(filePath string) error {
 
 // migrateLocations migrates location data
 func migrateLocations() error {
-	locationsPath := filepath.Join("docs", "data", "content", "locations")
+	locationsPath := filepath.Join("game-data", "locations")
 
 	// Clear existing locations
 	if _, err := db.Exec("DELETE FROM locations"); err != nil {
@@ -406,7 +358,7 @@ func migrateLocationFile(filePath, locationType string) error {
 
 // migrateNPCs migrates all NPC JSON files from all location subdirectories
 func migrateNPCs() error {
-	npcsPath := filepath.Join("docs", "data", "content", "npcs")
+	npcsPath := filepath.Join("game-data", "npcs")
 
 	// Clear existing NPCs
 	if _, err := db.Exec("DELETE FROM npcs"); err != nil {

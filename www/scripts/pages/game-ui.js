@@ -88,7 +88,7 @@ async function loadAdvancementData() {
   }
 
   try {
-    const response = await fetch('/data/character/advancement.json');
+    const response = await fetch('/data/systems/advancement.json');
     if (!response.ok) {
       throw new Error('Failed to fetch advancement data');
     }

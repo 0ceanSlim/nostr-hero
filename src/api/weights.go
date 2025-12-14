@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"nostr-hero/src/db"
 )
 
 // WeightsHandler serves character generation weights from DuckDB
@@ -143,131 +146,60 @@ func getWeightsFromDB() (map[string]interface{}, error) {
 	return weights, nil
 }
 
-// IntroductionsHandler serves character introduction data from DuckDB
+// IntroductionsHandler serves character introduction data from database
 func IntroductionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// For now, return a simple structure - this could be expanded to query from DB
-	introductions := map[string]interface{}{
-		"base_intro": map[string]string{
-			"scene1":       "The rain falls relentlessly, drumming against the worn cobblestones of your village. Tonight marks eighteen years since your arrival in this world - a life spent without the guidance of parents, but not without care.",
-			"scene2":       "For years, the old caretaker looked after you when no one else would. Teaching you, guiding you, preparing you for a world that can be both harsh and wondrous.",
-			"scene3":       "Tonight, as the rain falls outside, they've passed peacefully in their sleep. Their final words still echo in your mind:",
-			"final_words":  "Your destiny awaits beyond these village borders. You have a hero's heart - don't let it remain hidden here.",
-			"letter_intro": "Before passing, they left you a letter. It speaks of dreams unfulfilled and adventures never taken - and a wish that you might find your own path.",
-		},
-		"background_intros": map[string]map[string]string{
-			"Acolyte": {
-				"scene":  "[Fade to: A small shrine in the corner of the room, candles flickering.] Their faith sustained them, even at the end. You were raised amidst prayers and rituals, guided by the old caretaker's unwavering devotion.",
-				"letter": "My child, faith has been my anchor through life's storms. I found purpose in service to higher powers, in the rituals that mark our days, in the comfort of ancient texts. But I remained too long within temple walls when the wider world called.",
-			},
-			"Criminal": {
-				"scene":  "[Fade to: A hidden compartment being opened in the floor, revealing concealed items.] Even in their final days, they kept secrets well. The old caretaker taught you to survive in the shadows, to observe without being seen.",
-				"letter": "I never told you everything about my past. Some secrets are best carried to the grave. What I've taught you - the silent step, the watchful eye, the patient hand - these were born of necessity in darker times.",
-			},
-			"Folk Hero": {
-				"scene":  "[Fade to: Maps and natural implements - seeds, dried herbs, survival tools.] They knew the wilds better than the village streets. The old caretaker taught you to read the stars, to track game, to live in harmony with nature's harsh beauty.",
-				"letter": "The earth provides, the sky guides, and between them is where we make our way. The road called to me all my life, but I answered it too rarely. I found you, and that journey was enough to fill my heart, but there were countless paths I left unexplored.",
-			},
-			// Add more backgrounds as needed...
-		},
-		"equipment_intros": map[string]map[string]string{
-			"warrior": {
-				"scene": "Along the wall rest weapons and armor, maintained with meticulous care despite their age.",
-				"quote": "Take what suits your strength. A warrior's tools should feel like extensions of the body, not burdens upon it.",
-			},
-			"faithful": {
-				"scene": "A modest altar sits in the corner, testament to devotion maintained through decades.",
-				"quote": "Faith and focus are weapons that never dull. When body and spirit align, even mountains can be moved.",
-			},
-			// Add more equipment types...
-		},
-		"final_note": map[string]string{
-			"text":  "Among these practical items rests a simple pack, weathered but sturdy, large enough to carry what you'll need but not so large as to become a burden. Attached to it is a small note in your caretaker's hand:",
-			"quote": "The weight you carry shapes the journey. Choose wisely.",
-		},
-		"departure": map[string]string{
-			"text": "With the letter carefully folded and tucked away, you gather what you need for the journey ahead. The road stretches before you, damp from the night's rain but illuminated by the breaking dawn. Where fate will lead, only time will tell. But one thing is certain - you won't find your destiny by staying here.",
-		},
+	// Get introductions data from database
+	introductions, err := getIntroductionsFromDB()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load introductions: %v", err), http.StatusInternalServerError)
+		return
 	}
 
-	json.NewEncoder(w).Encode(introductions)
+	w.Write([]byte(introductions))
 }
 
-// StartingGearHandler serves starting equipment data
+// getIntroductionsFromDB retrieves introductions data from database
+func getIntroductionsFromDB() (string, error) {
+	database := db.GetDB()
+	if database == nil {
+		return "", fmt.Errorf("database not available")
+	}
+
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM introductions WHERE id = 'introductions'").Scan(&dataJSON)
+	if err != nil {
+		return "", fmt.Errorf("failed to query introductions: %v", err)
+	}
+	return dataJSON, nil
+}
+
+// StartingGearHandler serves starting equipment data from database
 func StartingGearHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// For now, return starting gear structure directly
-	// This should eventually be loaded from DuckDB
-	startingGear := map[string]interface{}{
-		"equipment_packs": map[string]map[string]interface{}{
-			"Fighter": map[string]interface{}{
-				"given": []map[string]interface{}{
-					{"item": "leather-armor", "quantity": 1, "equipped": true, "slot": "armor"},
-					{"item": "shortsword", "quantity": 1, "equipped": true, "slot": "weapon"},
-					{"item": "shield", "quantity": 1, "equipped": true, "slot": "shield"},
-					{"item": "rations", "quantity": 5},
-					{"item": "bedroll", "quantity": 1},
-					{"item": "rope", "quantity": 1},
-				},
-				"choice": []map[string]interface{}{
-					{
-						"options": []string{"longsword", "battleaxe", "warhammer"},
-						"description": "Choose your primary weapon",
-					},
-				},
-			},
-			"Wizard": map[string]interface{}{
-				"given": []map[string]interface{}{
-					{"item": "robes", "quantity": 1, "equipped": true, "slot": "armor"},
-					{"item": "quarterstaff", "quantity": 1, "equipped": true, "slot": "weapon"},
-					{"item": "spellbook", "quantity": 1},
-					{"item": "spell-component-pouch", "quantity": 1},
-					{"item": "rations", "quantity": 3},
-					{"item": "bedroll", "quantity": 1},
-				},
-				"choice": []map[string]interface{}{
-					{
-						"options": []string{"healing-potion", "mage-armor-scroll", "magic-missile-scroll"},
-						"description": "Choose your starting magical aid",
-					},
-				},
-			},
-			"Rogue": map[string]interface{}{
-				"given": []map[string]interface{}{
-					{"item": "leather-armor", "quantity": 1, "equipped": true, "slot": "armor"},
-					{"item": "shortsword", "quantity": 1, "equipped": true, "slot": "weapon"},
-					{"item": "dagger", "quantity": 2},
-					{"item": "thieves-tools", "quantity": 1},
-					{"item": "rations", "quantity": 4},
-					{"item": "rope", "quantity": 1},
-				},
-				"choice": []map[string]interface{}{
-					{
-						"options": []string{"shortbow", "crossbow", "throwing-knives"},
-						"description": "Choose your ranged weapon",
-					},
-				},
-			},
-			"Cleric": map[string]interface{}{
-				"given": []map[string]interface{}{
-					{"item": "chainmail", "quantity": 1, "equipped": true, "slot": "armor"},
-					{"item": "mace", "quantity": 1, "equipped": true, "slot": "weapon"},
-					{"item": "shield", "quantity": 1, "equipped": true, "slot": "shield"},
-					{"item": "holy-symbol", "quantity": 1},
-					{"item": "rations", "quantity": 4},
-					{"item": "bedroll", "quantity": 1},
-				},
-				"choice": []map[string]interface{}{
-					{
-						"options": []string{"healing-potion", "blessing-scroll", "turn-undead-scroll"},
-						"description": "Choose your divine blessing",
-					},
-				},
-			},
-		},
+	// Get starting gear data from database
+	startingGear, err := getStartingGearFromDB()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load starting gear: %v", err), http.StatusInternalServerError)
+		return
 	}
 
-	json.NewEncoder(w).Encode(startingGear)
+	w.Write([]byte(startingGear))
+}
+
+// getStartingGearFromDB retrieves starting gear data from database
+func getStartingGearFromDB() (string, error) {
+	database := db.GetDB()
+	if database == nil {
+		return "", fmt.Errorf("database not available")
+	}
+
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM starting_gear WHERE id = 'starting-gear'").Scan(&dataJSON)
+	if err != nil {
+		return "", fmt.Errorf("failed to query starting gear: %v", err)
+	}
+	return dataJSON, nil
 }

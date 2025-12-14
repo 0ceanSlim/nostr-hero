@@ -293,7 +293,7 @@ async function startIntroSequence() {
   document.getElementById("name-screen").classList.add("hidden");
 
   // Load intro data
-  const response = await fetch("/data/character/introductions.json");
+  const response = await fetch("/api/introductions");
   introData = await response.json();
 
   // 1. Scene 1 - Rainy Night

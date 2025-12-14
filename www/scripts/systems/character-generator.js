@@ -28,14 +28,14 @@ class NostrCharacterGenerator {
                 slotsResponse,
                 citiesResponse
             ] = await Promise.all([
-                fetch('/data/systems/weights.json'),
-                fetch('/data/character/introductions.json'),
-                fetch('/data/character/starting-gear.json'),
-                fetch('/data/character/starting-gold.json'),
-                fetch('/data/character/starting-spells.json'),
-                fetch('/data/character/spell-progression.json'),
-                fetch('/data/character/spell-slots.json'),
-                fetch('/data/character/racial-starting-cities.json')
+                fetch('/api/weights'),
+                fetch('/api/introductions'),
+                fetch('/api/starting-gear'),
+                fetch('/data/systems/new-character/starting-gold.json'),
+                fetch('/data/systems/new-character/starting-spells.json'),
+                fetch('/data/magic/spell-progression.json'),
+                fetch('/data/magic/spell-slots.json'),
+                fetch('/data/systems/new-character/starting-locations.json')
             ]);
 
             if (!weightsResponse.ok) throw new Error('Failed to load weights data');
