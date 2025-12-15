@@ -4,31 +4,6 @@
 // Advancement data cache
 let advancementDataCache = null;
 
-// Spell data mapping
-const spellData = {
-    'fire-bolt': { school: 'evocation', damage: '1d10', type: 'fire', emoji: '🔥' },
-    'ray-of-frost': { school: 'evocation', damage: '1d8', type: 'cold', emoji: '❄️' },
-    'shocking-grasp': { school: 'evocation', damage: '1d8', type: 'lightning', emoji: '⚡' },
-    'mage-hand': { school: 'conjuration', damage: null, type: null, emoji: '' },
-    'light': { school: 'evocation', damage: null, type: null, emoji: '' },
-    'acid-splash': { school: 'conjuration', damage: '1d6', type: 'acid', emoji: '🧪' },
-    'magic-missile': { school: 'evocation', damage: '1d4+1', type: 'force', emoji: '✨' },
-    'shield': { school: 'abjuration', damage: null, type: null, emoji: '' },
-    'burning-hands': { school: 'evocation', damage: '3d6', type: 'fire', emoji: '🔥' },
-    'thunderwave': { school: 'evocation', damage: '2d8', type: 'thunder', emoji: '💥' },
-    'mage-armor': { school: 'abjuration', damage: null, type: null, emoji: '' },
-    'sleep': { school: 'enchantment', damage: null, type: null, emoji: '' },
-    'detect-magic': { school: 'divination', damage: null, type: null, emoji: '' },
-    'identify': { school: 'divination', damage: null, type: null, emoji: '' },
-    'sacred-flame': { school: 'evocation', damage: '1d8', type: 'radiant', emoji: '✨' },
-    'guidance': { school: 'divination', damage: null, type: null, emoji: '' },
-    'spare-the-dying': { school: 'necromancy', damage: null, type: null, emoji: '' },
-    'cure-wounds': { school: 'evocation', damage: '1d8', type: 'healing', emoji: '💚' },
-    'healing-word': { school: 'evocation', damage: '1d4', type: 'healing', emoji: '💚' },
-    'bless': { school: 'enchantment', damage: null, type: null, emoji: '' },
-    'guiding-bolt': { school: 'evocation', damage: '4d6', type: 'radiant', emoji: '✨' },
-};
-
 /**
  * Add a message to the game text log
  * Messages are appended to preserve history
@@ -829,7 +804,12 @@ function updateSpellsDisplay() {
         const spellsArray = Array.isArray(character.spells) ? character.spells : [];
 
         spellsArray.forEach(spellId => {
-            const spell = spellData[spellId] || { school: 'evocation', damage: null, type: null, emoji: '' };
+            const spell = getSpellById(spellId);
+
+            if (!spell) {
+                console.error(`❌ Spell not found: ${spellId}`);
+                return; // Skip this spell
+            }
 
             const spellDiv = document.createElement('div');
             spellDiv.className = 'relative cursor-pointer hover:opacity-80 flex flex-col items-center justify-center overflow-hidden';

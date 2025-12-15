@@ -484,64 +484,6 @@ async function initializeFromSave(saveData) {
     console.log('Mapped game state:', gameState);
     updateGameState(gameState);
 }
-// Convert location/district/building IDs to display names for saving
-async function getDisplayNamesForLocation(locationId, districtKey, buildingId) {
-    try {
-        // Fetch location data directly from API instead of DOM (DOM gets wiped by intro screen)
-        const response = await fetch('/api/locations');
-        if (!response.ok) {
-            console.warn('Failed to fetch locations from API');
-            return { location: locationId, district: districtKey, building: buildingId };
-        }
-
-        const allLocations = await response.json();
-        console.log('🔍 Fetched', allLocations.length, 'locations from API');
-        console.log('🔍 Looking for locationId:', locationId);
-
-        // Find the location
-        const location = allLocations.find(loc => loc.id === locationId);
-        if (!location) {
-            console.warn('❌ Location not found:', locationId);
-            return { location: locationId, district: districtKey, building: buildingId };
-        }
-
-        const locationName = location.name || locationId;
-        console.log('✅ Found location name:', locationName);
-
-        // Find the district (check both location.districts and location.properties.districts)
-        const districts = location.districts || location.properties?.districts;
-        let districtName = districtKey;
-        if (districts && districts[districtKey]) {
-            districtName = districts[districtKey].name || districtKey;
-            console.log('✅ Found district name:', districtName);
-        } else {
-            console.warn('❌ District not found:', districtKey, 'Available districts:', districts ? Object.keys(districts) : 'none');
-        }
-
-        // Find the building
-        let buildingName = buildingId || '';
-        if (buildingId && districts && districts[districtKey]) {
-            const district = districts[districtKey];
-            if (district.buildings) {
-                const building = district.buildings.find(b => b.id === buildingId);
-                if (building) {
-                    buildingName = building.name || buildingId;
-                }
-            }
-        }
-
-        const result = {
-            location: locationName,
-            district: districtName,
-            building: buildingName
-        };
-        console.log('🔍 Final display names:', result);
-        return result;
-    } catch (error) {
-        console.error('❌ Error getting display names:', error);
-        return { location: locationId, district: districtKey, building: buildingId };
-    }
-}
 
 // Convert display names back to IDs for game logic
 async function getIdsFromDisplayNames(locationName, districtName, buildingName) {
