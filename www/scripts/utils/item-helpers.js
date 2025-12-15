@@ -71,3 +71,114 @@ async function getItemById(itemId) {
 function clearItemsCache() {
   itemsDatabaseCache = null;
 }
+
+/**
+ * Convert item name to image filename
+ * @param {string} itemName - The item name
+ * @returns {string} Image filename (lowercase, no special chars, hyphens for spaces)
+ * @example getItemImageName("Leather Armor") returns "leather-armor"
+ */
+function getItemImageName(itemName) {
+  return itemName.toLowerCase().replace(/[',]/g, "").replace(/\s+/g, "-");
+}
+
+/**
+ * Get formatted HTML stats for an item
+ * @param {string} itemName - The item name to fetch stats for
+ * @returns {Promise<string>} HTML string with formatted item stats
+ */
+async function getItemStats(itemName) {
+  try {
+    const response = await fetch(
+      `/api/items?name=${encodeURIComponent(itemName)}`
+    );
+    if (!response.ok) {
+      return `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">No details available</div>`;
+    }
+
+    const items = await response.json();
+
+    if (!items || items.length === 0) {
+      return `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">No details available</div>`;
+    }
+
+    const itemData = items[0];
+    const props = itemData.properties || {};
+
+    let statsHTML = `<div class="font-bold text-yellow-400 mb-2 text-xl">${itemData.name}</div>`;
+
+    if (itemData.item_type) {
+      statsHTML += `<div class="text-green-400 text-sm font-semibold mb-3">${itemData.item_type}</div>`;
+    }
+
+    // Check if this is a focus item
+    const isFocus =
+      itemData.item_type === "Arcane Focus" ||
+      itemData.item_type === "Druidic Focus" ||
+      itemData.item_type === "Holy Symbol";
+
+    // If it's a focus, show the component it provides prominently
+    if (isFocus && props.provides) {
+      statsHTML += `<div class="bg-purple-900 bg-opacity-40 border-2 border-purple-500 rounded-lg p-3 mb-3">`;
+      statsHTML += `<div class="text-purple-300 text-xs font-semibold mb-2">✨ Provides Unlimited:</div>`;
+      statsHTML += `<div class="flex items-center gap-2">`;
+      statsHTML += `<img src="/res/img/items/${props.provides}.png" class="w-8 h-8 object-contain" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;" onerror="this.style.display='none'">`;
+      statsHTML += `<div class="text-white font-semibold">${props.provides
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")}</div>`;
+      statsHTML += `</div>`;
+      statsHTML += `</div>`;
+    }
+
+    // Stats section
+    statsHTML += `<div class="space-y-1 mb-3">`;
+
+    if (props.damage) {
+      statsHTML += `<div class="text-gray-300 text-sm">⚔️ Damage: ${
+        props.damage
+      } ${props["damage-type"] || ""}</div>`;
+    }
+
+    if (props.ac) {
+      statsHTML += `<div class="text-gray-300 text-sm">🛡️ AC: ${props.ac}</div>`;
+    }
+
+    if (props.weight) {
+      statsHTML += `<div class="text-gray-300 text-sm">⚖️ Weight: ${props.weight} lb</div>`;
+    }
+
+    statsHTML += `</div>`;
+
+    // Add tags
+    if (itemData.tags && itemData.tags.length > 0) {
+      statsHTML += `<div class="flex flex-wrap gap-1 mb-3">`;
+      statsHTML += itemData.tags
+        .map(
+          (tag) =>
+            `<span class="bg-gray-700 px-2 py-1 rounded text-xs text-gray-300">${tag}</span>`
+        )
+        .join("");
+      statsHTML += `</div>`;
+    }
+
+    // Add full description
+    if (itemData.description) {
+      statsHTML += `<div class="text-gray-300 text-sm mt-3 leading-relaxed border-t border-gray-600 pt-3">${itemData.description}</div>`;
+    }
+
+    // Add notes for focuses
+    if (isFocus && props.notes && props.notes.length > 0) {
+      statsHTML += `<div class="text-purple-300 text-xs mt-3 leading-relaxed border-t border-purple-600 pt-3">`;
+      props.notes.forEach((note) => {
+        statsHTML += `<div class="mb-1">• ${note}</div>`;
+      });
+      statsHTML += `</div>`;
+    }
+
+    return statsHTML;
+  } catch (error) {
+    console.error("❌ Error fetching item:", itemName, error);
+    return `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">Error loading details</div>`;
+  }
+}

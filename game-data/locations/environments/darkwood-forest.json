@@ -46,15 +46,15 @@
       "name": "Lost Merchant",
       "description": "You encounter a merchant who has lost his way. His cart is stuck in the mud, and wolves circle nearby.",
       "probability": 0.15,
-      "actions": ["help_merchant", "take_goods", "ignore", "scare_wolves"],
+      "actions": ["help_merchant", "take_goods", "ignore"],
       "outcomes": {
         "help_merchant": {
-          "reward": {"gold": 20, "reputation": 5},
+          "reward": { "gold": 20, "reputation": 5 },
           "description": "The grateful merchant rewards you for your kindness."
         },
         "take_goods": {
-          "reward": {"items": ["Clothes Fine", "Perfume (vial)"]},
-          "penalty": {"reputation": -3},
+          "reward": { "items": ["Clothes Fine", "Perfume (vial)"] },
+          "penalty": { "reputation": -3 },
           "description": "You take what you can carry, leaving the merchant to his fate."
         }
       }
@@ -67,11 +67,11 @@
       "actions": ["pray", "leave_offering", "investigate", "take_offerings"],
       "outcomes": {
         "pray": {
-          "reward": {"blessing": "forest_protection", "duration": 24},
+          "reward": { "blessing": "forest_protection", "duration": 24 },
           "description": "You feel the blessing of the old gods upon you."
         },
         "leave_offering": {
-          "reward": {"experience": 50},
+          "reward": { "experience": 50 },
           "description": "Your respectful gesture is noted by unseen powers."
         }
       }
@@ -84,8 +84,8 @@
       "actions": ["search_cache", "set_trap", "leave_alone"],
       "outcomes": {
         "search_cache": {
-          "reward": {"gold": 15, "items": ["Healing", "Rations (1 day)"]},
-          "risk": {"encounter": "bandit_patrol"},
+          "reward": { "gold": 15, "items": ["Healing", "Rations (1 day)"] },
+          "risk": { "encounter": "bandit_patrol" },
           "description": "You find useful supplies, but hear voices approaching..."
         }
       }

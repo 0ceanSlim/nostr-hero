@@ -1392,14 +1392,8 @@ function createComplexChoiceContent(option) {
 }
 
 /**
- * Get item image name
- */
-function getItemImageName(itemName) {
-  return itemName.toLowerCase().replace(/[',]/g, '').replace(/\s+/g, '-');
-}
-
-/**
  * Show item info modal
+ * Note: Uses getItemImageName() and getItemStats() from item-helpers.js
  */
 async function showItemModal(itemName) {
   console.log('🔍 showItemModal called with:', itemName);
@@ -1517,95 +1511,6 @@ async function fetchPackData(packName) {
   } catch (error) {
     console.error('❌ Error fetching pack data:', packName, error);
     return null;
-  }
-}
-
-/**
- * Get item stats from API
- */
-async function getItemStats(itemName) {
-  console.log('📊 Getting stats for:', itemName);
-
-  if (itemStatsCache[itemName]) {
-    console.log('✨ Using cached data for:', itemName, '- First 50 chars:', itemStatsCache[itemName].substring(0, 50));
-    return itemStatsCache[itemName];
-  }
-
-  try {
-    console.log('🌐 Fetching from API:', itemName);
-    const response = await fetch(`/api/items?name=${encodeURIComponent(itemName)}`);
-    if (!response.ok) {
-      console.warn('❌ API response not ok for:', itemName);
-      const fallback = `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">No details available</div>`;
-      itemStatsCache[itemName] = fallback;
-      return fallback;
-    }
-
-    const items = await response.json();
-    console.log('📦 API returned for', itemName, ':', items);
-
-    if (!items || items.length === 0) {
-      console.warn('⚠️ No items found for:', itemName);
-      const fallback = `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">No details available</div>`;
-      itemStatsCache[itemName] = fallback;
-      return fallback;
-    }
-
-    const itemData = items[0];
-    console.log('📋 Item data received:', {
-      requested: itemName,
-      apiReturned: itemData.name,
-      id: itemData.id,
-      match: itemData.name === itemName,
-      fullData: itemData
-    });
-    const props = itemData.properties || {};
-    console.log('📦 Properties object:', props);
-
-    let statsHTML = `<div class="font-bold text-yellow-400 mb-2 text-xl">${itemData.name}</div>`;
-
-    if (itemData.item_type) {
-      statsHTML += `<div class="text-green-400 text-sm font-semibold mb-3">${itemData.item_type}</div>`;
-    }
-
-    // Stats section
-    statsHTML += `<div class="space-y-1 mb-3">`;
-
-    if (props.damage) {
-      statsHTML += `<div class="text-gray-300 text-sm">⚔️ Damage: ${props.damage} ${props['damage-type'] || ''}</div>`;
-    }
-
-    if (props.ac) {
-      statsHTML += `<div class="text-gray-300 text-sm">🛡️ AC: ${props.ac}</div>`;
-    }
-
-    if (props.weight) {
-      statsHTML += `<div class="text-gray-300 text-sm">⚖️ Weight: ${props.weight} lb</div>`;
-    }
-
-    statsHTML += `</div>`;
-
-    // Add tags
-    if (itemData.tags && itemData.tags.length > 0) {
-      statsHTML += `<div class="flex flex-wrap gap-1 mb-3">`;
-      statsHTML += itemData.tags.map(tag => `<span class="bg-gray-700 px-2 py-1 rounded text-xs text-gray-300">${tag}</span>`).join('');
-      statsHTML += `</div>`;
-    }
-
-    // Add full description
-    if (itemData.description) {
-      statsHTML += `<div class="text-gray-300 text-sm mt-3 leading-relaxed border-t border-gray-600 pt-3">${itemData.description}</div>`;
-    }
-
-    console.log('💾 Caching data for:', itemName);
-    itemStatsCache[itemName] = statsHTML;
-    return statsHTML;
-
-  } catch (error) {
-    console.error('❌ Error fetching item:', itemName, error);
-    const fallback = `<div class="font-bold text-yellow-400 mb-1">${itemName}</div><div class="text-gray-400 text-xs">Error loading details</div>`;
-    itemStatsCache[itemName] = fallback;
-    return fallback;
   }
 }
 
