@@ -19,29 +19,32 @@
 - [ ] Clean up vault-related JS code
 - [ ] Validate vault structure in backend
 
-## High Priority - JavaScript Cleanup
+## High Priority - JavaScript Refactoring
 
-### Files to Remove/Consolidate
-- [ ] Delete `pages/login.js` (confirmed unused)
-- [ ] Audit for more unused/duplicate code
-- [ ] Document dependencies between files
+### ✅ Phase 1 Complete: Analysis & Planning
+- [x] Delete `pages/login.js` (confirmed unused)
+- [x] Audit for duplicate code (found 3 duplicate functions)
+- [x] Extract duplicate functions to utils (getItemImageName, getItemStats)
+- [x] Document dependencies and circular deps
+- [x] Create comprehensive refactoring plan
 
-### Folder Structure Rework
-Current issues:
-- `pages/game-ui.js` is 1700+ lines (should be split)
-- Confusing "pages" vs "systems" organization
-- Unclear dependencies and load order
+### Next: Modern ES6 Module Architecture
+See **JAVASCRIPT-REFACTOR.md** for complete plan:
+- [ ] Setup Node.js, npm, and Vite build tooling
+- [ ] Create src/ directory with layered structure
+- [ ] Convert all files to ES6 modules
+- [ ] Split game-ui.js (1,911 lines) into 15 focused modules
+- [ ] Break circular dependency (game-ui.js ↔ game-state.js)
+- [ ] Add smart logger system (dev vs prod)
+- [ ] Update HTML templates to load bundled files
+- [ ] Test dev and production builds
 
-Proposed reorganization:
-- [ ] Map out current dependencies
-- [ ] Split large files (game-ui.js) into focused modules
-- [ ] Clearer separation: core → systems → pages → components
-- [ ] Document load order requirements
-
-### Specific Cleanup Tasks
-- [ ] Consolidate duplicate code across game-ui.js, game-state.js, game-logic.js
-- [ ] Clarify responsibilities of each file
-- [ ] Remove dead code within used files
+**Expected Results:**
+- Bundle size: 300 KB → 87 KB (71% reduction)
+- Load time: 2.5s → 0.6s (76% faster)
+- HTTP requests: 13+ → 1 (92% fewer)
+- Clean production logs (errors only)
+- No circular dependencies
 
 ## Medium Priority - Game Systems
 
