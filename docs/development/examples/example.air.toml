@@ -10,9 +10,9 @@ tmp_dir = "tmp"
   args_bin = []
   bin = "tmp/main.exe"
 
-  # Build command - includes Tailwind CSS compilation
-  # Runs Tailwind first, then builds Go binary from server/ directory
-  cmd = "cmd /c \"tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --minify && cd server && go build -o ../tmp/main.exe .\""
+  # Build command - runs npm build (Vite + Tailwind CSS v4) before Go build
+  # Rebuilds frontend assets, then builds Go binary from server/ directory
+  cmd = "cmd /c \"npm run build && cd server && go build -o ../tmp/main.exe .\""
 
   # Delay before restart (milliseconds)
   delay = 1000

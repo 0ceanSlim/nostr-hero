@@ -37,7 +37,8 @@ This will:
 2. Copy `example.air.toml` → `.air.toml`
 3. Copy `example.package.json` → `package.json`
 4. Copy `example.vite.config.js` → `vite.config.js`
-5. Install npm dependencies
+5. Copy `example.postcss.config.js` → `postcss.config.js`
+6. Install npm dependencies
 
 **Makefile Commands:**
 ```bash
@@ -102,117 +103,118 @@ There are three main components to the application: the Go backend, frontend Jav
 The backend serves the game files and handles all game logic. The recommended way to run it is with [Air](https://github.com/cosmtrek/air).
 
 ```bash
-# Starts the server and automatically restarts it on any .go file changes.
+# Starts the server and automatically restarts it on any .go file changes
+# Also runs 'npm run build' to rebuild frontend assets before each Go build
 air
 ```
 
+Air watches the `server/` directory for Go file changes and:
+1. Runs `npm run build` (Vite + Tailwind CSS v4)
+2. Builds the Go binary from `server/main.go`
+3. Restarts the server
+
 Alternatively, you can build and run it manually:
 ```bash
-go build -o nostr-hero.exe
-./nostr-hero.exe
+# Build frontend assets first
+npm run build
+
+# Build Go binary from server/ directory
+cd server
+go build -o ../nostr-hero main.go
+cd ..
+
+# Run the binary
+./nostr-hero
 ```
 
 ### Frontend (CSS)
 
-The project uses Tailwind CSS, which is now integrated with the npm build system.
+The project uses **Tailwind CSS v4** integrated with Vite via the `@tailwindcss/vite` plugin. CSS is automatically compiled as part of the Vite build process.
 
-#### CSS Development (Watch Mode)
+#### CSS Development
 
-To automatically recompile CSS when you make styling changes:
-
+**Option 1: Use Air (recommended for backend-focused development)**
 ```bash
-# Watch and recompile CSS on changes
-npm run dev:css
+# Air automatically rebuilds CSS on every Go file change
+air
 ```
 
-**Or run both JavaScript and CSS watchers together:**
+**Option 2: Use Vite dev server (recommended for frontend-focused development)**
 ```bash
-# Run Vite + Tailwind CSS together (recommended for full-stack development)
-npm run dev:full
-```
-
-This will run both the Vite dev server and Tailwind CSS watcher concurrently in a single terminal.
-
-#### CSS Production Build
-
-CSS is automatically built when you run the production build:
-
-```bash
-# Builds both JavaScript and CSS
-npm run build
-```
-
-To build only CSS:
-```bash
-npm run build:css
-```
-
-#### Option 2: Use the Tailwind Play CDN (Quick Backend Development)
-
-If you're only working on backend Go code and don't want to run any Node.js processes, you can use the Tailwind Play CDN. Edit `www/views/templates/layout.html`:
-
-**Replace this:**
-```html
-<link href="/res/style/output.css?v=20250109-23" rel="stylesheet" />
-```
-
-**With this:**
-```html
-<script src="https://cdn.tailwindcss.com"></script>
-```
-
-For more information, see the [styling readme](./www/res/style/readme.md).
-
-### Frontend (JavaScript)
-
-The project uses modern ES6 modules with Vite for bundling and development. There are two modes of operation:
-
-#### Development Mode (with Hot Module Replacement)
-
-For active JavaScript development, use Vite's dev server which provides instant hot module replacement (HMR):
-
-```bash
-# In a separate terminal from your 'air' process
+# Instant hot module replacement for CSS changes
 npm run dev
 ```
 
-**What this does:**
-- Starts Vite dev server on http://localhost:5173
-- Proxies API calls to your Go backend (port from config.yml)
-- Provides instant updates when you edit JavaScript files
-- Includes source maps for easy debugging
-- Shows all debug logs in console
+**CSS Configuration:**
+- Source: `src/styles/main.css` (imports Tailwind CSS v4)
+- Output: `www/dist/main.css` (single CSS file for all pages)
+- Config: `postcss.config.js` (Tailwind + Autoprefixer)
 
-**Note:** When using Vite dev server, you'll access the game at http://localhost:5173 (Vite), not your Go server port.
+The CSS file is configured in `src/styles/main.css`:
+```css
+@import "tailwindcss";
+
+/* Tailwind content sources */
+@source "../../www/views/**/*.html";
+@source "../**/*.{js,jsx,ts,tsx}";
+```
+
+Tailwind v4 uses CSS-based configuration instead of JavaScript config files.
+
+### Frontend (JavaScript)
+
+The project uses modern ES6 modules with Vite for bundling and development.
+
+#### Development Modes
+
+**Option 1: Air (single terminal, rebuilds on Go changes)**
+```bash
+# Watches Go files, rebuilds frontend + backend on change
+air
+```
+- Rebuilds both frontend and backend when you edit Go files
+- Slower but simpler (single command)
+- Access game at your Go server port (from config.yml)
+
+**Option 2: Vite dev server (recommended for frontend development)**
+```bash
+# In a separate terminal from your Go server
+npm run dev
+```
+- Instant hot module replacement (HMR) for JS/CSS changes
+- Faster iteration for frontend development
+- Proxies API calls to your Go backend
+- Access game at http://localhost:5173 (Vite dev server)
 
 #### Production Build
 
-To build optimized production bundles:
-
 ```bash
-# Build minified, optimized bundles
+# Build optimized bundles for production
 npm run build
-
-# Preview production build
-npm run preview
 ```
 
-**Production build benefits:**
-- Minified and tree-shaken (71% smaller than development)
-- Debug logs removed (only errors shown)
-- Hashed filenames for cache busting
-- Code splitting for faster loading
+**What gets built:**
+- All JavaScript entry points from `src/entries/`
+- Single CSS file (`main.css`) from `src/styles/main.css`
+- Output directory: `www/dist/`
 
-**Build outputs:**
-- Development: `www/dist/dev/` (readable, with source maps)
-- Production: `www/dist/prod/` (minified, with hashes)
+**Entry points:**
+- `index.js` - Home page
+- `game.js` - Main game interface
+- `gameIntro.js` - Game introduction
+- `newGame.js` - Character creation
+- `settings.js` - Settings page
+- `discover.js` - Discovery page
+- `saves.js` - Save management
 
-**Clean build directory:**
+#### Watch Mode (for manual testing)
+
 ```bash
-npm run clean
+# Continuously rebuild on file changes
+npm run build:watch
 ```
 
-For more details on the JavaScript architecture, see [JAVASCRIPT-REFACTOR.md](../../JAVASCRIPT-REFACTOR.md).
+Useful if you want to run the Go server directly and have Vite rebuild in the background.
 
 ### Debug Mode
 
@@ -268,29 +270,52 @@ This project includes several custom tools to aid in development.
 
 ```
 nostr-hero/
-├── main.go                 # Server entry point
 ├── config.yml             # Local server configuration (gitignored)
 │
-├── src/                   # Go backend source code
+├── server/                # Go backend source code
+│   ├── main.go           # Server entry point
+│   ├── go.mod            # Go module definition
 │   ├── api/              # API handlers for game logic
 │   ├── db/               # Database layer (SQLite)
 │   ├── routes/           # HTTP route definitions
-│   └── ...
+│   ├── auth/             # Nostr authentication
+│   ├── types/            # Data structures
+│   └── utils/            # Utility functions
+│
+├── src/                   # Frontend JavaScript source code
+│   ├── entries/          # Entry points (one per page)
+│   ├── lib/              # Core libraries
+│   ├── data/             # Data layer
+│   ├── state/            # State management
+│   ├── logic/            # Game logic
+│   ├── systems/          # Complex systems
+│   ├── ui/               # UI rendering
+│   ├── components/       # Reusable components
+│   ├── config/           # Configuration
+│   └── styles/           # CSS source (Tailwind v4)
 │
 ├── www/                   # All frontend assets served to the browser
 │   ├── game.db           # SQLite database (generated on startup)
+│   ├── dist/             # Built JavaScript and CSS (gitignored)
 │   ├── views/            # Go HTML templates
-│   ├── scripts/          # Frontend JavaScript files
-│   └── res/              # Static resources (CSS, images, fonts)
+│   └── res/              # Static resources (images, fonts)
+│
+├── game-data/             # The game's raw data (SOURCE OF TRUTH)
+│   ├── items/            # 200+ individual item files
+│   ├── magic/            # Spells and spell slots
+│   ├── monsters/         # Creature stat blocks
+│   ├── locations/        # World map and locations
+│   ├── npcs/             # NPCs by location
+│   └── systems/          # System configurations
 │
 ├── docs/
-│   ├── data/            # The game's raw data (SOURCE OF TRUTH)
-│   ├── development/     # Developer documentation (you are here)
-│   │   ├── deployment/  # Deployment scripts & server setup docs
-│   │   └── tools/       # Custom developer tool documentation
+│   ├── development/      # Developer documentation (you are here)
+│   │   ├── examples/    # Example config files
+│   │   ├── deployment/  # Deployment scripts & server setup
+│   │   └── tools/       # Custom developer tools
 │   └── draft/           # Archived planning and design documents
 │
-└── data/saves/          # Local player save files (gitignored)
+└── data/saves/           # Local player save files (gitignored)
 ```
 
 ---
@@ -309,22 +334,26 @@ nostr-hero/
 
 ### Modifying Game Data
 
-**Always edit the JSON files in `docs/data/` - never edit the database file (`www/game.db`) directly.** The database is completely rebuilt from the JSON files every time the server starts.
+**Always edit the JSON files in `game-data/` - never edit the database file (`www/game.db`) directly.** The database is completely rebuilt from the JSON files every time the server starts.
 
 ### Common Troubleshooting
 
-- **Styling is broken:** Your `www/res/style/output.css` file may be missing or out of date. See the [Frontend (CSS)](#frontend-css) section above for instructions on how to regenerate it, or consult the [styling readme](./www/res/style/readme.md).
-- **Database is corrupted:** If you encounter strange data-related errors, delete `www/game.db` and restart the server. It will be rebuilt automatically.
+- **Styling is broken:** Run `npm run build` to regenerate the CSS file. Make sure you have run `npm install` first.
+- **JavaScript not loading:** Check that `www/dist/` contains the built files. Run `npm run build` if needed.
+- **Database is corrupted:** Delete `www/game.db` and restart the server. It will be rebuilt automatically from JSON files.
+- **Go build fails:** Make sure you're building from the `server/` directory: `cd server && go build -o ../nostr-hero main.go`
+- **npm install fails:** Make sure you have Node.js 18+ installed: `node --version`
 
 ---
 
 ## Getting Help
 
 - Check existing documentation in `docs/development/`.
-- Review code comments in `src/` and `www/scripts/`.
-- Look at example items in `docs/data/equipment/items/`.
+- Review code comments in `server/` and `src/`.
+- Look at example items in `game-data/items/`.
 - Check session notes in `docs/draft/` for historical context.
+- See deployment documentation in `docs/development/deployment/`.
 
 ---
 
-**Last Updated**: 2025-12-07
+**Last Updated**: 2025-12-18

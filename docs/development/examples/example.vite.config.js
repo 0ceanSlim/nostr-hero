@@ -1,83 +1,94 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig(({ mode }) => {
-  const isDev = mode === 'development';
+export default defineConfig({
+  plugins: [tailwindcss()],
 
-  return {
-    root: '.', // Root is project directory
-    publicDir: 'www/res', // Static assets
+  // Root directory for source files
+  root: '.',
 
-    build: {
-      outDir: `www/dist/${isDev ? 'dev' : 'prod'}`,
-      emptyOutDir: true,
-      sourcemap: isDev,
-      minify: !isDev ? 'esbuild' : false,
+  // Public directory for static assets
+  publicDir: 'www/res',
 
-      rollupOptions: {
-        input: {
-          test: resolve(__dirname, 'src/pages/test.js'),
-          game: resolve(__dirname, 'src/pages/game.js'),
-          intro: resolve(__dirname, 'src/pages/intro.js'),
-          'new-game': resolve(__dirname, 'src/pages/new-game.js'),
-          index: resolve(__dirname, 'src/pages/index.js')
-        },
-        output: {
-          entryFileNames: isDev ? '[name].js' : '[name].[hash].js',
-          chunkFileNames: isDev ? 'chunks/[name].js' : 'chunks/[name].[hash].js',
-          assetFileNames: 'assets/[name].[hash][extname]',
+  // Build configuration
+  build: {
+    // Output directory (relative to project root)
+    outDir: 'www/dist',
 
-          // Split vendor code for better caching
-          manualChunks(id) {
-            if (id.includes('src/lib/')) {
-              return 'vendor';
-            }
-            if (id.includes('src/ui/core/')) {
-              return 'ui-core';
-            }
-          }
-        }
+    // Don't empty outDir before build (preserve other files)
+    emptyOutDir: false,
+
+    // Generate source maps for debugging
+    sourcemap: true,
+
+    // Prevent CSS code splitting - combine all CSS into one file
+    cssCodeSplit: false,
+
+    // Multiple entry points
+    rollupOptions: {
+      input: {
+        // JavaScript entries (first one will import CSS)
+        index: resolve(__dirname, 'src/entries/index.js'),
+        game: resolve(__dirname, 'src/entries/game.js'),
+        gameIntro: resolve(__dirname, 'src/entries/gameIntro.js'),
+        newGame: resolve(__dirname, 'src/entries/newGame.js'),
+        settings: resolve(__dirname, 'src/entries/settings.js'),
+        discover: resolve(__dirname, 'src/entries/discover.js'),
+        saves: resolve(__dirname, 'src/entries/saves.js'),
       },
-
-      // Enable tree shaking in production
-      treeshake: !isDev,
-
-      // Target modern browsers
-      target: 'es2020'
-    },
-
-    server: {
-      port: 5173,
-      proxy: {
-        // Proxy API calls to Go backend
-        '/api': {
-          target: 'http://localhost:8080',
-          changeOrigin: true
+      output: {
+        // Output file naming pattern
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          // Keep CSS filenames predictable (no hash) for easy linking in Go templates
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            // Force all CSS to be named main.css since we only have one CSS file
+            return 'main.css';
+          }
+          return 'assets/[name]-[hash][extname]';
         }
       }
     },
 
-    // Define global constants
-    define: {
-      __DEV__: isDev,
-      __PROD__: !isDev,
-      __VERSION__: JSON.stringify('1.0.0')
-    },
-
-    // Resolve configuration
-    resolve: {
-      alias: {
-        '@': resolve(__dirname, 'src'),
-        '@lib': resolve(__dirname, 'src/lib'),
-        '@data': resolve(__dirname, 'src/data'),
-        '@state': resolve(__dirname, 'src/state'),
-        '@logic': resolve(__dirname, 'src/logic'),
-        '@systems': resolve(__dirname, 'src/systems'),
-        '@ui': resolve(__dirname, 'src/ui'),
-        '@pages': resolve(__dirname, 'src/pages'),
-        '@components': resolve(__dirname, 'src/components'),
-        '@config': resolve(__dirname, 'src/config')
+    // Minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Remove console.log in production
+        drop_console: false, // Keep for now during testing
       }
     }
-  };
+  },
+
+  // Development server configuration
+  server: {
+    port: 5173,
+    open: false,
+    watch: {
+      // Prevent infinite rebuild loops
+      ignored: ['**/www/dist/**']
+    },
+    proxy: {
+      // Proxy API requests to Go server during development
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  },
+
+  // Define global constants
+  define: {
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
+    __PROD__: JSON.stringify(process.env.NODE_ENV === 'production')
+  },
+
+  // Resolve configuration
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
+    }
+  }
 });
