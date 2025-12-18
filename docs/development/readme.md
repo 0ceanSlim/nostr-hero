@@ -21,11 +21,13 @@ This guide provides a complete overview for developers looking to build, run, an
 For the fastest setup, use the included Makefile which will copy all necessary config files and install dependencies.
 
 **Prerequisites:**
+
 - **Go 1.21+** (for the backend server)
 - **Node.js 18+** (for JavaScript development)
-- **Air** (for live-reloading): `go install github.com/cosmtrek/air@latest`
+- **Air** (for live-reloading): `go install github.com/air-verse/air@latest`
 
 **Setup:**
+
 ```bash
 # Run from the docs/development directory
 cd docs/development
@@ -33,6 +35,7 @@ make setup
 ```
 
 This will:
+
 1. Copy `example.config.yml` → `config.yml`
 2. Copy `example.air.toml` → `.air.toml`
 3. Copy `example.package.json` → `package.json`
@@ -41,6 +44,7 @@ This will:
 6. Install npm dependencies
 
 **Makefile Commands:**
+
 ```bash
 # View all available commands
 make help
@@ -60,6 +64,7 @@ make clean-configs
 This approach is designed to get the game running with the least amount of setup, using the pre-compiled CSS file.
 
 ### 1. Prerequisites
+
 - **Go 1.21+** (for the backend server)
 - **Air** (for live-reloading): `go install github.com/cosmtrek/air@latest`
 
@@ -109,11 +114,13 @@ air
 ```
 
 Air watches the `server/` directory for Go file changes and:
+
 1. Runs `npm run build` (Vite + Tailwind CSS v4)
 2. Builds the Go binary from `server/main.go`
 3. Restarts the server
 
 Alternatively, you can build and run it manually:
+
 ```bash
 # Build frontend assets first
 npm run build
@@ -134,23 +141,27 @@ The project uses **Tailwind CSS v4** integrated with Vite via the `@tailwindcss/
 #### CSS Development
 
 **Option 1: Use Air (recommended for backend-focused development)**
+
 ```bash
 # Air automatically rebuilds CSS on every Go file change
 air
 ```
 
 **Option 2: Use Vite dev server (recommended for frontend-focused development)**
+
 ```bash
 # Instant hot module replacement for CSS changes
 npm run dev
 ```
 
 **CSS Configuration:**
+
 - Source: `src/styles/main.css` (imports Tailwind CSS v4)
 - Output: `www/dist/main.css` (single CSS file for all pages)
 - Config: `postcss.config.js` (Tailwind + Autoprefixer)
 
 The CSS file is configured in `src/styles/main.css`:
+
 ```css
 @import "tailwindcss";
 
@@ -168,19 +179,23 @@ The project uses modern ES6 modules with Vite for bundling and development.
 #### Development Modes
 
 **Option 1: Air (single terminal, rebuilds on Go changes)**
+
 ```bash
 # Watches Go files, rebuilds frontend + backend on change
 air
 ```
+
 - Rebuilds both frontend and backend when you edit Go files
 - Slower but simpler (single command)
 - Access game at your Go server port (from config.yml)
 
 **Option 2: Vite dev server (recommended for frontend development)**
+
 ```bash
 # In a separate terminal from your Go server
 npm run dev
 ```
+
 - Instant hot module replacement (HMR) for JS/CSS changes
 - Faster iteration for frontend development
 - Proxies API calls to your Go backend
@@ -194,11 +209,13 @@ npm run build
 ```
 
 **What gets built:**
+
 - All JavaScript entry points from `src/entries/`
 - Single CSS file (`main.css`) from `src/styles/main.css`
 - Output directory: `www/dist/`
 
 **Entry points:**
+
 - `index.js` - Home page
 - `game.js` - Main game interface
 - `gameIntro.js` - Game introduction
@@ -257,11 +274,11 @@ This project includes several custom tools to aid in development.
 
 **Complete tools documentation**: [tools/readme.md](./tools/readme.md)
 
-| Tool                 | Purpose                          | Quick Start                                               |
-| -------------------- | -------------------------------- | --------------------------------------------------------- |
-| **Item Editor**      | Edit items + AI image generation | `cd docs/development/tools && make run-item-editor`         |
-| **PixelLab Generator** | Batch generate item images       | `cd docs/development/tools && make pixellab-gen`          |
-| **Monster Manager**  | Manage creature stats            | `python docs/development/tools/monster_manager.py`        |
+| Tool                     | Purpose                          | Quick Start                                             |
+| ------------------------ | -------------------------------- | ------------------------------------------------------- |
+| **Item Editor**          | Edit items + AI image generation | `cd docs/development/tools && make run-item-editor`     |
+| **PixelLab Generator**   | Batch generate item images       | `cd docs/development/tools && make pixellab-gen`        |
+| **Monster Manager**      | Manage creature stats            | `python docs/development/tools/monster_manager.py`      |
 | **World Map Visualizer** | Visualize locations              | `python docs/development/tools/world_map_visualizer.py` |
 
 ---
@@ -325,10 +342,12 @@ nostr-hero/
 ### Code Style
 
 **Go Backend:**
+
 - Run `go fmt` before committing.
 - Follow standard Go conventions and idioms.
 
 **JavaScript Frontend:**
+
 - Vanilla JS (no frameworks).
 - Follow an event-driven architecture where possible.
 
