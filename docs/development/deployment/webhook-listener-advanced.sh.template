@@ -50,6 +50,26 @@ update_github_status() {
   if [ $? -eq 0 ]; then
     echo "✅ Code updated successfully"
 
+    # Install npm dependencies (if package.json changed)
+    echo "📦 Installing npm dependencies..."
+    npm install
+    if [ $? -ne 0 ]; then
+      echo "❌ npm install failed!"
+      update_github_status "failure" "npm install failed"
+      exit 1
+    fi
+    echo "✅ Dependencies installed"
+
+    # Build frontend assets (CSS/JS)
+    echo "🎨 Building frontend assets..."
+    npm run build
+    if [ $? -ne 0 ]; then
+      echo "❌ npm build failed!"
+      update_github_status "failure" "Frontend build failed"
+      exit 1
+    fi
+    echo "✅ Frontend built successfully"
+
     # Optional: Run tests before restarting
     # echo "🧪 Running tests..."
     # go test ./... || {

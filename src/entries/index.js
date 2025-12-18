@@ -5,6 +5,9 @@
  * This replaces the individual script tags in index.html.
  */
 
+// Import global styles (only imported here, shared across all bundles)
+import '../styles/main.css';
+
 // Core libraries
 import { logger } from '../lib/logger.js';
 import '../lib/session.js'; // Auto-initializes as window.sessionManager

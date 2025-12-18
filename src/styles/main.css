@@ -1,6 +1,42 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Dogica Font Family */
+@font-face {
+  font-family: 'Dogica';
+  src: url('/res/fonts/dogica.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Dogica';
+  src: url('/res/fonts/dogicabold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Dogica Pixel';
+  src: url('/res/fonts/dogicapixel.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Dogica Pixel';
+  src: url('/res/fonts/dogicapixelbold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+
+/* Tailwind CSS v4 - using @import syntax */
+@import "tailwindcss";
+
+/* Tailwind content sources for v4 */
+@source "../../www/views/**/*.html";
+@source "../**/*.{js,jsx,ts,tsx}";
 
 @layer base {
   /* Global pixel-perfect rendering for images */

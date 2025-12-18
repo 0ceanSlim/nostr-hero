@@ -21,9 +21,6 @@ pixellab-gen.exe
 
 # Development configs (examples in docs/development/)
 .air.toml
-package.json
-package-lock.json
-vite.config.js
 
 # Node.js
 node_modules/
@@ -48,4 +45,9 @@ deploy-config.env
 claude.md
 /www/res/img/items/_history
 /.gemini
+nul
+tailwind.config.js
 vite.config.js
+postcss.config.js
+package-lock.json
+package.json
