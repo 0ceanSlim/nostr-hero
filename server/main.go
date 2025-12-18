@@ -46,7 +46,6 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Serve static files
-	mux.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("www/scripts/"))))
 	mux.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("www/res/"))))
 	mux.Handle("/dist/", http.StripPrefix("/dist/", http.FileServer(http.Dir("www/dist/"))))
 
