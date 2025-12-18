@@ -36,14 +36,14 @@ func InitDatabase() error {
 
 	log.Printf("Connected to SQLite database at %s", dbPath)
 
-	// Run migrations first
-	if err = runMigrations(); err != nil {
-		return fmt.Errorf("failed to run migrations: %v", err)
-	}
-
-	// Create tables
+	// Create tables first
 	if err = createTables(); err != nil {
 		return fmt.Errorf("failed to create tables: %v", err)
+	}
+
+	// Run migrations after tables exist
+	if err = runMigrations(); err != nil {
+		return fmt.Errorf("failed to run migrations: %v", err)
 	}
 
 	return nil
