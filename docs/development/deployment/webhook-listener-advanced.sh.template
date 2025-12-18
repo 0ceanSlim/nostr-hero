@@ -10,8 +10,8 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# If NOT using nvm, use this instead:
-# export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+# IMPORTANT: Add Go to PATH
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
 REPO_PATH="/path/to/nostr-hero"
 SERVICE_NAME="your-service-name"
@@ -56,6 +56,7 @@ update_github_status() {
   echo "  PATH: $PATH"
   echo "  Node version: $(node --version 2>&1 || echo 'Node not found in PATH')"
   echo "  NPM version: $(npm --version 2>&1 || echo 'NPM not found in PATH')"
+  echo "  Go version: $(go version 2>&1 || echo 'Go not found in PATH')"
   echo "  Working directory: $(pwd)"
 
   # Pull latest code
@@ -90,7 +91,15 @@ update_github_status() {
 
     # Download Go dependencies
     echo "📦 Installing Go dependencies..."
-    cd server
+    echo "  Checking for Go: $(which go 2>&1 || echo 'go not found in PATH')"
+    echo "  Go version: $(go version 2>&1 || echo 'go command failed')"
+    cd server || {
+      echo "❌ Failed to enter server directory!"
+      update_github_status "failure" "Server directory not found"
+      exit 1
+    }
+    echo "  Working directory: $(pwd)"
+    echo "  Running: go mod download"
     go mod download
     if [ $? -ne 0 ]; then
       echo "❌ Go mod download failed!"
