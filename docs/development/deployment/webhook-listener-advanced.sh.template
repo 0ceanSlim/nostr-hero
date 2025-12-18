@@ -88,6 +88,28 @@ update_github_status() {
     fi
     echo "✅ Frontend built successfully"
 
+    # Download Go dependencies
+    echo "📦 Installing Go dependencies..."
+    cd server
+    go mod download
+    if [ $? -ne 0 ]; then
+      echo "❌ Go mod download failed!"
+      update_github_status "failure" "Go dependencies failed"
+      exit 1
+    fi
+    echo "✅ Go dependencies installed"
+
+    # Build Go binary
+    echo "🔨 Building Go binary..."
+    go build -o ../nostr-hero main.go
+    if [ $? -ne 0 ]; then
+      echo "❌ Go build failed!"
+      update_github_status "failure" "Go build failed"
+      exit 1
+    fi
+    cd ..
+    echo "✅ Go binary built successfully"
+
     # Optional: Run tests before restarting
     # echo "🧪 Running tests..."
     # go test ./... || {

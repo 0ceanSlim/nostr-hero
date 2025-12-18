@@ -1,0 +1,19 @@
+[Unit]
+Description=Nostr Hero Game Server
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/nostr-hero
+ExecStart=/path/to/nostr-hero/nostr-hero
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables (optional)
+# Environment="PORT=8080"
+
+[Install]
+WantedBy=multi-user.target

@@ -17,6 +17,7 @@ game.db
 !/www/data/
 item-editor-gui.exe
 nostr-hero.exe
+nostr-hero
 pixellab-gen.exe
 
 # Development configs (examples in docs/development/)
@@ -46,8 +47,7 @@ claude.md
 /www/res/img/items/_history
 /.gemini
 nul
-tailwind.config.js
 vite.config.js
-postcss.config.js
 package-lock.json
 package.json
+postcss.config.js
