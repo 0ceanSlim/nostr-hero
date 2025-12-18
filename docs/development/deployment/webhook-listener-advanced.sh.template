@@ -6,6 +6,13 @@
 # This script is called by the webhook tool when a push event is received
 # Define this in hooks.json (see webhook-hooks.json)
 
+# IMPORTANT: Initialize nvm (Node Version Manager) for npm access
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# If NOT using nvm, use this instead:
+# export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+
 REPO_PATH="/path/to/nostr-hero"
 SERVICE_NAME="your-service-name"
 LOG_FILE="/var/log/nostr-hero-deploy.log"
