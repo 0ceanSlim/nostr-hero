@@ -4,6 +4,28 @@
     "execute-command": "/path/to/nostr-hero/scripts/webhook-listener-advanced.sh",
     "command-working-directory": "/path/to/nostr-hero",
     "response-message": "Deployment triggered",
+    "pass-environment-to-command": [
+      {
+        "envname": "COMMIT_SHA",
+        "source": "payload",
+        "name": "after"
+      },
+      {
+        "envname": "REPO_NAME",
+        "source": "payload",
+        "name": "repository.full_name"
+      },
+      {
+        "envname": "PUSHER_NAME",
+        "source": "payload",
+        "name": "pusher.name"
+      },
+      {
+        "envname": "GITHUB_TOKEN",
+        "source": "string",
+        "name": "REPLACE_WITH_YOUR_GITHUB_TOKEN_HERE"
+      }
+    ],
     "trigger-rule": {
       "and": [
         {
