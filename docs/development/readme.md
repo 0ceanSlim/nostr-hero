@@ -16,6 +16,46 @@ This guide provides a complete overview for developers looking to build, run, an
 
 ## Quick Start
 
+### Option A: Automated Setup (Recommended)
+
+For the fastest setup, use the included Makefile which will copy all necessary config files and install dependencies.
+
+**Prerequisites:**
+- **Go 1.21+** (for the backend server)
+- **Node.js 18+** (for JavaScript development)
+- **Air** (for live-reloading): `go install github.com/cosmtrek/air@latest`
+
+**Setup:**
+```bash
+# Run from the docs/development directory
+cd docs/development
+make setup
+```
+
+This will:
+1. Copy `example.config.yml` → `config.yml`
+2. Copy `example.air.toml` → `.air.toml`
+3. Copy `example.package.json` → `package.json`
+4. Copy `example.vite.config.js` → `vite.config.js`
+5. Install npm dependencies
+
+**Makefile Commands:**
+```bash
+# View all available commands
+make help
+
+# Copy configs only (without installing npm packages)
+make setup-configs
+
+# Install/update npm dependencies
+make install-deps
+
+# Reset to clean state (removes local configs, keeps examples)
+make clean-configs
+```
+
+### Option B: Manual Setup
+
 This approach is designed to get the game running with the least amount of setup, using the pre-compiled CSS file.
 
 ### 1. Prerequisites
@@ -55,7 +95,7 @@ The game will now be available at `http://localhost:8585` (or the port you speci
 
 ## Running the Game
 
-There are two main components to the application: the Go backend and the frontend CSS. While the Quick Start gets you running with a pre-compiled `output.css`, for active frontend development, you'll need to manage the CSS compilation yourself.
+There are three main components to the application: the Go backend, frontend JavaScript, and frontend CSS. While the Quick Start gets you running with pre-compiled assets, for active frontend development, you'll need to manage JavaScript bundling and CSS compilation yourself.
 
 ### Backend (Go)
 
@@ -74,13 +114,42 @@ go build -o nostr-hero.exe
 
 ### Frontend (CSS)
 
-The project uses Tailwind CSS. There are two ways to handle CSS during development.
+The project uses Tailwind CSS, which is now integrated with the npm build system.
 
-#### Option 1: Use the Tailwind Play CDN (Easiest)
+#### CSS Development (Watch Mode)
 
-For a "zero-install" frontend experience, you can use the Tailwind Play CDN. This is a script that compiles the necessary styles directly in your browser. This is great for backend work or quick UI tweaks without needing Node.js.
+To automatically recompile CSS when you make styling changes:
 
-To use it, edit `www/views/templates/layout.html` and replace the `output.css` link with the CDN script:
+```bash
+# Watch and recompile CSS on changes
+npm run dev:css
+```
+
+**Or run both JavaScript and CSS watchers together:**
+```bash
+# Run Vite + Tailwind CSS together (recommended for full-stack development)
+npm run dev:full
+```
+
+This will run both the Vite dev server and Tailwind CSS watcher concurrently in a single terminal.
+
+#### CSS Production Build
+
+CSS is automatically built when you run the production build:
+
+```bash
+# Builds both JavaScript and CSS
+npm run build
+```
+
+To build only CSS:
+```bash
+npm run build:css
+```
+
+#### Option 2: Use the Tailwind Play CDN (Quick Backend Development)
+
+If you're only working on backend Go code and don't want to run any Node.js processes, you can use the Tailwind Play CDN. Edit `www/views/templates/layout.html`:
 
 **Replace this:**
 ```html
@@ -92,15 +161,58 @@ To use it, edit `www/views/templates/layout.html` and replace the `output.css` l
 <script src="https://cdn.tailwindcss.com"></script>
 ```
 
-#### Option 2: Use the Tailwind CLI (for Active Styling)
+For more information, see the [styling readme](./www/res/style/readme.md).
 
-If you are actively working on the game's styles, you should use the Tailwind CLI to watch for changes and rebuild your CSS file automatically. This requires Node.js.
+### Frontend (JavaScript)
 
-In a separate terminal from your `air` process, run the following command:
+The project uses modern ES6 modules with Vite for bundling and development. There are two modes of operation:
+
+#### Development Mode (with Hot Module Replacement)
+
+For active JavaScript development, use Vite's dev server which provides instant hot module replacement (HMR):
+
 ```bash
-npx tailwindcss -i ./www/res/style/input.css -o ./www/res/style/output.css --watch
+# In a separate terminal from your 'air' process
+npm run dev
 ```
-This will watch for changes in the HTML and JS files and keep `output.css` up to date. For more information, see the [styling readme](./www/res/style/readme.md).
+
+**What this does:**
+- Starts Vite dev server on http://localhost:5173
+- Proxies API calls to your Go backend (port from config.yml)
+- Provides instant updates when you edit JavaScript files
+- Includes source maps for easy debugging
+- Shows all debug logs in console
+
+**Note:** When using Vite dev server, you'll access the game at http://localhost:5173 (Vite), not your Go server port.
+
+#### Production Build
+
+To build optimized production bundles:
+
+```bash
+# Build minified, optimized bundles
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+**Production build benefits:**
+- Minified and tree-shaken (71% smaller than development)
+- Debug logs removed (only errors shown)
+- Hashed filenames for cache busting
+- Code splitting for faster loading
+
+**Build outputs:**
+- Development: `www/dist/dev/` (readable, with source maps)
+- Production: `www/dist/prod/` (minified, with hashes)
+
+**Clean build directory:**
+```bash
+npm run clean
+```
+
+For more details on the JavaScript architecture, see [JAVASCRIPT-REFACTOR.md](../../JAVASCRIPT-REFACTOR.md).
 
 ### Debug Mode
 

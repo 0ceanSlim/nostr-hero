@@ -10,20 +10,14 @@
   "damage": null,
   "heal": null,
   "ammunition": "",
+  "gear_slot": "hands",
   "img": "equipment/arcane-focus.jpg",
-  "range": "null",
-  "range-long": "null",
   "rarity": "common",
-  "substitues": "",
-  "tags": [
-    "focus",
-    "equipment"
-  ],
+  "tags": ["focus", "equipment"],
   "provides": "sulfur",
   "notes": [
     "Can be used as a spellcasting focus for arcane magic",
     "Provides unlimited Sulfur for fire and explosion spells"
   ],
-  "Gear_Slot": "hands",
   "image": "/res/img/items/rod.png"
 }

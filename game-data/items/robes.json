@@ -6,16 +6,12 @@
   "type": "Clothes",
   "weight": 4,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
+  "gear_slot": "clothes",
   "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "tags": [],
+  "tags": ["equipment"],
   "ai_description": "Flowing brown or gray robe with wide sleeves and hood",
   "notes": [],
-  "range": "null",
-  "range-long": "null",
   "ammunition": "",
   "image": "/res/img/items/robes.png"
 }

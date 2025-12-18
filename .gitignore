@@ -19,7 +19,18 @@ item-editor-gui.exe
 nostr-hero.exe
 pixellab-gen.exe
 
+# Development configs (examples in docs/development/)
 .air.toml
+package.json
+package-lock.json
+vite.config.js
+
+# Node.js
+node_modules/
+
+# Build outputs
+www/dist/
+
 /.claude
 /data
 
@@ -37,3 +48,4 @@ deploy-config.env
 claude.md
 /www/res/img/items/_history
 /.gemini
+vite.config.js

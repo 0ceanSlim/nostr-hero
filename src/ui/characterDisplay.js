@@ -1,0 +1,733 @@
+/**
+ * Character Display UI Module
+ *
+ * Handles all character display updates including stats, equipment, inventory,
+ * HP/mana/XP bars, fatigue, hunger, and weight calculations.
+ *
+ * @module ui/characterDisplay
+ */
+
+import { logger } from '../lib/logger.js';
+import { getGameStateSync } from '../state/gameState.js';
+import { loadItemsFromDatabase } from '../data/items.js';
+
+// Advancement data cache
+let advancementDataCache = null;
+
+/**
+ * Load advancement data from JSON
+ * @returns {Promise<Array>} Advancement data array
+ */
+async function loadAdvancementData() {
+    if (advancementDataCache) {
+        return advancementDataCache;
+    }
+
+    try {
+        const response = await fetch('/data/systems/advancement.json');
+        if (!response.ok) {
+            throw new Error('Failed to fetch advancement data');
+        }
+        advancementDataCache = await response.json();
+        return advancementDataCache;
+    } catch (error) {
+        logger.error('Error loading advancement data:', error);
+        return [];
+    }
+}
+
+/**
+ * Get item data from database cache by ID
+ * @param {string} itemId - Item ID to look up
+ * @returns {Promise<Object|null>} Item data or null
+ */
+async function getItemByIdAsync(itemId) {
+    try {
+        const items = await loadItemsFromDatabase();
+        const item = items.find(i => i.id === itemId);
+        return item || null;
+    } catch (error) {
+        logger.error(`Error getting item ${itemId}:`, error);
+        return null;
+    }
+}
+
+/**
+ * Calculate max weight capacity based on strength and equipped items
+ * @param {Object} character - Character data
+ * @returns {Promise<number>} Max capacity in lbs
+ */
+export async function calculateMaxCapacity(character) {
+    const strength = character.stats?.strength || 10;
+    let baseCapacity = strength * 5;
+
+    // Add weight_increase from all equipped items
+    const items = await loadItemsFromDatabase();
+    let capacityBonus = 0;
+
+    if (character.inventory?.gear_slots) {
+        for (const slotName in character.inventory.gear_slots) {
+            const slot = character.inventory.gear_slots[slotName];
+            if (slot && slot.item) {
+                const itemData = items.find(i => i.id === slot.item);
+                if (itemData) {
+                    const weightIncrease = itemData.weight_increase || itemData.properties?.weight_increase || 0;
+                    if (weightIncrease > 0) {
+                        capacityBonus += weightIncrease;
+                    }
+                }
+            }
+        }
+    }
+
+    const totalCapacity = baseCapacity + capacityBonus;
+    return totalCapacity;
+}
+
+/**
+ * Calculate total weight of all items in inventory
+ * @param {Object} character - Character data
+ * @returns {Promise<number>} Total weight in lbs
+ */
+export async function calculateAndDisplayWeight(character) {
+    if (!character.inventory) {
+        return 0;
+    }
+
+    let totalWeight = 0;
+    const items = await loadItemsFromDatabase();
+
+    // Function to get item weight by ID
+    const getItemWeight = (itemId) => {
+        const item = items.find(i => i.id === itemId);
+        if (!item) {
+            return 0;
+        }
+        // Weight can be at top level or in properties object
+        const weight = item.weight || item.properties?.weight || 0;
+        return weight;
+    };
+
+    // Calculate gear slots weight
+    if (character.inventory.gear_slots) {
+        const gearSlots = character.inventory.gear_slots;
+
+        // All gear slots except bag contents
+        for (const slotName in gearSlots) {
+            if (slotName === 'bag') continue; // Handle bag separately
+
+            const slot = gearSlots[slotName];
+            if (slot && slot.item) {
+                const weight = getItemWeight(slot.item);
+                const itemWeight = weight * (slot.quantity || 1);
+                totalWeight += itemWeight;
+            }
+        }
+
+        // Bag itself and its contents
+        if (gearSlots.bag) {
+            // Add bag weight
+            if (gearSlots.bag.item) {
+                const bagWeight = getItemWeight(gearSlots.bag.item);
+                totalWeight += bagWeight;
+            }
+
+            // Add contents weight
+            if (gearSlots.bag.contents && Array.isArray(gearSlots.bag.contents)) {
+                gearSlots.bag.contents.forEach(slot => {
+                    if (slot && slot.item) {
+                        const weight = getItemWeight(slot.item);
+                        const itemWeight = weight * (slot.quantity || 1);
+                        totalWeight += itemWeight;
+                    }
+                });
+            }
+        }
+    }
+
+    // Calculate general slots weight
+    if (character.inventory.general_slots && Array.isArray(character.inventory.general_slots)) {
+        character.inventory.general_slots.forEach(slot => {
+            if (slot && slot.item) {
+                const weight = getItemWeight(slot.item);
+                const itemWeight = weight * (slot.quantity || 1);
+                totalWeight += itemWeight;
+            }
+        });
+    }
+
+    return totalWeight;
+}
+
+/**
+ * Update full character display from save data
+ */
+export async function updateCharacterDisplay() {
+    const state = getGameStateSync();
+    const character = state.character;
+
+    if (!character) {
+        logger.error('No character data found!');
+        return;
+    }
+
+    // Update character info
+    if (document.getElementById('char-name')) {
+        document.getElementById('char-name').textContent = character.name || '-';
+    }
+    if (document.getElementById('char-race')) {
+        document.getElementById('char-race').textContent = character.race || '-';
+    }
+    if (document.getElementById('char-class')) {
+        document.getElementById('char-class').textContent = character.class || '-';
+    }
+    if (document.getElementById('char-background')) {
+        document.getElementById('char-background').textContent = character.background || '-';
+    }
+    if (document.getElementById('char-alignment')) {
+        document.getElementById('char-alignment').textContent = character.alignment || '-';
+    }
+    if (document.getElementById('char-level')) {
+        document.getElementById('char-level').textContent = character.level || 1;
+    }
+    if (document.getElementById('char-gold')) {
+        document.getElementById('char-gold').textContent = character.gold || 0;
+    }
+
+    // Update XP bar
+    const currentExpEl = document.getElementById('current-exp');
+    const expToNextEl = document.getElementById('exp-to-next');
+    const expBarEl = document.getElementById('exp-bar');
+
+    const advancementData = await loadAdvancementData();
+    const currentXP = character.experience || 0;
+    const currentLevel = character.level || 1;
+
+    // Find current and next level data
+    const currentLevelData = advancementData.find(l => l.Level === currentLevel);
+    const nextLevelData = advancementData.find(l => l.Level === currentLevel + 1);
+
+    if (currentExpEl && expToNextEl && expBarEl && currentLevelData) {
+        const currentLevelXP = currentLevelData.ExperiencePoints;
+        const nextLevelXP = nextLevelData ? nextLevelData.ExperiencePoints : currentLevelXP;
+        const xpIntoLevel = currentXP - currentLevelXP;
+        const xpNeededForLevel = nextLevelXP - currentLevelXP;
+
+        currentExpEl.textContent = xpIntoLevel.toLocaleString();
+        expToNextEl.textContent = xpNeededForLevel.toLocaleString();
+
+        const expPercentage = xpNeededForLevel > 0 ? (xpIntoLevel / xpNeededForLevel * 100) : 0;
+        expBarEl.style.width = Math.min(100, Math.max(0, expPercentage)) + '%';
+    }
+
+    // Update HP display
+    const currentHpEl = document.getElementById('current-hp');
+    const maxHpEl = document.getElementById('max-hp');
+    const hpBarEl = document.getElementById('hp-bar');
+    if (currentHpEl) currentHpEl.textContent = character.hp || 0;
+    if (maxHpEl) maxHpEl.textContent = character.max_hp || 0;
+    if (hpBarEl) {
+        const hpPercentage = (character.max_hp > 0) ? (character.hp / character.max_hp * 100) : 0;
+        hpBarEl.style.width = hpPercentage + '%';
+    }
+
+    // Update mana display
+    const currentManaEl = document.getElementById('current-mana');
+    const maxManaEl = document.getElementById('max-mana');
+    const manaBarEl = document.getElementById('mana-bar');
+    if (currentManaEl) currentManaEl.textContent = character.mana || 0;
+    if (maxManaEl) maxManaEl.textContent = character.max_mana || 0;
+    if (manaBarEl) {
+        const manaPercentage = (character.max_mana > 0) ? (character.mana / character.max_mana * 100) : 0;
+        manaBarEl.style.width = manaPercentage + '%';
+    }
+
+    // Update quick status (main bar - numbers + emojis)
+    const fatigue = Math.min(character.fatigue || 0, 10);
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+
+    // Fatigue number and emoji
+    const fatigueLevelEl = document.getElementById('fatigue-level');
+    const fatigueEmojiEl = document.getElementById('fatigue-emoji');
+
+    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
+    if (fatigueEmojiEl) {
+        if (fatigue <= 2) {
+            fatigueEmojiEl.textContent = '😊'; // Fresh
+        } else if (fatigue <= 5) {
+            fatigueEmojiEl.textContent = '😐'; // Tired
+        } else if (fatigue <= 8) {
+            fatigueEmojiEl.textContent = '😓'; // Weary
+        } else {
+            fatigueEmojiEl.textContent = '😵'; // Exhausted
+        }
+    }
+
+    // Hunger number and emoji
+    const hungerLevelEl = document.getElementById('hunger-level');
+    const hungerEmojiEl = document.getElementById('hunger-emoji');
+
+    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
+    if (hungerEmojiEl) {
+        if (hunger === 0) {
+            hungerEmojiEl.textContent = '😵'; // Famished
+        } else if (hunger === 1) {
+            hungerEmojiEl.textContent = '😋'; // Hungry
+        } else if (hunger === 2) {
+            hungerEmojiEl.textContent = '🙂'; // Satisfied
+        } else {
+            hungerEmojiEl.textContent = '😊'; // Full
+        }
+    }
+
+    // Weight numbers and emoji
+    const weightEl = document.getElementById('char-weight');
+    const maxWeightEl = document.getElementById('max-weight');
+    const weightEmojiEl = document.getElementById('weight-emoji');
+
+    if (weightEl || maxWeightEl || weightEmojiEl) {
+        Promise.all([
+            calculateAndDisplayWeight(character),
+            calculateMaxCapacity(character)
+        ]).then(([weight, maxCapacity]) => {
+            if (weightEl) weightEl.textContent = weight;
+            if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
+
+            const weightPercentage = (weight / maxCapacity) * 100;
+
+            if (weightEmojiEl) {
+                if (weightPercentage <= 50) {
+                    weightEmojiEl.textContent = '🪶'; // Light
+                } else if (weightPercentage <= 100) {
+                    weightEmojiEl.textContent = '✓'; // OK
+                } else if (weightPercentage <= 150) {
+                    weightEmojiEl.textContent = '📦'; // Heavy
+                } else {
+                    weightEmojiEl.textContent = '🐌'; // Overloaded
+                }
+            }
+        });
+    }
+
+    // Update detailed stats tab (if visible)
+    updateStatsTab(character);
+
+    // Update stats
+    if (character.stats) {
+        const statStrEl = document.getElementById('stat-str');
+        const statDexEl = document.getElementById('stat-dex');
+        const statConEl = document.getElementById('stat-con');
+        const statIntEl = document.getElementById('stat-int');
+        const statWisEl = document.getElementById('stat-wis');
+        const statChaEl = document.getElementById('stat-cha');
+
+        if (statStrEl) statStrEl.textContent = character.stats.strength || 10;
+        if (statDexEl) statDexEl.textContent = character.stats.dexterity || 10;
+        if (statConEl) statConEl.textContent = character.stats.constitution || 10;
+        if (statIntEl) statIntEl.textContent = character.stats.intelligence || 10;
+        if (statWisEl) statWisEl.textContent = character.stats.wisdom || 10;
+        if (statChaEl) statChaEl.textContent = character.stats.charisma || 10;
+    }
+
+    // Update equipment slots
+    if (character.inventory && character.inventory.gear_slots) {
+        const gear = character.inventory.gear_slots;
+        const slots = ['left_arm', 'right_arm', 'armor', 'bag', 'necklace', 'ring', 'ammunition', 'clothes'];
+
+        // Use for...of instead of forEach to properly handle async
+        for (const slotName of slots) {
+            const slotEl = document.querySelector(`[data-slot="${slotName}"]`);
+            if (slotEl) {
+                const itemId = gear[slotName]?.item;
+                const quantity = gear[slotName]?.quantity || 1;
+
+                if (itemId) {
+                    // Add data-item-id attribute to the slot for interaction system
+                    slotEl.setAttribute('data-item-id', itemId);
+
+                    // Fetch item data
+                    const itemData = await getItemByIdAsync(itemId);
+
+                    if (itemData) {
+                        // Replace placeholder with item image
+                        const imageContainer = slotEl.querySelector('.w-10.h-10');
+                        if (imageContainer) {
+                            imageContainer.innerHTML = `<img src="/res/img/items/${itemId}.png" alt="${itemData.name}" class="w-full h-full object-contain" style="image-rendering: pixelated;">`;
+                        }
+
+                        // Add quantity label if > 1 (for ammunition, potions, etc.)
+                        // First remove any existing quantity label
+                        const existingLabel = slotEl.querySelector('.equipment-quantity-label');
+                        if (existingLabel) {
+                            existingLabel.remove();
+                        }
+
+                        if (quantity > 1) {
+                            const quantityLabel = document.createElement('div');
+                            quantityLabel.className = 'equipment-quantity-label absolute bottom-0 right-0 text-white';
+                            quantityLabel.style.fontSize = '10px';
+                            quantityLabel.textContent = `${quantity}`;
+                            slotEl.appendChild(quantityLabel);
+                        }
+                    }
+                } else {
+                    // Remove data-item-id attribute if slot is empty
+                    slotEl.removeAttribute('data-item-id');
+
+                    // Remove quantity label if present
+                    const existingLabel = slotEl.querySelector('.equipment-quantity-label');
+                    if (existingLabel) {
+                        existingLabel.remove();
+                    }
+
+                    // Reset to placeholder if empty
+                    const imageContainer = slotEl.querySelector('.w-10.h-10');
+                    if (imageContainer) {
+                        // Check if placeholder exists
+                        let placeholderIcon = slotEl.querySelector('.placeholder-icon');
+                        if (placeholderIcon) {
+                            // Placeholder exists, make sure it's visible
+                            placeholderIcon.style.display = 'block';
+                            // Remove any item image
+                            const itemImg = imageContainer.querySelector('img');
+                            if (itemImg) {
+                                itemImg.remove();
+                            }
+                        } else {
+                            // No placeholder found, just clear the image
+                            const itemImg = imageContainer.querySelector('img');
+                            if (itemImg) {
+                                itemImg.remove();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Update general slots (4x1 grid) - ALWAYS create slots even if empty
+    const generalSlotsDiv = document.getElementById('general-slots');
+    if (generalSlotsDiv) {
+        generalSlotsDiv.innerHTML = '';
+
+        // Ensure inventory structure exists
+        if (!character.inventory) {
+            character.inventory = {};
+        }
+        if (!character.inventory.general_slots) {
+            character.inventory.general_slots = [];
+        }
+
+        // Create a map of slot index to item data (respecting the "slot" field)
+        const slotMap = {};
+        character.inventory.general_slots.forEach(item => {
+            if (item && item.item) {
+                const slotIndex = item.slot;
+                // Only use valid slot indices (0-3)
+                if (slotIndex >= 0 && slotIndex < 4) {
+                    slotMap[slotIndex] = item;
+                }
+            }
+        });
+
+        // Create all 4 general slots
+        for (let i = 0; i < 4; i++) {
+            const slot = slotMap[i];
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
+            slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+
+            // Add data attributes for interaction system
+            slotDiv.setAttribute('data-item-slot', i);
+
+            if (slot && slot.item) {
+                slotDiv.setAttribute('data-item-id', slot.item);
+
+                // Create image container
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+                const img = document.createElement('img');
+                img.src = `/res/img/items/${slot.item}.png`;
+                img.alt = slot.item;
+                img.className = 'w-full h-full object-contain';
+                img.style.imageRendering = 'pixelated';
+                imgDiv.appendChild(img);
+                slotDiv.appendChild(imgDiv);
+
+                // Add quantity label if > 1
+                if (slot.quantity > 1) {
+                    const quantityLabel = document.createElement('div');
+                    quantityLabel.className = 'absolute bottom-0 right-0 text-white';
+                    quantityLabel.style.fontSize = '10px';
+                    quantityLabel.textContent = `${slot.quantity}`;
+                    slotDiv.appendChild(quantityLabel);
+                }
+            }
+
+            generalSlotsDiv.appendChild(slotDiv);
+        }
+    }
+
+    // Update backpack items (4x5 grid = 20 slots) - ONLY show if bag is equipped
+    const backpackDiv = document.getElementById('backpack-slots');
+    if (backpackDiv) {
+        backpackDiv.innerHTML = '';
+
+        // Check if a bag is actually equipped
+        const bagEquipped = character.inventory?.gear_slots?.bag?.item;
+
+        if (!bagEquipped) {
+            // No bag equipped - hide the backpack div
+            if (backpackDiv.parentElement) {
+                backpackDiv.parentElement.style.display = 'none';
+            }
+            return; // Exit early, don't render any slots
+        }
+
+        // Bag is equipped - show the backpack div
+        if (backpackDiv.parentElement) {
+            backpackDiv.parentElement.style.display = 'grid';
+        }
+
+        // Get or initialize contents
+        if (!character.inventory.gear_slots.bag.contents) {
+            character.inventory.gear_slots.bag.contents = [];
+        }
+
+        const contents = character.inventory.gear_slots.bag.contents;
+
+        // Create a map of slot index to item data (respecting the "slot" field)
+        const bagSlotMap = {};
+        contents.forEach(item => {
+            if (item && item.item) {
+                const slotIndex = item.slot;
+                // Only use valid slot indices (0-19 for 20-slot backpack)
+                if (slotIndex >= 0 && slotIndex < 20) {
+                    bagSlotMap[slotIndex] = item;
+                }
+            }
+        });
+
+        let itemCount = 0;
+
+        // Create all 20 backpack slots
+        for (let i = 0; i < 20; i++) {
+            const slot = bagSlotMap[i];
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
+            slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+
+            // Add data attributes for interaction system
+            slotDiv.setAttribute('data-item-slot', i);
+
+            if (slot && slot.item) {
+                itemCount++;
+                slotDiv.setAttribute('data-item-id', slot.item);
+
+                // Create image container
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+                const img = document.createElement('img');
+                img.src = `/res/img/items/${slot.item}.png`;
+                img.alt = slot.item;
+                img.className = 'w-full h-full object-contain';
+                img.style.imageRendering = 'pixelated';
+                imgDiv.appendChild(img);
+                slotDiv.appendChild(imgDiv);
+
+                // Add quantity label if > 1
+                if (slot.quantity > 1) {
+                    const quantityLabel = document.createElement('div');
+                    quantityLabel.className = 'absolute bottom-0 right-0 text-white';
+                    quantityLabel.style.fontSize = '10px';
+                    quantityLabel.textContent = `${slot.quantity}`;
+                    slotDiv.appendChild(quantityLabel);
+                }
+            }
+
+            backpackDiv.appendChild(slotDiv);
+        }
+
+        const bagCountEl = document.getElementById('bag-count');
+        if (bagCountEl) {
+            bagCountEl.textContent = itemCount;
+        }
+    }
+
+    // Rebind inventory interactions after rendering slots
+    // This ensures events are always attached, regardless of where updateCharacterDisplay() is called from
+    if (window.inventoryInteractions && window.inventoryInteractions.bindInventoryEvents) {
+        window.inventoryInteractions.bindInventoryEvents();
+    }
+}
+
+/**
+ * Update detailed stats tab
+ * @param {Object} character - Character data
+ */
+async function updateStatsTab(character) {
+    // Character info
+    const raceEl = document.getElementById('stats-char-race');
+    const classEl = document.getElementById('stats-char-class');
+    const backgroundEl = document.getElementById('stats-char-background');
+    const alignmentEl = document.getElementById('stats-char-alignment');
+
+    if (raceEl) raceEl.textContent = character.race || '-';
+    if (classEl) classEl.textContent = character.class || '-';
+    if (backgroundEl) backgroundEl.textContent = character.background || '-';
+    if (alignmentEl) alignmentEl.textContent = character.alignment || '-';
+
+    // Ability scores with modifiers
+    if (character.stats) {
+        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+        const statNames = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+
+        stats.forEach((stat, index) => {
+            const valueEl = document.getElementById(`stats-${stat}`);
+            const modEl = document.getElementById(`stats-${stat}-mod`);
+
+            const value = character.stats[statNames[index]] || 10;
+            const modifier = Math.floor((value - 10) / 2);
+
+            if (valueEl) valueEl.textContent = value;
+            if (modEl) modEl.textContent = modifier >= 0 ? `+${modifier}` : modifier;
+        });
+    }
+
+    // Fatigue details
+    const fatigue = Math.min(character.fatigue || 0, 10);
+    const fatigueLevelEl = document.getElementById('stats-fatigue-level');
+    const fatigueStatusEl = document.getElementById('stats-fatigue-status');
+    const fatigueEmojiEl = document.getElementById('stats-fatigue-emoji');
+    const fatigueDescEl = document.getElementById('stats-fatigue-desc');
+
+    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
+
+    let fatigueStatus, fatigueEmoji, fatigueDesc, fatigueColor;
+    if (fatigue <= 2) {
+        fatigueStatus = 'FRESH';
+        fatigueEmoji = '😊';
+        fatigueDesc = 'You feel energetic and ready for adventure';
+        fatigueColor = 'text-green-400';
+    } else if (fatigue <= 5) {
+        fatigueStatus = 'TIRED';
+        fatigueEmoji = '😐';
+        fatigueDesc = "You're starting to feel the strain of travel";
+        fatigueColor = 'text-yellow-400';
+    } else if (fatigue <= 8) {
+        fatigueStatus = 'WEARY';
+        fatigueEmoji = '😓';
+        fatigueDesc = 'Your steps are heavy and reactions slower';
+        fatigueColor = 'text-orange-400';
+    } else {
+        fatigueStatus = 'EXHAUSTED';
+        fatigueEmoji = '😵';
+        fatigueDesc = 'You can barely function - rest immediately!';
+        fatigueColor = 'text-red-400';
+    }
+
+    if (fatigueStatusEl) {
+        fatigueStatusEl.textContent = fatigueStatus;
+        fatigueStatusEl.className = `${fatigueColor} font-bold text-xs`;
+    }
+    if (fatigueEmojiEl) fatigueEmojiEl.textContent = fatigueEmoji;
+    if (fatigueDescEl) fatigueDescEl.textContent = fatigueDesc;
+
+    // Hunger details
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+    const hungerLevelEl = document.getElementById('stats-hunger-level');
+    const hungerStatusEl = document.getElementById('stats-hunger-status');
+    const hungerEmojiEl = document.getElementById('stats-hunger-emoji');
+    const hungerDescEl = document.getElementById('stats-hunger-desc');
+
+    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
+
+    let hungerStatus, hungerEmoji, hungerDesc, hungerColor;
+    if (hunger === 0) {
+        hungerStatus = 'FAMISHED';
+        hungerEmoji = '😵';
+        hungerDesc = 'You are starving and weak';
+        hungerColor = 'text-red-400';
+    } else if (hunger === 1) {
+        hungerStatus = 'HUNGRY';
+        hungerEmoji = '😋';
+        hungerDesc = 'You could use a meal';
+        hungerColor = 'text-yellow-400';
+    } else if (hunger === 2) {
+        hungerStatus = 'SATISFIED';
+        hungerEmoji = '🙂';
+        hungerDesc = 'Your belly is content';
+        hungerColor = 'text-green-400';
+    } else {
+        hungerStatus = 'FULL';
+        hungerEmoji = '😊';
+        hungerDesc = "You're well-fed and energized";
+        hungerColor = 'text-green-400';
+    }
+
+    if (hungerStatusEl) {
+        hungerStatusEl.textContent = hungerStatus;
+        hungerStatusEl.className = `${hungerColor} font-bold text-xs`;
+    }
+    if (hungerEmojiEl) hungerEmojiEl.textContent = hungerEmoji;
+    if (hungerDescEl) hungerDescEl.textContent = hungerDesc;
+
+    // Weight details
+    const weightEl = document.getElementById('stats-weight');
+    const maxWeightEl = document.getElementById('stats-max-weight');
+    const weightStatusEl = document.getElementById('stats-weight-status');
+    const weightEmojiEl = document.getElementById('stats-weight-emoji');
+    const weightDescEl = document.getElementById('stats-weight-desc');
+
+    try {
+        const [weight, maxCapacity] = await Promise.all([
+            calculateAndDisplayWeight(character),
+            calculateMaxCapacity(character)
+        ]);
+
+        if (weightEl) weightEl.textContent = weight;
+        if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
+
+        const weightPercentage = (weight / maxCapacity) * 100;
+        let weightStatus, weightEmoji, weightDesc, weightColor;
+
+        if (weightPercentage <= 50) {
+            weightStatus = 'LIGHT';
+            weightEmoji = '🪶';
+            weightDesc = 'You move at full speed';
+            weightColor = 'text-green-400';
+        } else if (weightPercentage <= 100) {
+            weightStatus = 'NORMAL';
+            weightEmoji = '✓';
+            weightDesc = 'Carrying a comfortable load';
+            weightColor = 'text-green-400';
+        } else if (weightPercentage <= 150) {
+            weightStatus = 'HEAVY';
+            weightEmoji = '📦';
+            weightDesc = 'Movement slightly hindered';
+            weightColor = 'text-yellow-400';
+        } else if (weightPercentage <= 200) {
+            weightStatus = 'OVERLOADED';
+            weightEmoji = '🐌';
+            weightDesc = 'Severely slowed, drop items!';
+            weightColor = 'text-orange-400';
+        } else {
+            weightStatus = 'IMMOBILE';
+            weightEmoji = '🛑';
+            weightDesc = 'Cannot move! Drop items immediately!';
+            weightColor = 'text-red-400';
+        }
+
+        if (weightStatusEl) {
+            weightStatusEl.textContent = weightStatus;
+            weightStatusEl.className = `${weightColor} font-bold text-xs`;
+        }
+        if (weightEmojiEl) weightEmojiEl.textContent = weightEmoji;
+        if (weightDescEl) weightDescEl.textContent = weightDesc;
+    } catch (error) {
+        logger.error('Error calculating weight:', error);
+    }
+}
+
+logger.debug('Character display module loaded');

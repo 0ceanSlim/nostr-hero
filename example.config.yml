@@ -1,6 +1,0 @@
-server:
-  port: 8585
-  tls: false # Set to true if using HTTPS
-
-pixellab:
-  api_key: "your-pixellab-api-key-here"

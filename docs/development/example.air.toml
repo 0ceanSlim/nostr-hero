@@ -11,14 +11,14 @@ tmp_dir = "tmp"
   bin = "tmp/main.exe"
 
   # Build command - includes Tailwind CSS compilation
-  # Runs Tailwind first, then builds Go binary
-  cmd = "cmd /c \"tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --minify && go build -o ./tmp/main.exe .\""
+  # Runs Tailwind first, then builds Go binary from server/ directory
+  cmd = "cmd /c \"tailwindcss -c ./www/res/style/tailwind.config.js -i ./www/res/style/input.css -o ./www/res/style/output.css --minify && cd server && go build -o ../tmp/main.exe .\""
 
   # Delay before restart (milliseconds)
   delay = 1000
 
   # Directories to exclude from watching
-  exclude_dir = ["assets", "tmp", "vendor", "testdata", "www", "docs", "data"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "www", "docs", "data", "src", "node_modules"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = true
@@ -26,7 +26,7 @@ tmp_dir = "tmp"
   full_bin = ""
 
   # Directories to watch
-  include_dir = ["src"]
+  include_dir = ["server"]
 
   # File extensions to watch
   include_ext = ["go"]
