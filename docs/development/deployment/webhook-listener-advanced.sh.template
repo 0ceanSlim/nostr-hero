@@ -43,6 +43,14 @@ update_github_status() {
     exit 1
   }
 
+  # Print environment info for debugging
+  echo "🔍 Environment Info:"
+  echo "  User: $(whoami)"
+  echo "  PATH: $PATH"
+  echo "  Node version: $(node --version 2>&1 || echo 'Node not found in PATH')"
+  echo "  NPM version: $(npm --version 2>&1 || echo 'NPM not found in PATH')"
+  echo "  Working directory: $(pwd)"
+
   # Pull latest code
   echo "📥 Pulling latest code from main branch..."
   git pull origin main
@@ -52,7 +60,10 @@ update_github_status() {
 
     # Install npm dependencies (if package.json changed)
     echo "📦 Installing npm dependencies..."
-    npm install
+    # Use full path to npm if not in PATH (adjust this path based on your server)
+    NPM_CMD=$(command -v npm || echo "/usr/bin/npm")
+    echo "  Using npm at: $NPM_CMD"
+    $NPM_CMD install
     if [ $? -ne 0 ]; then
       echo "❌ npm install failed!"
       update_github_status "failure" "npm install failed"
@@ -62,7 +73,7 @@ update_github_status() {
 
     # Build frontend assets (CSS/JS)
     echo "🎨 Building frontend assets..."
-    npm run build
+    $NPM_CMD run build
     if [ $? -ne 0 ]; then
       echo "❌ npm build failed!"
       update_github_status "failure" "Frontend build failed"
