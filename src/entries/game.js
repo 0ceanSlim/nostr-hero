@@ -11,7 +11,7 @@ import '../lib/session.js'; // Auto-initializes as window.sessionManager
 import '../lib/api.js'; // Auto-initializes as window.gameAPI
 
 // State management
-import { getGameState, updateGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';
+import { getGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';
 import { getItemById, getSpellById, getLocationById } from '../state/staticData.js';
 
 // Systems
@@ -42,7 +42,6 @@ console.log('📋 nostrHeroStartup exists:', typeof nostrHeroStartup);
 
 // Make critical functions globally available for templates and inline scripts
 window.getGameState = getGameState;
-window.updateGameState = updateGameState;
 window.getGameStateSync = getGameStateSync;
 window.refreshGameState = refreshGameState;
 window.initializeGame = initializeGame;

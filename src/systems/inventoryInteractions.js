@@ -50,13 +50,23 @@ export function initializeInventoryInteractions() {
 
     // Close context menu when clicking elsewhere
     document.addEventListener('click', (e) => {
+        // Don't close if clicking on container context menu
+        if (e.target.closest('#container-context-menu')) {
+            return;
+        }
+
         if (activeContextMenu && !e.target.closest('.context-menu')) {
             closeContextMenu();
         }
     });
 
-    // Prevent default context menu
+    // Prevent default context menu (but not for container slots)
     document.addEventListener('contextmenu', (e) => {
+        // Don't interfere with container modal context menus
+        if (e.target.closest('#container-modal')) {
+            return; // Let container handle its own context menu
+        }
+
         if (e.target.closest('[data-item-slot]') || e.target.closest('[data-slot]')) {
             e.preventDefault();
         }
@@ -431,7 +441,7 @@ async function handleLeftClick(e, itemId, slotType, slotIndex, openContainer = n
     if (action === 'open') {
         // Open container
         if (openContainer) {
-            await openContainer(itemId, slotIndex);
+            await openContainer(itemId, slotIndex, slotType);
         } else {
             logger.error('openContainer function not provided');
         }

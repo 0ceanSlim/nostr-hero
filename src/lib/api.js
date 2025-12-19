@@ -233,58 +233,6 @@ class GameAPI {
         });
     }
 
-    /**
-     * Cast a spell
-     * @param {string} spellId - Spell ID
-     * @param {Object} target - Target (optional)
-     */
-    async castSpell(spellId, target = null) {
-        return await this.sendAction('cast_spell', {
-            spell_id: spellId,
-            target: target
-        });
-    }
-
-    /**
-     * Rest to restore HP/Mana
-     */
-    async rest() {
-        return await this.sendAction('rest', {});
-    }
-
-    /**
-     * Advance game time
-     * @param {number} segments - Number of time segments
-     */
-    async advanceTime(segments = 1) {
-        return await this.sendAction('advance_time', {
-            segments: segments
-        });
-    }
-
-    /**
-     * Deposit item to vault
-     * @param {string} itemId - Item ID
-     * @param {number} quantity - Quantity to deposit
-     */
-    async depositToVault(itemId, quantity = 1) {
-        return await this.sendAction('vault_deposit', {
-            item_id: itemId,
-            quantity: quantity
-        });
-    }
-
-    /**
-     * Withdraw item from vault
-     * @param {string} itemId - Item ID
-     * @param {number} quantity - Quantity to withdraw
-     */
-    async withdrawFromVault(itemId, quantity = 1) {
-        return await this.sendAction('vault_withdraw', {
-            item_id: itemId,
-            quantity: quantity
-        });
-    }
 }
 
 // Export singleton instance

@@ -1,10 +1,12 @@
 /**
  * Static Data Lookup Module
  *
- * Provides lookup functions for game data cached in the DOM.
+ * Provides SYNCHRONOUS lookup functions for game data cached in the DOM.
  *
- * NOTE: This is transitional code. Eventually these should use the data/ modules
- * instead of reading from DOM elements.
+ * ⚠️ TRANSITIONAL CODE - This will eventually be replaced
+ *
+ * Use these functions when you need SYNCHRONOUS access to cached data (e.g., in render loops).
+ * For async database queries, use the modules in data/ instead (e.g., data/items.js).
  *
  * @module state/staticData
  */

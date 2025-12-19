@@ -122,7 +122,6 @@ class NostrHeroStartup {
         // Just verify the functions are available
         const requiredGameFunctions = [
             'getGameState',
-            'updateGameState',
             'initializeGame'
         ];
 

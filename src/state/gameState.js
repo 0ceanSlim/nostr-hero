@@ -227,44 +227,6 @@ export async function refreshGameState() {
     return newState;
 }
 
-/**
- * Update cached state locally (only for UI, doesn't persist)
- * @deprecated Use gameAPI.sendAction() instead
- * @param {Object} newState - Partial state to merge with cached state
- */
-export function updateGameState(newState) {
-    logger.warn('updateGameState() is deprecated. Use gameAPI.sendAction() instead.');
-
-    // Update cache
-    if (cachedGameState) {
-        if (newState.character) cachedGameState.character = {...cachedGameState.character, ...newState.character};
-        if (newState.inventory) cachedGameState.inventory = newState.inventory;
-        if (newState.equipment) cachedGameState.equipment = newState.equipment;
-        if (newState.spells) cachedGameState.spells = newState.spells;
-        if (newState.location) cachedGameState.location = {...cachedGameState.location, ...newState.location};
-        if (newState.combat !== undefined) cachedGameState.combat = newState.combat;
-    } else {
-        cachedGameState = newState;
-    }
-
-    // Trigger UI updates via event bus
-    eventBus.emit('gameStateChange', cachedGameState);
-
-    // Also dispatch DOM event for legacy compatibility
-    document.dispatchEvent(new CustomEvent('gameStateChange', { detail: cachedGameState }));
-}
-
-/**
- * Helper functions for inventory and spell management
- */
-export function findInInventory(inventory, itemId) {
-    return inventory.find(item => item.item === itemId);
-}
-
-export function findInSpells(spells, spellId) {
-    return spells.find(spell => spell.spell === spellId);
-}
-
 // ========================================
 // Ground Items System (Session-only storage)
 // ========================================

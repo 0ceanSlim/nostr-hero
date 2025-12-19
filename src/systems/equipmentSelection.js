@@ -1093,22 +1093,3 @@ async function fetchPackData(packName) {
   }
 }
 
-/**
- * Animate scene out (used by equipment selection scenes).
- * @param {HTMLElement} content - The content container element.
- * @param {HTMLElement} container - The main scene container element.
- */
-async function animateSceneOut(content, container) {
-  const textElements = content.querySelectorAll('.scene-text, .item-card, .pixel-continue-btn');
-  textElements.forEach(el => {
-    el.style.animation = 'wipeOut 0.6s ease-in forwards';
-  });
-
-  await new Promise(resolve => setTimeout(resolve, 600)); // Wait for wipe animation
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Additional delay if needed
-
-  container.classList.remove('fade-in');
-  container.classList.add('fade-out');
-  await new Promise(resolve => setTimeout(resolve, 800)); // Wait for fade out
-  container.classList.add('hidden');
-}

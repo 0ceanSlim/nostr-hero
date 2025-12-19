@@ -2,7 +2,10 @@
  * Item Data Module
  *
  * Handles loading and caching item data from the database API.
- * Provides utilities for item lookups and transformations.
+ * Provides ASYNC utilities for item lookups and transformations.
+ *
+ * Use this module for database queries. For synchronous DOM-cached lookups,
+ * see state/staticData.js (transitional).
  *
  * @module data/items
  */

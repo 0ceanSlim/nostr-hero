@@ -21,9 +21,10 @@ let currentOpenContainer = null;
  * Open a container and show its contents
  * @param {string} itemId - Container item ID
  * @param {number} fromSlot - Inventory slot containing the container
+ * @param {string} fromSlotType - Type of slot ('general', 'inventory', 'equipment')
  */
-export async function openContainer(itemId, fromSlot) {
-    logger.debug('Opening container:', itemId, 'from slot:', fromSlot);
+export async function openContainer(itemId, fromSlot, fromSlotType = 'general') {
+    logger.info(`🎒 OPENING CONTAINER: ${itemId} from ${fromSlotType}[${fromSlot}]`);
 
     // Fetch item data to get container properties
     const itemData = getItemById(itemId);
@@ -68,6 +69,7 @@ export async function openContainer(itemId, fromSlot) {
     currentOpenContainer = {
         itemId: itemId,
         fromSlot: fromSlot,
+        fromSlotType: fromSlotType,
         slots: containerSlots,
         allowedTypes: allowedTypes,
         allowedItems: allowedItems,
@@ -176,18 +178,29 @@ async function renderContainerSlots(grid, totalSlots, contents) {
                     slot.appendChild(qty);
                 }
 
+                // Bind left-click to remove item from container
+                slot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    logger.info(`👆 Container slot clicked - removing item from slot ${i}`);
+                    removeFromContainer(i);
+                });
+
                 // Bind drag events
                 slot.addEventListener('dragstart', (e) => handleContainerDragStart(e, slotItem.item, i));
                 slot.addEventListener('dragend', handleContainerDragEnd);
 
                 // Bind right-click for context menu
                 slot.addEventListener('contextmenu', (e) => {
+                    logger.info(`⚡ Container contextmenu event fired for slot ${i}, item: ${slotItem.item}`);
                     e.preventDefault();
                     e.stopPropagation();
                     showContainerContextMenu(e, slotItem.item, i);
                 });
 
                 slot.title = itemData.name;
+
+                logger.debug(`✅ Bound events to container slot ${i} (${slotItem.item})`);
             }
         } else {
             // Empty slot - add placeholder (matching inventory style)
@@ -204,6 +217,8 @@ async function renderContainerSlots(grid, totalSlots, contents) {
 
         grid.appendChild(slot);
     }
+
+    logger.info(`✅ Rendered ${totalSlots} container slots (${contents.filter(c => c && c.item).length} with items)`);
 }
 
 /**
@@ -262,6 +277,7 @@ async function handleContainerDrop(e, toSlotIndex) {
                 from_slot: fromSlot,
                 from_slot_type: fromType,
                 container_slot: currentOpenContainer.fromSlot,
+                container_slot_type: currentOpenContainer.fromSlotType,
                 to_container_slot: toSlotIndex
             });
 
@@ -273,7 +289,7 @@ async function handleContainerDrop(e, toSlotIndex) {
                 await updateAllDisplays();
 
                 // Refresh container display
-                await openContainer(currentOpenContainer.itemId, currentOpenContainer.fromSlot);
+                await openContainer(currentOpenContainer.itemId, currentOpenContainer.fromSlot, currentOpenContainer.fromSlotType);
             } else {
                 showActionText(result.error, result.color || 'red');
             }
@@ -288,18 +304,31 @@ async function handleContainerDrop(e, toSlotIndex) {
  * Remove item from container
  */
 async function removeFromContainer(slotIndex) {
-    if (!currentOpenContainer) return;
+    logger.info(`🔍 removeFromContainer called - slotIndex: ${slotIndex}`);
+
+    if (!currentOpenContainer) {
+        logger.warn('No open container');
+        return;
+    }
 
     const item = currentOpenContainer.contents[slotIndex];
-    if (!item || !item.item) return;
+    if (!item || !item.item) {
+        logger.warn(`No item at slot ${slotIndex}`);
+        return;
+    }
+
+    logger.info(`📤 Removing ${item.item} from container at slot ${slotIndex}`);
 
     try {
         // Call backend API to remove item from container
         const result = await gameAPI.sendAction('remove_from_container', {
             item_id: item.item,
             container_slot: currentOpenContainer.fromSlot,
+            container_slot_type: currentOpenContainer.fromSlotType,
             from_container_slot: slotIndex
         });
+
+        logger.info('Backend response:', result);
 
         if (result.success) {
             showActionText(result.message, result.color || 'green');
@@ -309,7 +338,7 @@ async function removeFromContainer(slotIndex) {
             await updateAllDisplays();
 
             // Refresh container display
-            await openContainer(currentOpenContainer.itemId, currentOpenContainer.fromSlot);
+            await openContainer(currentOpenContainer.itemId, currentOpenContainer.fromSlot, currentOpenContainer.fromSlotType);
         } else {
             showActionText(result.error, result.color || 'red');
         }
@@ -323,6 +352,8 @@ async function removeFromContainer(slotIndex) {
  * Show context menu for container items
  */
 function showContainerContextMenu(e, itemId, slotIndex) {
+    logger.info(`🖱️ showContainerContextMenu called - itemId: ${itemId}, slot: ${slotIndex}`);
+
     // Close any existing menu
     const existingMenu = document.getElementById('container-context-menu');
     if (existingMenu) {
@@ -342,7 +373,10 @@ function showContainerContextMenu(e, itemId, slotIndex) {
     removeBtn.className = 'w-full px-3 py-1 text-left hover:bg-gray-700 text-xs';
     removeBtn.textContent = 'Remove';
     removeBtn.style.fontSize = '9px';
-    removeBtn.onclick = () => {
+    removeBtn.onclick = (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        logger.info(`🔘 Remove button clicked for slot ${slotIndex}`);
         removeFromContainer(slotIndex);
         menu.remove();
     };

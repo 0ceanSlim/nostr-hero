@@ -1536,6 +1536,7 @@ func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) 
 	if cs, ok := params["container_slot"].(float64); ok {
 		containerSlot = int(cs)
 	}
+	containerSlotType, _ := params["container_slot_type"].(string)
 	toContainerSlot := -1
 	if tcs, ok := params["to_container_slot"].(float64); ok {
 		toContainerSlot = int(tcs)
@@ -1547,6 +1548,7 @@ func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) 
 		FromSlot:        fromSlot,
 		FromSlotType:    fromSlotType,
 		ContainerSlot:   containerSlot,
+		ToSlotType:      containerSlotType, // Use ToSlotType for container location
 		ToContainerSlot: toContainerSlot,
 	}
 
@@ -1578,12 +1580,14 @@ func handleRemoveFromContainerAction(state *SaveFile, params map[string]interfac
 	if fcs, ok := params["from_container_slot"].(float64); ok {
 		fromContainerSlot = int(fcs)
 	}
+	containerSlotType, _ := params["container_slot_type"].(string)
 
 	req := &types.ItemActionRequest{
-		ItemID:        itemID,
-		Action:        "remove_from_container",
-		ContainerSlot: containerSlot,
-		FromSlot:      fromContainerSlot, // Use FromSlot for the container slot index
+		ItemID:         itemID,
+		Action:         "remove_from_container",
+		ContainerSlot:  containerSlot,
+		FromSlot:       fromContainerSlot, // Use FromSlot for the container slot index
+		FromSlotType:   containerSlotType, // Pass the container location type
 	}
 
 	// Call the inventory handler

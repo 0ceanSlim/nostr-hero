@@ -482,76 +482,76 @@ export async function updateCharacterDisplay() {
             if (backpackDiv.parentElement) {
                 backpackDiv.parentElement.style.display = 'none';
             }
-            return; // Exit early, don't render any slots
-        }
-
-        // Bag is equipped - show the backpack div
-        if (backpackDiv.parentElement) {
-            backpackDiv.parentElement.style.display = 'grid';
-        }
-
-        // Get or initialize contents
-        if (!character.inventory.gear_slots.bag.contents) {
-            character.inventory.gear_slots.bag.contents = [];
-        }
-
-        const contents = character.inventory.gear_slots.bag.contents;
-
-        // Create a map of slot index to item data (respecting the "slot" field)
-        const bagSlotMap = {};
-        contents.forEach(item => {
-            if (item && item.item) {
-                const slotIndex = item.slot;
-                // Only use valid slot indices (0-19 for 20-slot backpack)
-                if (slotIndex >= 0 && slotIndex < 20) {
-                    bagSlotMap[slotIndex] = item;
-                }
-            }
-        });
-
-        let itemCount = 0;
-
-        // Create all 20 backpack slots
-        for (let i = 0; i < 20; i++) {
-            const slot = bagSlotMap[i];
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
-            slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
-
-            // Add data attributes for interaction system
-            slotDiv.setAttribute('data-item-slot', i);
-
-            if (slot && slot.item) {
-                itemCount++;
-                slotDiv.setAttribute('data-item-id', slot.item);
-
-                // Create image container
-                const imgDiv = document.createElement('div');
-                imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
-                const img = document.createElement('img');
-                img.src = `/res/img/items/${slot.item}.png`;
-                img.alt = slot.item;
-                img.className = 'w-full h-full object-contain';
-                img.style.imageRendering = 'pixelated';
-                imgDiv.appendChild(img);
-                slotDiv.appendChild(imgDiv);
-
-                // Add quantity label if > 1
-                if (slot.quantity > 1) {
-                    const quantityLabel = document.createElement('div');
-                    quantityLabel.className = 'absolute bottom-0 right-0 text-white';
-                    quantityLabel.style.fontSize = '10px';
-                    quantityLabel.textContent = `${slot.quantity}`;
-                    slotDiv.appendChild(quantityLabel);
-                }
+            // Don't return early - continue to bindInventoryEvents() at end of function
+        } else {
+            // Bag is equipped - show the backpack div
+            if (backpackDiv.parentElement) {
+                backpackDiv.parentElement.style.display = 'grid';
             }
 
-            backpackDiv.appendChild(slotDiv);
-        }
+            // Get or initialize contents
+            if (!character.inventory.gear_slots.bag.contents) {
+                character.inventory.gear_slots.bag.contents = [];
+            }
 
-        const bagCountEl = document.getElementById('bag-count');
-        if (bagCountEl) {
-            bagCountEl.textContent = itemCount;
+            const contents = character.inventory.gear_slots.bag.contents;
+
+            // Create a map of slot index to item data (respecting the "slot" field)
+            const bagSlotMap = {};
+            contents.forEach(item => {
+                if (item && item.item) {
+                    const slotIndex = item.slot;
+                    // Only use valid slot indices (0-19 for 20-slot backpack)
+                    if (slotIndex >= 0 && slotIndex < 20) {
+                        bagSlotMap[slotIndex] = item;
+                    }
+                }
+            });
+
+            let itemCount = 0;
+
+            // Create all 20 backpack slots
+            for (let i = 0; i < 20; i++) {
+                const slot = bagSlotMap[i];
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
+                slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+
+                // Add data attributes for interaction system
+                slotDiv.setAttribute('data-item-slot', i);
+
+                if (slot && slot.item) {
+                    itemCount++;
+                    slotDiv.setAttribute('data-item-id', slot.item);
+
+                    // Create image container
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
+                    const img = document.createElement('img');
+                    img.src = `/res/img/items/${slot.item}.png`;
+                    img.alt = slot.item;
+                    img.className = 'w-full h-full object-contain';
+                    img.style.imageRendering = 'pixelated';
+                    imgDiv.appendChild(img);
+                    slotDiv.appendChild(imgDiv);
+
+                    // Add quantity label if > 1
+                    if (slot.quantity > 1) {
+                        const quantityLabel = document.createElement('div');
+                        quantityLabel.className = 'absolute bottom-0 right-0 text-white';
+                        quantityLabel.style.fontSize = '10px';
+                        quantityLabel.textContent = `${slot.quantity}`;
+                        slotDiv.appendChild(quantityLabel);
+                    }
+                }
+
+                backpackDiv.appendChild(slotDiv);
+            }
+
+            const bagCountEl = document.getElementById('bag-count');
+            if (bagCountEl) {
+                bagCountEl.textContent = itemCount;
+            }
         }
     }
 

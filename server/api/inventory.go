@@ -1926,30 +1926,48 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 // handleAddToContainer adds an item from inventory to a container
 func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
-	log.Printf("📦 Add to container: %s from %s[%d] to container at slot %d, container slot %d",
-		req.ItemID, req.FromSlotType, req.FromSlot, req.ContainerSlot, req.ToContainerSlot)
+	log.Printf("📦 Add to container: %s from %s[%d] to container at %s[%d], container slot %d",
+		req.ItemID, req.FromSlotType, req.FromSlot, req.ToSlotType, req.ContainerSlot, req.ToContainerSlot)
 
-	// Get the container from general_slots
+	var containerSlot map[string]interface{}
+	var containerIndex int
+
+	// Get general slots - needed for later source inventory lookup
 	generalSlots, ok := save.Inventory["general_slots"].([]interface{})
 	if !ok {
 		return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
 	}
 
-	// Find the container
-	var containerSlot map[string]interface{}
-	var containerIndex int
-	for i, slot := range generalSlots {
-		if slotMap, ok := slot.(map[string]interface{}); ok {
-			if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.ContainerSlot {
-				containerSlot = slotMap
-				containerIndex = i
-				break
+	// Get the container based on ToSlotType
+	if req.ToSlotType == "equipment" || req.ToSlotType == "" {
+		// Container is in equipment slot (backpack)
+		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
+		if !ok {
+			return &types.ItemActionResponse{Success: false, Error: "Equipment slots not found", Color: "red"}
+		}
+		if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+			if bag["item"] != nil && bag["item"] != "" {
+				containerSlot = bag
+				log.Printf("📦 Found container in equipped bag slot")
+			}
+		}
+	} else if req.ToSlotType == "general" {
+		// Container is in general slots
+		// Find the container
+		for i, slot := range generalSlots {
+			if slotMap, ok := slot.(map[string]interface{}); ok {
+				if slotNum, ok := slotMap["slot"].(float64); ok && int(slotNum) == req.ContainerSlot {
+					containerSlot = slotMap
+					containerIndex = i
+					log.Printf("📦 Found container in general slot %d", req.ContainerSlot)
+					break
+				}
 			}
 		}
 	}
 
 	if containerSlot == nil {
-		return &types.ItemActionResponse{Success: false, Error: "Container not found", Color: "red"}
+		return &types.ItemActionResponse{Success: false, Error: fmt.Sprintf("Container not found at %s[%d]", req.ToSlotType, req.ContainerSlot), Color: "red"}
 	}
 
 	containerID := containerSlot["item"].(string)
@@ -2177,11 +2195,17 @@ func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.I
 		"slot":     req.FromSlot,
 	}
 
-	// Update container contents
-	generalSlots[containerIndex].(map[string]interface{})["contents"] = contents
+	// Update container contents based on where it is
+	containerSlot["contents"] = contents
 
-	// Save changes
-	save.Inventory["general_slots"] = generalSlots
+	if req.ToSlotType == "general" {
+		// Update general slots if container is there
+		generalSlots[containerIndex] = containerSlot
+		save.Inventory["general_slots"] = generalSlots
+	}
+	// If container is in equipment, containerSlot already points to bag so changes are reflected
+
+	// Save source inventory changes
 	if req.FromSlotType == "inventory" {
 		gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 		bag := gearSlots["bag"].(map[string]interface{})
@@ -2198,8 +2222,8 @@ func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.I
 
 // handleRemoveFromContainer removes an item from a container back to inventory
 func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
-	log.Printf("📤 Remove from container: slot %d from container at slot %d",
-		req.FromSlot, req.ContainerSlot)
+	log.Printf("📤 Remove from container: slot %d from container at %s[%d]",
+		req.FromSlot, req.FromSlotType, req.ContainerSlot)
 
 	var containerSlot map[string]interface{}
 	var containerIndex int
@@ -2211,22 +2235,22 @@ func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *ty
 		return &types.ItemActionResponse{Success: false, Error: "General slots not found", Color: "red"}
 	}
 
-	// First, check if the container is equipped in gear_slots.bag
-	gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
-	if ok {
-		if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
-			if bag["item"] != nil && bag["item"] != "" {
-				// Bag is equipped - use it
-				containerSlot = bag
-				containerLocation = "equipped"
-				log.Printf("📦 Found container in equipped bag slot")
+	// Use FromSlotType to determine where to look for the container
+	if req.FromSlotType == "equipment" || req.FromSlotType == "" {
+		// Container is in equipment slot (backpack)
+		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
+		if ok {
+			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				if bag["item"] != nil && bag["item"] != "" {
+					// Bag is equipped - use it
+					containerSlot = bag
+					containerLocation = "equipped"
+					log.Printf("📦 Found container in equipped bag slot")
+				}
 			}
 		}
-	}
-
-	// If not equipped, search general_slots
-	if containerSlot == nil {
-
+	} else if req.FromSlotType == "general" {
+		// Container is in general slots (component pouch, etc.)
 		log.Printf("📦 Searching %d general slots for container at slot %d", len(generalSlots), req.ContainerSlot)
 
 		// Find the container in general slots

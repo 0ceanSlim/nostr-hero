@@ -34,21 +34,6 @@ class EventBus {
     }
 
     /**
-     * Subscribe to an event (fires only once)
-     * @param {string} eventName - Event name
-     * @param {Function} callback - Callback function
-     * @returns {Function} Unsubscribe function
-     */
-    once(eventName, callback) {
-        const wrappedCallback = (data) => {
-            callback(data);
-            this.off(eventName, wrappedCallback);
-        };
-
-        return this.on(eventName, wrappedCallback);
-    }
-
-    /**
      * Unsubscribe from an event
      * @param {string} eventName - Event name
      * @param {Function} callback - Callback function to remove
@@ -91,36 +76,6 @@ class EventBus {
         }
     }
 
-    /**
-     * Remove all listeners for an event, or all listeners if no event specified
-     * @param {string} [eventName] - Optional event name
-     */
-    clear(eventName) {
-        if (eventName) {
-            this.listeners.delete(eventName);
-            logger.debug(`Cleared all listeners for event: ${eventName}`);
-        } else {
-            this.listeners.clear();
-            logger.debug('Cleared all event listeners');
-        }
-    }
-
-    /**
-     * Get count of listeners for an event
-     * @param {string} eventName - Event name
-     * @returns {number} Number of listeners
-     */
-    listenerCount(eventName) {
-        return this.listeners.has(eventName) ? this.listeners.get(eventName).length : 0;
-    }
-
-    /**
-     * Get all event names with listeners
-     * @returns {string[]} Array of event names
-     */
-    eventNames() {
-        return Array.from(this.listeners.keys());
-    }
 }
 
 // Export singleton instance
