@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -152,6 +153,12 @@ func (auth *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Check whitelist access before creating session
+	if err := auth.checkWhitelistAccess(r, sessionReq.PublicKey); err != nil {
+		auth.sendErrorResponse(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	// Create user session using grain
 	userSession, err := session.CreateUserSession(w, sessionReq)
 	if err != nil {
@@ -293,6 +300,13 @@ func (auth *AuthHandler) HandleAmberCallback(w http.ResponseWriter, r *http.Requ
 
 	log.Printf("✅ Amber callback processed successfully: %s...", publicKey[:16])
 
+	// Check whitelist access before creating session
+	if err := auth.checkWhitelistAccess(r, publicKey); err != nil {
+		log.Printf("❌ Whitelist check failed for Amber login: %v", err)
+		auth.renderAmberError(w, "Access denied: "+err.Error())
+		return
+	}
+
 	// Create session
 	sessionRequest := session.SessionInitRequest{
 		PublicKey:     publicKey,
@@ -374,6 +388,129 @@ func (auth *AuthHandler) extractPublicKeyFromAmber(eventParam string) (string, e
 
 	log.Printf("✅ Extracted pubkey as direct string: %s", publicKey)
 	return publicKey, nil
+}
+
+// isLocalConnection checks if the request is from localhost or local network
+func isLocalConnection(r *http.Request) bool {
+	// Get the client IP from the request
+	clientIP := getClientIP(r)
+
+	// Parse the IP
+	ip := net.ParseIP(clientIP)
+	if ip == nil {
+		log.Printf("⚠️ Failed to parse client IP: %s", clientIP)
+		return false
+	}
+
+	// Check if it's localhost (IPv4 or IPv6)
+	if ip.IsLoopback() {
+		log.Printf("🔓 Connection from localhost: %s", clientIP)
+		return true
+	}
+
+	// Check if it's a private network address (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+	if ip.IsPrivate() {
+		log.Printf("🔓 Connection from local network: %s", clientIP)
+		return true
+	}
+
+	log.Printf("🌐 Connection from external IP: %s", clientIP)
+	return false
+}
+
+// getClientIP extracts the client IP from the request, handling proxies
+func getClientIP(r *http.Request) string {
+	// Check X-Forwarded-For header (for proxies)
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		// X-Forwarded-For can contain multiple IPs, take the first one
+		ips := strings.Split(xff, ",")
+		return strings.TrimSpace(ips[0])
+	}
+
+	// Check X-Real-IP header
+	if xri := r.Header.Get("X-Real-IP"); xri != "" {
+		return strings.TrimSpace(xri)
+	}
+
+	// Fall back to RemoteAddr
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return ip
+}
+
+// normalizePubkey converts npub to hex or returns hex unchanged
+func normalizePubkey(pubkey string) (string, error) {
+	// If it's already hex (64 characters)
+	if len(pubkey) == 64 {
+		if matched, _ := regexp.MatchString("^[0-9a-fA-F]{64}$", pubkey); matched {
+			return strings.ToLower(pubkey), nil
+		}
+	}
+
+	// If it's npub format, decode it
+	if strings.HasPrefix(pubkey, "npub") {
+		hexPubkey, err := utils.DecodeNpub(pubkey)
+		if err != nil {
+			return "", fmt.Errorf("failed to decode npub: %w", err)
+		}
+		return strings.ToLower(hexPubkey), nil
+	}
+
+	return "", fmt.Errorf("invalid pubkey format: must be npub or 64-char hex")
+}
+
+// isWhitelisted checks if a pubkey is in the whitelist
+func (auth *AuthHandler) isWhitelisted(pubkey string) bool {
+	// If no whitelist is configured, allow all
+	if len(auth.config.Server.Whitelist) == 0 {
+		return true
+	}
+
+	// Normalize the pubkey to check
+	normalizedPubkey, err := normalizePubkey(pubkey)
+	if err != nil {
+		log.Printf("⚠️ Failed to normalize pubkey for whitelist check: %v", err)
+		return false
+	}
+
+	// Check against each whitelisted key
+	for _, whitelistedKey := range auth.config.Server.Whitelist {
+		normalizedWhitelisted, err := normalizePubkey(whitelistedKey)
+		if err != nil {
+			log.Printf("⚠️ Invalid whitelist entry: %s - %v", whitelistedKey, err)
+			continue
+		}
+
+		if normalizedPubkey == normalizedWhitelisted {
+			return true
+		}
+	}
+
+	return false
+}
+
+// checkWhitelistAccess checks if a pubkey should be allowed based on whitelist rules
+func (auth *AuthHandler) checkWhitelistAccess(r *http.Request, pubkey string) error {
+	// Whitelist is only enforced when debug mode is enabled
+	if !auth.config.Server.DebugMode {
+		return nil
+	}
+
+	// Allow all connections from localhost or local network
+	if isLocalConnection(r) {
+		return nil
+	}
+
+	// Check whitelist for external connections
+	if !auth.isWhitelisted(pubkey) {
+		log.Printf("🚫 Access denied for non-whitelisted pubkey: %s...", pubkey[:16])
+		return fmt.Errorf("access denied: pubkey not whitelisted")
+	}
+
+	log.Printf("✅ Whitelisted pubkey allowed: %s...", pubkey[:16])
+	return nil
 }
 
 func (auth *AuthHandler) renderAmberSuccess(w http.ResponseWriter, publicKey string) {

@@ -9,10 +9,11 @@ import (
 
 // ServerConfig holds server-related configurations
 type ServerConfig struct {
-	Port      int    `yaml:"port"`
-	TLS       bool   `yaml:"tls"`
-	AppTitle  string `yaml:"app_title"`
-	DebugMode bool   `yaml:"debug_mode"`
+	Port      int      `yaml:"port"`
+	TLS       bool     `yaml:"tls"`
+	AppTitle  string   `yaml:"app_title"`
+	DebugMode bool     `yaml:"debug_mode"`
+	Whitelist []string `yaml:"whitelist"` // Pubkey whitelist (npub or hex format) - enforced when debug_mode is true
 }
 
 // Config holds the full application configuration

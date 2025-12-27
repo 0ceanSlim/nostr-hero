@@ -2,6 +2,10 @@ server:
   port: 8585
   tls: false # Set to true if using HTTPS
   debug_mode: true # Enable debug endpoints and features
+  whitelist: # Pubkey whitelist (enforced when debug_mode is true)
+    # - npub1example... # NPub format
+    # - 1234567890abcdef... # Hex format
+    # Connections from localhost/local network bypass whitelist
 
 pixellab:
   api_key: "your-pixellab-api-key-here"

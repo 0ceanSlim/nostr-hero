@@ -1260,10 +1260,15 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 	switch action {
 	case "register_storage":
 		cost, _ := choiceNode["cost"].(float64)
-		if state.Gold >= int(cost) {
-			state.Gold -= int(cost)
-			registerVault(state, state.Building)
-			actionResult, _ = choiceNode["success"].(string)
+		goldAmount := getGoldQuantity(state)
+		if goldAmount >= int(cost) {
+			if deductGold(state, int(cost)) {
+				registerVault(state, state.Building)
+				actionResult, _ = choiceNode["success"].(string)
+			} else {
+				log.Printf("⚠️ Failed to deduct gold even though we had enough")
+				actionResult, _ = choiceNode["failure"].(string)
+			}
 		} else {
 			actionResult, _ = choiceNode["failure"].(string)
 		}
@@ -1401,6 +1406,119 @@ func isNativeRaceForLocation(race, location string) bool {
 	return false
 }
 
+// Helper: Get total gold quantity from inventory
+func getGoldQuantity(state *SaveFile) int {
+	totalGold := 0
+
+	// Check general slots
+	if generalSlots, ok := state.Inventory["general_slots"].([]interface{}); ok {
+		for _, slotData := range generalSlots {
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
+					if qty, ok := slotMap["quantity"].(float64); ok {
+						totalGold += int(qty)
+					}
+				}
+			}
+		}
+	}
+
+	// Check backpack
+	if gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{}); ok {
+		if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+			if contents, ok := bag["contents"].([]interface{}); ok {
+				for _, slotData := range contents {
+					if slotMap, ok := slotData.(map[string]interface{}); ok {
+						if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
+							if qty, ok := slotMap["quantity"].(float64); ok {
+								totalGold += int(qty)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return totalGold
+}
+
+// Helper: Deduct gold from inventory (returns true if successful)
+func deductGold(state *SaveFile, amount int) bool {
+	if amount <= 0 {
+		return true
+	}
+
+	remaining := amount
+
+	// First, deduct from general slots
+	if generalSlots, ok := state.Inventory["general_slots"].([]interface{}); ok {
+		for _, slotData := range generalSlots {
+			if remaining <= 0 {
+				break
+			}
+			if slotMap, ok := slotData.(map[string]interface{}); ok {
+				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
+					if qty, ok := slotMap["quantity"].(float64); ok {
+						currentQty := int(qty)
+						if currentQty >= remaining {
+							// This slot has enough gold
+							slotMap["quantity"] = float64(currentQty - remaining)
+							if currentQty == remaining {
+								// Clear slot if depleted
+								slotMap["item"] = nil
+								slotMap["quantity"] = 0
+							}
+							remaining = 0
+						} else {
+							// Take all gold from this slot
+							remaining -= currentQty
+							slotMap["item"] = nil
+							slotMap["quantity"] = 0
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Then, deduct from backpack if needed
+	if remaining > 0 {
+		if gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{}); ok {
+			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				if contents, ok := bag["contents"].([]interface{}); ok {
+					for _, slotData := range contents {
+						if remaining <= 0 {
+							break
+						}
+						if slotMap, ok := slotData.(map[string]interface{}); ok {
+							if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
+								if qty, ok := slotMap["quantity"].(float64); ok {
+									currentQty := int(qty)
+									if currentQty >= remaining {
+										slotMap["quantity"] = float64(currentQty - remaining)
+										if currentQty == remaining {
+											slotMap["item"] = nil
+											slotMap["quantity"] = 0
+										}
+										remaining = 0
+									} else {
+										remaining -= currentQty
+										slotMap["item"] = nil
+										slotMap["quantity"] = 0
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return remaining == 0
+}
+
 // Helper: Check dialogue requirements
 func checkDialogueRequirements(state *SaveFile, requirements map[string]interface{}) bool {
 	if requirements == nil {
@@ -1426,7 +1544,7 @@ func checkDialogueRequirements(state *SaveFile, requirements map[string]interfac
 	}
 
 	if goldReq, ok := requirements["gold"].(float64); ok {
-		if state.Gold < int(goldReq) {
+		if getGoldQuantity(state) < int(goldReq) {
 			return false
 		}
 	}

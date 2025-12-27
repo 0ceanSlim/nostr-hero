@@ -28,7 +28,6 @@ type SaveFile struct {
 	FatigueCounter int `json:"fatigue_counter"` // Increments each time segment, +1 fatigue when reaches 2
 	Hunger         int `json:"hunger"`          // 0-3 scale: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
 	HungerCounter  int `json:"hunger_counter"`  // Increments each time segment, -1 hunger when reaches threshold (3 or 6)
-	Gold           int `json:"gold"`
 	Stats               map[string]interface{} `json:"stats"`
 	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
@@ -135,7 +134,6 @@ func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
 		saveMap["fatigue_counter"] = save.FatigueCounter
 		saveMap["hunger"] = save.Hunger
 		saveMap["hunger_counter"] = save.HungerCounter
-		saveMap["gold"] = save.Gold
 		saveMap["stats"] = save.Stats
 		saveMap["location"] = save.Location
 		saveMap["district"] = save.District

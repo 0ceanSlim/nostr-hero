@@ -19,10 +19,10 @@ import (
 
 // CreateCharacterRequest represents the frontend's simple equipment choices
 type CreateCharacterRequest struct {
-	Npub              string            `json:"npub"`
-	Name              string            `json:"name"`
-	EquipmentChoices  map[string]string `json:"equipment_choices"` // e.g., {"choice-0": "scimitar", "choice-1": "shield"}
-	PackChoice        string            `json:"pack_choice"`       // e.g., "druid-pack"
+	Npub             string            `json:"npub"`
+	Name             string            `json:"name"`
+	EquipmentChoices map[string]string `json:"equipment_choices"` // e.g., {"choice-0": "scimitar", "choice-1": "shield"}
+	PackChoice       string            `json:"pack_choice"`       // e.g., "druid-pack"
 }
 
 // CreateCharacterResponse returns the save ID and full character data
@@ -44,8 +44,8 @@ type EquipmentOption struct {
 	Type     string          `json:"type"` // "single", "bundle", "multi_slot"
 	Item     string          `json:"item,omitempty"`
 	Quantity int             `json:"quantity,omitempty"`
-	Items    []ItemWithQty   `json:"items,omitempty"`  // For bundles
-	Slots    []MultiSlotItem `json:"slots,omitempty"`  // For multi_slot
+	Items    []ItemWithQty   `json:"items,omitempty"` // For bundles
+	Slots    []MultiSlotItem `json:"slots,omitempty"` // For multi_slot
 }
 
 // ItemWithQty represents an item with quantity
@@ -210,14 +210,13 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		Mana:                mana,
 		MaxMana:             mana,
 		Fatigue:             0,
-		FatigueCounter:      0,  // ← ADDED
-		Hunger:              1,  // ← ADDED (1 = Hungry)
-		HungerCounter:       0,  // ← ADDED
-		Gold:                0,  // Gold is now in inventory as an item
+		FatigueCounter:      0, // ← ADDED
+		Hunger:              1, // ← ADDED (1 = Hungry)
+		HungerCounter:       0, // ← ADDED
 		Stats:               statsInterface,
-		Location:            locationID,    // Use ID, not display name
-		District:            districtKey,   // Use key, not display name
-		Building:            buildingID,    // Use ID, not display name
+		Location:            locationID,  // Use ID, not display name
+		District:            districtKey, // Use key, not display name
+		Building:            buildingID,  // Use ID, not display name
 		CurrentDay:          1,
 		TimeOfDay:           12, // Noon (12 PM)
 		Inventory:           inventory,
@@ -253,7 +252,6 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 			"max_hp":     saveFile.MaxHP,
 			"mana":       saveFile.Mana,
 			"max_mana":   saveFile.MaxMana,
-			"gold":       saveFile.Gold,
 			"stats":      saveFile.Stats,
 		},
 	})
