@@ -9,6 +9,7 @@
 import { logger } from '../lib/logger.js';
 import '../lib/session.js'; // Auto-initializes as window.sessionManager
 import '../lib/api.js'; // Auto-initializes as window.gameAPI
+import '../systems/auth.js'; // Auto-initializes authentication
 
 // State management
 import { getGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';

@@ -211,10 +211,13 @@ async function loginWithExtension() {
             body: JSON.stringify({ public_key: publicKey, signing_method: 'browser_extension', mode: 'write' })
         });
 
+        console.log('🔍 Login response status:', response.status);
         const result = await response.json().catch(() => null);
+        console.log('🔍 Login response data:', result);
 
         // Check for whitelist denial
         if (result?.whitelist_denial) {
+            console.log('🚫 Whitelist denial detected, showing popup');
             hideLoadingModal?.();
             showWhitelistDenialPopup(result.error, result.form_url);
             return;
