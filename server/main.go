@@ -22,22 +22,17 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Initialize grain client for authentication
-	if err := auth.InitializeGrainClient(&utils.AppConfig); err != nil {
-		log.Fatalf("Failed to initialize Grain client: %v", err)
-	}
-	defer auth.ShutdownGrainClient()
-
 	// Initialize database
 	if err := db.InitDatabase(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
 
-	// Run migration on startup (can be made conditional with a flag later)
-	if err := db.MigrateFromJSON(); err != nil {
-		log.Printf("Warning: Migration failed: %v", err)
+	// Initialize grain client for authentication
+	if err := auth.InitializeGrainClient(&utils.AppConfig); err != nil {
+		log.Fatalf("Failed to initialize Grain client: %v", err)
 	}
+	defer auth.ShutdownGrainClient()
 
 	// Initialize profile cache (24 hour TTL)
 	cache.InitProfileCache(24 * time.Hour)

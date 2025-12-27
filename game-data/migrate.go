@@ -1,18 +1,190 @@
-package db
+package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
-	"os"
+
+	"nostr-hero/utils"
+
+	_ "modernc.org/sqlite"
 )
 
-// MigrateFromJSON imports all JSON data into the database
-func MigrateFromJSON() error {
-	log.Println("Starting JSON to DuckDB migration...")
+var database *sql.DB
+
+func main() {
+	log.Println("🔄 Starting database migration...")
+
+	// Change to parent directory (project root) so paths work correctly
+	if err := os.Chdir(".."); err != nil {
+		log.Fatalf("Failed to change to project root: %v", err)
+	}
+
+	// Default config path (now in project root)
+	configPath := "config.yml"
+
+	// Load config
+	if err := utils.LoadConfig(configPath); err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	// Initialize database connection
+	if err := initDatabase(); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer database.Close()
+
+	// Create all tables first
+	if err := createTables(); err != nil {
+		log.Fatalf("❌ Failed to create tables: %v", err)
+	}
+
+	// Populate tables with data from JSON files
+	if err := migrateFromJSON(); err != nil {
+		log.Fatalf("❌ Migration failed: %v", err)
+	}
+
+	log.Println("✅ Database migration completed successfully!")
+}
+
+// initDatabase initializes the database connection for migration
+func initDatabase() error {
+	// Ensure www directory exists
+	dataDir := "./www"
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		return fmt.Errorf("failed to create www directory: %v", err)
+	}
+
+	dbPath := filepath.Join(dataDir, "game.db")
+
+	var err error
+	database, err = sql.Open("sqlite", dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %v", err)
+	}
+
+	// Test the connection
+	if err = database.Ping(); err != nil {
+		return fmt.Errorf("failed to ping database: %v", err)
+	}
+
+	log.Printf("✅ Connected to SQLite database at %s", dbPath)
+	return nil
+}
+
+// createTables creates all the necessary database tables
+func createTables() error {
+	log.Println("📋 Creating database tables...")
+
+	tables := []string{
+		// Items table for weapons, armor, consumables, etc.
+		`CREATE TABLE IF NOT EXISTS items (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			description TEXT,
+			item_type TEXT NOT NULL,
+			properties TEXT,
+			tags TEXT,
+			rarity TEXT DEFAULT 'common',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Spells table
+		`CREATE TABLE IF NOT EXISTS spells (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			description TEXT,
+			level INTEGER NOT NULL,
+			school TEXT NOT NULL,
+			damage TEXT,
+			mana_cost INTEGER,
+			classes TEXT,
+			properties TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Monsters table
+		`CREATE TABLE IF NOT EXISTS monsters (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			challenge_rating REAL,
+			stats TEXT,
+			actions TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Locations table
+		`CREATE TABLE IF NOT EXISTS locations (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			location_type TEXT,
+			description TEXT,
+			image TEXT,
+			music TEXT,
+			properties TEXT,
+			connections TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Character classes table for deterministic creation
+		`CREATE TABLE IF NOT EXISTS character_classes (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			hit_die INTEGER,
+			spell_progression TEXT,
+			starting_equipment TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Races table for character generation
+		`CREATE TABLE IF NOT EXISTS races (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			ability_modifiers TEXT,
+			traits TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// Equipment packs table
+		`CREATE TABLE IF NOT EXISTS equipment_packs (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			items TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+
+		// NPCs table
+		`CREATE TABLE IF NOT EXISTS npcs (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			title TEXT,
+			race TEXT,
+			location TEXT,
+			building TEXT,
+			description TEXT,
+			properties TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+	}
+
+	for _, table := range tables {
+		if _, err := database.Exec(table); err != nil {
+			return fmt.Errorf("failed to create table: %v", err)
+		}
+	}
+
+	log.Println("✅ Database tables created successfully")
+	return nil
+}
+
+// migrateFromJSON imports all JSON data into the database
+func migrateFromJSON() error {
+	log.Println("📦 Starting JSON to database migration...")
 
 	// Migrate character data
 	if err := migrateCharacterData(); err != nil {
@@ -34,7 +206,12 @@ func MigrateFromJSON() error {
 		return fmt.Errorf("failed to migrate content data: %v", err)
 	}
 
-	log.Println("Migration completed successfully!")
+	// Migrate system data (spell slots, music)
+	if err := migrateSystemData(); err != nil {
+		return fmt.Errorf("failed to migrate system data: %v", err)
+	}
+
+	log.Println("✅ Data migration completed successfully!")
 	return nil
 }
 
@@ -72,7 +249,7 @@ func migrateItems() error {
 	itemsPath := filepath.Join("game-data", "items")
 
 	// Clear existing items
-	if _, err := db.Exec("DELETE FROM items"); err != nil {
+	if _, err := database.Exec("DELETE FROM items"); err != nil {
 		return fmt.Errorf("failed to clear items table: %v", err)
 	}
 
@@ -128,7 +305,7 @@ func migrateItemFile(filePath string) error {
 	propertiesJSON, _ := json.Marshal(item)
 
 	stmt := `INSERT INTO items (id, name, description, item_type, properties, tags, rarity) VALUES (?, ?, ?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, description, itemType, string(propertiesJSON), string(tagsJSON), rarity)
+	_, err = database.Exec(stmt, id, name, description, itemType, string(propertiesJSON), string(tagsJSON), rarity)
 	return err
 }
 
@@ -139,7 +316,7 @@ func migrateSpells() error {
 	spellsPath := filepath.Join("game-data", "magic", "spells")
 
 	// Clear existing spells
-	if _, err := db.Exec("DELETE FROM spells"); err != nil {
+	if _, err := database.Exec("DELETE FROM spells"); err != nil {
 		return fmt.Errorf("failed to clear spells table: %v", err)
 	}
 
@@ -199,7 +376,7 @@ func migrateSpellFile(filePath string) error {
 
 	stmt := `INSERT INTO spells (id, name, description, level, school, damage, mana_cost, classes, properties)
 	         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, description, int(level), school, damage, manaCost, string(classesJSON), string(propertiesJSON))
+	_, err = database.Exec(stmt, id, name, description, int(level), school, damage, manaCost, string(classesJSON), string(propertiesJSON))
 	return err
 }
 
@@ -230,7 +407,7 @@ func migrateMonsters() error {
 	monstersPath := filepath.Join("game-data", "monsters")
 
 	// Clear existing monsters
-	if _, err := db.Exec("DELETE FROM monsters"); err != nil {
+	if _, err := database.Exec("DELETE FROM monsters"); err != nil {
 		return fmt.Errorf("failed to clear monsters table: %v", err)
 	}
 
@@ -282,7 +459,7 @@ func migrateMonsterFile(filePath string) error {
 	actionsJSON, _ := json.Marshal(map[string]interface{}{}) // Empty for now
 
 	stmt := `INSERT INTO monsters (id, name, challenge_rating, stats, actions) VALUES (?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, challengeRating, string(statsJSON), string(actionsJSON))
+	_, err = database.Exec(stmt, id, name, challengeRating, string(statsJSON), string(actionsJSON))
 	return err
 }
 
@@ -291,7 +468,7 @@ func migrateLocations() error {
 	locationsPath := filepath.Join("game-data", "locations")
 
 	// Clear existing locations
-	if _, err := db.Exec("DELETE FROM locations"); err != nil {
+	if _, err := database.Exec("DELETE FROM locations"); err != nil {
 		return fmt.Errorf("failed to clear locations table: %v", err)
 	}
 
@@ -352,7 +529,7 @@ func migrateLocationFile(filePath, locationType string) error {
 
 	stmt := `INSERT INTO locations (id, name, location_type, description, image, music, properties, connections)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, locationType, description, image, music, string(propertiesJSON), string(connectionsJSON))
+	_, err = database.Exec(stmt, id, name, locationType, description, image, music, string(propertiesJSON), string(connectionsJSON))
 	return err
 }
 
@@ -361,7 +538,7 @@ func migrateNPCs() error {
 	npcsPath := filepath.Join("game-data", "npcs")
 
 	// Clear existing NPCs
-	if _, err := db.Exec("DELETE FROM npcs"); err != nil {
+	if _, err := database.Exec("DELETE FROM npcs"); err != nil {
 		return fmt.Errorf("failed to clear npcs table: %v", err)
 	}
 
@@ -419,7 +596,7 @@ func migrateNPCFile(filePath string) error {
 
 	stmt := `INSERT INTO npcs (id, name, title, race, location, building, description, properties)
 	         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	_, err = db.Exec(stmt, id, name, title, race, location, building, description, string(propertiesJSON))
+	_, err = database.Exec(stmt, id, name, title, race, location, building, description, string(propertiesJSON))
 	return err
 }
 
@@ -437,22 +614,43 @@ func migrateGenericJSON(filePath, tableName string) error {
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	)`, tableName)
 
-	if _, err := db.Exec(createSQL); err != nil {
+	if _, err := database.Exec(createSQL); err != nil {
 		return fmt.Errorf("failed to create table %s: %v", tableName, err)
 	}
 
 	// Clear existing data
-	if _, err := db.Exec(fmt.Sprintf("DELETE FROM %s", tableName)); err != nil {
+	if _, err := database.Exec(fmt.Sprintf("DELETE FROM %s", tableName)); err != nil {
 		return fmt.Errorf("failed to clear table %s: %v", tableName, err)
 	}
 
 	// Insert data
 	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
 	stmt := fmt.Sprintf(`INSERT INTO %s (id, data) VALUES (?, ?)`, tableName)
-	_, err = db.Exec(stmt, id, string(data))
+	_, err = database.Exec(stmt, id, string(data))
 
 	if err != nil {
 		return fmt.Errorf("failed to insert into %s: %v", tableName, err)
+	}
+
+	return nil
+}
+
+// migrateSystemData migrates system configuration files
+func migrateSystemData() error {
+	log.Println("Migrating system data...")
+
+	systemDataPath := filepath.Join("game-data", "systems")
+
+	// Migrate music.json
+	musicPath := filepath.Join(systemDataPath, "music.json")
+	if err := migrateGenericJSON(musicPath, "music_tracks"); err != nil {
+		log.Printf("Warning: failed to migrate music.json: %v", err)
+	}
+
+	// Migrate spell-slots.json
+	spellSlotsPath := filepath.Join("game-data", "magic", "spell-slots.json")
+	if err := migrateGenericJSON(spellSlotsPath, "spell_slots_progression"); err != nil {
+		log.Printf("Warning: failed to migrate spell-slots.json: %v", err)
 	}
 
 	return nil

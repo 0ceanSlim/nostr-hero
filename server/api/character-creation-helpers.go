@@ -14,15 +14,16 @@ import (
 // STARTING GEAR LOADING
 // ============================================================================
 
-func loadStartingGearForClass(class string) (*StartingGearData, error) {
-	data, err := os.ReadFile("game-data/systems/new-character/starting-gear.json")
+func loadStartingGearForClass(database *sql.DB, class string) (*StartingGearData, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM starting_gear WHERE id = 'starting-gear'").Scan(&dataJSON)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read starting-gear.json: %v", err)
+		return nil, fmt.Errorf("failed to query starting gear from database: %v", err)
 	}
 
 	var allGear []StartingGearData
-	if err := json.Unmarshal(data, &allGear); err != nil {
-		return nil, fmt.Errorf("failed to parse starting-gear.json: %v", err)
+	if err := json.Unmarshal([]byte(dataJSON), &allGear); err != nil {
+		return nil, fmt.Errorf("failed to parse starting gear data: %v", err)
 	}
 
 	for _, gear := range allGear {
@@ -510,15 +511,16 @@ func getKeys(m map[string]string) []string {
 // SPELL SLOTS AND KNOWN SPELLS
 // ============================================================================
 
-func generateSpellSlots(class string) (map[string]interface{}, error) {
-	data, err := os.ReadFile("game-data/magic/spell-slots.json")
+func generateSpellSlots(database *sql.DB, class string) (map[string]interface{}, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM spell_slots_progression WHERE id = 'spell-slots'").Scan(&dataJSON)
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse as generic map first to skip the "description" field
 	var rawData map[string]interface{}
-	if err := json.Unmarshal(data, &rawData); err != nil {
+	if err := json.Unmarshal([]byte(dataJSON), &rawData); err != nil {
 		return nil, err
 	}
 
@@ -565,14 +567,15 @@ func generateSpellSlots(class string) (map[string]interface{}, error) {
 	return spellSlots, nil
 }
 
-func loadKnownSpells(class string) ([]string, error) {
-	data, err := os.ReadFile("game-data/systems/new-character/starting-spells.json")
+func loadKnownSpells(database *sql.DB, class string) ([]string, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM starting_spells WHERE id = 'starting-spells'").Scan(&dataJSON)
 	if err != nil {
 		return nil, err
 	}
 
 	var allSpells map[string]map[string][]string
-	if err := json.Unmarshal(data, &allSpells); err != nil {
+	if err := json.Unmarshal([]byte(dataJSON), &allSpells); err != nil {
 		return nil, err
 	}
 
@@ -599,8 +602,9 @@ func loadKnownSpells(class string) ([]string, error) {
 // LOCATION HELPERS
 // ============================================================================
 
-func getStartingCityForRace(race string) (string, error) {
-	data, err := os.ReadFile("game-data/systems/new-character/starting-locations.json")
+func getStartingCityForRace(database *sql.DB, race string) (string, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM starting_locations WHERE id = 'starting-locations'").Scan(&dataJSON)
 	if err != nil {
 		return "millhaven", err
 	}
@@ -609,7 +613,7 @@ func getStartingCityForRace(race string) (string, error) {
 		RacialStartingCities map[string]string `json:"racial_starting_cities"`
 	}
 
-	if err := json.Unmarshal(data, &racialCities); err != nil {
+	if err := json.Unmarshal([]byte(dataJSON), &racialCities); err != nil {
 		return "millhaven", err
 	}
 
@@ -664,10 +668,11 @@ func getDisplayNamesForSave(database *sql.DB, locationID, districtKey, buildingI
 	return locationName, districtName, buildingName
 }
 
-func getMusicTrackForLocation(locationID string) string {
-	data, err := os.ReadFile("game-data/systems/music.json")
+func getMusicTrackForLocation(database *sql.DB, locationID string) string {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM music_tracks WHERE id = 'music'").Scan(&dataJSON)
 	if err != nil {
-		log.Printf("⚠️  Failed to read music.json: %v", err)
+		log.Printf("⚠️  Failed to query music tracks from database: %v", err)
 		return ""
 	}
 
@@ -680,8 +685,8 @@ func getMusicTrackForLocation(locationID string) string {
 		} `json:"tracks"`
 	}
 
-	if err := json.Unmarshal(data, &musicData); err != nil {
-		log.Printf("⚠️  Failed to parse music.json: %v", err)
+	if err := json.Unmarshal([]byte(dataJSON), &musicData); err != nil {
+		log.Printf("⚠️  Failed to parse music data: %v", err)
 		return ""
 	}
 
@@ -695,10 +700,11 @@ func getMusicTrackForLocation(locationID string) string {
 	return ""
 }
 
-func getAutoUnlockMusicTracks() []string {
-	data, err := os.ReadFile("game-data/systems/music.json")
+func getAutoUnlockMusicTracks(database *sql.DB) []string {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM music_tracks WHERE id = 'music'").Scan(&dataJSON)
 	if err != nil {
-		log.Printf("⚠️  Failed to read music.json: %v", err)
+		log.Printf("⚠️  Failed to query music tracks from database: %v", err)
 		return []string{}
 	}
 
@@ -711,8 +717,8 @@ func getAutoUnlockMusicTracks() []string {
 		} `json:"tracks"`
 	}
 
-	if err := json.Unmarshal(data, &musicData); err != nil {
-		log.Printf("⚠️  Failed to parse music.json: %v", err)
+	if err := json.Unmarshal([]byte(dataJSON), &musicData); err != nil {
+		log.Printf("⚠️  Failed to parse music data: %v", err)
 		return []string{}
 	}
 
@@ -750,14 +756,58 @@ func generateStartingVault(locationID string) map[string]interface{} {
 // STARTING GOLD
 // ============================================================================
 
-func getStartingGold(background string) (int, error) {
-	data, err := os.ReadFile("game-data/systems/new-character/starting-gold.json")
+func addGoldToInventory(inventory map[string]interface{}, goldAmount int) error {
+	generalSlots, ok := inventory["general_slots"].([]map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid general_slots format")
+	}
+
+	// Try to add gold to first empty general slot
+	for i, slot := range generalSlots {
+		if slot["item"] == nil || slot["item"] == "" {
+			generalSlots[i] = map[string]interface{}{
+				"slot":     i,
+				"item":     "gold-piece",
+				"quantity": goldAmount,
+			}
+			return nil
+		}
+	}
+
+	// If general slots are full, try to add to backpack
+	gearSlots, ok := inventory["gear_slots"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid gear_slots format")
+	}
+
+	bag, ok := gearSlots["bag"].(map[string]interface{})
+	if ok && bag["item"] != nil {
+		if contents, ok := bag["contents"].([]map[string]interface{}); ok {
+			for i, slot := range contents {
+				if slot["item"] == nil || slot["item"] == "" {
+					contents[i] = map[string]interface{}{
+						"slot":     slot["slot"],
+						"item":     "gold-piece",
+						"quantity": goldAmount,
+					}
+					return nil
+				}
+			}
+		}
+	}
+
+	return fmt.Errorf("no empty slots available for gold")
+}
+
+func getStartingGold(database *sql.DB, background string) (int, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM starting_gold WHERE id = 'starting-gold'").Scan(&dataJSON)
 	if err != nil {
 		return 1000, err
 	}
 
 	var goldData map[string][][]interface{}
-	if err := json.Unmarshal(data, &goldData); err != nil {
+	if err := json.Unmarshal([]byte(dataJSON), &goldData); err != nil {
 		return 1000, err
 	}
 

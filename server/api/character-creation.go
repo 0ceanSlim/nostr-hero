@@ -114,82 +114,89 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 
 	character := functions.GenerateCharacter(pubKey, &weightDataStruct)
 
-	// 2. Load starting gear data
-	startingGear, err := loadStartingGearForClass(character.Class)
-	if err != nil {
-		respondWithError(w, "Failed to load starting gear: "+err.Error())
-		return
-	}
-
-	// 3. Build inventory from equipment choices
+	// 2. Get database connection
 	database := db.GetDB()
 	if database == nil {
 		respondWithError(w, "Database not available")
 		return
 	}
 
+	// 3. Load starting gear data
+	startingGear, err := loadStartingGearForClass(database, character.Class)
+	if err != nil {
+		respondWithError(w, "Failed to load starting gear: "+err.Error())
+		return
+	}
+
+	// 4. Get starting gold
+	startingGold, err := getStartingGold(database, character.Background)
+	if err != nil {
+		log.Printf("⚠️  Failed to get starting gold: %v", err)
+		startingGold = 1000 // Default
+	}
+
+	// 5. Build inventory from equipment choices
 	inventory, err := buildInventoryFromChoices(database, startingGear, req.EquipmentChoices, req.PackChoice)
 	if err != nil {
 		respondWithError(w, "Failed to build inventory: "+err.Error())
 		return
 	}
 
-	// 4. Generate spell slots
-	spellSlots, err := generateSpellSlots(character.Class)
+	// 6. Add gold to inventory as an item
+	err = addGoldToInventory(inventory, startingGold)
+	if err != nil {
+		log.Printf("⚠️  Failed to add gold to inventory: %v", err)
+	}
+
+	// 7. Generate spell slots
+	spellSlots, err := generateSpellSlots(database, character.Class)
 	if err != nil {
 		log.Printf("⚠️  Failed to generate spell slots: %v", err)
 		spellSlots = make(map[string]interface{})
 	}
 
-	// 5. Load known spells
-	knownSpells, err := loadKnownSpells(character.Class)
+	// 8. Load known spells
+	knownSpells, err := loadKnownSpells(database, character.Class)
 	if err != nil {
 		log.Printf("⚠️  Failed to load known spells: %v", err)
 		knownSpells = []string{}
 	}
 
-	// 6. Determine starting location based on race
-	startingCity, err := getStartingCityForRace(character.Race)
+	// 9. Determine starting location based on race
+	startingCity, err := getStartingCityForRace(database, character.Race)
 	if err != nil {
 		log.Printf("⚠️  Failed to get starting city: %v", err)
 		startingCity = "millhaven"
 	}
 
-	// 7. Generate starting vault
+	// 10. Generate starting vault
 	startingVault := generateStartingVault(startingCity)
 	vaults := []map[string]interface{}{startingVault}
 
-	// 8. Calculate HP and Mana
+	// 11. Calculate HP and Mana
 	hp := calculateHP(character.Stats["Constitution"], character.Class)
 	mana := calculateMana(character.Stats, character.Class)
 
-	// 9. Get starting gold
-	gold, err := getStartingGold(character.Background)
-	if err != nil {
-		log.Printf("⚠️  Failed to get starting gold: %v", err)
-		gold = 1000 // Default
-	}
-
-	// 10. Use location IDs directly (not display names)
+	// 12. Use location IDs directly (not display names)
 	// startingCity is already an ID like "millhaven", "verdant", etc.
 	locationID := startingCity
 	districtKey := "center" // All characters start in the center district
 	buildingID := ""        // Start outdoors
 
-	// 11. Get music tracks (auto-unlock + location track)
-	musicTracks := getAutoUnlockMusicTracks()
-	locationMusic := getMusicTrackForLocation(startingCity)
+	// 13. Get music tracks (auto-unlock + location track)
+	musicTracks := getAutoUnlockMusicTracks(database)
+	locationMusic := getMusicTrackForLocation(database, startingCity)
 	if locationMusic != "" {
 		musicTracks = append(musicTracks, locationMusic)
 	}
 
-	// 12. Convert stats to interface{} map
+	// 14. Convert stats to interface{} map
 	statsInterface := make(map[string]interface{})
 	for k, v := range character.Stats {
 		statsInterface[k] = v
 	}
 
-	// 13. Create save file
+	// 15. Create save file
 	saveFile := SaveFile{
 		D:                   req.Name,
 		CreatedAt:           time.Now().UTC().Format(time.RFC3339),
@@ -206,7 +213,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		FatigueCounter:      0,  // ← ADDED
 		Hunger:              1,  // ← ADDED (1 = Hungry)
 		HungerCounter:       0,  // ← ADDED
-		Gold:                gold,
+		Gold:                0,  // Gold is now in inventory as an item
 		Stats:               statsInterface,
 		Location:            locationID,    // Use ID, not display name
 		District:            districtKey,   // Use key, not display name
@@ -223,7 +230,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		InternalID:          fmt.Sprintf("save_%d", time.Now().Unix()),
 	}
 
-	// 12. Save to disk
+	// 16. Save to disk
 	if err := saveToDisk(req.Npub, &saveFile); err != nil {
 		respondWithError(w, "Failed to save character: "+err.Error())
 		return

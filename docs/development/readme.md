@@ -258,7 +258,42 @@ GOOS=linux GOARCH=amd64 go build -o nostr-hero
 
 ### Database Migration
 
-The game automatically migrates all game data from the JSON files in `docs/data/` into a single SQLite database (`www/game.db`) on every startup. The JSON files are the source of truth; the database is just a performant runtime cache.
+The game uses a SQLite database (`www/game.db`) as a performant runtime cache for all game data. The JSON files in `game-data/` are the source of truth.
+
+**Important:** The server DOES NOT create or migrate the database. It only connects and validates. You must run the migration tool first.
+
+**To create and populate the database:**
+
+```bash
+# Run the migration tool from project root
+cd game-data
+go run migrate.go
+
+# Or build and run it
+cd game-data
+go build -o migrate migrate.go
+./migrate
+```
+
+The migration process:
+1. Creates all database tables (items, spells, monsters, locations, npcs, etc.)
+2. Reads all JSON files from `game-data/`
+3. Inserts fresh data into the SQLite database
+4. Exits when complete
+
+**When to run migration:**
+- **Before first server start** - The database must exist before running the server
+- After modifying any JSON files in `game-data/` (items, spells, monsters, etc.)
+- After pulling changes that include game data updates
+- If the database becomes corrupted (delete `www/game.db` and run migration again)
+
+**What the server does:**
+- Checks that `www/game.db` exists (fails if not found)
+- Connects to the database
+- Validates that all required tables exist
+- Provides helpful error messages pointing to the migration tool if validation fails
+
+**Note:** Migration is completely separate from the server. The server will refuse to start if the database doesn't exist or is invalid.
 
 ### Deployment Strategy
 

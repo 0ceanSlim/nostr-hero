@@ -20,9 +20,9 @@ type GameAction struct {
 type GameActionResponse struct {
 	Success bool                   `json:"success"`
 	Message string                 `json:"message"`
-	Color   string                 `json:"color,omitempty"`   // Message color (red, green, yellow, white, purple, blue)
-	State   *SaveFile              `json:"state,omitempty"`   // Updated game state
-	Delta   map[string]interface{} `json:"delta,omitempty"`   // Only changed fields (for optimization)
+	Color   string                 `json:"color,omitempty"` // Message color (red, green, yellow, white, purple, blue)
+	State   *SaveFile              `json:"state,omitempty"` // Updated game state
+	Delta   map[string]interface{} `json:"delta,omitempty"` // Only changed fields (for optimization)
 	Error   string                 `json:"error,omitempty"`
 }
 
@@ -1565,7 +1565,7 @@ func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) 
 		}, nil
 	}
 
-	return nil, fmt.Errorf(response.Error)
+	return nil, fmt.Errorf("%s", response.Error)
 }
 
 // handleRemoveFromContainerAction removes an item from a container
@@ -1583,11 +1583,11 @@ func handleRemoveFromContainerAction(state *SaveFile, params map[string]interfac
 	containerSlotType, _ := params["container_slot_type"].(string)
 
 	req := &types.ItemActionRequest{
-		ItemID:         itemID,
-		Action:         "remove_from_container",
-		ContainerSlot:  containerSlot,
-		FromSlot:       fromContainerSlot, // Use FromSlot for the container slot index
-		FromSlotType:   containerSlotType, // Pass the container location type
+		ItemID:        itemID,
+		Action:        "remove_from_container",
+		ContainerSlot: containerSlot,
+		FromSlot:      fromContainerSlot, // Use FromSlot for the container slot index
+		FromSlotType:  containerSlotType, // Pass the container location type
 	}
 
 	// Call the inventory handler
@@ -1603,5 +1603,5 @@ func handleRemoveFromContainerAction(state *SaveFile, params map[string]interfac
 		}, nil
 	}
 
-	return nil, fmt.Errorf(response.Error)
+	return nil, fmt.Errorf("%s", response.Error)
 }
