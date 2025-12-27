@@ -155,7 +155,12 @@ func (auth *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Check whitelist access before creating session
 	if err := auth.checkWhitelistAccess(r, sessionReq.PublicKey); err != nil {
-		auth.sendErrorResponse(w, err.Error(), http.StatusForbidden)
+		if whitelistErr, ok := err.(*WhitelistError); ok {
+			// Send whitelist-specific error with form URL
+			auth.sendWhitelistErrorResponse(w, whitelistErr)
+		} else {
+			auth.sendErrorResponse(w, err.Error(), http.StatusForbidden)
+		}
 		return
 	}
 
@@ -303,7 +308,11 @@ func (auth *AuthHandler) HandleAmberCallback(w http.ResponseWriter, r *http.Requ
 	// Check whitelist access before creating session
 	if err := auth.checkWhitelistAccess(r, publicKey); err != nil {
 		log.Printf("❌ Whitelist check failed for Amber login: %v", err)
-		auth.renderAmberError(w, "Access denied: "+err.Error())
+		if whitelistErr, ok := err.(*WhitelistError); ok {
+			auth.renderAmberWhitelistError(w, whitelistErr)
+		} else {
+			auth.renderAmberError(w, "Access denied: "+err.Error())
+		}
 		return
 	}
 
@@ -491,6 +500,16 @@ func (auth *AuthHandler) isWhitelisted(pubkey string) bool {
 	return false
 }
 
+// WhitelistError represents a whitelist access denial with form URL
+type WhitelistError struct {
+	Message string
+	FormURL string
+}
+
+func (e *WhitelistError) Error() string {
+	return e.Message
+}
+
 // checkWhitelistAccess checks if a pubkey should be allowed based on whitelist rules
 func (auth *AuthHandler) checkWhitelistAccess(r *http.Request, pubkey string) error {
 	// Whitelist is only enforced when debug mode is enabled
@@ -506,7 +525,10 @@ func (auth *AuthHandler) checkWhitelistAccess(r *http.Request, pubkey string) er
 	// Check whitelist for external connections
 	if !auth.isWhitelisted(pubkey) {
 		log.Printf("🚫 Access denied for non-whitelisted pubkey: %s...", pubkey[:16])
-		return fmt.Errorf("access denied: pubkey not whitelisted")
+		return &WhitelistError{
+			Message: "Access denied: Your public key is not whitelisted for this test server",
+			FormURL: auth.config.Server.WhitelistFormURL,
+		}
 	}
 
 	log.Printf("✅ Whitelisted pubkey allowed: %s...", pubkey[:16])
@@ -638,6 +660,102 @@ func (auth *AuthHandler) renderAmberError(w http.ResponseWriter, errorMsg string
 	w.Write([]byte(html))
 }
 
+func (auth *AuthHandler) renderAmberWhitelistError(w http.ResponseWriter, whitelistErr *WhitelistError) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusForbidden)
+
+	formLinkHTML := ""
+	if whitelistErr.FormURL != "" {
+		formLinkHTML = `<div class="form-link">
+            <a href="` + whitelistErr.FormURL + `" target="_blank">Request Access →</a>
+        </div>`
+	}
+
+	html := `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied - Nostr Hero</title>
+    <style>
+        body {
+            font-family: 'Pixelify Sans', monospace;
+            margin: 0;
+            padding: 20px;
+            background: #001100;
+            color: #ff4444;
+            text-align: center;
+        }
+        .error { color: #ff4444; margin: 20px 0; }
+        .form-link { margin: 20px 0; }
+        .form-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #00ff41;
+            color: #001100;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .retry { margin-top: 20px; }
+        .retry a { color: #888; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="error">
+        <h2>🚫 Access Denied</h2>
+        <p>` + whitelistErr.Message + `</p>
+    </div>
+    ` + formLinkHTML + `
+    <div class="retry">
+        <a href="/game">← Return to game</a>
+    </div>
+
+    <script>
+        const whitelistDenialData = {
+            type: 'whitelist_denial',
+            error: '` + whitelistErr.Message + `',
+            formUrl: '` + whitelistErr.FormURL + `'
+        };
+
+        // Store in localStorage as fallback
+        try {
+            localStorage.setItem('amber_callback_result', JSON.stringify(whitelistDenialData));
+            console.log('Stored whitelist denial in localStorage');
+        } catch (error) {
+            console.error('Failed to store whitelist denial:', error);
+        }
+
+        // Send via postMessage
+        if (window.opener && !window.opener.closed) {
+            try {
+                window.opener.postMessage(whitelistDenialData, window.location.origin);
+                console.log('Sent whitelist denial via postMessage');
+            } catch (error) {
+                console.error('Failed to send postMessage:', error);
+            }
+        }
+
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.close();
+                } else {
+                    window.location.href = '/game';
+                }
+            } catch (error) {
+                console.error('Failed to close window:', error);
+                window.location.href = '/game';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>`
+
+	w.Write([]byte(html))
+}
+
 func (auth *AuthHandler) sendJSONResponse(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
@@ -650,4 +768,14 @@ func (auth *AuthHandler) sendErrorResponse(w http.ResponseWriter, message string
 		"error":   message,
 	}
 	auth.sendJSONResponse(w, response, statusCode)
+}
+
+func (auth *AuthHandler) sendWhitelistErrorResponse(w http.ResponseWriter, whitelistErr *WhitelistError) {
+	response := map[string]interface{}{
+		"success":          false,
+		"error":            whitelistErr.Message,
+		"whitelist_denial": true,
+		"form_url":         whitelistErr.FormURL,
+	}
+	auth.sendJSONResponse(w, response, http.StatusForbidden)
 }

@@ -211,12 +211,19 @@ async function loginWithExtension() {
             body: JSON.stringify({ public_key: publicKey, signing_method: 'browser_extension', mode: 'write' })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.message || `HTTP ${response.status}`);
+        const result = await response.json().catch(() => null);
+
+        // Check for whitelist denial
+        if (result?.whitelist_denial) {
+            hideLoadingModal?.();
+            showWhitelistDenialPopup(result.error, result.form_url);
+            return;
         }
 
-        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result?.error || result?.message || `HTTP ${response.status}`);
+        }
+
         if (!result.success) {
             throw new Error(result.message || 'Login failed');
         }
@@ -287,13 +294,32 @@ function setupAmberCallbackListener() {
         if (!amberCallbackReceived) setTimeout(checkForAmberCallback, 500);
     };
 
+    // Listen for postMessage from Amber callback page
+    const handleMessage = (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'whitelist_denial') {
+            amberCallbackReceived = true;
+            hideLoadingModal?.();
+            showWhitelistDenialPopup(event.data.error, event.data.formUrl);
+        } else if (event.data?.type === 'amber_success') {
+            amberCallbackReceived = true;
+            handleAmberCallbackData({ success: true });
+        } else if (event.data?.type === 'amber_error') {
+            amberCallbackReceived = true;
+            hideLoadingModal?.();
+            showAuthResult?.('error', `Amber login failed: ${event.data.error}`);
+        }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('message', handleMessage);
     setTimeout(checkForAmberCallback, 1000); // Also check immediately
 
     setTimeout(() => { // Cleanup
         document.removeEventListener('visibilitychange', handleVisibilityChange);
         window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('message', handleMessage);
     }, 65000);
 }
 
@@ -307,6 +333,14 @@ function checkForAmberCallback() {
         try {
             const data = JSON.parse(amberResult);
             amberCallbackReceived = true;
+
+            // Check if it's a whitelist denial stored in localStorage
+            if (data.type === 'whitelist_denial' || data.formUrl) {
+                hideLoadingModal?.();
+                showWhitelistDenialPopup(data.error, data.formUrl);
+                return;
+            }
+
             handleAmberCallbackData(data);
         } catch (error) {
             logger.error('Failed to parse stored Amber result:', error);
@@ -319,7 +353,15 @@ function checkForAmberCallback() {
  */
 function handleAmberCallbackData(data) {
     try {
-        if (data.error) throw new Error(data.error);
+        if (data.error) {
+            // Check if this is a whitelist denial (from postMessage in Amber callback page)
+            if (data.type === 'whitelist_denial' || data.formUrl) {
+                hideLoadingModal?.();
+                showWhitelistDenialPopup(data.error, data.formUrl);
+                return;
+            }
+            throw new Error(data.error);
+        }
 
         hideLoadingModal?.();
         showAuthResult?.('success', 'Connected via Amber!');
@@ -436,6 +478,54 @@ async function logout() {
     }
 }
 
+/**
+ * Shows a popup modal for whitelist denial with request access button.
+ * @param {string} errorMessage - The error message to display
+ * @param {string} formUrl - URL to the access request form
+ */
+function showWhitelistDenialPopup(errorMessage, formUrl) {
+    // Remove existing popup if any
+    const existingPopup = document.getElementById('whitelist-denial-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    // Create popup element
+    const popup = document.createElement('div');
+    popup.id = 'whitelist-denial-popup';
+    popup.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    popup.innerHTML = `
+        <div class="bg-gray-900 border-4 border-red-600 rounded-lg p-8 max-w-md mx-4 text-center">
+            <div class="text-6xl mb-4">🚫</div>
+            <h2 class="text-2xl font-bold text-red-500 mb-4">Access Denied</h2>
+            <p class="text-gray-300 mb-6">${errorMessage || 'Your public key is not whitelisted for this test server.'}</p>
+            ${formUrl ? `
+                <a href="${formUrl}" target="_blank"
+                   class="block w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors mb-3">
+                    📝 Request Access
+                </a>
+            ` : ''}
+            <button onclick="closeWhitelistDenialPopup()"
+                    class="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                Close
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+    logger.info('Whitelist denial popup shown');
+}
+
+/**
+ * Closes the whitelist denial popup.
+ */
+function closeWhitelistDenialPopup() {
+    const popup = document.getElementById('whitelist-denial-popup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
 
 // For compatibility with old HTML that uses onclick, attach functions to window
 if (typeof window !== 'undefined') {
@@ -449,6 +539,8 @@ if (typeof window !== 'undefined') {
     window.generateNewKeys = generateNewKeys;
     window.useGeneratedKeys = useGeneratedKeys;
     window.logout = logout;
+    window.showWhitelistDenialPopup = showWhitelistDenialPopup;
+    window.closeWhitelistDenialPopup = closeWhitelistDenialPopup;
 }
 
 logger.debug('🔐 Authentication system module loaded.');

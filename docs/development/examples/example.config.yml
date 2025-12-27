@@ -6,6 +6,7 @@ server:
     # - npub1example... # NPub format
     # - 1234567890abcdef... # Hex format
     # Connections from localhost/local network bypass whitelist
+  whitelist_form_url: "https://forms.example.com/request-access" # URL for users to request access
 
 pixellab:
   api_key: "your-pixellab-api-key-here"
