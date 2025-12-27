@@ -54,12 +54,24 @@ export function initializeAuthentication() {
         const isNewAccount = typeof data === 'object' ? data.isNewAccount : false;
         logger.info(`✅ Authentication successful via ${method}${isNewAccount ? ' (new account)' : ''}`);
         showLoadingModal?.('Redirecting to saves...');
+
+        // Hide any login interface or modals
+        hideKeyLogin?.();
+        hideGeneratedKeys?.();
+
         setTimeout(() => {
             const allowedPaths = ['/saves', '/game', '/new-game', '/settings', '/discover'];
             if (!allowedPaths.includes(window.location.pathname)) {
+                logger.info(`Redirecting from ${window.location.pathname} to /saves`);
                 window.location.href = '/saves';
             } else {
+                logger.info(`Already on allowed path: ${window.location.pathname}`);
                 hideLoadingModal?.();
+                // If we're on a page that needs the user to be logged in, reload to show content
+                if (window.location.pathname === '/game' || window.location.pathname === '/new-game') {
+                    logger.info('Reloading page to load authenticated content');
+                    window.location.reload();
+                }
             }
         }, 1000);
     });
@@ -401,7 +413,10 @@ async function loginWithPrivateKey() {
         // Success is handled by event listeners
     } catch (error) {
         logger.error('Private key login error:', error);
-        showMessage('❌ Private key login failed: ' + error.message, 'error');
+        // Don't show error message if it's a whitelist denial (popup already shown)
+        if (!error.whitelistDenial) {
+            showMessage('❌ Private key login failed: ' + error.message, 'error');
+        }
     }
 }
 

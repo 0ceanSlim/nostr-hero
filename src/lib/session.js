@@ -439,11 +439,25 @@ class SessionManager {
             body: JSON.stringify(loginRequest)
         });
 
-        if (!response.ok) {
-            throw new Error(`Login failed: ${response.status}`);
+        const result = await response.json().catch(() => null);
+
+        // Check for whitelist denial before checking response.ok
+        if (result?.whitelist_denial) {
+            logger.warn('Whitelist denial during session manager login');
+            // Show the whitelist popup if the function exists
+            if (window.showWhitelistDenialPopup) {
+                window.showWhitelistDenialPopup(result.error, result.form_url);
+            }
+            // Throw error with special marker so auth.js can handle it
+            const error = new Error(result.error || 'Access denied');
+            error.whitelistDenial = true;
+            error.formUrl = result.form_url;
+            throw error;
         }
 
-        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result?.error || `Login failed: ${response.status}`);
+        }
 
         if (!result.success) {
             throw new Error(result.error || result.message || 'Login failed');
