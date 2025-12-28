@@ -3,14 +3,18 @@
   "name": "Sack",
   "description": "",
   "ai_description": "rough burlap sack with drawstring closure, simple cloth bag for carrying grain or loose items",
-  "price": 1,
+  "price": 50,
   "type": "Adventuring Gear",
   "weight": 0.5,
   "stack": 1,
   "rarity": "common",
   "tags": ["container"],
-  "notes": ["adds 8 inventory slots"],
+  "notes": [
+    "adds 4 inventory slots, change to contain anything that weighs less than a certain weight to limit item size"
+  ],
   "img": "equipment/adventuring-gear.jpg",
   "ammunition": "",
-  "image": "/res/img/items/sack.png"
+  "image": "/res/img/items/sack.png",
+  "container_slots": 4,
+  "allowed_types": "any"
 }

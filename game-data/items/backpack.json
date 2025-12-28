@@ -9,11 +9,8 @@
   "weight_increase": 35,
   "stack": 1,
   "gear_slot": "bag",
-  "rarity": "common",
-  "tags": [
-    "container",
-    "equipment"
-  ],
+  "rarity": "uncommon",
+  "tags": ["container", "equipment"],
   "container_slots": 20,
   "allowed_types": "any",
   "img": "equipment/adventuring-gear.jpg",
