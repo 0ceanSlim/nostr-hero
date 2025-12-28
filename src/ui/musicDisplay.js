@@ -169,6 +169,15 @@ function updateTrackList(tracks, currentTrack) {
 export function initMusicDisplay() {
     logger.debug('Initializing music display');
 
+    // Play/Pause button
+    const playPauseBtn = document.getElementById('music-play-pause-btn');
+    if (playPauseBtn) {
+        // Update button text on play/pause toggle
+        document.addEventListener('musicPlayPauseToggle', (e) => {
+            playPauseBtn.textContent = e.detail.paused ? '▶' : '⏸';
+        });
+    }
+
     // Mode buttons
     const autoBtn = document.getElementById('music-auto-btn');
     const manualBtn = document.getElementById('music-manual-btn');

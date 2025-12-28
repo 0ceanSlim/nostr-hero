@@ -88,7 +88,6 @@ document.addEventListener('gameDataLoaded', () => {
     const musicTracks = getAllMusicTracks();
     initMusicSystem(musicTracks);
     initMusicDisplay();
-
     // Note: Auto-play happens after game state is loaded in gameState.js
 });
 

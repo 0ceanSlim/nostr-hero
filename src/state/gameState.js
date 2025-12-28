@@ -432,7 +432,6 @@ export async function initializeGame() {
 
                 // Auto-play location music now that state is loaded
                 if (window.musicSystem && window.musicSystem.playLocationMusic) {
-                    logger.debug('Triggering auto-play for location music');
                     window.musicSystem.playLocationMusic();
                 }
 

@@ -232,17 +232,14 @@ class NostrHeroStartup {
         console.log('✅ showActionText done');
 
         // Now initialize the actual game (load save data and render UI)
-        console.log('🎮 Calling initializeGame() to load save data and render UI...');
         if (typeof window.initializeGame === 'function') {
-            window.initializeGame().catch(error => {
-                console.error('❌ initializeGame failed:', error);
-                logger.error('Failed to initialize game:', error);
-            });
+            window.initializeGame()
+                .catch(error => {
+                    logger.error('Failed to initialize game:', error);
+                });
         } else {
             console.error('❌ initializeGame function not found on window!');
         }
-
-        console.log('✅ onInitializationComplete() finished');
     }
 
     /**

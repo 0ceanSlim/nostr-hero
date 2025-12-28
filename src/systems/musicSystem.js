@@ -22,11 +22,8 @@ let allTracks = []; // Loaded from music.json
  * @param {Array} tracks - Music tracks from game data API
  */
 export function initMusicSystem(tracks = []) {
-    logger.info('Initializing music system');
-
     // Store tracks
     allTracks = tracks;
-    logger.debug(`Loaded ${allTracks.length} music tracks`);
 
     // Load playback preferences from localStorage
     const savedMode = localStorage.getItem('musicMode');
@@ -34,8 +31,6 @@ export function initMusicSystem(tracks = []) {
 
     if (savedMode) playbackMode = savedMode;
     if (savedLoop !== null) loopEnabled = savedLoop === 'true';
-
-    logger.debug('Music system initialized', { mode: playbackMode, loop: loopEnabled });
 }
 
 /**
@@ -130,6 +125,12 @@ export function playTrack(track) {
         return;
     }
 
+    // Don't restart if same track is already playing
+    if (currentTrack && currentTrack.title === track.title && currentAudio && !currentAudio.paused) {
+        logger.debug('Track already playing:', track.title);
+        return;
+    }
+
     // Stop current audio
     stopMusic();
 
@@ -159,20 +160,12 @@ export function playLocationMusic() {
     const state = getGameStateSync();
     const currentLocation = state.location?.current;
 
-    logger.debug('playLocationMusic called:', {
-        currentLocation,
-        mode: playbackMode,
-        trackCount: allTracks.length
-    });
-
     if (!currentLocation) {
-        logger.debug('No current location for music');
         return;
     }
 
     // Only play in auto mode
     if (playbackMode !== 'auto') {
-        logger.debug('Not in auto mode, skipping location music');
         return;
     }
 
@@ -183,16 +176,16 @@ export function playLocationMusic() {
     );
 
     if (locationTrack) {
-        logger.debug('Playing location track:', locationTrack.title);
-        playTrack(locationTrack);
+        // Add unlocked property since we already verified it should be unlocked
+        const unlockedTrack = { ...locationTrack, unlocked: true };
+        playTrack(unlockedTrack);
     } else {
         // Play a default track if no location-specific track
         const defaultTrack = allTracks.find(t => t.auto_unlock);
         if (defaultTrack) {
-            logger.debug('Playing default track:', defaultTrack.title);
-            playTrack(defaultTrack);
-        } else {
-            logger.warn('No default track found to play');
+            // Add unlocked property for auto-unlock tracks
+            const unlockedTrack = { ...defaultTrack, unlocked: true };
+            playTrack(unlockedTrack);
         }
     }
 }
@@ -230,6 +223,26 @@ export function resumeMusic() {
 }
 
 /**
+ * Toggle play/pause
+ */
+export function togglePlayPause() {
+    if (!currentAudio) {
+        return;
+    }
+
+    if (currentAudio.paused) {
+        resumeMusic();
+    } else {
+        pauseMusic();
+    }
+
+    // Trigger event to update UI
+    document.dispatchEvent(new CustomEvent('musicPlayPauseToggle', {
+        detail: { paused: currentAudio.paused }
+    }));
+}
+
+/**
  * Check if a track should be unlocked at current location
  * and unlock it if needed
  */
@@ -262,6 +275,7 @@ window.musicSystem = {
     stopMusic,
     pauseMusic,
     resumeMusic,
+    togglePlayPause,
     setPlaybackMode,
     toggleLoop,
     getPlaybackMode,
