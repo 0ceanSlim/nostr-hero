@@ -33,7 +33,6 @@
           "id": "ember_vault",
           "name": "The Ember Vault",
           "description": "A place of fire and honor where dragonborn clan relics are preserved in magically sealed chests heated by dragonfire. The vaults are guarded by ancient draconic magic.",
-          "npcs": ["scalekeeper"],
           "open": "always",
           "close": null
         },
@@ -41,15 +40,20 @@
           "id": "goldenhaven_trade_goods",
           "name": "Goldscale Trading House",
           "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
-          "npcs": ["trade-merchant"],
           "open": 7,
           "close": 8
+        },
+        {
+          "id": "aurelia_home",
+          "name": "Aurelia's Private Residence",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         },
         {
           "id": "grand_exchange",
           "name": "Grand Exchange",
           "description": "The financial heart of the city where currencies are exchanged and large transactions occur.",
-          "npcs": [],
           "open": 8,
           "close": 6
         },
@@ -57,7 +61,6 @@
           "id": "luxury_market",
           "name": "Golden Bazaar",
           "description": "An upscale market selling rare and exotic goods from across the world.",
-          "npcs": [],
           "open": 7,
           "close": 9
         },
@@ -65,12 +68,10 @@
           "id": "merchants_guild",
           "name": "Merchant Princes Guild",
           "description": "The most powerful guild in the city, controlling trade routes and merchant licenses.",
-          "npcs": [],
           "open": 8,
           "close": 7
         }
-      ],
-      "npcs": ["scalekeeper", "trade-merchant"]
+      ]
     },
     "west": {
       "id": "goldenhaven-west",
@@ -85,7 +86,6 @@
           "id": "customs_house",
           "name": "Customs House",
           "description": "Where all goods entering the city are inspected and taxed.",
-          "npcs": [],
           "open": 6,
           "close": 10
         },
@@ -93,12 +93,10 @@
           "id": "caravan_rest",
           "name": "Caravan Rest Inn",
           "description": "A large inn designed to accommodate merchant caravans and their guards.",
-          "npcs": [],
           "open": 7,
           "close": 4
         }
       ],
-      "npcs": [],
       "exit_to_environment": "merchants-highway"
     },
     "north": {
@@ -114,12 +112,10 @@
           "id": "miners_exchange",
           "name": "Mountain Ore Exchange",
           "description": "A major trading post for ores, gems, and mining equipment.",
-          "npcs": [],
           "open": 7,
           "close": 7
         }
       ],
-      "npcs": [],
       "exit_to_environment": "cragspire-mountains"
     },
     "east": {
@@ -135,7 +131,6 @@
           "id": "harbor_master",
           "name": "Harbor Master's Office",
           "description": "Where ship passages are booked and cargo is registered.",
-          "npcs": [],
           "open": 6,
           "close": 8
         },
@@ -143,12 +138,24 @@
           "id": "sailors_tavern",
           "name": "The Salty Anchor",
           "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
-          "npcs": ["port-innkeeper", "port-doorman"],
           "open": 7,
           "close": 4
+        },
+        {
+          "id": "reylia_quarters",
+          "name": "Reylia's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "crusher_quarters",
+          "name": "Crusher's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
       ],
-      "npcs": ["port-innkeeper", "port-doorman"],
       "exit_to_environment": "sunscorch-desert"
     }
   }

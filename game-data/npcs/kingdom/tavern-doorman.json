@@ -6,12 +6,26 @@
   "location": "kingdom",
   "building": "tavern_golden_griffin",
   "description": "A refined half-elf with an ear for music and an eye for talent. He manages the entertainment at the Golden Griffin with professionalism and taste.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "tavern_golden_griffin", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "marcus_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "marcus_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "tavern_golden_griffin", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+  ],
   "greeting": {
     "first_time": "Good evening. I'm Marcus, entertainment coordinator for the Golden Griffin. Are you here to perform?",
     "returning": "Ah, you're back! Ready for another performance?",
     "already_performed": "You've already performed today. Our patrons appreciate variety—return tomorrow for another booking."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*sleeping soundly* Zzz... *murmurs* ...excellent performance... Zzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I'm off duty at the moment. The tavern is open below—feel free to enjoy yourself. I'll be back on the floor soon.",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "How can I help you?",
       "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]

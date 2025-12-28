@@ -6,12 +6,75 @@
   "location": "kingdom",
   "building": "kingdom_general_store",
   "description": "A portly, cheerful merchant with a quick smile and keen eye for business. His shop is packed with everything an adventurer might need, from rope to rations.",
+  "schedule": [
+    {
+      "start": 0,
+      "end": 360,
+      "location_type": "building",
+      "location_id": "aldric_home",
+      "state": "sleeping",
+      "dialogue_options": ["sleeping"],
+      "available_actions": []
+    },
+    {
+      "start": 360,
+      "end": 420,
+      "location_type": "district",
+      "location_id": "kingdom-center",
+      "state": "traveling",
+      "dialogue_options": ["traveling_to_work"],
+      "available_actions": []
+    },
+    {
+      "start": 420,
+      "end": 1320,
+      "location_type": "building",
+      "location_id": "kingdom_general_store",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["open_shop", "open_sell"]
+    },
+    {
+      "start": 1320,
+      "end": 1380,
+      "location_type": "district",
+      "location_id": "kingdom-center",
+      "state": "traveling",
+      "dialogue_options": ["traveling_home"],
+      "available_actions": []
+    },
+    {
+      "start": 1380,
+      "end": 1440,
+      "location_type": "building",
+      "location_id": "aldric_home",
+      "state": "home",
+      "dialogue_options": ["off_duty"],
+      "available_actions": []
+    }
+  ],
   "greeting": {
     "first_time": "Welcome, welcome! Aldric Goodsworth at your service. Looking for supplies? You've come to the right place—I've got everything an adventurer needs!",
     "returning": "Ah, back again! What can I get for you today?",
     "low_gold": "Business has been good today—my purse is getting a bit light. I may not be able to buy much more from you right now."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring* Zzz... five more minutes...",
+      "options": ["goodbye"]
+    },
+    "traveling_to_work": {
+      "text": "Morning! Heading to the shop to open up. Stop by if you need supplies!",
+      "options": ["goodbye"]
+    },
+    "traveling_home": {
+      "text": "Shop's closed for the night, friend. I'm heading home to rest these old bones. Come back tomorrow!",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I'm off the clock for the evening. Visit me at the Grand Market tomorrow during business hours!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What brings you to my shop today?",
       "options": ["browse_shop", "sell_items", "ask_about_stock", "goodbye"]

@@ -20,10 +20,50 @@ import { updateAllDisplays } from './displayCoordinator.js';
 let lastDisplayedLocation = null;
 
 /**
+ * Fetch NPCs at current location from backend
+ * @param {string} location - Location ID (e.g., "kingdom")
+ * @param {string} district - District key (e.g., "center")
+ * @param {string} building - Building ID (optional, empty string if not in building)
+ * @returns {Promise<string[]>} Array of NPC IDs at this location
+ */
+async function fetchNPCsAtLocation(location, district, building = '') {
+    try {
+        const state = getGameStateSync();
+        const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 720;
+        const districtId = `${location}-${district}`;
+
+        const params = new URLSearchParams({
+            location: location,
+            district: districtId,
+            time: timeOfDay.toString()
+        });
+
+        if (building) {
+            params.append('building', building);
+        }
+
+        const response = await fetch(`/api/npcs/at-location?${params.toString()}`);
+        if (!response.ok) {
+            logger.error('Failed to fetch NPCs:', response.statusText);
+            return [];
+        }
+
+        const data = await response.json();
+        logger.debug('Fetched NPCs at location:', data);
+
+        // Extract NPC IDs from response
+        return data.map(npc => npc.npc_id);
+    } catch (error) {
+        logger.error('Error fetching NPCs at location:', error);
+        return [];
+    }
+}
+
+/**
  * Display current location with navigation, buildings, and NPCs
  * Main location rendering function
  */
-export function displayCurrentLocation() {
+export async function displayCurrentLocation() {
     const state = getGameStateSync();
     const cityId = state.location?.current;
     const districtKey = state.location?.district || 'center';
@@ -123,7 +163,12 @@ export function displayCurrentLocation() {
     // Get connections - check both direct and properties.connections
     const connections = currentData.connections || currentData.properties?.connections;
     let buildings = currentData.buildings || currentData.properties?.buildings;
-    let npcs = currentData.npcs || currentData.properties?.npcs;
+
+    // Fetch NPCs from backend based on current location and time
+    let npcs = [];
+    await fetchNPCsAtLocation(cityId, districtKey, currentBuildingId).then(npcData => {
+        npcs = npcData || [];
+    });
 
     // Check if we're inside a building
     if (currentBuildingId && buildings) {
@@ -132,15 +177,6 @@ export function displayCurrentLocation() {
 
         if (currentBuilding) {
             logger.debug('Inside building:', currentBuilding);
-
-            // Get NPCs from the building
-            if (currentBuilding.npcs) {
-                npcs = currentBuilding.npcs;  // Array of NPC IDs
-            } else if (currentBuilding.npc) {
-                npcs = [currentBuilding.npc];  // Single NPC
-            } else {
-                npcs = [];  // No NPCs in building
-            }
 
             // Override buildings to show only "Exit Building" button
             buildings = [{ id: '__exit__', name: 'Exit Building', isExit: true }];
@@ -346,6 +382,11 @@ export function isBuildingOpen(building, currentTime) {
     // Always open buildings
     if (building.open === 'always') {
         return true;
+    }
+
+    // Private buildings (never accessible)
+    if (building.open === -1 || building.open < 0) {
+        return false;
     }
 
     const openTime = building.open;

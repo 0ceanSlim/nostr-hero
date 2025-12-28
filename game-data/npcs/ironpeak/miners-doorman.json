@@ -6,12 +6,26 @@
   "location": "town-northeast",
   "building": "miners_inn",
   "description": "A grizzled dwarf with a voice that can be heard across the mine shaft. He books entertainment for miners who want to blow off steam after long shifts.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "durin_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "durin_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+  ],
   "greeting": {
     "first_time": "Aye? I'm Durin. Handle the music here. Ye a performer?",
     "returning": "Back to play again, eh? Good!",
     "already_performed": "Already played today. Come back tomorrow if ye want another go."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring like rumbling rocks* Zzz... *mutters* ...more drums... Zzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "Havin' a rest. Inn's still open below. Help yerself!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What d'ye need?",
       "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]

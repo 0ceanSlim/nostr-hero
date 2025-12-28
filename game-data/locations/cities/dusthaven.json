@@ -29,7 +29,6 @@
           "id": "desert_inn",
           "name": "The Mirage's Rest",
           "description": "A cool, shaded inn built around the oasis where desert travelers rest.",
-          "npcs": [],
           "open": 7,
           "close": 4
         },
@@ -37,7 +36,6 @@
           "id": "desert_supplies",
           "name": "Desert Walker's Supplies",
           "description": "A shop specializing in desert survival gear and supplies.",
-          "npcs": [],
           "open": 6,
           "close": 9
         },
@@ -45,12 +43,10 @@
           "id": "oasis_shrine",
           "name": "Shrine of the Sacred Well",
           "description": "A modest shrine dedicated to the water spirits that bless the oasis.",
-          "npcs": [],
           "open": "always",
           "close": null
         }
-      ],
-      "npcs": []
+      ]
     },
     "west": {
       "id": "dusthaven-west",
@@ -65,12 +61,10 @@
           "id": "caravan_staging",
           "name": "Caravan Assembly Point",
           "description": "Where desert caravans gather supplies and travelers before heading into the wasteland.",
-          "npcs": [],
           "open": "always",
           "close": null
         }
       ],
-      "npcs": [],
       "exit_to_environment": "sunscorch-desert"
     }
   }

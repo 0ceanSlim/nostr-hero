@@ -6,64 +6,158 @@
   "location": "village-west",
   "building": "general_store",
   "description": "A cheerful halfling with rosy cheeks and an infectious smile. His shop is tidy and welcoming, with every item neatly organized and clearly priced.",
+  "schedule": [
+    {
+      "start": 0,
+      "end": 420,
+      "location_type": "building",
+      "location_id": "pip_home",
+      "state": "sleeping",
+      "dialogue_options": ["sleeping"],
+      "available_actions": []
+    },
+    {
+      "start": 420,
+      "end": 480,
+      "location_type": "district",
+      "location_id": "village-west",
+      "state": "traveling",
+      "dialogue_options": ["traveling_to_work"],
+      "available_actions": []
+    },
+    {
+      "start": 480,
+      "end": 1200,
+      "location_type": "building",
+      "location_id": "general_store",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["open_shop", "open_sell"]
+    },
+    {
+      "start": 1200,
+      "end": 1260,
+      "location_type": "district",
+      "location_id": "village-west",
+      "state": "traveling",
+      "dialogue_options": ["traveling_home"],
+      "available_actions": []
+    },
+    {
+      "start": 1260,
+      "end": 1440,
+      "location_type": "building",
+      "location_id": "pip_home",
+      "state": "home",
+      "dialogue_options": ["off_duty"],
+      "available_actions": []
+    }
+  ],
   "greeting": {
     "first_time": "Oh hello! Welcome to Haversham's! I'm Pip, and this is my family's store. How wonderful to have a visitor! What can I help you find?",
     "returning": "Back so soon! Lovely to see you again, dear!",
     "low_gold": "Oh my, I've been buying quite a lot today! My coin purse is looking rather empty. Perhaps check back tomorrow?"
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring softly* Mmm... just five more minutes, dear...",
+      "options": ["goodbye"]
+    },
+    "traveling_to_work": {
+      "text": "Good morning! I'm just heading to open the shop. Do stop by Haversham's if you need anything!",
+      "options": ["goodbye"]
+    },
+    "traveling_home": {
+      "text": "Shop's closed for the day! I'm heading home for a nice cup of tea. Come by tomorrow during business hours!",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I'm off for the evening, dear! Visit Haversham's tomorrow—I'll have fresh stock ready for you!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What brings you to our little shop today?",
       "options": ["browse_shop", "sell_items", "ask_about_village", "goodbye"]
     },
     "browse_shop": {
       "text": "Please, have a look around! Everything's priced fairly—we pride ourselves on honest business here in Millhaven!",
-      "action": "open_shop",
-      "options": ["main_menu"]
+      "action": "open_shop"
     },
     "sell_items": {
-      "text": "Oh, you have things to sell? Wonderful! Let me see what you've got—I'll buy anything useful, as long as I have the coin!",
+      "text": "Oh, looking to sell? I'd be happy to buy, as long as I have enough coin!",
       "action": "open_sell",
       "requirements": {
         "shop_gold": 1
       },
-      "failure": "Oh dear, I'm terribly sorry, but I've spent all my coin today. Come back tomorrow and I'll have more!",
-      "options": ["main_menu"]
+      "failure": "Oh dear, I'm afraid I'm a bit short on coin right now. Check back tomorrow after I've made some sales!"
     },
     "ask_about_village": {
-      "text": "Millhaven's a lovely place! Quiet, peaceful, everyone knows everyone. We get fresh produce from the farms every morning. It's a simple life, but a good one!",
-      "options": ["main_menu"]
+      "text": "Millhaven is a wonderful place! Everyone knows everyone, and we all look out for each other. If you're planning to stay, do visit the Burrowlock—Rosie can set you up with storage!"
     },
     "goodbye": {
-      "text": "Safe travels, dear! Don't be a stranger—come back anytime!",
+      "text": "Safe travels, friend! Do come back anytime—there's always a warm welcome at Haversham's!",
       "action": "end_dialogue"
     }
   },
   "shop_config": {
     "shop_type": "general",
     "buys_items": true,
-    "buy_price_multiplier": 0.4,
-    "sell_price_multiplier": 0.9,
+    "buy_price_multiplier": 0.6,
+    "sell_price_multiplier": 1.0,
     "starting_gold": 300,
-    "max_gold": 700,
-    "gold_regen_rate": 80,
+    "max_gold": 600,
+    "gold_regen_rate": 75,
     "gold_regen_interval": "daily",
     "inventory": [
-      {"item_id": "rope-hemp", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
-      {"item_id": "torch", "stock": 15, "max_stock": 15, "restock_rate": 12, "restock_interval": "daily"},
-      {"item_id": "rations", "stock": 40, "max_stock": 40, "restock_rate": 35, "restock_interval": "daily"},
-      {"item_id": "waterskin", "stock": 10, "max_stock": 10, "restock_rate": 8, "restock_interval": "daily"},
-      {"item_id": "backpack", "stock": 4, "max_stock": 4, "restock_rate": 2, "restock_interval": "daily"},
-      {"item_id": "bedroll", "stock": 6, "max_stock": 6, "restock_rate": 4, "restock_interval": "daily"},
-      {"item_id": "tinderbox", "stock": 8, "max_stock": 8, "restock_rate": 5, "restock_interval": "daily"},
-      {"item_id": "oil-flask", "stock": 8, "max_stock": 8, "restock_rate": 6, "restock_interval": "daily"},
-      {"item_id": "candle", "stock": 30, "max_stock": 30, "restock_rate": 25, "restock_interval": "daily"},
-      {"item_id": "soap", "stock": 20, "max_stock": 20, "restock_rate": 15, "restock_interval": "daily"},
-      {"item_id": "bucket", "stock": 5, "max_stock": 5, "restock_rate": 3, "restock_interval": "daily"},
-      {"item_id": "basket", "stock": 8, "max_stock": 8, "restock_rate": 6, "restock_interval": "daily"},
-      {"item_id": "fishing-tackle", "stock": 4, "max_stock": 4, "restock_rate": 3, "restock_interval": "daily"},
-      {"item_id": "healers-kit", "stock": 2, "max_stock": 2, "restock_rate": 1, "restock_interval": "daily"},
-      {"item_id": "sack", "stock": 12, "max_stock": 12, "restock_rate": 10, "restock_interval": "daily"}
+      {
+        "item_id": "rope-hemp",
+        "stock": 8,
+        "max_stock": 8,
+        "restock_rate": 4,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "torch",
+        "stock": 15,
+        "max_stock": 15,
+        "restock_rate": 15,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "rations",
+        "stock": 25,
+        "max_stock": 25,
+        "restock_rate": 25,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "waterskin",
+        "stock": 12,
+        "max_stock": 12,
+        "restock_rate": 8,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "backpack",
+        "stock": 4,
+        "max_stock": 4,
+        "restock_rate": 2,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "bedroll",
+        "stock": 6,
+        "max_stock": 6,
+        "restock_rate": 4,
+        "restock_interval": "daily"
+      },
+      {
+        "item_id": "tinderbox",
+        "stock": 8,
+        "max_stock": 8,
+        "restock_rate": 4,
+        "restock_interval": "daily"
+      }
     ]
   }
 }

@@ -8,6 +8,7 @@ import (
 
 	"nostr-hero/db"
 	"nostr-hero/types"
+	"nostr-hero/utils"
 )
 
 // GameAction represents any action a player can take
@@ -1118,6 +1119,25 @@ func handleEnterBuildingAction(state *SaveFile, params map[string]interface{}) (
 		return nil, fmt.Errorf("missing or invalid building_id parameter")
 	}
 
+	// Check if building is open
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	isOpen, openHour, closeHour, err := utils.IsBuildingOpen(database, state.Location, buildingID, state.TimeOfDay)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check building hours: %v", err)
+	}
+
+	if !isOpen {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("The building is closed. Open hours: %02d:00 - %02d:00", openHour, closeHour),
+			Color:   "red",
+		}, nil
+	}
+
 	// Update state to include building
 	state.Building = buildingID
 
@@ -1170,57 +1190,94 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*Gam
 		return nil, fmt.Errorf("NPC not found: %s", npcID)
 	}
 
-	// Parse NPC properties
-	var npcData map[string]interface{}
+	// Parse NPC properties into NPCData struct
+	var npcData types.NPCData
 	if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
 		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
 	}
 
-	// Determine greeting based on state
-	greetings, _ := npcData["greeting"].(map[string]interface{})
-	var greetingText string
+	// Resolve NPC schedule based on current time
+	scheduleInfo := utils.ResolveNPCSchedule(&npcData, state.TimeOfDay)
 
-	// Check if this is first time talking to this NPC
-	// Check if player has registered vault at this location
-	isRegistered := isVaultRegistered(state, state.Building)
-	isNativeRace := isNativeRaceForLocation(state.Race, state.Location)
-
-	if isNativeRace {
-		greetingText, _ = greetings["native_race"].(string)
-	} else if isRegistered {
-		greetingText, _ = greetings["returning"].(string)
-	} else {
-		greetingText, _ = greetings["first_time"].(string)
-	}
-
-	// Start dialogue at "about_service" node
-	dialogue, _ := npcData["dialogue"].(map[string]interface{})
-	aboutService, _ := dialogue["about_service"].(map[string]interface{})
-	dialogueText, _ := aboutService["text"].(string)
-	options, _ := aboutService["options"].([]interface{})
-
-	// Filter options based on requirements
-	var optionsList []string
-	for _, opt := range options {
-		if optStr, ok := opt.(string); ok {
-			// Get the option node to check requirements
-			optionNode, _ := dialogue[optStr].(map[string]interface{})
-			if optionNode != nil {
-				requirements, _ := optionNode["requirements"].(map[string]interface{})
-				// Only include option if requirements are met
-				if checkDialogueRequirements(state, requirements) {
-					optionsList = append(optionsList, optStr)
-				} else {
-					log.Printf("🚫 Filtered out option '%s' (requirements not met)", optStr)
-				}
-			} else {
-				// No requirements, include it
-				optionsList = append(optionsList, optStr)
-			}
+	// Check if player is at NPC's current location
+	playerAtLocation := false
+	if scheduleInfo.LocationType == "building" && state.Building == scheduleInfo.LocationID {
+		playerAtLocation = true
+	} else if scheduleInfo.LocationType == "district" && state.Building == "" {
+		// Construct full district ID from location + district (e.g., "kingdom" + "center" = "kingdom-center")
+		playerDistrictID := fmt.Sprintf("%s-%s", state.Location, state.District)
+		if playerDistrictID == scheduleInfo.LocationID {
+			playerAtLocation = true
 		}
 	}
 
-	log.Printf("💬 %s: %s (showing %d/%d options)", npcID, greetingText, len(optionsList), len(options))
+	if !playerAtLocation {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("%s is not here at this time.", npcData.Name),
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Check if NPC is available for interaction
+	if !scheduleInfo.IsAvailable {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("%s is busy right now.", npcData.Name),
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Determine greeting based on state
+	greetingText := ""
+	isRegistered := isVaultRegistered(state, scheduleInfo.LocationID)
+	isNativeRace := isNativeRaceForLocation(state.Race, state.Location)
+
+	if isNativeRace {
+		greetingText, _ = npcData.Greeting["native_race"]
+	} else if isRegistered {
+		greetingText, _ = npcData.Greeting["returning"]
+	} else {
+		greetingText, _ = npcData.Greeting["first_time"]
+	}
+
+	// Get initial dialogue node (first from available options)
+	var dialogueNode string
+	var dialogueText string
+	var options []string
+
+	if len(scheduleInfo.AvailableDialogue) > 0 {
+		dialogueNode = scheduleInfo.AvailableDialogue[0]
+
+		// Get dialogue content
+		if nodeData, ok := npcData.Dialogue[dialogueNode].(map[string]interface{}); ok {
+			dialogueText, _ = nodeData["text"].(string)
+			if opts, ok := nodeData["options"].([]interface{}); ok {
+				for _, opt := range opts {
+					if optStr, ok := opt.(string); ok {
+						// Filter options based on requirements
+						optionNode, _ := npcData.Dialogue[optStr].(map[string]interface{})
+						if optionNode != nil {
+							requirements, _ := optionNode["requirements"].(map[string]interface{})
+							if checkDialogueRequirements(state, requirements) {
+								options = append(options, optStr)
+							}
+						} else {
+							options = append(options, optStr)
+						}
+					}
+				}
+			}
+		}
+	} else {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("%s is busy right now.", npcData.Name),
+			Color:   "yellow",
+		}, nil
+	}
+
+	log.Printf("💬 %s: %s (schedule state: %s, showing %d options)", npcID, greetingText, scheduleInfo.State, len(options))
 
 	return &GameActionResponse{
 		Success: true,
@@ -1228,10 +1285,11 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*Gam
 		Color:   "yellow",
 		Delta: map[string]interface{}{
 			"npc_dialogue": map[string]interface{}{
-				"npc_id":  npcID,
-				"node":    "about_service",
-				"text":    dialogueText,
-				"options": optionsList,
+				"npc_id":         npcID,
+				"node":           dialogueNode,
+				"text":           dialogueText,
+				"options":        options,
+				"schedule_state": scheduleInfo.State,
 			},
 		},
 	}, nil

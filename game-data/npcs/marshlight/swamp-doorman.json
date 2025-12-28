@@ -6,12 +6,26 @@
   "location": "village-southwest",
   "building": "marsh_inn",
   "description": "An intimidating orc with battle scars and a grim expression. He judges musicians by strength and power, not delicacy. Weak music earns only contempt.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "marsh_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "rokgar_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "rokgar_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "marsh_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+  ],
   "greeting": {
     "first_time": "I am Rokgar. I choose music here. You perform?",
     "returning": "You play again?",
     "already_performed": "Already played today. Return tomorrow."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring heavily* Grrr... strong drums... Zzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "Resting now. Inn below. Go there.",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What?",
       "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]

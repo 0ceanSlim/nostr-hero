@@ -3,15 +3,29 @@
   "name": "Captain Reylia Stormwave",
   "title": "Tavern Master",
   "race": "Dragonborn",
-  "location": "city-east",
+  "location": "goldenhaven-east",
   "building": "sailors_tavern",
   "description": "A bronze-scaled dragonborn with the bearing of a seasoned sea captain. Her tavern caters to sailors, merchants, and dock workers with strong drinks and hearty food.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "reylia_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "reylia_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
+  ],
   "greeting": {
     "first_time": "Ahoy there! Welcome to the Salty Anchor. I'm Captain Reylia—ran ships for twenty years before opening this place. What'll it be?",
     "returning": "Back from the seas, are we? Good to see you!",
     "tired": "You look like you've been through a storm. A night's rest will sort you out."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring* Zzzz... *mumbles* ...batten down the hatches... Zzzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "Just catching my breath before the evening crowd. The tavern's open—grab a seat downstairs!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What do you need, sailor?",
       "options": ["rent_room", "buy_drink", "ask_about_entertainment", "goodbye"]

@@ -6,12 +6,58 @@
   "location": "kingdom",
   "building": "tavern_golden_griffin",
   "description": "A stout, friendly man with a booming voice and infectious laughter. His tavern is always lively, filled with music, drinks, and good cheer.",
+  "schedule": [
+    {
+      "start": 0,
+      "end": 240,
+      "location_type": "building",
+      "location_id": "tavern_golden_griffin",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["rent_room", "buy_drink"]
+    },
+    {
+      "start": 240,
+      "end": 360,
+      "location_type": "building",
+      "location_id": "gareth_quarters",
+      "state": "sleeping",
+      "dialogue_options": ["sleeping"],
+      "available_actions": []
+    },
+    {
+      "start": 360,
+      "end": 420,
+      "location_type": "building",
+      "location_id": "gareth_quarters",
+      "state": "home",
+      "dialogue_options": ["off_duty"],
+      "available_actions": []
+    },
+    {
+      "start": 420,
+      "end": 1440,
+      "location_type": "building",
+      "location_id": "tavern_golden_griffin",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["rent_room", "buy_drink"]
+    }
+  ],
   "greeting": {
     "first_time": "Welcome to the Golden Griffin! Best ale in the kingdom, and the finest entertainment you'll find! I'm Gareth, owner and master of this fine establishment.",
     "returning": "Ah, back again! Always good to see a familiar face. What can I get for you?",
     "tired": "You look exhausted, friend. A good night's rest will set you right."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring loudly* Zzzzz... *mumbles* ...more ale for table three... Zzzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "Just taking a short break before the evening rush! The tavern's open—help yourself to a seat downstairs!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What brings you to the Griffin today?",
       "options": ["rent_room", "buy_drink", "ask_about_entertainment", "goodbye"]

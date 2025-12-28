@@ -31,21 +31,31 @@
           "id": "warhoard",
           "name": "The Warhoard",
           "description": "Communal caches where orcs store spoils of war. Battle-scarred vaults in the lower levels, guarded fiercely by the clan's most trusted warriors.",
-          "npcs": ["hoardkeeper"],
           "open": "always",
           "close": null
         },
-
         {
           "id": "bog_trader",
           "name": "Swamp Treasures",
           "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
-          "npcs": ["swamp-trader"],
           "open": 8,
           "close": 16
+        },
+        {
+          "id": "grishka_quarters",
+          "name": "Grishka's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "rokgar_quarters",
+          "name": "Rokgar's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
-      ],
-      "npcs": []
+      ]
     },
     "east": {
       "id": "marshlight-east",
@@ -60,12 +70,10 @@
           "id": "marsh_inn",
           "name": "The Glowing Lantern",
           "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
-          "npcs": ["swamp-innkeeper", "swamp-doorman"],
           "open": 14,
           "close": 8
         }
       ],
-      "npcs": [],
       "exit_to_environment": "shadowmere-wetlands"
     }
   }

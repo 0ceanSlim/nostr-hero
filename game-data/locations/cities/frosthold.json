@@ -30,7 +30,6 @@
           "id": "frost_inn",
           "name": "The Frozen Mug Tavern",
           "description": "A warm tavern serving strong ales and hearty stews to ward off the northern cold.",
-          "npcs": [],
           "open": 7,
           "close": 4
         },
@@ -38,7 +37,6 @@
           "id": "fur_trader",
           "name": "Northern Furs Trading Post",
           "description": "A shop specializing in warm clothing and cold-weather gear.",
-          "npcs": [],
           "open": 7,
           "close": 8
         },
@@ -46,12 +44,10 @@
           "id": "town_hall",
           "name": "Town Hall",
           "description": "The administrative center where the town elder holds court.",
-          "npcs": [],
           "open": 8,
           "close": 6
         }
-      ],
-      "npcs": []
+      ]
     },
     "south": {
       "id": "frosthold-south",
@@ -66,12 +62,10 @@
           "id": "guard_house",
           "name": "Guard House",
           "description": "A fortified building where the town guard maintains watch.",
-          "npcs": [],
           "open": "always",
           "close": null
         }
       ],
-      "npcs": [],
       "exit_to_environment": "mistmarsh-swamplands"
     }
   }

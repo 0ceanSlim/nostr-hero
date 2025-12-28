@@ -467,7 +467,7 @@ export async function initializeGame() {
             throw new Error('Failed to load game state');
         }
 
-        displayCurrentLocation();
+        await displayCurrentLocation();
         await updateAllDisplays();
 
         logger.info('✅ Game initialized and ready to play!');

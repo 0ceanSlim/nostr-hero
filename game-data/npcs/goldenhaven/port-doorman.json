@@ -3,15 +3,29 @@
   "name": "Crusher Morg",
   "title": "Bouncer",
   "race": "Half-Orc",
-  "location": "city-east",
+  "location": "goldenhaven-east",
   "building": "sailors_tavern",
   "description": "A massive half-orc with scarred knuckles and a surprisingly keen ear for music. He keeps the peace and books entertainment with equal efficiency.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "crusher_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "crusher_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+  ],
   "greeting": {
     "first_time": "Name's Crusher. I handle entertainment here. You play music?",
     "returning": "You back to play again?",
     "already_performed": "Already played today. Come back tomorrow."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring loudly* Grrrr... *grunts* ...no music now... Zzz...",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "Resting. Tavern's downstairs. Don't cause trouble.",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What?",
       "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]

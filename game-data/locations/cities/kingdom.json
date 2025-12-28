@@ -34,7 +34,6 @@
           "id": "vault_of_crowns",
           "name": "The Vault of Crowns",
           "description": "The kingdom's official storage facility, funded by the crown to encourage trade and travel. Citizens and allies store goods freely as a royal right.",
-          "npcs": ["royal-custodian"],
           "open": "always",
           "close": null
         },
@@ -42,12 +41,17 @@
           "id": "kingdom_general_store",
           "name": "Grand Market",
           "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
-          "npcs": ["general-merchant"],
           "open": 6,
           "close": 22
+        },
+        {
+          "id": "aldric_home",
+          "name": "Aldric's Private Residence",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
-      ],
-      "npcs": []
+      ]
     },
     "north": {
       "id": "kingdom-north",
@@ -62,12 +66,10 @@
           "id": "mage_tower",
           "name": "Mage Tower",
           "description": "A crystalline spire where court wizards study the arcane arts.",
-          "npcs": [],
           "open": 8,
           "close": 20
         }
       ],
-      "npcs": [],
       "exit_to_environment": "mistmarsh-swamplands"
     },
     "south": {
@@ -83,7 +85,6 @@
           "id": "travelers_inn",
           "name": "The Wayward Traveler Inn",
           "description": "A cozy inn catering to merchants and adventurers from distant lands.",
-          "npcs": [],
           "open": 7,
           "close": 4
         },
@@ -91,12 +92,10 @@
           "id": "stable",
           "name": "Royal Stables",
           "description": "Well-maintained stables offering cart services to other cities.",
-          "npcs": [],
           "open": 6,
           "close": 22
         }
       ],
-      "npcs": [],
       "exit_to_environment": "darkwood-forest"
     },
     "east": {
@@ -112,12 +111,10 @@
           "id": "grand_forge",
           "name": "Grand Forge",
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
-          "npcs": [],
           "open": 7,
           "close": 19
         }
       ],
-      "npcs": [],
       "exit_to_environment": "merchants-highway"
     },
     "west": {
@@ -133,7 +130,7 @@
           "id": "trading_post",
           "name": "Western Trading Post",
           "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
-          "npcs": [],
+
           "open": 7,
           "close": 21
         },
@@ -141,16 +138,28 @@
           "id": "tavern_golden_griffin",
           "name": "The Golden Griffin Tavern",
           "description": "A popular upscale tavern where merchants, adventurers, and locals gather for fine drinks, live music, and news. Gareth Thornfield runs a refined establishment with quality entertainment.",
-          "npcs": ["tavern-keeper", "tavern-doorman"],
           "open": 7,
           "close": 4,
           "special_features": [
             "vip_section_for_happytavern_nip5",
             "live_music_nightly"
           ]
+        },
+        {
+          "id": "gareth_quarters",
+          "name": "Gareth's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "marcus_quarters",
+          "name": "Marcus's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
       ],
-      "npcs": ["tavern-keeper", "tavern-doorman"],
       "exit_to_environment": "windswept-hills"
     }
   }

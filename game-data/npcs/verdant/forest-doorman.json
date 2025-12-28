@@ -6,12 +6,26 @@
   "location": "city-south",
   "building": "moonlit_glade_inn",
   "description": "A tall elf with an air of ancient wisdom and refined taste. He judges musicians not by volume, but by their ability to create harmony with the forest's natural rhythms.",
+  "schedule": [
+    {"start": 0, "end": 240, "location_type": "building", "location_id": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location_type": "building", "location_id": "theren_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location_type": "building", "location_id": "theren_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location_type": "building", "location_id": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+  ],
   "greeting": {
     "first_time": "Greetings. I am Theren. I select musicians whose art honors the peace of this place. Do you perform?",
     "returning": "Your music was welcome before. Will you grace us again?",
     "already_performed": "The forest appreciates variety. Return tomorrow for another performance."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*sleeping peacefully* ...the wind through leaves... *gentle breathing*",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I am meditating in harmony with nature. The inn welcomes you below. I shall return shortly.",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "How may I assist you?",
       "options": ["ask_about_performing", "book_performance", "ask_about_rates", "goodbye"]

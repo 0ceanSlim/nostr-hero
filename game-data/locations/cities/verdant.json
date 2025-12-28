@@ -33,7 +33,6 @@
           "id": "glade_of_safekeeping",
           "name": "The Glade of Safekeeping",
           "description": "Enchanted trees store belongings within hollow roots, kept safe by ancient elven magic. The eldest trees of the enclave offer this blessing to their kin and those who earn it.",
-          "npcs": ["warden-of-roots"],
           "open": "always",
           "close": null
         },
@@ -41,7 +40,6 @@
           "id": "verdant_supplies",
           "name": "Greenleaf Provisions",
           "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
-          "npcs": ["nature-supplier"],
           "open": 7,
           "close": 8
         },
@@ -49,12 +47,24 @@
           "id": "moonlit_glade_inn",
           "name": "The Moonlit Glade",
           "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
-          "npcs": ["forest-innkeeper", "forest-doorman"],
           "open": 7,
           "close": 4
+        },
+        {
+          "id": "faelyn_quarters",
+          "name": "Faelyn's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "theren_quarters",
+          "name": "Theren's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
-      ],
-      "npcs": []
+      ]
     },
     "north": {
       "id": "verdant-north",
@@ -65,7 +75,6 @@
         "north": "darkwood-forest"
       },
       "buildings": [],
-      "npcs": [],
       "exit_to_environment": "darkwood-forest"
     },
     "west": {
@@ -77,7 +86,6 @@
         "west": "shadowmere-wetlands"
       },
       "buildings": [],
-      "npcs": [],
       "exit_to_environment": "shadowmere-wetlands"
     },
     "south": {
@@ -89,7 +97,6 @@
         "south": "suncrest-coastlands"
       },
       "buildings": [],
-      "npcs": [],
       "exit_to_environment": "suncrest-coastlands"
     }
   }

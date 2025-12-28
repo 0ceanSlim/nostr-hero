@@ -19,7 +19,7 @@ import { updateTimeDisplay } from './timeDisplay.js';
 export async function updateAllDisplays() {
     await updateCharacterDisplay(); // Async - must await
     updateSpellsDisplay();
-    displayCurrentLocation();
+    await displayCurrentLocation(); // Async - must await (fetches NPCs from backend)
     updateTimeDisplay();
 }
 

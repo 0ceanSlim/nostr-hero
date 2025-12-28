@@ -6,12 +6,75 @@
   "location": "city-east",
   "building": "goldenhaven_trade_goods",
   "description": "A bronze-scaled dragonborn with sharp golden eyes and an even sharper mind for business. Her shop caters to wealthy travelers and adventurers with coin to spend.",
+  "schedule": [
+    {
+      "start": 0,
+      "end": 420,
+      "location_type": "building",
+      "location_id": "aurelia_home",
+      "state": "sleeping",
+      "dialogue_options": ["sleeping"],
+      "available_actions": []
+    },
+    {
+      "start": 420,
+      "end": 480,
+      "location_type": "district",
+      "location_id": "city-east",
+      "state": "traveling",
+      "dialogue_options": ["traveling_to_work"],
+      "available_actions": []
+    },
+    {
+      "start": 480,
+      "end": 1200,
+      "location_type": "building",
+      "location_id": "goldenhaven_trade_goods",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["open_shop", "open_sell"]
+    },
+    {
+      "start": 1200,
+      "end": 1260,
+      "location_type": "district",
+      "location_id": "city-east",
+      "state": "traveling",
+      "dialogue_options": ["traveling_home"],
+      "available_actions": []
+    },
+    {
+      "start": 1260,
+      "end": 1440,
+      "location_type": "building",
+      "location_id": "aurelia_home",
+      "state": "home",
+      "dialogue_options": ["off_duty"],
+      "available_actions": []
+    }
+  ],
   "greeting": {
     "first_time": "Welcome to Goldenhaven's finest trading house. I am Aurelia Goldscale. If you seek quality supplies, you have found them.",
     "returning": "Ah, a returning customer. Excellent. How may I assist you?",
     "low_gold": "I've been making many purchases today. My coffers are nearly empty—return later if you wish to sell."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*breathing slowly* ...Not now. Business hours only.",
+      "options": ["goodbye"]
+    },
+    "traveling_to_work": {
+      "text": "I am on my way to open the trading house. Visit during business hours if you require supplies.",
+      "options": ["goodbye"]
+    },
+    "traveling_home": {
+      "text": "The trading house is closed. I am retiring for the evening. Return tomorrow.",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I do not conduct business outside my establishment. Visit the trading house during operating hours.",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What business do you have with me?",
       "options": ["browse_shop", "sell_items", "ask_about_quality", "goodbye"]

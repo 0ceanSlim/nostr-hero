@@ -551,7 +551,11 @@ func migrateNPCs() error {
 		}
 
 		if !d.IsDir() && strings.HasSuffix(path, ".json") {
-			if err := migrateNPCFile(path); err != nil {
+			// Extract location from folder path (e.g., "game-data/npcs/kingdom/..." -> "kingdom")
+			relPath, _ := filepath.Rel(npcsPath, path)
+			locationFolder := filepath.Dir(relPath)
+
+			if err := migrateNPCFile(path, locationFolder); err != nil {
 				log.Printf("Warning: failed to migrate NPC file %s: %v", path, err)
 			} else {
 				count++
@@ -569,7 +573,7 @@ func migrateNPCs() error {
 }
 
 // migrateNPCFile migrates a single NPC JSON file
-func migrateNPCFile(filePath string) error {
+func migrateNPCFile(filePath, locationFromPath string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -587,9 +591,11 @@ func migrateNPCFile(filePath string) error {
 	name, _ := npc["name"].(string)
 	title, _ := npc["title"].(string)
 	race, _ := npc["race"].(string)
-	location, _ := npc["location"].(string)
 	building, _ := npc["building"].(string)
 	description, _ := npc["description"].(string)
+
+	// Use location from folder path (e.g., "kingdom", "goldenhaven"), not from JSON
+	location := locationFromPath
 
 	// Serialize all properties as JSON
 	propertiesJSON, _ := json.Marshal(npc)

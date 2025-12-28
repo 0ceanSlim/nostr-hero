@@ -6,12 +6,75 @@
   "location": "town-northeast",
   "building": "ironpeak_general_supplies",
   "description": "A stocky dwarf with soot-stained hands and a no-nonsense demeanor. His shop is crammed with sturdy, practical gear that can survive the harsh mountain conditions.",
+  "schedule": [
+    {
+      "start": 0,
+      "end": 360,
+      "location_type": "building",
+      "location_id": "brogni_home",
+      "state": "sleeping",
+      "dialogue_options": ["sleeping"],
+      "available_actions": []
+    },
+    {
+      "start": 360,
+      "end": 420,
+      "location_type": "district",
+      "location_id": "town-northeast",
+      "state": "traveling",
+      "dialogue_options": ["traveling_to_work"],
+      "available_actions": []
+    },
+    {
+      "start": 420,
+      "end": 1200,
+      "location_type": "building",
+      "location_id": "ironpeak_general_supplies",
+      "state": "working",
+      "dialogue_options": ["main_menu"],
+      "available_actions": ["open_shop", "open_sell"]
+    },
+    {
+      "start": 1200,
+      "end": 1260,
+      "location_type": "district",
+      "location_id": "town-northeast",
+      "state": "traveling",
+      "dialogue_options": ["traveling_home"],
+      "available_actions": []
+    },
+    {
+      "start": 1260,
+      "end": 1440,
+      "location_type": "building",
+      "location_id": "brogni_home",
+      "state": "home",
+      "dialogue_options": ["off_duty"],
+      "available_actions": []
+    }
+  ],
   "greeting": {
     "first_time": "Aye, welcome! Brogni Ironhand's the name. Ye need supplies that won't fail ye in the depths? Ye've come to the right place!",
     "returning": "Back again, eh? Good to see ye. What'll it be?",
     "low_gold": "Business has been brisk today—my coin pouch is runnin' dry. Can't buy much more 'til I make some sales."
   },
   "dialogue": {
+    "sleeping": {
+      "text": "*snoring loudly* Zzzz... *mumbles about ore prices*",
+      "options": ["goodbye"]
+    },
+    "traveling_to_work": {
+      "text": "Mornin'! Headin' to the shop to open up. Stop by if ye need quality gear!",
+      "options": ["goodbye"]
+    },
+    "traveling_home": {
+      "text": "Shop's closed for the night, friend. I'm headin' home. Come back tomorrow!",
+      "options": ["goodbye"]
+    },
+    "off_duty": {
+      "text": "I'm off duty, friend. Visit me shop during business hours if ye need supplies!",
+      "options": ["goodbye"]
+    },
     "main_menu": {
       "text": "What can I get for ye?",
       "options": ["browse_shop", "sell_items", "ask_about_durability", "goodbye"]

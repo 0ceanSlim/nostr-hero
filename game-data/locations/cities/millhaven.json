@@ -31,21 +31,38 @@
           "id": "burrowlock",
           "name": "The Burrowlock",
           "description": "Each family in Millhaven maintains shared storage burrows beneath their villages. Cozy underground chambers lined with cedar, each secured with unique brass locks.",
-          "npcs": ["keywarden"],
           "open": "always",
           "close": null
         },
-
         {
           "id": "general_store",
           "name": "Haversham's General Store",
           "description": "Pip Haversham's tidy family shop, offering honest prices on essential supplies for village life and adventuring.",
-          "npcs": ["village-shopkeeper"],
           "open": 3,
           "close": 8
+        },
+        {
+          "id": "pip_home",
+          "name": "Pip's Private Residence",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "marigold_quarters",
+          "name": "Marigold's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "tobias_quarters",
+          "name": "Tobias's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
-      ],
-      "npcs": []
+      ]
     },
     "east": {
       "id": "millhaven-east",
@@ -60,7 +77,6 @@
           "id": "village_inn",
           "name": "The Grain & Grape Inn",
           "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
-          "npcs": ["village-innkeeper", "village-doorman"],
           "open": 7,
           "close": 4
         }
