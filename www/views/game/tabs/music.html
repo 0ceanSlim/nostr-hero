@@ -3,44 +3,59 @@
 <div id="music-panel" class="tab-panel hidden space-y-2">
     <h3 class="text-sm font-bold text-yellow-400 mb-2" style="font-size: 8px;">MUSIC & SOUND</h3>
 
-    <!-- Control Buttons -->
-    <div class="flex gap-1 mb-2">
-        <!-- Play/Pause Button -->
-        <button
-            id="music-play-pause-btn"
-            class="text-white"
-            style="font-size: 7px; background: #6b8e6b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
-            onclick="window.musicSystem.togglePlayPause()"
-        >
-            ⏸
-        </button>
+    <!-- Playback Controls -->
+    <div class="mb-2">
+        <!-- Play/Pause and Volume Row -->
+        <div class="flex gap-2 items-center mb-1">
+            <button
+                id="music-play-pause-btn"
+                class="text-white"
+                style="font-size: 9px; background: #6b8e6b; cursor: pointer; padding: 4px 8px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
+                onclick="window.musicSystem.togglePlayPause()"
+            >
+                ⏸
+            </button>
 
-        <!-- Auto Button -->
-        <button
-            id="music-auto-btn"
-            class="text-white flex-1"
-            style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
-        >
-            AUTO
-        </button>
+            <div class="flex-1 flex items-center gap-2">
+                <span style="font-size: 7px; color: #888;">VOL</span>
+                <input
+                    type="range"
+                    id="music-volume-slider"
+                    min="0"
+                    max="100"
+                    value="50"
+                    style="flex-1; height: 6px; background: #2a2a2a; border: 1px inset #666; cursor: pointer; -webkit-appearance: none; appearance: none;"
+                    oninput="window.musicSystem.setVolume(this.value / 100)"
+                />
+            </div>
+        </div>
 
-        <!-- Manual Button -->
-        <button
-            id="music-manual-btn"
-            class="text-white flex-1"
-            style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
-        >
-            MANUAL
-        </button>
+        <!-- Mode and Loop Row -->
+        <div class="flex gap-1">
+            <button
+                id="music-auto-btn"
+                class="text-white flex-1"
+                style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
+            >
+                AUTO
+            </button>
 
-        <!-- Loop Toggle Button -->
-        <button
-            id="music-loop-btn"
-            class="text-white flex-1"
-            style="font-size: 7px; background: #6b8e6b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #ffffff; border-bottom: 1px solid #ffffff; box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 rgba(255, 255, 255, 0.3);"
-        >
-            Loop: ON
-        </button>
+            <button
+                id="music-manual-btn"
+                class="text-white flex-1"
+                style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
+            >
+                MANUAL
+            </button>
+
+            <button
+                id="music-loop-btn"
+                class="text-white flex-1"
+                style="font-size: 7px; background: #6b8e6b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #ffffff; border-bottom: 1px solid #ffffff; box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 rgba(255, 255, 255, 0.3);"
+            >
+                Loop: ON
+            </button>
+        </div>
     </div>
 
     <!-- Track List Header -->

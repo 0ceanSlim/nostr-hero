@@ -16,6 +16,8 @@ let currentTrack = null;
 let playbackMode = 'auto'; // 'auto' or 'manual'
 let loopEnabled = true;
 let allTracks = []; // Loaded from music.json
+let manuallyPaused = false; // Track if user manually paused
+let currentVolume = 0.5; // Default volume
 
 /**
  * Initialize the music system
@@ -28,9 +30,11 @@ export function initMusicSystem(tracks = []) {
     // Load playback preferences from localStorage
     const savedMode = localStorage.getItem('musicMode');
     const savedLoop = localStorage.getItem('musicLoop');
+    const savedVolume = localStorage.getItem('musicVolume');
 
     if (savedMode) playbackMode = savedMode;
     if (savedLoop !== null) loopEnabled = savedLoop === 'true';
+    if (savedVolume !== null) currentVolume = parseFloat(savedVolume);
 }
 
 /**
@@ -118,16 +122,32 @@ export function toggleLoop() {
 /**
  * Play a specific track
  * @param {Object} track - Track object from getAllTracks()
+ * @param {boolean} forcePlay - Force play even if manually paused
  */
-export function playTrack(track) {
+export function playTrack(track, forcePlay = false) {
     if (!track.unlocked) {
         logger.warn('Cannot play locked track:', track.title);
         return;
     }
 
-    // Don't restart if same track is already playing
+    const isDifferentTrack = !currentTrack || currentTrack.title !== track.title;
+
+    // Don't restart if same track is already playing and not paused
     if (currentTrack && currentTrack.title === track.title && currentAudio && !currentAudio.paused) {
         logger.debug('Track already playing:', track.title);
+        return;
+    }
+
+    // If same track but paused, and not force playing, keep it paused
+    if (currentTrack && currentTrack.title === track.title && currentAudio && currentAudio.paused && !forcePlay) {
+        logger.debug('Track paused, not auto-resuming:', track.title);
+        return;
+    }
+
+    // If manually paused and not forcing, only block if it's the SAME track
+    // Allow new tracks to play even if manually paused
+    if (manuallyPaused && !forcePlay && !isDifferentTrack) {
+        logger.debug('Manually paused, not auto-playing same track');
         return;
     }
 
@@ -137,8 +157,11 @@ export function playTrack(track) {
     // Create new audio
     currentAudio = new Audio(track.file);
     currentAudio.loop = loopEnabled;
-    currentAudio.volume = 0.5;
+    currentAudio.volume = currentVolume;
     currentTrack = track;
+
+    // Clear manual pause flag when starting a new track
+    manuallyPaused = false;
 
     // Play
     currentAudio.play().catch(err => {
@@ -208,6 +231,7 @@ export function stopMusic() {
 export function pauseMusic() {
     if (currentAudio) {
         currentAudio.pause();
+        manuallyPaused = true; // Mark as manually paused
     }
 }
 
@@ -219,6 +243,7 @@ export function resumeMusic() {
         currentAudio.play().catch(err => {
             logger.debug('Music play prevented:', err);
         });
+        manuallyPaused = false; // Clear manual pause flag
     }
 }
 
@@ -240,6 +265,32 @@ export function togglePlayPause() {
     document.dispatchEvent(new CustomEvent('musicPlayPauseToggle', {
         detail: { paused: currentAudio.paused }
     }));
+}
+
+/**
+ * Set volume
+ * @param {number} volume - Volume level (0.0 to 1.0)
+ */
+export function setVolume(volume) {
+    currentVolume = Math.max(0, Math.min(1, volume));
+    localStorage.setItem('musicVolume', currentVolume.toString());
+
+    if (currentAudio) {
+        currentAudio.volume = currentVolume;
+    }
+
+    // Trigger event to update UI
+    document.dispatchEvent(new CustomEvent('musicVolumeChange', {
+        detail: { volume: currentVolume }
+    }));
+}
+
+/**
+ * Get current volume
+ * @returns {number} Current volume (0.0 to 1.0)
+ */
+export function getVolume() {
+    return currentVolume;
 }
 
 /**
@@ -278,6 +329,8 @@ window.musicSystem = {
     togglePlayPause,
     setPlaybackMode,
     toggleLoop,
+    setVolume,
+    getVolume,
     getPlaybackMode,
     isLoopEnabled,
     getCurrentTrack,

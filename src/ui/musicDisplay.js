@@ -7,7 +7,7 @@
  */
 
 import { logger } from '../lib/logger.js';
-import { getAllTracks, getCurrentTrack, getPlaybackMode, isLoopEnabled, playTrack, setPlaybackMode, toggleLoop } from '../systems/musicSystem.js';
+import { getAllTracks, getCurrentTrack, getPlaybackMode, isLoopEnabled, playTrack, setPlaybackMode, toggleLoop, getVolume } from '../systems/musicSystem.js';
 
 /**
  * Update music tab display
@@ -143,7 +143,8 @@ function updateTrackList(tracks, currentTrack) {
             trackName.addEventListener('click', () => {
                 const mode = getPlaybackMode();
                 if (mode === 'manual') {
-                    playTrack(track);
+                    // Force play when manually selecting a track
+                    playTrack(track, true);
                 }
             });
 
@@ -175,6 +176,19 @@ export function initMusicDisplay() {
         // Update button text on play/pause toggle
         document.addEventListener('musicPlayPauseToggle', (e) => {
             playPauseBtn.textContent = e.detail.paused ? '▶' : '⏸';
+        });
+    }
+
+    // Volume slider
+    const volumeSlider = document.getElementById('music-volume-slider');
+    if (volumeSlider) {
+        // Set initial value
+        const currentVolume = window.musicSystem.getVolume();
+        volumeSlider.value = Math.round(currentVolume * 100);
+
+        // Listen for volume changes from other sources
+        document.addEventListener('musicVolumeChange', (e) => {
+            volumeSlider.value = Math.round(e.detail.volume * 100);
         });
     }
 
