@@ -13,12 +13,14 @@ import '../systems/auth.js'; // Auto-initializes authentication
 
 // State management
 import { getGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';
-import { getItemById, getSpellById, getLocationById } from '../state/staticData.js';
+import { getItemById, getSpellById, getLocationById, getAllMusicTracks } from '../state/staticData.js';
 
 // Systems
 import { saveGameToLocal } from '../systems/saveSystem.js';
 import * as inventoryInteractions from '../systems/inventoryInteractions.js';
 import { openContainer, closeContainer } from '../systems/containers.js';
+import { initTimeClock, cleanupTimeClock } from '../systems/timeClock.js';
+import { initMusicSystem } from '../systems/musicSystem.js';
 
 // UI modules
 import { updateTimeDisplay } from '../ui/timeDisplay.js';
@@ -28,6 +30,8 @@ import { updateSpellsDisplay } from '../ui/spellsDisplay.js';
 import { updateAllDisplays } from '../ui/displayCoordinator.js';
 import { showMessage, showActionText, addGameLog } from '../ui/messaging.js';
 import { openGroundModal } from '../ui/groundItems.js';
+import { initMusicDisplay } from '../ui/musicDisplay.js';
+import * as musicDisplay from '../ui/musicDisplay.js';
 
 // Page initialization
 import { nostrHeroStartup } from '../pages/startup.js';
@@ -70,9 +74,30 @@ window.closeContainer = closeContainer;
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         inventoryInteractions.bindInventoryEvents();
+        initTimeClock();
+        // Music system will be initialized after game data loads
     });
 } else {
     inventoryInteractions.bindInventoryEvents();
+    initTimeClock();
+    // Music system will be initialized after game data loads
 }
+
+// Initialize music system after game data is loaded
+document.addEventListener('gameDataLoaded', () => {
+    const musicTracks = getAllMusicTracks();
+    initMusicSystem(musicTracks);
+    initMusicDisplay();
+
+    // Note: Auto-play happens after game state is loaded in gameState.js
+});
+
+// Export music display for global access
+window.musicDisplay = musicDisplay;
+
+// Cleanup time clock on page unload
+window.addEventListener('beforeunload', () => {
+    cleanupTimeClock();
+});
 
 logger.info('🎮 Game page bundle loaded');

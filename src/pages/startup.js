@@ -231,10 +231,6 @@ class NostrHeroStartup {
         showActionText('Welcome to Nostr Hero! Your adventure begins...', 'purple');
         console.log('✅ showActionText done');
 
-        // Show welcome popup after a short delay (every time)
-        console.log('⏰ Setting timeout for welcome popup...');
-        setTimeout(() => this.showWelcomePopup(), 1000);
-
         // Now initialize the actual game (load save data and render UI)
         console.log('🎮 Calling initializeGame() to load save data and render UI...');
         if (typeof window.initializeGame === 'function') {

@@ -13,11 +13,12 @@ import (
 
 // GameData represents the complete static game data bundle
 type GameData struct {
-	Items     []Item     `json:"items"`
-	Spells    []Spell    `json:"spells"`
-	Monsters  []Monster  `json:"monsters"`
-	Locations []Location `json:"locations"`
-	Packs     []Pack     `json:"packs"`
+	Items       []Item       `json:"items"`
+	Spells      []Spell      `json:"spells"`
+	Monsters    []Monster    `json:"monsters"`
+	Locations   []Location   `json:"locations"`
+	Packs       []Pack       `json:"packs"`
+	MusicTracks []MusicTrack `json:"music_tracks"`
 }
 
 // Item represents game items
@@ -72,6 +73,14 @@ type Pack struct {
 	Items []interface{} `json:"items"`
 }
 
+// MusicTrack represents music tracks in the game
+type MusicTrack struct {
+	Title      string `json:"title"`
+	File       string `json:"file"`
+	UnlocksAt  string `json:"unlocks_at,omitempty"`
+	AutoUnlock bool   `json:"auto_unlock,omitempty"`
+}
+
 // NPC represents non-player characters
 type NPC struct {
 	ID          string                 `json:"id"`
@@ -95,7 +104,7 @@ func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 	gameData := GameData{}
 
 	// Load all static data in parallel
-	errChan := make(chan error, 5)
+	errChan := make(chan error, 6)
 
 	go func() {
 		var err error
@@ -127,8 +136,14 @@ func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 		errChan <- err
 	}()
 
+	go func() {
+		var err error
+		gameData.MusicTracks, err = LoadAllMusicTracks(database)
+		errChan <- err
+	}()
+
 	// Wait for all operations to complete
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 6; i++ {
 		if err := <-errChan; err != nil {
 			log.Printf("Error loading game data: %v", err)
 			http.Error(w, "Failed to load game data", http.StatusInternalServerError)
@@ -145,8 +160,8 @@ func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Served game data: %d items, %d spells, %d monsters, %d locations, %d packs",
-		len(gameData.Items), len(gameData.Spells), len(gameData.Monsters), len(gameData.Locations), len(gameData.Packs))
+	log.Printf("Served game data: %d items, %d spells, %d monsters, %d locations, %d packs, %d music tracks",
+		len(gameData.Items), len(gameData.Spells), len(gameData.Monsters), len(gameData.Locations), len(gameData.Packs), len(gameData.MusicTracks))
 }
 
 // Individual endpoints for specific data types
@@ -484,4 +499,23 @@ func LoadAllNPCs(database *sql.DB) ([]NPC, error) {
 	}
 
 	return npcs, nil
+}
+
+func LoadAllMusicTracks(database *sql.DB) ([]MusicTrack, error) {
+	var dataJSON string
+	err := database.QueryRow("SELECT data FROM music_tracks WHERE id = 'music'").Scan(&dataJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query music_tracks: %v", err)
+	}
+
+	// Parse the JSON data
+	var musicData struct {
+		Tracks []MusicTrack `json:"tracks"`
+	}
+
+	if err := json.Unmarshal([]byte(dataJSON), &musicData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal music data: %v", err)
+	}
+
+	return musicData.Tracks, nil
 }

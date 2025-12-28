@@ -7,17 +7,10 @@
   "type": "Adventuring Gear",
   "weight": 0.5,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
   "rarity": "common",
-  "tags": [],
-  "notes": [
-    "adds 8 inventory slots"
-  ],
+  "tags": ["container"],
+  "notes": ["adds 8 inventory slots"],
   "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
   "ammunition": "",
   "image": "/res/img/items/sack.png"
 }

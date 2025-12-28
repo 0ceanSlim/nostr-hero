@@ -6,24 +6,18 @@
   "type": "Druidic Focus",
   "weight": 1,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
   "ammunition": "",
   "img": "equipment/druidic-focus.jpg",
   "range": "null",
   "range-long": "null",
   "rarity": "common",
   "substitutes": "",
-  "tags": [
-    "focus",
-    "equipment"
-  ],
+  "tags": ["focus", "equipment"],
   "provides": "tree-sap",
   "notes": [
     "Can be used as a spellcasting focus for druidic magic",
     "Provides unlimited Tree Sap for poison and transformation magic"
   ],
-  "Gear_Slot": "hands",
+  "gear_slot": "hands",
   "image": "/res/img/items/yew-wand.png"
 }

@@ -6,16 +6,13 @@
   "type": "Adventuring Gear",
   "weight": 3,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
   "img": "equipment/adventuring-gear.jpg",
   "rarity": "common",
-  "tags": [],
+  "tags": ["container", "equipment"],
   "ai_description": "Leather tome with brass clasp, arcane symbols, and blank pages",
-  "notes": [],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/spellbook.png"
+  "notes": [
+    "when equipped, should add a d3 to spell damages, maybe other bonuses"
+  ],
+  "image": "/res/img/items/spellbook.png",
+  "allowed_types": "spell-scroll"
 }

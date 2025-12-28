@@ -381,6 +381,7 @@ export async function initializeGame() {
         document.getElementById('all-monsters').textContent = JSON.stringify(gameData.monsters || []);
         document.getElementById('all-locations').textContent = JSON.stringify(gameData.locations || []);
         document.getElementById('all-packs').textContent = JSON.stringify(gameData.packs || []);
+        document.getElementById('all-music-tracks').textContent = JSON.stringify(gameData.music_tracks || []);
 
         // Load NPCs separately
         const npcsResponse = await fetch('/api/npcs');
@@ -390,7 +391,10 @@ export async function initializeGame() {
             logger.info(`Loaded ${npcs?.length || 0} NPCs`);
         }
 
-        logger.info(`Loaded game data: ${gameData.items?.length || 0} items, ${gameData.spells?.length || 0} spells, ${gameData.monsters?.length || 0} monsters, ${gameData.locations?.length || 0} locations`);
+        logger.info(`Loaded game data: ${gameData.items?.length || 0} items, ${gameData.spells?.length || 0} spells, ${gameData.monsters?.length || 0} monsters, ${gameData.locations?.length || 0} locations, ${gameData.music_tracks?.length || 0} music tracks`);
+
+        // Trigger game data loaded event for music system
+        document.dispatchEvent(new Event('gameDataLoaded'));
 
         // Check if we're loading a specific save
         const session = window.sessionManager.getSession();
@@ -425,6 +429,12 @@ export async function initializeGame() {
                 await refreshGameState();
 
                 logger.info('✅ Save file loaded successfully!');
+
+                // Auto-play location music now that state is loaded
+                if (window.musicSystem && window.musicSystem.playLocationMusic) {
+                    logger.debug('Triggering auto-play for location music');
+                    window.musicSystem.playLocationMusic();
+                }
 
             } catch (saveError) {
                 logger.error('Failed to load specific save:', saveError);

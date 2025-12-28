@@ -1,9 +1,53 @@
 {{define "game/tabs/music.html"}}
 <!-- Music Tab -->
-<div id="music-panel" class="tab-panel hidden space-y-3">
-    <h3 class="text-sm font-bold text-yellow-400 mb-2">MUSIC & SOUND</h3>
-    <div class="text-sm text-gray-400">
-        <p>Music controls coming soon...</p>
+<div id="music-panel" class="tab-panel hidden space-y-2">
+    <h3 class="text-sm font-bold text-yellow-400 mb-2" style="font-size: 8px;">MUSIC & SOUND</h3>
+
+    <!-- Control Buttons -->
+    <div class="flex gap-1 mb-2">
+        <!-- Auto Button -->
+        <button
+            id="music-auto-btn"
+            class="text-white flex-1"
+            style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
+        >
+            AUTO
+        </button>
+
+        <!-- Manual Button -->
+        <button
+            id="music-manual-btn"
+            class="text-white flex-1"
+            style="font-size: 7px; background: #6b7a9e; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3);"
+        >
+            MANUAL
+        </button>
+
+        <!-- Loop Toggle Button -->
+        <button
+            id="music-loop-btn"
+            class="text-white flex-1"
+            style="font-size: 7px; background: #6b8e6b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #ffffff; border-bottom: 1px solid #ffffff; box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 rgba(255, 255, 255, 0.3);"
+        >
+            Loop: ON
+        </button>
+    </div>
+
+    <!-- Track List Header -->
+    <div class="text-xs text-gray-400 mb-1" style="font-size: 7px;">
+        <span style="color: #6b8e6b;">● Unlocked</span>
+        <span class="ml-2" style="color: #9e6b6b;">● Locked</span>
+    </div>
+
+    <!-- Track List (Scrollable) -->
+    <div id="music-track-list" class="space-y-0.5 overflow-y-auto" style="max-height: 200px; background: #1a1a1a; border: 1px solid #404040; padding: 2px;">
+        <!-- Tracks will be populated by JavaScript -->
+    </div>
+
+    <!-- Attribution -->
+    <div class="text-xs text-gray-500 mt-2" style="font-size: 6px;">
+        <p>Music by Medieval Lofi</p>
+        <p>CC BY-SA 4.0</p>
     </div>
 </div>
 {{end}}

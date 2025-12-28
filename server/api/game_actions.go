@@ -112,6 +112,8 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleRestAction(state, action.Params)
 	case "advance_time":
 		return handleAdvanceTimeAction(state, action.Params)
+	case "update_time":
+		return handleUpdateTimeAction(state, action.Params)
 	case "vault_deposit":
 		return handleVaultDepositAction(state, action.Params)
 	case "vault_withdraw":
@@ -176,15 +178,6 @@ func handleMoveAction(state *SaveFile, params map[string]interface{}) (*GameActi
 	}
 	if !discovered {
 		state.LocationsDiscovered = append(state.LocationsDiscovered, location)
-	}
-
-	// Advance time by 1 segment when moving locations
-	timeParams := map[string]interface{}{
-		"segments": float64(1),
-	}
-	_, err := handleAdvanceTimeAction(state, timeParams)
-	if err != nil {
-		log.Printf("⚠️ Failed to advance time: %v", err)
 	}
 
 	return &GameActionResponse{
@@ -530,23 +523,27 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*G
 		segments = 1 // Default to 1 time segment
 	}
 
-	newTime := state.TimeOfDay + int(segments)
-	daysAdvanced := newTime / 24
-	state.CurrentDay += daysAdvanced
-	state.TimeOfDay = newTime % 24
+	// Convert hours to minutes (segments is in hours, time_of_day is now in minutes)
+	minutesToAdvance := int(segments) * 60
 
-	// Update fatigue counter (increments every 4 hours)
-	state.FatigueCounter += int(segments)
-	if state.FatigueCounter >= 4 {
+	// Advance time in minutes (0-1439 range)
+	state.TimeOfDay += minutesToAdvance
+	daysAdvanced := state.TimeOfDay / 1440
+	state.CurrentDay += daysAdvanced
+	state.TimeOfDay = state.TimeOfDay % 1440
+
+	// Update fatigue counter (increments every 240 minutes = 4 hours)
+	state.FatigueCounter += float64(minutesToAdvance)
+	if state.FatigueCounter >= 240.0 {
 		state.Fatigue++
 		state.FatigueCounter = 0
 	}
 
-	// Update hunger counter (decreases every 6 hours, or 12 if already hungry)
-	state.HungerCounter += int(segments)
-	hungerThreshold := 6
+	// Update hunger counter (decreases every 360 minutes = 6 hours, or 720 minutes = 12 hours if already hungry)
+	state.HungerCounter += float64(minutesToAdvance)
+	hungerThreshold := 360.0 // 6 hours in minutes
 	if state.Hunger <= 1 {
-		hungerThreshold = 12 // Slower when already hungry
+		hungerThreshold = 720.0 // 12 hours in minutes (slower when already hungry)
 	}
 	if state.HungerCounter >= hungerThreshold {
 		if state.Hunger > 0 {
@@ -558,6 +555,44 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*G
 	return &GameActionResponse{
 		Success: true,
 		Message: fmt.Sprintf("Advanced %d time segment(s)", int(segments)),
+	}, nil
+}
+
+// handleUpdateTimeAction syncs time from frontend clock to backend state
+func handleUpdateTimeAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+	// Update time_of_day (minutes in day, 0-1439)
+	if timeOfDay, ok := params["time_of_day"].(float64); ok {
+		state.TimeOfDay = int(timeOfDay)
+	}
+
+	// Update current_day
+	if currentDay, ok := params["current_day"].(float64); ok {
+		state.CurrentDay = int(currentDay)
+	}
+
+	// Update fatigue counter (in minutes)
+	if fatigueCounter, ok := params["fatigue_counter"].(float64); ok {
+		state.FatigueCounter = fatigueCounter
+	}
+
+	// Update hunger counter (in minutes)
+	if hungerCounter, ok := params["hunger_counter"].(float64); ok {
+		state.HungerCounter = hungerCounter
+	}
+
+	// Update fatigue level
+	if fatigue, ok := params["fatigue"].(float64); ok {
+		state.Fatigue = int(fatigue)
+	}
+
+	// Update hunger level
+	if hunger, ok := params["hunger"].(float64); ok {
+		state.Hunger = int(hunger)
+	}
+
+	return &GameActionResponse{
+		Success: true,
+		Message: "Time updated",
 	}, nil
 }
 
@@ -1099,15 +1134,6 @@ func handleEnterBuildingAction(state *SaveFile, params map[string]interface{}) (
 func handleExitBuildingAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
 	// Update state to remove building (back outdoors)
 	state.Building = ""
-
-	// Advance time by 1 hour when exiting building
-	timeParams := map[string]interface{}{
-		"segments": float64(1),
-	}
-	_, err := handleAdvanceTimeAction(state, timeParams)
-	if err != nil {
-		log.Printf("⚠️ Failed to advance time: %v", err)
-	}
 
 	log.Printf("🚪 Exited building")
 

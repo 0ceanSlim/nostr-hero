@@ -44,7 +44,7 @@
           "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
           "npcs": ["general-merchant"],
           "open": 6,
-          "close": 10
+          "close": 22
         }
       ],
       "npcs": []
@@ -64,7 +64,7 @@
           "description": "A crystalline spire where court wizards study the arcane arts.",
           "npcs": [],
           "open": 8,
-          "close": 8
+          "close": 20
         }
       ],
       "npcs": [],
@@ -93,7 +93,7 @@
           "description": "Well-maintained stables offering cart services to other cities.",
           "npcs": [],
           "open": 6,
-          "close": 10
+          "close": 22
         }
       ],
       "npcs": [],
@@ -114,7 +114,7 @@
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
           "npcs": [],
           "open": 7,
-          "close": 7
+          "close": 19
         }
       ],
       "npcs": [],
@@ -135,7 +135,7 @@
           "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
           "npcs": [],
           "open": 7,
-          "close": 9
+          "close": 21
         },
         {
           "id": "tavern_golden_griffin",

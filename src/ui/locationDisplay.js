@@ -17,33 +17,7 @@ import { moveToLocation } from '../logic/mechanics.js';
 import { updateAllDisplays } from './displayCoordinator.js';
 
 // Module-level state
-let currentLocationMusic = null;
 let lastDisplayedLocation = null;
-
-/**
- * Play background music for a location
- * @param {string} musicPath - Path to the music file
- */
-export function playLocationMusic(musicPath) {
-    // Stop current music if playing
-    if (currentLocationMusic) {
-        currentLocationMusic.pause();
-        currentLocationMusic.currentTime = 0;
-    }
-
-    // Create new audio element
-    currentLocationMusic = new Audio(musicPath);
-    currentLocationMusic.loop = true;
-    currentLocationMusic.volume = 0.5; // Adjust volume as needed
-
-    // Play the music
-    currentLocationMusic.play().catch(err => {
-        logger.debug('Music autoplay prevented:', err);
-        // User interaction may be required to start audio
-    });
-
-    logger.debug('Playing location music:', musicPath);
-}
 
 /**
  * Display current location with navigation, buildings, and NPCs
@@ -87,8 +61,8 @@ export function displayCurrentLocation() {
     }
 
     // Update music (use city's music for all districts)
-    if (cityData.music) {
-        playLocationMusic(cityData.music);
+    if (cityData.music && window.musicSystem) {
+        window.musicSystem.playLocationMusic();
     }
 
     // Update city name (top of scene)
@@ -227,8 +201,9 @@ export function displayCurrentLocation() {
         const buildingButtonContainer = buildingContainer.querySelector('div');
 
         if (buildings && buildings.length > 0) {
-            // Get current time of day from game state
-            const currentTime = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
+            // Get current time of day from game state (convert minutes to hours)
+            const timeInMinutes = state.character?.time_of_day !== undefined ? state.character.time_of_day : 720;
+            const currentTime = Math.floor(timeInMinutes / 60) % 24;
 
             buildings.forEach(building => {
                 // Check if this is the special "Exit Building" button
@@ -322,31 +297,42 @@ export function createActionButton(text, onClick, classes = 'bg-gray-600 hover:b
 export function createLocationButton(text, onClick, type = 'navigation') {
     const button = document.createElement('button');
 
-    // Different colors for different types
+    // Different muted colors for different types (Win95-style)
     const typeStyles = {
-        navigation: 'bg-blue-700 hover:bg-blue-600 border-blue-900',      // City districts - blue
-        environment: 'bg-red-700 hover:bg-red-600 border-red-900',        // Outside city - red
-        building: 'bg-green-700 hover:bg-green-600 border-green-900',     // Open buildings - green
-        'building-closed': 'bg-gray-500 hover:bg-gray-600 border-gray-700 text-black',  // Closed buildings - grey with black text
-        npc: 'bg-purple-700 hover:bg-purple-600 border-purple-900'
+        navigation: '#6b7a9e',      // City districts - muted blue
+        environment: '#9e6b6b',     // Outside city - muted red
+        building: '#6b8e6b',        // Open buildings - muted green
+        'building-closed': '#808080', // Closed buildings - grey
+        npc: '#8b6b9e'              // NPCs - muted purple
     };
 
-    const colorClass = typeStyles[type] || typeStyles.navigation;
+    const bgColor = typeStyles[type] || typeStyles.navigation;
+    const textColor = type === 'building-closed' ? '#000000' : '#ffffff';
 
-    // For closed buildings, text color is already in colorClass, otherwise default to white
-    const textColor = type === 'building-closed' ? '' : 'text-white';
-
-    button.className = `${colorClass} ${textColor} border-2 px-2 py-1 font-bold transition-all leading-tight text-center overflow-hidden`;
+    button.className = 'text-white transition-all leading-tight text-center overflow-hidden';
     button.style.fontSize = '7px';
-    button.style.imageRendering = 'pixelated';
-    button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
+    button.style.background = bgColor;
+    button.style.color = textColor;
+    button.style.cursor = 'pointer';
+    button.style.padding = '2px 4px';
+    button.style.borderTop = '1px solid #ffffff';
+    button.style.borderLeft = '1px solid #ffffff';
+    button.style.borderRight = '1px solid #000000';
+    button.style.borderBottom = '1px solid #000000';
+    button.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3)';
     button.style.overflowWrap = 'break-word';
     button.style.hyphens = 'none';
     button.style.display = 'flex';
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
     button.textContent = text;
-    button.addEventListener('click', onClick);
+    button.addEventListener('click', () => {
+        // Auto-play time when taking any action
+        if (window.timeClock && window.timeClock.play) {
+            window.timeClock.play();
+        }
+        onClick();
+    });
     return button;
 }
 
@@ -499,9 +485,17 @@ export function showNPCDialogue(dialogueData, npcMessage) {
     if (dialogueData.options && dialogueData.options.length > 0) {
         dialogueData.options.forEach(optionKey => {
             const button = document.createElement('button');
-            button.className = 'bg-yellow-700 hover:bg-yellow-600 border-2 border-yellow-900 text-white px-2 py-1 font-bold transition-all';
-            button.style.fontSize = '10px';
-            button.style.clipPath = 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))';
+            button.className = 'text-white transition-all';
+            button.style.fontSize = '7px';
+            button.style.background = '#9e8b6b'; // Muted yellow/tan
+            button.style.color = '#ffffff';
+            button.style.cursor = 'pointer';
+            button.style.padding = '2px 4px';
+            button.style.borderTop = '1px solid #ffffff';
+            button.style.borderLeft = '1px solid #ffffff';
+            button.style.borderRight = '1px solid #000000';
+            button.style.borderBottom = '1px solid #000000';
+            button.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3)';
 
             // Format option text (convert snake_case to readable)
             const optionText = formatDialogueOption(optionKey);

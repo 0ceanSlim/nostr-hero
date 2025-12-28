@@ -15,8 +15,19 @@ import { getGameStateSync } from '../state/gameState.js';
  */
 export function updateTimeDisplay() {
     const state = getGameStateSync();
-    const timeOfDay = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
     const currentDay = state.character?.current_day || 1;
+
+    // Get current time including minutes from time clock
+    let hour, minute;
+    if (window.timeClock && window.timeClock.getCurrentTime) {
+        const currentTime = window.timeClock.getCurrentTime();
+        hour = currentTime.hour;
+        minute = currentTime.minute;
+    } else {
+        // Fallback if timeClock not available
+        hour = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
+        minute = 0;
+    }
 
     // Map time (0-23) to 12 PNG filenames (each image covers 2 hours)
     const timeImages = [
@@ -35,23 +46,23 @@ export function updateTimeDisplay() {
     ];
 
     // Calculate which image to use (divide by 2 since each image covers 2 hours)
-    const imageIndex = Math.floor(timeOfDay / 2);
+    const imageIndex = Math.floor(hour / 2);
 
     // Update time image
     const timeImage = document.getElementById('time-of-day-image');
     if (timeImage) {
         const imageName = timeImages[imageIndex] || timeImages[6]; // Default to noon if invalid
         timeImage.src = `/res/img/time/${imageName}`;
-        timeImage.alt = `Time: ${formatTime(timeOfDay)}`;
+        timeImage.alt = `Time: ${formatTime(hour, minute)}`;
     }
 
-    // Update time text (AM/PM format)
-    const timeText = document.getElementById('time-of-day-text');
-    if (timeText) {
-        timeText.textContent = formatTime(timeOfDay);
+    // Update time text in stats bar
+    const timeTextStats = document.getElementById('time-of-day-text-stats');
+    if (timeTextStats) {
+        timeTextStats.textContent = formatTime(hour, minute);
     }
 
-    // Update day counter
+    // Update day counter in scene (top-right)
     const dayCounter = document.getElementById('day-counter');
     if (dayCounter) {
         dayCounter.textContent = `Day ${currentDay}`;
@@ -61,13 +72,16 @@ export function updateTimeDisplay() {
 /**
  * Helper function to format time in AM/PM format
  * @param {number} hour - Hour in 24-hour format (0-23)
+ * @param {number} minute - Minute (0-59)
  * @returns {string} Formatted time string
  */
-export function formatTime(hour) {
-    if (hour === 0) return '12 AM';
-    if (hour < 12) return `${hour} AM`;
-    if (hour === 12) return '12 PM';
-    return `${hour - 12} PM`;
+export function formatTime(hour, minute = 0) {
+    const minuteStr = minute.toString().padStart(2, '0');
+
+    if (hour === 0) return `12:${minuteStr} AM`;
+    if (hour < 12) return `${hour}:${minuteStr} AM`;
+    if (hour === 12) return `12:${minuteStr} PM`;
+    return `${hour - 12}:${minuteStr} PM`;
 }
 
 logger.debug('Time display module loaded');

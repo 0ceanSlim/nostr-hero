@@ -1,15 +1,42 @@
 {{define "game/player-stats.html"}}
 <!-- Player Stats Area - Dark Win95 Style -->
 <div class="p-1 space-y-1" style="flex-shrink: 0; font-size: 7px;">
-    <!-- Character Name, Level, and Gold -->
+    <!-- Character Name, Level, and Time Controls -->
     <div class="flex flex-col gap-0.5">
         <div class="flex items-center justify-between font-bold text-white" style="font-size: 8px;">
-            <div class="truncate">
-                <span id="char-name">Character</span> Lv.<span id="char-level">1</span>
-            </div>
             <div class="flex items-center gap-0.5 flex-shrink-0">
-                <span id="char-gold">0</span>
-                <img src="/res/img/items/gold-piece.png" alt="Gold" class="w-3 h-3">
+                <!-- Wait Button -->
+                <button
+                    id="time-wait-button"
+                    class="text-xs font-bold text-white"
+                    style="font-size: 6px; background: #8b9aaa; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #5a6978, inset 1px 1px 0 #bcc9d6;"
+                    title="Wait 1 hour"
+                >
+                    🕐
+                </button>
+                <!-- Play Button (initially visible) -->
+                <button
+                    id="time-play-button"
+                    class="text-xs font-bold text-white"
+                    style="font-size: 6px; background: #6b8e6b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #ffffff; border-left: 1px solid #ffffff; border-right: 1px solid #000000; border-bottom: 1px solid #000000; box-shadow: inset -1px -1px 0 #4a6b4a, inset 1px 1px 0 #8faf8f;"
+                    onclick="window.timeClock.play()"
+                >
+                    ▶
+                </button>
+                <!-- Pause Button (initially hidden) -->
+                <button
+                    id="time-pause-button"
+                    class="text-xs font-bold text-white"
+                    style="font-size: 6px; background: #a65b5b; cursor: pointer; padding: 2px 4px; border-top: 1px solid #000000; border-left: 1px solid #000000; border-right: 1px solid #ffffff; border-bottom: 1px solid #ffffff; box-shadow: inset 1px 1px 0 #7a4242, inset -1px -1px 0 #c48080; display: none;"
+                    onclick="window.timeClock.pause()"
+                >
+                    ⏸
+                </button>
+                <!-- Time of day -->
+                <span id="time-of-day-text-stats" class="text-xs font-bold text-white" style="font-size: 7px;">12:00 PM</span>
+            </div>
+            <div class="truncate flex-1 text-right">
+                <span id="char-name">Character</span> Lv.<span id="char-level">1</span>
             </div>
         </div>
     </div>

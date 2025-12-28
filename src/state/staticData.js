@@ -125,4 +125,18 @@ export function getNPCById(npcId) {
     return allNPCs.find(npc => npc.id === npcId);
 }
 
+/**
+ * Get all music tracks from cached data
+ * @returns {Array} Array of music track objects
+ */
+export function getAllMusicTracks() {
+    const element = document.getElementById('all-music-tracks');
+    if (!element) {
+        logger.warn('all-music-tracks element not found in DOM');
+        return [];
+    }
+
+    return JSON.parse(element.textContent || '[]');
+}
+
 logger.debug('Static data lookup module loaded');

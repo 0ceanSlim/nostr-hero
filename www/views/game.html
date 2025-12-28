@@ -28,6 +28,7 @@
   <div id="all-locations">[]</div>
   <div id="all-packs">[]</div>
   <div id="all-npcs">[]</div>
+  <div id="all-music-tracks">[]</div>
 </div>
 
 <!-- Message Area (Fixed Position) -->
@@ -269,6 +270,11 @@
           panels[tab].classList.add("hidden");
         }
       });
+
+      // Update music display when opening music tab
+      if (tabName === 'music' && window.musicDisplay && window.musicDisplay.updateMusicDisplay) {
+        window.musicDisplay.updateMusicDisplay();
+      }
     }
 
     // Game UI Scaling System

@@ -24,16 +24,16 @@ type SaveFile struct {
 	MaxHP               int                    `json:"max_hp"`
 	Mana                int                    `json:"mana"`
 	MaxMana             int                    `json:"max_mana"`
-	Fatigue        int `json:"fatigue"`
-	FatigueCounter int `json:"fatigue_counter"` // Increments each time segment, +1 fatigue when reaches 2
-	Hunger         int `json:"hunger"`          // 0-3 scale: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
-	HungerCounter  int `json:"hunger_counter"`  // Increments each time segment, -1 hunger when reaches threshold (3 or 6)
+	Fatigue             int                    `json:"fatigue"`
+	FatigueCounter      float64                `json:"fatigue_counter"` // Minutes until next fatigue increase (0-239)
+	Hunger              int                    `json:"hunger"`          // 0-3 scale: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
+	HungerCounter       float64                `json:"hunger_counter"`  // Minutes until next hunger decrease (0-359 or 0-719)
 	Stats               map[string]interface{} `json:"stats"`
 	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
 	Building            string                 `json:"building"`     // Building ID or empty for outdoors
 	CurrentDay          int                    `json:"current_day"`
-	TimeOfDay           int                    `json:"time_of_day"` // 0-23 hours (0=midnight, 12=noon, 23=11 PM)
+	TimeOfDay           int                    `json:"time_of_day"` // Minutes in current day (0-1439, where 720=noon, 0=midnight)
 	Inventory           map[string]interface{} `json:"inventory"`
 	Vaults              []map[string]interface{} `json:"vaults"`
 	KnownSpells         []string               `json:"known_spells"`
