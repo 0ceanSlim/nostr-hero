@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"time"
@@ -21,6 +23,32 @@ import (
 var editor *itemeditor.Editor
 
 func main() {
+	// Command-line flags
+	migrateFlag := flag.Bool("migrate", false, "Run database migration and exit")
+	flag.Parse()
+
+	// Handle migration flag
+	if *migrateFlag {
+		fmt.Println("🔄 Running database migration...")
+		dbPath := "../www/game.db"
+
+		err := migration.Migrate(dbPath, func(status migration.Status) {
+			if status.Progress > 0 {
+				fmt.Printf("  %s (%d/%d)\n", status.Message, status.Progress, status.Total)
+			} else {
+				fmt.Printf("  %s\n", status.Message)
+			}
+		})
+
+		if err != nil {
+			fmt.Printf("❌ Migration failed: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("✅ Migration completed successfully!")
+		os.Exit(0)
+	}
+
 	// Initialize item editor
 	editor = itemeditor.New()
 

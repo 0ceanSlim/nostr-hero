@@ -22,14 +22,22 @@ CODEX is a comprehensive web-based GUI tool for editing, validating, and managin
 - **Image History** - Keeps history of all generated images
 - **Preview & Accept** - Review generated images before accepting
 
+#### Database Migration
+- **CLI Migration** - Run migrations from command line with `--migrate` flag
+- **GUI Migration** - Visual interface for migrating JSON to SQLite with progress tracking
+- **Status Monitoring** - Real-time migration progress updates
+
+#### Data Validation
+- **Comprehensive Checks** - Validate all game data for errors and inconsistencies
+- **Categorized Issues** - Errors, warnings, and info messages
+- **Detailed Reports** - File-by-file breakdown of validation issues
+
 ### 🚀 Planned Features
 
-- **Database Migration GUI** - Visual interface for migrating JSON to SQLite
 - **Spell Editor** - Edit D&D 5e spells
 - **Monster Editor** - Manage creature stat blocks
 - **Location Editor** - Edit world map and locations
 - **NPC Editor** - Manage NPC data
-- **Validation Suite** - Comprehensive data validation checks
 - **Bulk Operations** - Edit multiple items at once
 - **Export/Import** - Backup and restore game data
 
@@ -65,14 +73,10 @@ CODEX is a comprehensive web-based GUI tool for editing, validating, and managin
 
 From the `game-data/CODEX` directory:
 
+**Start the GUI (default)**:
 ```bash
-go run main.go
-```
-
-Or build and run:
-
-```bash
-go build -o codex.exe
+go run .
+# or
 ./codex.exe
 ```
 
@@ -80,6 +84,13 @@ The tool will:
 1. Start a web server on `http://localhost:8080`
 2. Automatically open your browser
 3. Load all items from `game-data/items/`
+
+**Run database migration from command line**:
+```bash
+./codex.exe --migrate
+```
+
+This will migrate all JSON game data to `www/game.db` and exit. Useful for CI/CD pipelines or automated builds.
 
 ### Interface Overview
 
@@ -140,10 +151,42 @@ Images are saved to:
 
 ```
 game-data/CODEX/
-├── main.go           # Main application
-├── go.mod            # Go module definition
-├── go.sum            # Go dependencies
-└── README.md         # This file
+├── codex.go                      # Main entry point
+├── go.mod, go.sum                # Go dependencies
+├── README.md                     # This file
+│
+├── templates/                    # HTML templates
+│   ├── home.html
+│   ├── item-editor.html
+│   ├── database-migration.html
+│   └── validation.html
+│
+├── static/                       # Static assets
+│   ├── css/                      # Stylesheets
+│   │   ├── codex.css
+│   │   ├── tool.css
+│   │   └── validation.css
+│   └── js/                       # JavaScript modules
+│       ├── item-editor.js
+│       ├── database-migration.js
+│       └── validation.js
+│
+├── item-editor/                  # Item editor package
+│   ├── editor.go
+│   ├── handlers.go
+│   └── refactor.go
+│
+├── config/                       # Configuration
+│   └── config.go
+│
+├── pixellab/                     # Image generation
+│   └── client.go
+│
+├── migration/                    # Database migration
+│   └── migration.go
+│
+└── validation/                   # Data validation
+    └── validation.go
 ```
 
 ### Data Flow
