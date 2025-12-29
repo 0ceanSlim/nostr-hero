@@ -4,24 +4,17 @@
   "ai_description": "sacred symbol on metal pendant, holy emblem with religious iconography and chain necklace",
   "price": 500,
   "type": "Holy Symbol",
-  "weight": 0.1,
+  "weight": 0,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
-  "img": "equipment/holy-symbol.jpg",
-  "range": "null",
-  "range-long": "null",
+  "gear_slot": "necklace",
   "rarity": "common",
   "tags": [
     "equipment"
   ],
-  "provides": "sacred-oil",
+  "img": "equipment/holy-symbol.jpg",
+  "image": "/res/img/items/emblem.png",
   "notes": [
     "Can be used as a spellcasting focus for divine magic",
     "Provides unlimited Sacred Oil for healing and blessing spells"
-  ],
-  "gear_slot": "necklace",
-  "image": "/res/img/items/emblem.png"
+  ]
 }

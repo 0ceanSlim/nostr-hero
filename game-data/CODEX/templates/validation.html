@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Validation - CODEX</title>
+    <link rel="stylesheet" href="/static/css/validation.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-link">← Back to Home</a>
+            <div class="title">✅ Data Validation</div>
+        </div>
+
+        <div class="content">
+            <p style="margin-bottom: 20px; color: #6272a4;">
+                Validate all game data files for consistency, required fields, and common errors.
+            </p>
+
+            <button class="button" onclick="runValidation()">
+                Run Validation
+            </button>
+
+            <div class="results" id="results">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFiles">0</div>
+                        <div class="stat-label">Files Checked</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #ff5555;" id="errors">0</div>
+                        <div class="stat-label">Errors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #f1fa8c;" id="warnings">0</div>
+                        <div class="stat-label">Warnings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #8be9fd;" id="info">0</div>
+                        <div class="stat-label">Info</div>
+                    </div>
+                </div>
+
+                <div id="issues"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/validation.js"></script>
+</body>
+</html>

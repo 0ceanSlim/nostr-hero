@@ -19,6 +19,8 @@ item-editor-gui.exe
 nostr-hero.exe
 nostr-hero
 pixellab-gen.exe
+game-data/CODEX/codex.exe
+game-data/CODEX/codex
 
 # Development configs (examples in docs/development/)
 .air.toml
