@@ -21,42 +21,42 @@
     },
     {
       "title": "A Just King",
-      "file": "/res/aud/A Just King.wav",
+      "file": "/res/aud/A Just King.mp3",
       "unlocks_at": "kingdom"
     },
     {
       "title": "Healing",
-      "file": "/res/aud/Healing.wav",
+      "file": "/res/aud/Healing.mp3",
       "unlocks_at": "millhaven"
     },
     {
       "title": "God of Dreams",
-      "file": "/res/aud/God of Dreams.wav",
+      "file": "/res/aud/God of Dreams.mp3",
       "unlocks_at": "goldhaven"
     },
     {
       "title": "Breath Of The Mountains",
-      "file": "/res/aud/Breath Of The Mountains.wav",
+      "file": "/res/aud/Breath Of The Mountains.mp3",
       "unlocks_at": "ironpeak"
     },
     {
       "title": "Mellow Times",
-      "file": "/res/aud/Mellow Times.wav",
+      "file": "/res/aud/Mellow Times.mp3",
       "unlocks_at": "marshlight"
     },
     {
       "title": "Folklore",
-      "file": "/res/aud/Folklore.wav",
+      "file": "/res/aud/Folklore.mp3",
       "unlocks_at": "verdant"
     },
     {
       "title": "Mysteries",
-      "file": "/res/aud/Mysteries.wav",
+      "file": "/res/aud/Mysteries.mp3",
       "unlocks_at": "mistmarsh-swamplands"
     },
     {
       "title": "Citadel in the Mountains",
-      "file": "/res/aud/Citadel in the Mountains.wav",
+      "file": "/res/aud/Citadel in the Mountains.mp3",
       "unlocks_at": "cragspire-mountains"
     }
   ]
