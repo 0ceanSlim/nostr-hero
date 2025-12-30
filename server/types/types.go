@@ -79,3 +79,45 @@ type NPCScheduleInfo struct {
 	AvailableDialogue []string         `json:"available_dialogue"`
 	AvailableActions  []string         `json:"available_actions"`
 }
+
+// Shop-related types
+
+// ShopInventoryItem represents an item in a shop's inventory
+type ShopInventoryItem struct {
+	ItemID          string `json:"item_id"`
+	Stock           int    `json:"stock"`
+	MaxStock        int    `json:"max_stock"`
+	RestockRate     int    `json:"restock_rate"`
+	RestockInterval string `json:"restock_interval"`
+}
+
+// ShopConfig represents the static configuration from NPC JSON
+type ShopConfig struct {
+	ShopType            string              `json:"shop_type"`
+	BuysItems           bool                `json:"buys_items"`
+	BuyPriceMultiplier  float64             `json:"buy_price_multiplier"`  // What merchant pays player
+	SellPriceMultiplier float64             `json:"sell_price_multiplier"` // What player pays merchant
+	StartingGold        int                 `json:"starting_gold"`
+	MaxGold             int                 `json:"max_gold"`
+	GoldRegenRate       int                 `json:"gold_regen_rate"`
+	GoldRegenInterval   string              `json:"gold_regen_interval"`
+	Inventory           []ShopInventoryItem `json:"inventory"`
+}
+
+// ShopState represents the runtime state of a shop (stored in save file)
+type ShopState struct {
+	MerchantID  string         `json:"merchant_id"`
+	CurrentGold int            `json:"current_gold"`
+	LastRegen   string         `json:"last_regen"` // ISO timestamp
+	Stock       map[string]int `json:"stock"`      // item_id -> current quantity
+}
+
+// ShopTransaction represents a buy or sell transaction
+type ShopTransaction struct {
+	Npub       string `json:"npub"`
+	SaveID     string `json:"save_id"`
+	MerchantID string `json:"merchant_id"`
+	ItemID     string `json:"item_id"`
+	Quantity   int    `json:"quantity"`
+	Action     string `json:"action"` // "buy" or "sell"
+}

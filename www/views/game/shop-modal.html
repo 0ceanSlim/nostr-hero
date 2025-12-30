@@ -1,0 +1,81 @@
+{{define "game/shop-modal.html"}}
+<!-- Shop Modal Overlay (positioned over scene area only) -->
+<div id="shop-modal" class="hidden absolute z-50" style="top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); pointer-events: none;">
+    <div class="relative bg-win95-bgDark m-2" style="border: 2px solid #808080; max-width: 95%; margin-left: auto; margin-right: auto; margin-top: 10px; pointer-events: auto; max-height: 95%;">
+        <!-- Title Bar -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 px-2 py-1 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span style="font-size: 12px;">🏪</span>
+                <span id="shop-merchant-name" class="text-white font-bold" style="font-size: 9px;">Shop</span>
+            </div>
+            <button onclick="window.closeShop()" class="text-white hover:bg-red-600 px-1" style="font-size: 9px; background: #c0c0c0; color: black; border: 1px solid #000;">✕</button>
+        </div>
+
+        <!-- Shop Info -->
+        <div class="px-2 py-1 bg-win95-bgDark border-b border-gray-700">
+            <div class="flex items-center justify-between" style="font-size: 7px;">
+                <span class="text-gray-400">
+                    Merchant: <span id="shop-merchant-gold" class="text-yellow-400">0</span>g
+                </span>
+                <span class="text-gray-400">
+                    You: <span id="shop-player-gold" class="text-yellow-400">0</span>g
+                </span>
+            </div>
+        </div>
+
+        <!-- Shop Tabs -->
+        <div class="flex gap-1 px-2 pt-2 bg-win95-bgDark">
+            <button
+                id="shop-buy-tab"
+                onclick="window.switchShopTab('buy')"
+                class="px-2 py-1 font-bold text-white"
+                style="font-size: 7px; background: #15803d; border-top: 2px solid #22c55e; border-left: 2px solid #22c55e; border-right: 2px solid #166534; border-bottom: 2px solid #166534;">
+                BUY
+            </button>
+            <button
+                id="shop-sell-tab"
+                onclick="window.switchShopTab('sell')"
+                class="px-2 py-1 font-bold text-white"
+                style="font-size: 7px; background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a;">
+                SELL
+            </button>
+        </div>
+
+        <!-- Buy Tab Content -->
+        <div id="shop-buy-content" class="p-2 bg-win95-bgDark" style="max-height: 250px; overflow-y: auto;">
+            <!-- Item Grid -->
+            <div id="shop-item-grid" class="grid gap-1 mb-2" style="grid-template-columns: repeat(5, 1fr);">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Sell Tab Content -->
+        <div id="shop-sell-content" class="hidden p-2 bg-win95-bgDark" style="max-height: 250px; overflow-y: auto;">
+            <!-- Player Inventory Grid -->
+            <div class="text-xs mb-1" style="color: #9ca3af; font-size: 7px;">Your Items:</div>
+            <div id="shop-sell-grid" class="grid gap-1 mb-2" style="grid-template-columns: repeat(5, 1fr);">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Staging Area (initially hidden) -->
+            <div id="sell-staging" class="hidden mt-2 pt-2 border-t border-gray-700">
+                <div class="text-xs mb-1" style="color: #22c55e; font-size: 7px;">Selling:</div>
+                <div id="sell-staged-items" class="flex flex-wrap gap-1 mb-1">
+                    <!-- Staged item badges -->
+                </div>
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold" style="color: #22c55e; font-size: 7px;">
+                        Total: <span id="sell-total-value">0</span>g
+                    </span>
+                    <button id="sell-confirm-btn" onclick="window.confirmSellTransaction()" class="px-2 py-1 font-bold text-white" style="font-size: 7px; background: #ca8a04; border-top: 2px solid #fbbf24; border-left: 2px solid #fbbf24; border-right: 2px solid #a16207; border-bottom: 2px solid #a16207;">
+                        CONFIRM
+                    </button>
+                </div>
+                <button onclick="window.clearSellStaging()" class="w-full px-2 py-1 font-bold" style="font-size: 7px; background: #6b7280; color: white; border-top: 2px solid #9ca3af; border-left: 2px solid #9ca3af; border-right: 2px solid #374151; border-bottom: 2px solid #374151;">
+                    CLEAR
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

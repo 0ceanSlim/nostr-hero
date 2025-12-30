@@ -601,6 +601,18 @@ export async function selectDialogueOption(npcId, choice) {
                 await refreshGameState();
                 showVaultUI(result.delta.open_vault);
             }
+            // Check if shop should open
+            else if (result.delta?.open_shop) {
+                logger.debug('Opening shop for merchant:', result.delta.open_shop);
+                closeNPCDialogue();
+                await refreshGameState();
+                // Open shop with optional tab selection
+                const shopTab = result.delta.shop_tab || 'buy';
+                window.openShop(result.delta.open_shop);
+                if (shopTab === 'sell') {
+                    window.switchShopTab('sell');
+                }
+            }
             // Check if dialogue should close
             else if (result.delta?.npc_dialogue?.action === 'close') {
                 closeNPCDialogue();

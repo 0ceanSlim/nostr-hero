@@ -48,11 +48,16 @@ export function updateTimeDisplay() {
     // Calculate which image to use (divide by 2 since each image covers 2 hours)
     const imageIndex = Math.floor(hour / 2);
 
-    // Update time image
+    // Update time image (only if changed to avoid reloading)
     const timeImage = document.getElementById('time-of-day-image');
     if (timeImage) {
         const imageName = timeImages[imageIndex] || timeImages[6]; // Default to noon if invalid
-        timeImage.src = `/res/img/time/${imageName}`;
+        const newSrc = `/res/img/time/${imageName}`;
+        // Compare just the pathname to avoid full URL issues
+        const currentSrc = new URL(timeImage.src, window.location.origin).pathname;
+        if (currentSrc !== newSrc) {
+            timeImage.src = newSrc;
+        }
         timeImage.alt = `Time: ${formatTime(hour, minute)}`;
     }
 

@@ -907,25 +907,79 @@ func handleStackItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 		return nil, fmt.Errorf("items don't match for stacking")
 	}
 
-	// Get quantities
-	fromQty, _ := fromSlotMap["quantity"].(float64)
-	toQty, _ := toSlotMap["quantity"].(float64)
+	// Get item data to check max stack
+	itemData, err := db.GetItemByID(itemID)
+	if err != nil {
+		return nil, fmt.Errorf("item not found: %s", itemID)
+	}
 
-	// Combine stacks
-	newQty := int(fromQty) + int(toQty)
+	// Parse max stack from properties
+	maxStack := 1
+	if itemData.Properties != "" {
+		var properties map[string]interface{}
+		if err := json.Unmarshal([]byte(itemData.Properties), &properties); err == nil {
+			if val, ok := properties["stack"].(float64); ok {
+				maxStack = int(val)
+			}
+		}
+	}
+
+	// Get quantities - handle both int and float64 types
+	var fromQty, toQty int
+
+	// Convert from slot quantity (handle both int and float64)
+	switch v := fromSlotMap["quantity"].(type) {
+	case float64:
+		fromQty = int(v)
+	case int:
+		fromQty = v
+	default:
+		fromQty = 0
+	}
+
+	// Convert to slot quantity (handle both int and float64)
+	switch v := toSlotMap["quantity"].(type) {
+	case float64:
+		toQty = int(v)
+	case int:
+		toQty = v
+	default:
+		toQty = 0
+	}
+
+	log.Printf("📊 Stack quantities - From slot: qty=%v (type=%T), To slot: qty=%v (type=%T), max stack: %d",
+		fromSlotMap["quantity"], fromSlotMap["quantity"],
+		toSlotMap["quantity"], toSlotMap["quantity"], maxStack)
+	log.Printf("📊 Converted - fromQty=%d, toQty=%d", fromQty, toQty)
+
+	// Check if destination is already at max
+	if toQty >= maxStack {
+		return nil, fmt.Errorf("destination stack is full (max %d)", maxStack)
+	}
+
+	// Calculate how much can be added
+	canAdd := maxStack - toQty
+	if canAdd > fromQty {
+		canAdd = fromQty
+	}
 
 	// Update destination slot
-	toSlotMap["quantity"] = float64(newQty)
+	toSlotMap["quantity"] = toQty + canAdd
 
-	// Clear source slot
-	fromSlotMap["item"] = nil
-	fromSlotMap["quantity"] = 0
-
-	log.Printf("✅ Stacked %s: %d + %d = %d", itemID, int(fromQty), int(toQty), newQty)
+	// Update or clear source slot
+	remaining := fromQty - canAdd
+	if remaining > 0 {
+		fromSlotMap["quantity"] = remaining
+		log.Printf("✅ Stacked %s: moved %d from %d to %d (now %d total, %d remaining in source)", itemID, canAdd, fromQty, toQty, toQty+canAdd, remaining)
+	} else {
+		fromSlotMap["item"] = nil
+		fromSlotMap["quantity"] = 0
+		log.Printf("✅ Stacked %s: %d + %d = %d (source cleared)", itemID, fromQty, toQty, toQty+canAdd)
+	}
 
 	return &GameActionResponse{
 		Success: true,
-		Message: fmt.Sprintf("Stacked items (%d total)", newQty),
+		Message: fmt.Sprintf("Stacked items (%d total)", toQty+canAdd),
 	}, nil
 }
 
@@ -1376,6 +1430,37 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 			Color:   "yellow",
 			Delta: map[string]interface{}{
 				"open_vault": vault,
+				"npc_dialogue": map[string]interface{}{
+					"action": "close",
+				},
+			},
+		}, nil
+
+	case "open_shop":
+		// Return signal to open shop UI
+		log.Printf("✅ Opening shop for merchant: %s", npcID)
+		return &GameActionResponse{
+			Success: true,
+			Message: responseText,
+			Color:   "yellow",
+			Delta: map[string]interface{}{
+				"open_shop": npcID,
+				"npc_dialogue": map[string]interface{}{
+					"action": "close",
+				},
+			},
+		}, nil
+
+	case "open_sell":
+		// Return signal to open shop UI in sell mode
+		log.Printf("✅ Opening shop (sell mode) for merchant: %s", npcID)
+		return &GameActionResponse{
+			Success: true,
+			Message: responseText,
+			Color:   "yellow",
+			Delta: map[string]interface{}{
+				"open_shop": npcID,
+				"shop_tab":  "sell",
 				"npc_dialogue": map[string]interface{}{
 					"action": "close",
 				},

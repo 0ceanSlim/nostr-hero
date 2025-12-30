@@ -139,4 +139,49 @@ export function getAllMusicTracks() {
     return JSON.parse(element.textContent || '[]');
 }
 
+/**
+ * Get all items from cached data
+ * @returns {Array} Array of all item objects
+ */
+export function getAllItems() {
+    const element = document.getElementById('all-items');
+    if (!element) {
+        logger.warn('all-items element not found in DOM');
+        return [];
+    }
+
+    return JSON.parse(element.textContent || '[]');
+}
+
+/**
+ * Get all static data as a structured object
+ * @returns {Object} Object containing all static data arrays
+ */
+export function getAllStaticData() {
+    return {
+        items: getAllItems(),
+        spells: (function() {
+            const element = document.getElementById('all-spells');
+            return element ? JSON.parse(element.textContent || '[]') : [];
+        })(),
+        monsters: (function() {
+            const element = document.getElementById('all-monsters');
+            return element ? JSON.parse(element.textContent || '[]') : [];
+        })(),
+        locations: (function() {
+            const element = document.getElementById('all-locations');
+            return element ? JSON.parse(element.textContent || '[]') : [];
+        })(),
+        npcs: (function() {
+            const element = document.getElementById('all-npcs');
+            return element ? JSON.parse(element.textContent || '[]') : [];
+        })(),
+        packs: (function() {
+            const element = document.getElementById('all-packs');
+            return element ? JSON.parse(element.textContent || '[]') : [];
+        })(),
+        musicTracks: getAllMusicTracks()
+    };
+}
+
 logger.debug('Static data lookup module loaded');

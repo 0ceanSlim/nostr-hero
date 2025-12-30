@@ -13,7 +13,7 @@ import '../systems/auth.js'; // Auto-initializes authentication
 
 // State management
 import { getGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';
-import { getItemById, getSpellById, getLocationById, getAllMusicTracks } from '../state/staticData.js';
+import { getItemById, getSpellById, getLocationById, getAllMusicTracks, getAllStaticData } from '../state/staticData.js';
 
 // Systems
 import { saveGameToLocal } from '../systems/saveSystem.js';
@@ -21,6 +21,7 @@ import * as inventoryInteractions from '../systems/inventoryInteractions.js';
 import { openContainer, closeContainer } from '../systems/containers.js';
 import { initTimeClock, cleanupTimeClock } from '../systems/timeClock.js';
 import { initMusicSystem } from '../systems/musicSystem.js';
+import '../systems/shopSystem.js'; // Auto-initializes shop functions on window
 
 // UI modules
 import { updateTimeDisplay } from '../ui/timeDisplay.js';
@@ -53,6 +54,7 @@ window.initializeGame = initializeGame;
 window.getItemById = getItemById;
 window.getSpellById = getSpellById;
 window.getLocationById = getLocationById;
+window.staticData = getAllStaticData();
 window.saveGameToLocal = saveGameToLocal;
 window.saveGame = saveGameToLocal; // Alias for template compatibility
 window.inventoryInteractions = inventoryInteractions;

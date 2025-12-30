@@ -102,6 +102,9 @@ func main() {
 	mux.HandleFunc("/api/inventory/action", api.InventoryHandler)
 	mux.HandleFunc("/api/inventory/actions", api.ItemActionsHandler)
 
+	// Shop API endpoints
+	mux.HandleFunc("/api/shop/", api.ShopHandler)
+
 	// Existing API endpoints
 	mux.HandleFunc("/api/character", api.CharacterHandler)
 	mux.HandleFunc("/api/character/create-save", api.CreateCharacterHandler)

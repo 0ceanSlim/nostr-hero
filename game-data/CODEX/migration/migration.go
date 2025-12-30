@@ -160,6 +160,14 @@ func createTables() error {
 			properties TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// Equipment packs table
+		`CREATE TABLE IF NOT EXISTS equipment_packs (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			items TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, table := range tables {

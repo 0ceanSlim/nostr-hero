@@ -30,7 +30,7 @@ func main() {
 	// Handle migration flag
 	if *migrateFlag {
 		fmt.Println("🔄 Running database migration...")
-		dbPath := "../www/game.db"
+		dbPath := "../../www/game.db"
 
 		err := migration.Migrate(dbPath, func(status migration.Status) {
 			if status.Progress > 0 {
@@ -148,7 +148,7 @@ func handleMigrateStart(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer func() { migrationRunning = false }()
 
-		dbPath := "../../www/game.db"
+		dbPath := "../../../www/game.db"
 		err := migration.Migrate(dbPath, func(status migration.Status) {
 			migrationStatus = status
 		})

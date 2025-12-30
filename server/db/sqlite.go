@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -98,4 +99,109 @@ func validateDatabase() error {
 
 	log.Println("✅ Database validation passed - all required tables exist")
 	return nil
+}
+
+// Item represents an item from the database
+type Item struct {
+	ID          string
+	Name        string
+	Description string
+	Type        string
+	Value       int
+	Properties  string
+	Tags        string
+	Rarity      string
+}
+
+// NPC represents an NPC from the database
+type NPC struct {
+	ID         string
+	Name       string
+	Title      string
+	Race       string
+	Location   string
+	Building   string
+	Description string
+	Properties string
+}
+
+// GetItemByID retrieves an item by its ID
+func GetItemByID(itemID string) (*Item, error) {
+	var item Item
+	var propertiesJSON string
+	var tagsJSON string
+
+	err := db.QueryRow(`
+		SELECT id, name, description, item_type, properties, tags, rarity
+		FROM items
+		WHERE id = ?
+	`, itemID).Scan(&item.ID, &item.Name, &item.Description, &item.Type, &propertiesJSON, &tagsJSON, &item.Rarity)
+
+	if err != nil {
+		return nil, fmt.Errorf("item not found: %s", itemID)
+	}
+
+	item.Properties = propertiesJSON
+	item.Tags = tagsJSON
+
+	// Parse price from properties JSON
+	var properties map[string]interface{}
+	if err := parseJSON(propertiesJSON, &properties); err == nil {
+		if val, ok := properties["price"].(float64); ok {
+			item.Value = int(val)
+		} else if val, ok := properties["value"].(float64); ok {
+			// Fallback to "value" if "price" doesn't exist
+			item.Value = int(val)
+		}
+	}
+
+	return &item, nil
+}
+
+// GetNPCByID retrieves an NPC by its ID and returns a types.NPCData
+func GetNPCByID(npcID string) (*NPCData, error) {
+	var propertiesJSON string
+
+	err := db.QueryRow(`
+		SELECT properties
+		FROM npcs
+		WHERE id = ?
+	`, npcID).Scan(&propertiesJSON)
+
+	if err != nil {
+		return nil, fmt.Errorf("NPC not found: %s", npcID)
+	}
+
+	// Parse properties JSON into NPCData
+	var npcData NPCData
+	if err := parseJSON(propertiesJSON, &npcData); err != nil {
+		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
+	}
+
+	return &npcData, nil
+}
+
+// Helper to parse JSON strings
+func parseJSON(jsonStr string, target interface{}) error {
+	if jsonStr == "" {
+		return fmt.Errorf("empty JSON string")
+	}
+	return json.Unmarshal([]byte(jsonStr), target)
+}
+
+// NPCData represents the full NPC structure (copied from types package to avoid circular import)
+type NPCData struct {
+	ID            string                 `json:"id"`
+	Name          string                 `json:"name"`
+	Title         string                 `json:"title,omitempty"`
+	Race          string                 `json:"race,omitempty"`
+	Location      string                 `json:"location,omitempty"`
+	Building      string                 `json:"building,omitempty"`
+	Description   string                 `json:"description,omitempty"`
+	Greeting      map[string]string      `json:"greeting,omitempty"`
+	Dialogue      map[string]interface{} `json:"dialogue,omitempty"`
+	Schedule      []interface{}          `json:"schedule,omitempty"`
+	ShopConfig    map[string]interface{} `json:"shop_config,omitempty"`
+	StorageConfig map[string]interface{} `json:"storage_config,omitempty"`
+	InnConfig     map[string]interface{} `json:"inn_config,omitempty"`
 }

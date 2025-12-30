@@ -337,19 +337,39 @@ async function handleDrop(e, toSlotType, toSlotIndex, showMessage, showVaultUI) 
         const state = getGameStateSync();
         let destItem = null;
 
-        // Get destination slot item
+        // Get destination slot item using CORRECT state structure
         if (toSlotType === 'general') {
-            if (state.character.inventory?.general_slots?.[toSlotIndex]) {
-                destItem = state.character.inventory.general_slots[toSlotIndex];
+            // state.inventory is the array of general slots
+            const generalSlots = Array.isArray(state.inventory) ? state.inventory : [];
+            if (generalSlots[toSlotIndex]) {
+                destItem = generalSlots[toSlotIndex];
             }
         } else if (toSlotType === 'inventory') {
-            if (state.character.inventory?.gear_slots?.bag?.contents?.[toSlotIndex]) {
-                destItem = state.character.inventory.gear_slots.bag.contents[toSlotIndex];
+            // state.equipment.bag.contents is the backpack
+            const backpack = state.equipment?.bag?.contents || [];
+            if (backpack[toSlotIndex]) {
+                destItem = backpack[toSlotIndex];
             }
         }
 
+        console.log('🎯 Stacking check:', {
+            destItem,
+            draggedItem,
+            canStack: destItem && destItem.item === draggedItem,
+            toSlotType,
+            toSlotIndex
+        });
+
         // If destination has an item and it's the same type, try to stack
         if (destItem && destItem.item === draggedItem) {
+            console.log('🎯 Attempting stack:', {
+                action: 'stack',
+                itemId: draggedItem,
+                fromSlot: draggedFromSlot,
+                toSlot: toSlotIndex,
+                fromSlotType: draggedFromType,
+                toSlotType: toSlotType
+            });
             await performAction('stack', draggedItem, draggedFromSlot, toSlotIndex, draggedFromType, toSlotType, showMessage, showVaultUI);
         }
         // Otherwise, move/swap as normal
@@ -472,14 +492,12 @@ function handleRightClick(e, itemId, slotType, slotIndex) {
     const state = getGameStateSync();
     let inventoryItem = null;
 
-    if (slotType === 'general' && state.character.inventory?.general_slots) {
-        inventoryItem = state.character.inventory.general_slots.find(slot =>
-            slot && slot.slot === slotIndex && slot.item === itemId
-        );
-    } else if (slotType === 'inventory' && state.character.inventory?.gear_slots?.bag?.contents) {
-        inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot =>
-            slot && slot.slot === slotIndex && slot.item === itemId
-        );
+    if (slotType === 'general') {
+        const generalSlots = Array.isArray(state.inventory) ? state.inventory : [];
+        inventoryItem = generalSlots[slotIndex];
+    } else if (slotType === 'inventory') {
+        const backpack = state.equipment?.bag?.contents || [];
+        inventoryItem = backpack[slotIndex];
     }
 
     // Merge template data with actual inventory quantity
@@ -711,13 +729,13 @@ export async function performAction(action, itemId, fromSlot, toSlotOrType, from
         const state = getGameStateSync();
         let inventoryItem = null;
 
-        // Find the SPECIFIC item at the clicked slot (use fromSlot, not find())
-        if (fromSlotType === 'general' && state.character.inventory?.general_slots) {
-            // Find by matching the slot index
-            inventoryItem = state.character.inventory.general_slots.find(slot => slot && slot.slot === fromSlot && slot.item === itemId);
-        } else if (fromSlotType === 'inventory' && state.character.inventory?.gear_slots?.bag?.contents) {
-            // Find by matching the slot index
-            inventoryItem = state.character.inventory.gear_slots.bag.contents.find(slot => slot && slot.slot === fromSlot && slot.item === itemId);
+        // Get the item at the specific slot using CORRECT state structure
+        if (fromSlotType === 'general') {
+            const generalSlots = Array.isArray(state.inventory) ? state.inventory : [];
+            inventoryItem = generalSlots[fromSlot];
+        } else if (fromSlotType === 'inventory') {
+            const backpack = state.equipment?.bag?.contents || [];
+            inventoryItem = backpack[fromSlot];
         }
 
         const currentQuantity = inventoryItem?.quantity || 1;
@@ -770,8 +788,15 @@ export async function performAction(action, itemId, fromSlot, toSlotOrType, from
 
         logger.debug(`Sending action: ${gameAction}`, params);
 
+        // Extra logging for stack action
+        if (action === 'stack') {
+            console.log('🎯 STACK ACTION - Params being sent:', params);
+        }
+
         // Send action to Go backend
         const result = await gameAPI.sendAction(gameAction, params);
+
+        console.log('🎯 Backend response:', result);
 
         if (result.success) {
             logger.info('Action successful:', result.message);
