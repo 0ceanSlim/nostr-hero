@@ -94,13 +94,24 @@ func ValidateItems() ([]Issue, error) {
 	issues := []Issue{}
 	itemsPath := "../items"
 
+	// First, build a set of all valid item IDs for reference checking
+	validItemIDs := make(map[string]bool)
+	filepath.WalkDir(itemsPath, func(path string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && strings.HasSuffix(path, ".json") {
+			filename := strings.TrimSuffix(filepath.Base(path), ".json")
+			validItemIDs[filename] = true
+		}
+		return nil
+	})
+
+	// Now validate each item
 	err := filepath.WalkDir(itemsPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if !d.IsDir() && strings.HasSuffix(path, ".json") {
-			itemIssues := validateItemFile(path)
+			itemIssues := validateItemFile(path, validItemIDs)
 			issues = append(issues, itemIssues...)
 		}
 		return nil
@@ -109,7 +120,7 @@ func ValidateItems() ([]Issue, error) {
 	return issues, err
 }
 
-func validateItemFile(filePath string) []Issue {
+func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 	issues := []Issue{}
 	filename := filepath.Base(filePath)
 	idFromFilename := strings.TrimSuffix(filename, ".json")
@@ -136,8 +147,8 @@ func validateItemFile(filePath string) []Issue {
 		return issues
 	}
 
-	// Check required fields
-	requiredFields := []string{"id", "name", "type", "price", "weight", "stack", "rarity"}
+	// Check ALL required fields
+	requiredFields := []string{"id", "name", "description", "ai_description", "rarity", "price", "weight", "stack", "type", "image", "tags", "notes"}
 	for _, field := range requiredFields {
 		if _, exists := item[field]; !exists {
 			issues = append(issues, Issue{
@@ -147,6 +158,19 @@ func validateItemFile(filePath string) []Issue {
 				Field:    field,
 				Message:  fmt.Sprintf("Missing required field: %s", field),
 			})
+		} else {
+			// Check for empty strings in string fields
+			if field == "description" || field == "ai_description" {
+				if val, ok := item[field].(string); ok && val == "" {
+					issues = append(issues, Issue{
+						Type:     "error",
+						Category: "items",
+						File:     filename,
+						Field:    field,
+						Message:  fmt.Sprintf("Required field '%s' cannot be empty", field),
+					})
+				}
+			}
 		}
 	}
 
@@ -189,10 +213,23 @@ func validateItemFile(filePath string) []Issue {
 		}
 	}
 
+	// Check stack is positive
+	if stack, ok := item["stack"].(float64); ok {
+		if stack < 1 {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "stack",
+				Message:  "Stack must be at least 1",
+			})
+		}
+	}
+
 	// Check rarity is valid
 	validRarities := map[string]bool{
 		"common": true, "uncommon": true, "rare": true,
-		"very rare": true, "legendary": true,
+		"legendary": true, "mythical": true,
 	}
 	if rarity, ok := item["rarity"].(string); ok {
 		if !validRarities[strings.ToLower(rarity)] {
@@ -206,7 +243,384 @@ func validateItemFile(filePath string) []Issue {
 		}
 	}
 
-	// Check if image exists (warning, not error)
+	// Get tags for conditional validation
+	tags := []string{}
+	if tagsArray, ok := item["tags"].([]interface{}); ok {
+		for _, tag := range tagsArray {
+			if tagStr, ok := tag.(string); ok {
+				tags = append(tags, tagStr)
+			}
+		}
+	}
+
+	// TAG-BASED CONDITIONAL VALIDATION
+
+	// Equipment tag requires gear_slot
+	if contains(tags, "equipment") {
+		if gearSlot, exists := item["gear_slot"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "gear_slot",
+				Message:  "Items with 'equipment' tag must have 'gear_slot' property",
+			})
+		} else if gearSlotStr, ok := gearSlot.(string); ok {
+			validGearSlots := map[string]bool{
+				"hands": true, "armor": true, "necklace": true, "ring": true,
+				"clothes": true, "bag": true, "ammunition": true,
+			}
+			if !validGearSlots[gearSlotStr] {
+				issues = append(issues, Issue{
+					Type:     "error",
+					Category: "items",
+					File:     filename,
+					Field:    "gear_slot",
+					Message:  fmt.Sprintf("Invalid gear_slot '%s'. Must be one of: hands, armor, necklace, ring, clothes, bag, ammunition", gearSlotStr),
+				})
+			}
+		}
+	} else {
+		// Items with gear_slot should have equipment tag
+		if _, exists := item["gear_slot"]; exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "tags",
+				Message:  "Item has 'gear_slot' but is missing 'equipment' tag - should add 'equipment' to tags",
+			})
+		}
+	}
+
+	// Consumable tag requires effects property
+	if contains(tags, "consumable") {
+		if _, exists := item["effects"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "warning",
+				Category: "items",
+				File:     filename,
+				Field:    "effects",
+				Message:  "Items with 'consumable' tag should have 'effects' property (not yet enforced)",
+			})
+		}
+	}
+
+	// Container tag requires container_slots and allowed_types
+	if contains(tags, "container") {
+		if _, exists := item["container_slots"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "container_slots",
+				Message:  "Items with 'container' tag must have 'container_slots' property",
+			})
+		} else {
+			// Validate container_slots is a positive number
+			if slots, ok := item["container_slots"].(float64); ok {
+				if slots < 1 {
+					issues = append(issues, Issue{
+						Type:     "error",
+						Category: "items",
+						File:     filename,
+						Field:    "container_slots",
+						Message:  "container_slots must be at least 1",
+					})
+				}
+			}
+		}
+
+		if allowedTypes, exists := item["allowed_types"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "allowed_types",
+				Message:  "Items with 'container' tag must have 'allowed_types' property",
+			})
+		} else {
+			// Validate allowed_types format
+			switch v := allowedTypes.(type) {
+			case string:
+				// Can be "any" or a specific type/item ID
+				if v != "any" && v == "" {
+					issues = append(issues, Issue{
+						Type:     "error",
+						Category: "items",
+						File:     filename,
+						Field:    "allowed_types",
+						Message:  "allowed_types cannot be empty string",
+					})
+				}
+			case []interface{}:
+				// Array of types or IDs
+				if len(v) == 0 {
+					issues = append(issues, Issue{
+						Type:     "warning",
+						Category: "items",
+						File:     filename,
+						Field:    "allowed_types",
+						Message:  "allowed_types array is empty",
+					})
+				}
+			default:
+				issues = append(issues, Issue{
+					Type:     "error",
+					Category: "items",
+					File:     filename,
+					Field:    "allowed_types",
+					Message:  "allowed_types must be a string ('any', type, or item ID) or array of strings",
+				})
+			}
+		}
+	} else {
+		// Non-container items should NOT have container properties
+		if _, exists := item["container_slots"]; exists {
+			issues = append(issues, Issue{
+				Type:     "warning",
+				Category: "items",
+				File:     filename,
+				Field:    "container_slots",
+				Message:  "Item has 'container_slots' but is not tagged as 'container'",
+			})
+		}
+		if _, exists := item["allowed_types"]; exists {
+			issues = append(issues, Issue{
+				Type:     "warning",
+				Category: "items",
+				File:     filename,
+				Field:    "allowed_types",
+				Message:  "Item has 'allowed_types' but is not tagged as 'container'",
+			})
+		}
+	}
+
+	// TYPE-BASED CONDITIONAL VALIDATION
+	itemType := ""
+	if t, ok := item["type"].(string); ok {
+		itemType = t
+	}
+
+	// Armor must have AC
+	if strings.Contains(strings.ToLower(itemType), "armor") {
+		if ac, exists := item["ac"]; !exists || ac == nil || ac == "" {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "ac",
+				Message:  "Armor items must have 'ac' property",
+			})
+		}
+	} else {
+		// Non-armor should not have AC
+		if ac, exists := item["ac"]; exists && ac != nil && ac != "" {
+			issues = append(issues, Issue{
+				Type:     "warning",
+				Category: "items",
+				File:     filename,
+				Field:    "ac",
+				Message:  "Non-armor item has 'ac' property (should be removed)",
+			})
+		}
+	}
+
+	// Melee weapons must have damage
+	if strings.Contains(strings.ToLower(itemType), "melee") {
+		if damage, exists := item["damage"]; !exists || damage == nil || damage == "" {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "damage",
+				Message:  "Melee weapons must have 'damage' property",
+			})
+		}
+	}
+
+	// Ranged weapons need ammunition, range, and range-long
+	if strings.Contains(strings.ToLower(itemType), "ranged") {
+		if ammunition, exists := item["ammunition"]; !exists || ammunition == nil || ammunition == "" {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "ammunition",
+				Message:  "Ranged weapons must have 'ammunition' property",
+			})
+		}
+		if rng, exists := item["range"]; !exists || rng == nil || rng == "" || rng == "null" {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "range",
+				Message:  "Ranged weapons must have 'range' property",
+			})
+		}
+		if rngLong, exists := item["range-long"]; !exists || rngLong == nil || rngLong == "" || rngLong == "null" {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "range-long",
+				Message:  "Ranged weapons must have 'range-long' property",
+			})
+		}
+	} else {
+		// Non-ranged weapons should not have these properties
+		checkUnnecessaryField(item, "ammunition", filename, "Non-ranged item", &issues)
+		checkUnnecessaryField(item, "range", filename, "Non-ranged item", &issues)
+		checkUnnecessaryField(item, "range-long", filename, "Non-ranged item", &issues)
+	}
+
+	// Check for unnecessary null/empty fields
+	unnecessaryIfNull := []string{"ac", "damage", "heal", "ammunition", "range", "range-long"}
+	for _, field := range unnecessaryIfNull {
+		checkUnnecessaryField(item, field, filename, "Item", &issues)
+	}
+
+	// PACK TAG VALIDATION
+	if contains(tags, "pack") {
+		if contents, exists := item["contents"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "contents",
+				Message:  "Items with 'pack' tag must have 'contents' property",
+			})
+		} else if contentsArray, ok := contents.([]interface{}); ok {
+			// Validate contents array format and item IDs
+			for i, entry := range contentsArray {
+				if entryArray, ok := entry.([]interface{}); ok {
+					if len(entryArray) != 2 {
+						issues = append(issues, Issue{
+							Type:     "error",
+							Category: "items",
+							File:     filename,
+							Field:    "contents",
+							Message:  fmt.Sprintf("Pack contents entry %d must be [item_id, quantity] format", i),
+						})
+						continue
+					}
+
+					// Validate item ID exists
+					if itemID, ok := entryArray[0].(string); ok {
+						if !validItemIDs[itemID] {
+							issues = append(issues, Issue{
+								Type:     "error",
+								Category: "items",
+								File:     filename,
+								Field:    "contents",
+								Message:  fmt.Sprintf("Pack contains invalid item ID '%s' at index %d", itemID, i),
+							})
+						}
+					} else {
+						issues = append(issues, Issue{
+							Type:     "error",
+							Category: "items",
+							File:     filename,
+							Field:    "contents",
+							Message:  fmt.Sprintf("Pack contents entry %d: item ID must be a string", i),
+						})
+					}
+
+					// Validate quantity is a number
+					if quantity, ok := entryArray[1].(float64); ok {
+						if quantity < 1 {
+							issues = append(issues, Issue{
+								Type:     "error",
+								Category: "items",
+								File:     filename,
+								Field:    "contents",
+								Message:  fmt.Sprintf("Pack contents entry %d: quantity must be at least 1", i),
+							})
+						}
+					} else {
+						issues = append(issues, Issue{
+							Type:     "error",
+							Category: "items",
+							File:     filename,
+							Field:    "contents",
+							Message:  fmt.Sprintf("Pack contents entry %d: quantity must be a number", i),
+						})
+					}
+				} else {
+					issues = append(issues, Issue{
+						Type:     "error",
+						Category: "items",
+						File:     filename,
+						Field:    "contents",
+						Message:  fmt.Sprintf("Pack contents entry %d must be an array", i),
+					})
+				}
+			}
+		} else if contents != nil {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "contents",
+				Message:  "Pack 'contents' property must be an array",
+			})
+		}
+	}
+
+	// FOCUS TAG VALIDATION
+	if contains(tags, "focus") {
+		// Must have equipment tag
+		if !contains(tags, "equipment") {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "tags",
+				Message:  "Items with 'focus' tag must also have 'equipment' tag",
+			})
+		}
+
+		// Must have provides property
+		if provides, exists := item["provides"]; !exists {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "provides",
+				Message:  "Items with 'focus' tag must have 'provides' property",
+			})
+		} else if providesStr, ok := provides.(string); ok {
+			// Validate that the provided item ID exists
+			if providesStr == "" {
+				issues = append(issues, Issue{
+					Type:     "error",
+					Category: "items",
+					File:     filename,
+					Field:    "provides",
+					Message:  "Focus 'provides' property cannot be empty",
+				})
+			} else if !validItemIDs[providesStr] {
+				issues = append(issues, Issue{
+					Type:     "error",
+					Category: "items",
+					File:     filename,
+					Field:    "provides",
+					Message:  fmt.Sprintf("Focus provides invalid item ID '%s'", providesStr),
+				})
+			}
+		} else {
+			issues = append(issues, Issue{
+				Type:     "error",
+				Category: "items",
+				File:     filename,
+				Field:    "provides",
+				Message:  "Focus 'provides' property must be a string (spell component item ID)",
+			})
+		}
+	}
+
+	// Check if image file exists (warning, not error)
 	if image, ok := item["image"].(string); ok && image != "" {
 		imagePath := filepath.Join("../../www/res/img/items", idFromFilename+".png")
 		if _, err := os.Stat(imagePath); os.IsNotExist(err) {
@@ -221,6 +635,38 @@ func validateItemFile(filePath string) []Issue {
 	}
 
 	return issues
+}
+
+// Helper function to check if a slice contains a string
+func contains(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper to check for unnecessary null/empty fields
+func checkUnnecessaryField(item map[string]interface{}, field, filename, context string, issues *[]Issue) {
+	if val, exists := item[field]; exists {
+		isEmpty := false
+		switch v := val.(type) {
+		case nil:
+			isEmpty = true
+		case string:
+			isEmpty = v == "" || v == "null"
+		}
+		if isEmpty {
+			*issues = append(*issues, Issue{
+				Type:     "warning",
+				Category: "items",
+				File:     filename,
+				Field:    field,
+				Message:  fmt.Sprintf("%s has unnecessary null/empty '%s' property (should be removed)", context, field),
+			})
+		}
+	}
 }
 
 // ValidateSpells validates all spell files

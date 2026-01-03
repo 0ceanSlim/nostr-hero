@@ -1,16 +1,4 @@
 {
-  "id": "entertainers-pack",
-  "name": "Entertainer's Pack",
-  "description": "A performer's kit containing essential supplies for traveling entertainers and artists. Unpacking equips a backpack and places all contents inside it.",
-  "price": 3300,
-  "type": "Pack",
-  "weight": 38,
-  "stack": 1,
-  "gear_slot": "consumable",
-  "rarity": "common",
-  "tags": [
-    "pack"
-  ],
   "ai_description": "Colorful velvet pack with ribbons, masks, and costume pieces",
   "contents": [
     [
@@ -54,5 +42,17 @@
       1
     ]
   ],
-  "image": "/res/img/items/entertainers-pack.png"
+  "description": "A performer's kit containing essential supplies for traveling entertainers and artists. Unpacking equips a backpack and places all contents inside it.",
+  "id": "entertainers-pack",
+  "image": "/res/img/items/entertainers-pack.png",
+  "name": "Entertainer's Pack",
+  "notes": [],
+  "price": 3300,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "pack"
+  ],
+  "type": "Pack",
+  "weight": 38
 }

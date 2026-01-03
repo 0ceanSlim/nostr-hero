@@ -1,27 +1,23 @@
 {
-  "id": "superior-healing",
-  "name": "Superior healing",
-  "description": "A superior healing potion that glows with intense magical energy.",
   "ai_description": "ornate glass bottle with brilliant red healing elixir, powerful potion with bright magical glow and golden shimmer",
-  "price": 20000,
-  "ac": null,
-  "damage": null,
+  "description": "A superior healing potion that glows with intense magical energy.",
+  "effects": [],
   "heal": "8d4 + 8",
-  "stack": 1,
-  "weight": 0.5,
-  "type": "Potion",
+  "id": "superior-healing",
+  "image": "/res/img/items/superior-healing.png",
+  "img": "equipment/potion.jpg",
+  "name": "Superior healing",
   "notes": [
     "Single use item",
     "Takes an action to drink"
   ],
+  "price": 20000,
+  "rarity": "common",
+  "stack": 1,
   "tags": [
     "consumable",
     "healing"
   ],
-  "rarity": "common",
-  "img": "equipment/potion.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/superior-healing.png"
+  "type": "Potion",
+  "weight": 0.5
 }

@@ -1,14 +1,14 @@
 {
-  "id": "ladder",
-  "name": "Ladder",
-  "description": "A portable wooden ladder that can be used to reach higher places.",
   "ai_description": "wooden ladder with horizontal rungs, portable climbing tool with crossbeams and side rails",
+  "description": "A portable wooden ladder that can be used to reach higher places.",
+  "id": "ladder",
+  "image": "/res/img/items/ladder.png",
+  "name": "Ladder",
+  "notes": [],
   "price": 10,
-  "type": "Adventuring Gear",
-  "weight": 25,
-  "stack": 1,
-  "gear_slot": "",
   "rarity": "common",
+  "stack": 1,
   "tags": [],
-  "image": "/res/img/items/ladder.png"
+  "type": "Adventuring Gear",
+  "weight": 25
 }

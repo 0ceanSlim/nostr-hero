@@ -1,21 +1,24 @@
 {
-  "id": "crossbow-heavy",
-  "name": "Crossbow heavy",
-  "description": "A large, powerful crossbow that requires two hands to operate effectively.",
   "ai_description": "large wooden crossbow with steel prod and intricate loading mechanism, heavy siege weapon with cranking lever and bolt groove",
-  "price": 0,
-  "type": "Martial Ranged Weapons",
-  "weight": 18,
-  "stack": 1,
-  "ac": null,
-  "damage": "1d10",
-  "heal": null,
   "ammunition": "bolts",
+  "damage": "1d10",
   "damage-type": "piercing",
+  "description": "A large, powerful crossbow that requires two hands to operate effectively.",
+  "gear_slot": "hands",
+  "id": "crossbow-heavy",
+  "image": "/res/img/items/crossbow-heavy.png",
   "img": "equipment/weapon.jpg",
+  "name": "Crossbow heavy",
+  "notes": [
+    "Requires bolts to fire",
+    "Loading property requires action to reload",
+    "Heavy weapon"
+  ],
+  "price": 0,
   "range": "3",
   "range-long": "5",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "ammunition",
     "loading",
@@ -23,11 +26,6 @@
     "heavy",
     "equipment"
   ],
-  "notes": [
-    "Requires bolts to fire",
-    "Loading property requires action to reload",
-    "Heavy weapon"
-  ],
-  "gear_slot": "hands",
-  "image": "/res/img/items/crossbow-heavy.png"
+  "type": "Martial Ranged Weapons",
+  "weight": 18
 }

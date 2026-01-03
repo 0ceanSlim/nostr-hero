@@ -75,6 +75,7 @@ func main() {
 	r.HandleFunc("/api/items", editor.HandleGetItems).Methods("GET")
 	r.HandleFunc("/api/items/{filename}", editor.HandleGetItem).Methods("GET")
 	r.HandleFunc("/api/items/{filename}", editor.HandleSaveItem).Methods("PUT")
+	r.HandleFunc("/api/items/{filename}", editor.HandleDeleteItem).Methods("DELETE")
 	r.HandleFunc("/api/validate", editor.HandleValidate).Methods("GET")
 	r.HandleFunc("/api/types", editor.HandleGetTypes).Methods("GET")
 	r.HandleFunc("/api/tags", editor.HandleGetTags).Methods("GET")
@@ -93,6 +94,7 @@ func main() {
 	// Validation routes
 	r.HandleFunc("/tools/validation", handleValidationTool).Methods("GET")
 	r.HandleFunc("/api/validation/run", handleValidationRun).Methods("POST")
+	r.HandleFunc("/api/validation/cleanup", handleCleanupRun).Methods("POST")
 
 	// Static files
 	r.PathPrefix("/www/").Handler(http.StripPrefix("/www/", http.FileServer(http.Dir("../../www/"))))
@@ -177,6 +179,20 @@ func handleValidationTool(w http.ResponseWriter, r *http.Request) {
 
 func handleValidationRun(w http.ResponseWriter, r *http.Request) {
 	result, err := validation.ValidateAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func handleCleanupRun(w http.ResponseWriter, r *http.Request) {
+	// Check for dry_run parameter
+	dryRun := r.URL.Query().Get("dry_run") == "true"
+
+	result, err := validation.CleanupAllItems(dryRun)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

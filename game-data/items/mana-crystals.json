@@ -3,16 +3,14 @@
   "name": "Mana Crystals",
   "description": "Small crystalline formations that store concentrated magical energy. Provided unlimited when using a Staff focus.",
   "ai_description": "cluster of blue-white crystals with internal glow, faceted gems that pulse with concentrated magical energy",
+  "rarity": "common",
   "price": 200,
-  "type": "Spell Component",
   "weight": 0.2,
   "stack": 5,
-  "rarity": "common",
+  "type": "Spell Component",
   "tags": [
-    "spell_component",
-    "focus_provided"
+    "spell_component"
   ],
-  "img": "equipment/spell-component.jpg",
   "notes": [
     "Used for large and ritual spells",
     "Unlimited when Staff focus is equipped",

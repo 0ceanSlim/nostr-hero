@@ -1,14 +1,14 @@
 {
-  "id": "chalk",
-  "name": "Chalk",
-  "description": "A piece of white chalk for marking surfaces and leaving temporary messages.",
   "ai_description": "white limestone stick for marking surfaces, small cylindrical writing tool that leaves pale traces",
+  "description": "A piece of white chalk for marking surfaces and leaving temporary messages.",
+  "id": "chalk",
+  "image": "/res/img/items/chalk.png",
+  "name": "Chalk",
+  "notes": [],
   "price": 1,
-  "type": "Adventuring Gear",
-  "weight": 0.05,
-  "stack": 10,
-  "gear_slot": "",
   "rarity": "common",
+  "stack": 10,
   "tags": [],
-  "image": "/res/img/items/chalk.png"
+  "type": "Adventuring Gear",
+  "weight": 0.05
 }

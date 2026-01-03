@@ -1,28 +1,23 @@
 {
-  "id": "longsword",
-  "name": "Longsword",
-  "description": "A well-balanced blade with a long, straight edge. The signature weapon of knights and warriors.",
   "ai_description": "medieval longsword with straight double-edged blade, steel crossguard, leather-wrapped handle with pommel, classic knight weapon",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 3,
-  "stack": 1,
-  "ac": null,
   "damage": "1d8,1d10",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "slashing",
+  "description": "A well-balanced blade with a long, straight edge. The signature weapon of knights and warriors.",
+  "gear_slot": "hands",
+  "id": "longsword",
+  "image": "/res/img/items/longsword.png",
   "img": "equipment/weapon.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Longsword",
+  "notes": [
+    "Can be wielded with two hands for increased damage"
+  ],
+  "price": 0,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "versatile",
     "equipment"
   ],
-  "notes": [
-    "Can be wielded with two hands for increased damage"
-  ],
-  "gear_slot": "hands",
-  "image": "/res/img/items/longsword.png"
+  "type": "Martial Melee Weapons",
+  "weight": 3
 }

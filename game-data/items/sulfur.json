@@ -6,12 +6,8 @@
   "type": "Spell Component",
   "weight": 0.1,
   "stack": 10,
-  "gear_slot": "",
   "rarity": "common",
-  "tags": [
-    "spell_component",
-    "focus_provided"
-  ],
+  "tags": ["spell_component", "focus_provided"],
   "notes": [
     "Used for fire and explosion spells",
     "Unlimited when Rod focus is equipped",

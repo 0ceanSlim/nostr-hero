@@ -1,17 +1,16 @@
 {
-  "id": "ball-bearings",
-  "name": "Ball Bearings",
-  "description": "A bag containing 1,000 small metal ball bearings that can be scattered to create difficult terrain.",
   "ai_description": "leather pouch filled with tiny steel ball bearings, bag of round metal spheres for creating slippery obstacles",
+  "description": "A bag containing 1,000 small metal ball bearings that can be scattered to create difficult terrain.",
+  "id": "ball-bearings",
+  "image": "/res/img/items/ball-bearings.png",
+  "name": "Ball Bearings",
+  "notes": [],
   "price": 1,
-  "type": "Adventuring Gear",
-  "weight": 2,
-  "stack": 1,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "restraint"
   ],
-  "range": "null",
-  "range-long": "null",
-  "image": "/res/img/items/ball-bearings.png"
+  "type": "Adventuring Gear",
+  "weight": 2
 }

@@ -1,27 +1,22 @@
 {
-  "id": "shortsword",
-  "name": "Shortsword",
-  "description": "",
   "ai_description": "short steel blade with simple crossguard and leather-wrapped hilt, compact slashing weapon for quick strikes",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 2,
-  "stack": 1,
-  "ac": null,
   "damage": "1d6",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "slashing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "shortsword",
+  "image": "/res/img/items/shortsword.png",
   "img": "equipment/weapon.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Shortsword",
+  "notes": [],
+  "price": 0,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "finesse",
     "light",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/shortsword.png"
+  "type": "Martial Melee Weapons",
+  "weight": 2
 }

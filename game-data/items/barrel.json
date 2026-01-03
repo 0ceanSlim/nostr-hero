@@ -1,23 +1,20 @@
 {
   "id": "barrel",
   "name": "Barrel",
-  "description": "",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "large wooden barrel with metal hoops, storage container with curved staves and removable lid for bulk storage",
+  "rarity": "common",
   "price": 200,
-  "type": "Adventuring Gear",
   "weight": 70,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "rarity": "common",
-  "tags": [],
+  "type": "Adventuring Gear",
+  "container_slots": 16,
+  "allowed_types": "any",
+  "tags": [
+    "container"
+  ],
   "notes": [
     "32 slots to store items, only placeable in house"
   ],
-  "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
   "image": "/res/img/items/barrel.png"
 }

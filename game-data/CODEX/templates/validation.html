@@ -15,12 +15,20 @@
 
         <div class="content">
             <p style="margin-bottom: 20px; color: #6272a4;">
-                Validate all game data files for consistency, required fields, and common errors.
+                Validate and clean up all game data files for consistency, required fields, and common errors.
             </p>
 
-            <button class="button" onclick="runValidation()">
-                Run Validation
-            </button>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="button" onclick="runValidation()">
+                    🔍 Run Validation
+                </button>
+                <button class="button" style="background: #f1fa8c; color: #282a36;" onclick="runCleanup(true)">
+                    👁️ Preview Cleanup (Dry Run)
+                </button>
+                <button class="button" style="background: #50fa7b; color: #282a36;" onclick="runCleanup(false)">
+                    🔧 Apply Cleanup
+                </button>
+            </div>
 
             <div class="results" id="results">
                 <div class="stats">
@@ -43,6 +51,7 @@
                 </div>
 
                 <div id="issues"></div>
+                <div id="cleanup-results"></div>
             </div>
         </div>
     </div>

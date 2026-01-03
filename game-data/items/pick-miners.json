@@ -1,23 +1,18 @@
 {
-  "id": "pick-miners",
-  "name": "Pickaxe",
-  "description": "A tool designed for breaking up rocks and hard surfaces. Consists of a wooden handle with a pointed metal head. Essential for mining operations and can be used to break through stone walls.",
   "ai_description": "wooden-handled tool with pointed iron head, mining pickaxe for breaking stone and hard earth",
-  "price": 200,
-  "type": "Tools",
-  "weight": 10,
-  "stack": 1,
-  "ac": null,
   "damage": "1d6",
-  "heal": null,
+  "description": "A tool designed for breaking up rocks and hard surfaces. Consists of a wooden handle with a pointed metal head. Essential for mining operations and can be used to break through stone walls.",
+  "id": "pick-miners",
+  "image": "/res/img/items/pick-miners.png",
   "img": "equipment/adventuring-gear.jpg",
+  "name": "Pickaxe",
+  "notes": [],
+  "price": 200,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "improvised-weapon"
   ],
-  "notes": [],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/pick-miners.png"
+  "type": "Tools",
+  "weight": 10
 }

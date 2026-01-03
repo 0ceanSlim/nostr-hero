@@ -1,24 +1,20 @@
 {
-  "id": "clothes-costume",
-  "name": "Clothes Costume",
-  "description": "Elaborate costume clothing for disguises, performances, or special occasions.",
   "ai_description": "colorful theatrical garments with decorative trim, elaborate costume with masks and fancy accessories",
-  "price": 500,
-  "type": "Clothes",
-  "weight": 4,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": ["equipment"],
+  "description": "Elaborate costume clothing for disguises, performances, or special occasions.",
   "gear_slot": "clothes",
+  "id": "clothes-costume",
+  "image": "/res/img/items/clothes-costume.png",
+  "img": "equipment/adventuring-gear.jpg",
+  "name": "Clothes Costume",
   "notes": [
     "Can be used for disguises or performances"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/clothes-costume.png"
+  "price": 500,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "equipment"
+  ],
+  "type": "Clothes",
+  "weight": 4
 }

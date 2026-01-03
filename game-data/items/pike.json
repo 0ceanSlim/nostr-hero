@@ -1,28 +1,24 @@
 {
-  "id": "pike",
-  "name": "Pike",
-  "description": "",
   "ai_description": "very long wooden polearm with sharp steel spearhead, extended reach weapon for infantry formation fighting",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 18,
-  "stack": 1,
-  "ac": null,
   "damage": "1d10",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "piercing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "pike",
+  "image": "/res/img/items/pike.png",
   "img": "equipment/weapon.jpg",
+  "name": "Pike",
+  "notes": [],
+  "price": 0,
   "range": "1",
-  "range-long": "null",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "heavy",
     "reach",
     "two-handed",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/pike.png"
+  "type": "Martial Melee Weapons",
+  "weight": 18
 }

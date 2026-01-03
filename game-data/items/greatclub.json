@@ -1,26 +1,21 @@
 {
-  "id": "greatclub",
-  "name": "Greatclub",
-  "description": "",
   "ai_description": "massive wooden club with thick knotted head, crude two-handed bludgeoning weapon made from heavy oak branch",
-  "price": 0,
-  "type": "Simple Melee Weapons",
-  "weight": 10,
-  "stack": 1,
-  "ac": null,
   "damage": "1d8",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "bludgeon",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "greatclub",
+  "image": "/res/img/items/greatclub.png",
   "img": "equipment/weapon.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Greatclub",
+  "notes": [],
+  "price": 0,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "two-handed",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/greatclub.png"
+  "type": "Simple Melee Weapons",
+  "weight": 10
 }

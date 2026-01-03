@@ -1,25 +1,20 @@
 {
-  "id": "flail",
-  "name": "Flail",
-  "description": "",
   "ai_description": "weapon with wooden handle connected to spiked iron ball by chain, medieval swinging weapon with flexible striking head",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 2,
-  "stack": 1,
-  "ac": null,
   "damage": "1d8",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "bludgeon",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "flail",
+  "image": "/res/img/items/flail.png",
   "img": "equipment/weapon.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Flail",
+  "notes": [],
+  "price": 0,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/flail.png"
+  "type": "Martial Melee Weapons",
+  "weight": 2
 }

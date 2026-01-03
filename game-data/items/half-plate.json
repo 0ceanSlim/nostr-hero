@@ -1,27 +1,22 @@
 {
-  "id": "half-plate",
-  "name": "Half Plate",
-  "description": "",
-  "ai_description": "partial plate armor with breastplate and arm guards, medium protection with articulated steel pieces",
-  "price": 75000,
-  "type": "Medium Armor",
-  "weight": 40,
-  "stack": 1,
   "ac": "15 + Dex(max2)",
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "ai_description": "partial plate armor with breastplate and arm guards, medium protection with articulated steel pieces",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "armor",
+  "id": "half-plate",
+  "image": "/res/img/items/half-plate.png",
   "img": "equipment/armor.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Half Plate",
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "price": 75000,
   "rarity": "common",
+  "stack": 1,
   "stealth": "-1",
   "tags": [
     "equipment"
   ],
-  "notes": [
-    "Disadvantage on Stealth"
-  ],
-  "gear_slot": "armor",
-  "image": "/res/img/items/half-plate.png"
+  "type": "Medium Armor",
+  "weight": 40
 }

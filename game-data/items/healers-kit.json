@@ -1,27 +1,21 @@
 {
-  "id": "healers-kit",
-  "name": "Healer's kit",
-  "description": "A collection of bandages, salves, and medical supplies for treating wounds.",
   "ai_description": "leather satchel with rolled bandages, glass bottles of healing salve, needle and thread, medical instruments",
-  "price": 500,
-  "type": "Adventuring Gear",
-  "weight": 3,
-  "stack": 10,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "description": "A collection of bandages, salves, and medical supplies for treating wounds.",
+  "id": "healers-kit",
+  "image": "/res/img/items/healers-kit.png",
   "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
-  "rarity": "common",
-  "tags": [
-    "healing"
-  ],
+  "name": "Healer's kit",
   "notes": [
     "Can be used to stabilize dying creatures",
     "Contains 10 uses",
     "Each use heals 2 hitpoints"
   ],
-  "image": "/res/img/items/healers-kit.png"
+  "price": 500,
+  "rarity": "common",
+  "stack": 10,
+  "tags": [
+    "healing"
+  ],
+  "type": "Adventuring Gear",
+  "weight": 3
 }

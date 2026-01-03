@@ -1,30 +1,27 @@
 {
-  "id": "dagger",
-  "name": "Dagger",
-  "description": "A short, sharp blade perfect for close quarters combat or throwing at enemies.",
   "ai_description": "short steel dagger with pointed blade, simple crossguard, dark leather-wrapped handle, sharp piercing weapon",
-  "price": 0,
-  "type": "Simple Melee Weapons",
-  "weight": 1,
-  "stack": 1,
-  "ac": null,
   "damage": "1d4",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "piercing",
+  "description": "A short, sharp blade perfect for close quarters combat or throwing at enemies.",
+  "gear_slot": "hands",
+  "id": "dagger",
+  "image": "/res/img/items/dagger.png",
   "img": "equipment/weapon.jpg",
+  "name": "Dagger",
+  "notes": [
+    "Can be thrown at targets within 60 feet"
+  ],
+  "price": 0,
   "range": "1",
   "range-long": "2",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "finesse",
     "light",
     "thrown",
     "equipment"
   ],
-  "notes": [
-    "Can be thrown at targets within 60 feet"
-  ],
-  "gear_slot": "hands",
-  "image": "/res/img/items/dagger.png"
+  "type": "Simple Melee Weapons",
+  "weight": 1
 }

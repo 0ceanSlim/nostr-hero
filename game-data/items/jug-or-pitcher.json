@@ -1,23 +1,17 @@
 {
-  "id": "jug-or-pitcher",
-  "name": "Jug or pitcher",
-  "description": "A ceramic vessel with a handle and spout for storing and pouring liquids.",
-  "price": 2,
-  "type": "Adventuring Gear",
-  "weight": 4,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [],
   "ai_description": "Clay ceramic jug with curved handle and pouring spout",
+  "description": "A ceramic vessel with a handle and spout for storing and pouring liquids.",
+  "id": "jug-or-pitcher",
+  "image": "/res/img/items/jug-or-pitcher.png",
+  "img": "equipment/adventuring-gear.jpg",
+  "name": "Jug or pitcher",
   "notes": [
     "Can hold up to 1 gallon of liquid"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/jug-or-pitcher.png"
+  "price": 2,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [],
+  "type": "Adventuring Gear",
+  "weight": 4
 }

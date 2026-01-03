@@ -1,24 +1,20 @@
 {
-  "id": "clothes-common",
-  "name": "Clothes Common",
-  "description": "Simple everyday clothing made from rough cloth, suitable for common folk.",
   "ai_description": "plain brown tunic and trousers made of rough wool and linen, simple peasant clothing with basic stitching",
-  "price": 50,
-  "type": "Clothes",
-  "weight": 3,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": ["equipment"],
+  "description": "Simple everyday clothing made from rough cloth, suitable for common folk.",
   "gear_slot": "clothes",
+  "id": "clothes-common",
+  "image": "/res/img/items/clothes-common.png",
+  "img": "equipment/adventuring-gear.jpg",
+  "name": "Clothes Common",
   "notes": [
     "Basic clothing for daily wear"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/clothes-common.png"
+  "price": 50,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "equipment"
+  ],
+  "type": "Clothes",
+  "weight": 3
 }

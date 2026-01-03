@@ -1,28 +1,20 @@
 {
   "id": "plate",
   "name": "Plate",
-  "description": "",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "full suit of articulated steel plates, gleaming knight's armor with pauldrons, breastplate, and helm, ultimate protection",
-  "price": 150000,
-  "type": "Heavy Armor",
+  "rarity": "common",
+  "price": 15000,
   "weight": 65,
   "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "armor",
   "ac": "18",
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
-  "img": "equipment/armor.jpg",
-  "range": "null",
-  "range-long": "null",
-  "rarity": "common",
-  "stealth": "-1",
-  "str": "15",
   "tags": [
     "equipment"
   ],
   "notes": [
     "Disadvantage on Stealth - Strength 15"
   ],
-  "gear_slot": "armor",
   "image": "/res/img/items/plate.png"
 }

@@ -1,14 +1,14 @@
 {
-  "id": "oil",
-  "name": "Oil",
-  "description": "A flask of lamp oil that can fuel lanterns or be used as an improvised weapon.",
   "ai_description": "ceramic flask filled with clear lamp oil, cork stopper with dark amber liquid fuel for lanterns",
+  "description": "A flask of lamp oil that can fuel lanterns or be used as an improvised weapon.",
+  "id": "oil",
+  "image": "/res/img/items/oil.png",
+  "name": "Oil",
+  "notes": [],
   "price": 10,
-  "type": "Adventuring Gear",
-  "weight": 1,
-  "stack": 1,
-  "gear_slot": "",
   "rarity": "common",
+  "stack": 1,
   "tags": [],
-  "image": "/res/img/items/oil.png"
+  "type": "Adventuring Gear",
+  "weight": 1
 }

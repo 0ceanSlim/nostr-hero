@@ -1,28 +1,24 @@
 {
-  "id": "halberd",
-  "name": "Halberd",
-  "description": "",
   "ai_description": "versatile polearm with axe blade, spear point and hook on long wooden staff, medieval combination weapon for reach combat",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 6,
-  "stack": 1,
-  "ac": null,
   "damage": "1d10",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "slashing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "halberd",
+  "image": "/res/img/items/halberd.png",
   "img": "equipment/weapon.jpg",
+  "name": "Halberd",
+  "notes": [],
+  "price": 0,
   "range": "1",
-  "range-long": "null",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "heavy",
     "reach",
     "two-handed",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/halberd.png"
+  "type": "Martial Melee Weapons",
+  "weight": 6
 }

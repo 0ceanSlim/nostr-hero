@@ -1,31 +1,29 @@
 {
-  "id": "crossbow-light",
-  "name": "Crossbow light",
-  "description": "A compact crossbow that can be operated with one hand.",
   "ai_description": "small wooden crossbow with steel bow prod, one-handed mechanical weapon with trigger mechanism and bolt groove",
-  "price": 0,
-  "type": "Simple Ranged Weapons",
-  "weight": 5,
-  "stack": 1,
-  "ac": null,
-  "damage": "1d6",
-  "heal": null,
   "ammunition": "bolts",
+  "damage": "1d6",
   "damage-type": "piercing",
+  "description": "A compact crossbow that can be operated with one hand.",
+  "gear_slot": "hands",
+  "id": "crossbow-light",
+  "image": "/res/img/items/crossbow-light.png",
   "img": "equipment/weapon.jpg",
+  "name": "Crossbow light",
+  "notes": [
+    "Requires bolts to fire",
+    "Loading property requires action to reload"
+  ],
+  "price": 0,
   "range": "2",
   "range-long": "4",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "ammunition",
     "loading",
     "two-handed",
     "equipment"
   ],
-  "notes": [
-    "Requires bolts to fire",
-    "Loading property requires action to reload"
-  ],
-  "gear_slot": "hands",
-  "image": "/res/img/items/crossbow-light.png"
+  "type": "Simple Ranged Weapons",
+  "weight": 5
 }

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEX - Item Editor</title>
+    <link rel="stylesheet" href="/static/css/item-editor.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 CODEX - Item Editor</h1>
+            <button class="btn" onclick="window.location.href='/'">← Back to Home</button>
+        </div>
+
+        <div class="main-content">
+            <!-- LEFT SIDEBAR: Item List -->
+            <div class="item-list">
+                <h2>Items (<span id="itemCount">0</span>)</h2>
+
+                <!-- Filter Controls -->
+                <div class="filter-section">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search items..." onkeyup="applyFilters()" />
+
+                    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                        <option value="">All Types</option>
+                    </select>
+
+                    <button class="btn btn-new" onclick="createNewItem()">+ New Item</button>
+                </div>
+
+                <div id="itemListContainer"></div>
+            </div>
+
+            <!-- RIGHT PANEL: Editor -->
+            <div class="editor-panel">
+                <div id="emptyState" class="empty-state">
+                    <p>Select an item from the list to edit or create a new item</p>
+                </div>
+
+                <div id="editorForm" style="display: none;">
+                    <div class="editor-header">
+                        <h2>
+                            <span id="editorMode">Edit</span>: <span id="itemName"></span>
+                        </h2>
+                        <button class="btn btn-danger" onclick="deleteItem()" id="deleteBtn">🗑️ Delete</button>
+                    </div>
+
+                    <div class="status-message" id="statusMessage"></div>
+
+                    <!-- SECTION: Image & Basic Info (Side-by-side) -->
+                    <div class="top-section">
+                        <div class="image-section">
+                            <h3>🖼️ Image</h3>
+                            <div class="image-preview-large">
+                                <div id="imageContainer">
+                                    <p style="color: #6272a4;">No image available</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Image Path *</label>
+                                <input type="text" id="itemImage" placeholder="/res/img/items/longsword.png" readonly style="opacity: 0.6;" />
+                            </div>
+                            <div class="actions">
+                                <button class="btn" onclick="generateImage()">🎨 Generate Image</button>
+                                <button class="btn" onclick="checkImage()">🖼️ Check Image</button>
+                            </div>
+                        </div>
+
+                        <div class="basic-info-section">
+                            <h3>📋 Basic Information</h3>
+
+                            <div class="form-group">
+                                <label>ID * <span class="field-hint">(filename, lowercase-with-hyphens)</span></label>
+                                <input type="text" id="itemId" placeholder="longsword" />
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name *</label>
+                                    <input type="text" id="itemNameInput" placeholder="Longsword" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Type *</label>
+                                    <select id="itemType">
+                                        <option value="">Select type...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Rarity *</label>
+                                    <select id="itemRarity">
+                                        <option value="common">Common</option>
+                                        <option value="uncommon">Uncommon</option>
+                                        <option value="rare">Rare</option>
+                                        <option value="legendary">Legendary</option>
+                                        <option value="mythical">Mythical</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price (GP) *</label>
+                                    <input type="number" id="itemPrice" placeholder="0" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight (lbs) *</label>
+                                    <input type="number" step="0.01" id="itemWeight" placeholder="1" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Stack Size *</label>
+                                    <input type="number" id="itemStack" placeholder="1" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description *</label>
+                                <textarea id="itemDescription" placeholder="A well-balanced blade..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>AI Description * <span class="field-hint">(for image generation)</span></label>
+                                <textarea id="itemAiDescription" placeholder="medieval longsword with straight double-edged blade..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- SECTION: Tags -->
+                    <div class="section">
+                        <h3>🏷️ Tags</h3>
+                        <div class="tag-editor">
+                            <div class="tags-container" id="tagsContainer"></div>
+                            <div class="tag-input-row">
+                                <input type="text" id="newTagInput" placeholder="Add tag (e.g., equipment, consumable, container)" list="commonTags" />
+                                <button class="btn btn-sm" onclick="addTag()">Add</button>
+                            </div>
+                            <datalist id="commonTags">
+                                <option value="equipment">
+                                <option value="consumable">
+                                <option value="container">
+                                <option value="ammunition">
+                                <option value="versatile">
+                                <option value="two-handed">
+                                <option value="light">
+                                <option value="heavy">
+                                <option value="finesse">
+                                <option value="thrown">
+                                <option value="ranged">
+                                <option value="melee">
+                                <option value="healing">
+                                <option value="light-source">
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Equipment Properties (conditional) -->
+                    <div class="section conditional-section" id="equipmentSection" style="display: none;">
+                        <h3>⚔️ Equipment Properties</h3>
+                        <div class="form-group">
+                            <label>Gear Slot *</label>
+                            <select id="gearSlot">
+                                <option value="">Select slot...</option>
+                                <option value="hands">Hands (weapons, tools)</option>
+                                <option value="armor">Armor (body armor)</option>
+                                <option value="necklace">Necklace (amulets)</option>
+                                <option value="ring">Ring</option>
+                                <option value="clothes">Clothes (cloaks, robes)</option>
+                                <option value="bag">Bag (backpacks, pouches)</option>
+                                <option value="ammunition">Ammunition (arrows, bolts)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Container Properties (conditional) -->
+                    <div class="section conditional-section" id="containerSection" style="display: none;">
+                        <h3>📦 Container Properties</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Container Slots *</label>
+                                <input type="number" id="containerSlots" placeholder="20" />
+                            </div>
+                            <div class="form-group">
+                                <label>Allowed Types *</label>
+                                <select id="allowedTypes" multiple size="8">
+                                    <option value="any">any (all items)</option>
+                                </select>
+                                <span class="field-hint">Hold Ctrl/Cmd to select multiple. First option = "any" accepts all items.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Armor Properties (conditional) -->
+                    <div class="section conditional-section" id="armorSection" style="display: none;">
+                        <h3>🛡️ Armor Properties</h3>
+                        <div class="form-group">
+                            <label>AC *</label>
+                            <input type="text" id="itemAC" placeholder="14 + Dex(max2)" />
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Weapon Properties (conditional) -->
+                    <div class="section conditional-section" id="weaponSection" style="display: none;">
+                        <h3>⚔️ Weapon Properties</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Damage *</label>
+                                <input type="text" id="itemDamage" placeholder="1d8 or 1d8,1d10" />
+                            </div>
+                            <div class="form-group">
+                                <label>Damage Type *</label>
+                                <select id="damageType">
+                                    <option value="">None</option>
+                                    <option value="slashing">Slashing</option>
+                                    <option value="piercing">Piercing</option>
+                                    <option value="bludgeoning">Bludgeoning</option>
+                                    <option value="fire">Fire</option>
+                                    <option value="cold">Cold</option>
+                                    <option value="lightning">Lightning</option>
+                                    <option value="poison">Poison</option>
+                                    <option value="acid">Acid</option>
+                                    <option value="psychic">Psychic</option>
+                                    <option value="necrotic">Necrotic</option>
+                                    <option value="radiant">Radiant</option>
+                                    <option value="force">Force</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Focus Properties (conditional) -->
+                    <div class="section conditional-section" id="focusSection" style="display: none;">
+                        <h3>✨ Focus Properties</h3>
+                        <div class="form-group">
+                            <label>Provides * <span class="field-hint">(spell component this focus provides unlimited)</span></label>
+                            <select id="itemProvides">
+                                <option value="">Select spell component...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Pack Properties (conditional) -->
+                    <div class="section conditional-section" id="packSection" style="display: none;">
+                        <h3>📦 Pack Contents</h3>
+                        <div class="pack-editor">
+                            <div class="pack-contents-container" id="packContentsContainer"></div>
+                            <div class="pack-input-row">
+                                <select id="newPackItemSelect" style="flex: 2;">
+                                    <option value="">Select item to add...</option>
+                                </select>
+                                <input type="number" id="newPackItemQuantity" placeholder="Qty" min="1" value="1" style="flex: 0 0 80px;" />
+                                <button class="btn btn-sm" onclick="addPackItem()">Add Item</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Ranged Properties (conditional) -->
+                    <div class="section conditional-section" id="rangedSection" style="display: none;">
+                        <h3>🏹 Ranged Weapon Properties</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Ammunition *</label>
+                                <input type="text" id="ammunition" placeholder="arrows" />
+                            </div>
+                            <div class="form-group">
+                                <label>Range *</label>
+                                <input type="text" id="range" placeholder="80" />
+                            </div>
+                            <div class="form-group">
+                                <label>Range (Long) *</label>
+                                <input type="text" id="rangeLong" placeholder="320" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Consumable Properties (conditional) -->
+                    <div class="section conditional-section" id="consumableSection" style="display: none;">
+                        <h3>💊 Consumable Properties</h3>
+                        <div class="form-group">
+                            <label>Heal</label>
+                            <input type="text" id="itemHeal" placeholder="2d4 + 2" />
+                        </div>
+                        <div class="form-group">
+                            <label>Effects <span class="field-hint">(JSON array, experimental)</span></label>
+                            <textarea id="itemEffects" placeholder='[]'></textarea>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Notes -->
+                    <div class="section">
+                        <h3>📝 Notes</h3>
+                        <div class="notes-editor">
+                            <div class="notes-container" id="notesContainer"></div>
+                            <div class="tag-input-row">
+                                <input type="text" id="newNoteInput" placeholder="Add note (e.g., Burns for 1 hour when lit)" />
+                                <button class="btn btn-sm" onclick="addNote()">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="actions-bar">
+                        <button class="btn btn-primary btn-large" onclick="saveItem()">💾 Save Item</button>
+                        <button class="btn" onclick="validateItem()">✓ Validate</button>
+                        <button class="btn" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/item-editor-v2.js"></script>
+</body>
+</html>

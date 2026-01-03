@@ -1,19 +1,18 @@
 {
-  "id": "blowgun-needle",
-  "name": "Blowgun Needle",
-  "price": 2,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "stack": 50,
-  "weight": 0.01,
-  "type": "Ammunition",
-  "rarity": "common",
-  "img": "equipment/ammunition.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
   "ai_description": "Thin sharp dart with feathered end and metal tip",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "ammunition",
+  "id": "blowgun-needle",
   "image": "/res/img/items/blowgun-needle.png",
-  "gear_slot": "ammunition"
+  "img": "equipment/ammunition.jpg",
+  "name": "Blowgun Needle",
+  "notes": [],
+  "price": 2,
+  "rarity": "common",
+  "stack": 50,
+  "tags": [
+    "equipment"
+  ],
+  "type": "Ammunition",
+  "weight": 0.01
 }

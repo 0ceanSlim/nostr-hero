@@ -1,24 +1,19 @@
 {
-  "id": "studded-leather",
-  "name": "Studded Leather",
-  "description": "",
-  "ai_description": "leather armor reinforced with metal studs and rivets, tough hide vest with iron spikes for extra protection",
-  "price": 4500,
-  "type": "Light Armor",
-  "weight": 13,
-  "stack": 1,
   "ac": "12 + Dex",
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "ai_description": "leather armor reinforced with metal studs and rivets, tough hide vest with iron spikes for extra protection",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "armor",
+  "id": "studded-leather",
+  "image": "/res/img/items/studded-leather.png",
   "img": "equipment/armor.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Studded Leather",
+  "notes": [],
+  "price": 4500,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "armor",
-  "image": "/res/img/items/studded-leather.png"
+  "type": "Light Armor",
+  "weight": 13
 }

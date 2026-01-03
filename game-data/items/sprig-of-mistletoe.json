@@ -1,29 +1,24 @@
 {
+  "ai_description": "Green mistletoe branch with white berries and small leaves",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
   "id": "sprig-of-mistletoe",
-  "name": "Sprig of Mistletoe",
-  "price": 100,
-  "type": "Druidic Focus",
-  "weight": 0.01,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "image": "/res/img/items/sprig-of-mistletoe.png",
   "img": "equipment/druidic-focus.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Sprig of Mistletoe",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Pollen for charm and nature spells"
+  ],
+  "price": 100,
+  "provides": "pollen",
   "rarity": "common",
+  "stack": 1,
   "substitutes": "",
   "tags": [
     "focus",
     "equipment"
   ],
-  "ai_description": "Green mistletoe branch with white berries and small leaves",
-  "provides": "pollen",
-  "notes": [
-    "Can be used as a spellcasting focus for druidic magic",
-    "Provides unlimited Pollen for charm and nature spells"
-  ],
-  "Gear_Slot": "hands",
-  "image": "/res/img/items/sprig-of-mistletoe.png"
+  "type": "Druidic Focus",
+  "weight": 0.01
 }

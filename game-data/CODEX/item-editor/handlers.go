@@ -18,7 +18,7 @@ import (
 
 // HandleItemEditor renders the item editor UI
 func (e *Editor) HandleItemEditor(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "templates/item-editor.html")
+	http.ServeFile(w, r, "templates/item-editor-v2.html")
 }
 
 // HandleGetItems returns all items as JSON
@@ -61,6 +61,34 @@ func (e *Editor) HandleSaveItem(w http.ResponseWriter, r *http.Request) {
 
 	// Update in memory
 	e.Items[filename] = &item
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}
+
+// HandleDeleteItem deletes an item
+func (e *Editor) HandleDeleteItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+
+	// Check if item exists
+	if _, exists := e.Items[filename]; !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	// Delete the file
+	itemsDir := "../items"
+	filePath := filepath.Join(itemsDir, filename+".json")
+	if err := os.Remove(filePath); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to delete file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Remove from memory
+	delete(e.Items, filename)
+
+	log.Printf("🗑️ Deleted item: %s", filename)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "success"})

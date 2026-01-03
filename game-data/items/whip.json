@@ -1,27 +1,23 @@
 {
-  "id": "whip",
-  "name": "Whip",
-  "description": "",
   "ai_description": "long braided leather cord with wrapped handle, flexible weapon for striking at extended reach",
-  "price": 0,
-  "type": "Martial Melee Weapons",
-  "weight": 3,
-  "stack": 1,
-  "ac": null,
   "damage": "1d4",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "slashing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "whip",
+  "image": "/res/img/items/whip.png",
   "img": "equipment/weapon.jpg",
+  "name": "Whip",
+  "notes": [],
+  "price": 0,
   "range": "1",
-  "range-long": "null",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "finesse",
     "reach",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/whip.png"
+  "type": "Martial Melee Weapons",
+  "weight": 3
 }

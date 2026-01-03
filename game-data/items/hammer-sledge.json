@@ -1,25 +1,19 @@
 {
-  "id": "hammer-sledge",
-  "name": "Sledge Hammer",
-  "description": "A heavy two-handed hammer designed for breaking through walls and large objects.",
   "ai_description": "massive steel-headed hammer with long wooden handle, heavy demolition tool with flat striking face",
-  "price": 200,
-  "type": "Adventuring Gear",
-  "weight": 10,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
+  "description": "A heavy two-handed hammer designed for breaking through walls and large objects.",
+  "id": "hammer-sledge",
+  "image": "/res/img/items/hammer-sledge.png",
   "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [
-    "two-handed"
-  ],
+  "name": "Sledge Hammer",
   "notes": [
     "Effective for breaking down barriers"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/hammer-sledge.png"
+  "price": 200,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "two-handed"
+  ],
+  "type": "Adventuring Gear",
+  "weight": 10
 }

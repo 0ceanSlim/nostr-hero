@@ -1,23 +1,17 @@
 {
-  "id": "signal-whistle",
-  "name": "Signal whistle",
-  "description": "A small whistle that produces a loud, sharp sound that can be heard up to 600 feet away. Essential for signaling allies, calling for help, or coordinating group movements.",
-  "price": 5,
-  "type": "Adventuring Gear",
-  "weight": 0.1,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [],
   "ai_description": "Small brass whistle with leather cord and sharp sound",
+  "description": "A small whistle that produces a loud, sharp sound that can be heard up to 600 feet away. Essential for signaling allies, calling for help, or coordinating group movements.",
+  "id": "signal-whistle",
+  "image": "/res/img/items/signal-whistle.png",
+  "img": "equipment/adventuring-gear.jpg",
+  "name": "Signal whistle",
   "notes": [
     "Can be used to summon a monster to fight."
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/signal-whistle.png"
+  "price": 5,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [],
+  "type": "Adventuring Gear",
+  "weight": 0.1
 }

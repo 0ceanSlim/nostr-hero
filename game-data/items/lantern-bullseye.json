@@ -1,28 +1,22 @@
 {
-  "id": "lantern-bullseye",
-  "name": "Lantern Bullseye",
+  "ai_description": "Brass lantern with focused lens and directional shutters",
   "description": "A focused lantern that casts a bright cone of light in one direction.",
-  "price": 1000,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "stack": 1,
-  "weight": 2,
-  "type": "Adventuring Gear",
+  "id": "lantern-bullseye",
+  "image": "/res/img/items/lantern-bullseye.png",
+  "img": "equipment/adventuring-gear.jpg",
+  "name": "Lantern Bullseye",
   "notes": [
     "Casts bright light in a 60-foot cone",
     "Burns for 6 hours on one flask of oil"
   ],
+  "price": 1000,
+  "rarity": "common",
+  "stack": 1,
   "tags": [
     "light-source",
     "directional",
     "oil-burning"
   ],
-  "ai_description": "Brass lantern with focused lens and directional shutters",
-  "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/lantern-bullseye.png"
+  "type": "Adventuring Gear",
+  "weight": 2
 }

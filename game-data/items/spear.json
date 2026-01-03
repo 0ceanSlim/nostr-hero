@@ -1,27 +1,24 @@
 {
-  "id": "spear",
-  "name": "Spear",
-  "description": "",
   "ai_description": "long wooden shaft with sharp iron spearhead, classic thrusting weapon with metal point and leather grip",
-  "price": 0,
-  "type": "Simple Melee Weapons",
-  "weight": 3,
-  "stack": 1,
-  "ac": null,
   "damage": "1d4,1d8",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "piercing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "spear",
+  "image": "/res/img/items/spear.png",
   "img": "equipment/weapon.jpg",
+  "name": "Spear",
+  "notes": [],
+  "price": 0,
   "range": "1",
   "range-long": "2",
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "thrown",
     "versatile",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
-  "image": "/res/img/items/spear.png"
+  "type": "Simple Melee Weapons",
+  "weight": 3
 }

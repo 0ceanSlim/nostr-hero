@@ -1,23 +1,23 @@
 {
-  "id": "javelin",
-  "name": "Javelin",
-  "description": "",
   "ai_description": "lightweight throwing spear with sharp iron point, athletic weapon with balanced shaft for accurate throwing and thrusting",
-  "price": 0,
-  "type": "Simple Melee Weapons",
-  "weight": 2,
-  "stack": 5,
-  "ac": null,
   "damage": "1d6",
-  "heal": null,
-  "ammunition": "",
   "damage-type": "piercing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "ammunition",
+  "id": "javelin",
+  "image": "/res/img/items/javelin.png",
   "img": "equipment/weapon.jpg",
+  "name": "Javelin",
+  "notes": [],
+  "price": 0,
   "range": "1",
   "range-long": "3",
   "rarity": "common",
-  "tags": ["thrown", "equipment"],
-  "notes": [],
-  "gear_slot": "ammunition",
-  "image": "/res/img/items/javelin.png"
+  "stack": 5,
+  "tags": [
+    "thrown",
+    "equipment"
+  ],
+  "type": "Simple Melee Weapons",
+  "weight": 2
 }

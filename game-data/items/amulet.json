@@ -1,28 +1,22 @@
 {
   "id": "amulet",
   "name": "Amulet",
-  "description": "",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "ornate holy symbol amulet on chain, religious charm with divine symbols and polished metal disc",
+  "rarity": "rare",
   "price": 500,
-  "type": "Holy Symbol",
   "weight": 1,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
-  "img": "equipment/holy-symbol.jpg",
-  "range": "null",
-  "range-long": "null",
-  "rarity": "common",
+  "type": "Holy Symbol",
+  "gear_slot": "necklace",
   "tags": [
-    "equipment"
+    "equipment",
+    "focus"
   ],
-  "provides": "blessed-incense",
   "notes": [
     "Can be used as a spellcasting focus for divine magic",
     "Provides unlimited Blessed Incense for holy and protective spells"
   ],
-  "gear_slot": "necklace",
-  "image": "/res/img/items/amulet.png"
+  "image": "/res/img/items/amulet.png",
+  "provides": "blessed-incense"
 }

@@ -1,23 +1,17 @@
 {
-  "id": "hourglass",
-  "name": "Hourglass",
-  "description": "A glass timepiece that measures exactly one hour as sand falls from top to bottom.",
   "ai_description": "glass timekeeper with sand flowing between twin bulbs, hourglass timer with narrow waist and wooden frame",
-  "price": 2500,
-  "type": "Adventuring Gear",
-  "weight": 1,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
+  "description": "A glass timepiece that measures exactly one hour as sand falls from top to bottom.",
+  "id": "hourglass",
+  "image": "/res/img/items/hourglass.png",
   "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [],
+  "name": "Hourglass",
   "notes": [
     "Accurately measures one hour of time"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/hourglass.png"
+  "price": 2500,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [],
+  "type": "Adventuring Gear",
+  "weight": 1
 }

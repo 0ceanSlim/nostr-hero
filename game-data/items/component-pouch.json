@@ -3,15 +3,20 @@
   "name": "Component Pouch",
   "description": "A small leather pouch containing various material components needed for spellcasting.",
   "ai_description": "leather spellcaster's pouch with small compartments, magic component bag filled with crystals, herbs, and mystical materials",
+  "rarity": "common",
   "price": 25,
-  "type": "Adventuring Gear",
   "weight": 2,
   "stack": 1,
+  "type": "Adventuring Gear",
   "container_slots": 4,
-  "allowed_types": "spell-component",
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": ["container"],
-  "notes": ["Can be used as a spellcasting focus for material components"],
+  "allowed_types": [
+    "Spell Component"
+  ],
+  "tags": [
+    "container"
+  ],
+  "notes": [
+    "Can be used as a spellcasting focus for material components"
+  ],
   "image": "/res/img/items/component-pouch.png"
 }

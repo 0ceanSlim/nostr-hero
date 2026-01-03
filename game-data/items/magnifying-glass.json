@@ -1,23 +1,17 @@
 {
-  "id": "magnifying-glass",
-  "name": "Magnifying glass",
-  "description": "A convex lens in a handle that makes small objects appear larger for detailed examination.",
   "ai_description": "round magnifying lens with wooden handle, investigation tool for examining fine details and small text",
-  "price": 10000,
-  "type": "Adventuring Gear",
-  "weight": 0.1,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
+  "description": "A convex lens in a handle that makes small objects appear larger for detailed examination.",
+  "id": "magnifying-glass",
+  "image": "/res/img/items/magnifying-glass.png",
   "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [],
+  "name": "Magnifying glass",
   "notes": [
     "Provides advantage on investigation checks involving small details"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/magnifying-glass.png"
+  "price": 10000,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [],
+  "type": "Adventuring Gear",
+  "weight": 0.1
 }

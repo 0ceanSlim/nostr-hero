@@ -3,21 +3,30 @@
   "name": "Climber's kit",
   "description": "A collection of pitons, boot tips, gloves, and other gear needed for climbing.",
   "ai_description": "bundle of iron pitons, coiled rope, leather gloves with grip, spiked boot attachments for mountain climbing",
+  "rarity": "common",
   "price": 2500,
-  "type": "Adventuring Gear",
   "weight": 12,
   "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [],
+  "type": "Adventuring Gear",
+  "tags": [
+    "pack"
+  ],
   "notes": [
     "Provides advantage on climbing difficult surfaces"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/climbers-kit.png"
+  "image": "/res/img/items/climbers-kit.png",
+  "contents": [
+    [
+      "piton",
+      10
+    ],
+    [
+      "rope",
+      1
+    ],
+    [
+      "hammer",
+      1
+    ]
+  ]
 }

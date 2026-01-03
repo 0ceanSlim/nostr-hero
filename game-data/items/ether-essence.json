@@ -3,16 +3,14 @@
   "name": "Ether Essence",
   "description": "A shimmering substance that seems to exist between dimensions. Provided unlimited when using an Orb focus.",
   "ai_description": "translucent swirling mist in glass vial, ethereal substance that phases between visible and invisible states",
+  "rarity": "common",
   "price": 100,
-  "type": "Spell Component",
   "weight": 0.1,
   "stack": 10,
-  "rarity": "common",
+  "type": "Spell Component",
   "tags": [
-    "spell_component",
-    "focus_provided"
+    "spell_component"
   ],
-  "img": "equipment/spell-component.jpg",
   "notes": [
     "Used for teleportation and dimensional magic",
     "Unlimited when Orb focus is equipped",

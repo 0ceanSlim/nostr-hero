@@ -1,18 +1,12 @@
 {
   "id": "bedroll",
   "name": "Bedroll",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "rolled up sleeping mat made of thick canvas and wool padding, leather straps holding it closed, portable camping bed",
-  "price": 100,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "stack": 1,
-  "weight": 7,
-  "type": "Adventuring Gear",
   "rarity": "common",
-  "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
+  "price": 100,
+  "weight": 7,
+  "stack": 1,
+  "type": "Adventuring Gear",
   "image": "/res/img/items/bedroll.png"
 }

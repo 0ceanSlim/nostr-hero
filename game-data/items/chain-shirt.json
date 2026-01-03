@@ -1,23 +1,19 @@
 {
-  "id": "chain-shirt",
-  "name": "Chain Shirt",
-  "ai_description": "lightweight armor of interlocked metal rings, flexible chainmail covering torso and shoulders",
-  "price": 5000,
-  "type": "Medium Armor",
-  "weight": 20,
-  "stack": 1,
   "ac": "13 + Dex(max2)",
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "ai_description": "lightweight armor of interlocked metal rings, flexible chainmail covering torso and shoulders",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "armor",
+  "id": "chain-shirt",
+  "image": "/res/img/items/chain-shirt.png",
   "img": "equipment/armor.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Chain Shirt",
+  "notes": [],
+  "price": 5000,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "armor",
-  "image": "/res/img/items/chain-shirt.png"
+  "type": "Medium Armor",
+  "weight": 20
 }

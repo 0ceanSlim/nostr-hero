@@ -1,13 +1,15 @@
 {
-  "id": "book",
-  "name": "Book",
-  "description": "",
   "ai_description": "leather-bound tome with yellowed pages, thick book with metal clasps and embossed cover design",
-  "price": 2500,
-  "type": "Adventuring Gear",
-  "weight": 5,
-  "stack": 1,
-  "rarity": "common",
+  "description": "NEEDS DESCRIPTION",
+  "id": "book",
+  "image": "/res/img/items/book.png",
   "img": "equipment/adventuring-gear.jpg",
-  "image": "/res/img/items/book.png"
+  "name": "Book",
+  "notes": [],
+  "price": 2500,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [],
+  "type": "Adventuring Gear",
+  "weight": 5
 }

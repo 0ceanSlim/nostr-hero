@@ -6,19 +6,13 @@
   "type": "Food",
   "weight": 2,
   "stack": 10,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
   "id": "rations",
   "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
   "rarity": "common",
   "tags": ["consumable"],
   "effects": [
-    {"type": "hunger", "value": 1},
-    {"type": "fatigue", "value": -3}
+    { "type": "hunger", "value": 1 },
+    { "type": "fatigue", "value": -3 }
   ],
   "notes": [],
   "image": "/res/img/items/rations.png"

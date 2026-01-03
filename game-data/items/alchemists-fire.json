@@ -3,12 +3,15 @@
   "name": "Alchemist's Fire",
   "description": "A sticky, adhesive fluid that ignites when exposed to air, creating persistent flames.",
   "ai_description": "ceramic flask with orange alchemical fire, volatile throwing weapon with combustible liquid and cork stopper",
+  "rarity": "common",
   "price": 5000,
-  "type": "Adventuring Gear",
   "weight": 1,
   "stack": 1,
-  "gear_slot": "",
-  "rarity": "common",
+  "type": "Adventuring Gear",
+  "damage": "1d6",
+  "damage-type": "fire",
+  "range": "1",
+  "range-long": "2",
   "tags": [
     "thrown"
   ],

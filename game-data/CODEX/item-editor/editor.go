@@ -14,29 +14,33 @@ import (
 
 // Item represents a game item with all possible fields
 type Item struct {
-	ID            string              `json:"id"`
-	Name          string              `json:"name"`
-	Description   string              `json:"description,omitempty"`
-	AIDescription string              `json:"ai_description,omitempty"`
-	Price         int                 `json:"price"`
-	Type          string              `json:"type"`
-	Weight        float64             `json:"weight"`
-	Stack         int                 `json:"stack"`
-	GearSlot      string              `json:"gear_slot,omitempty"`
-	Rarity        string              `json:"rarity"`
-	Tags          []string            `json:"tags,omitempty"`
-	Contents      [][]interface{}     `json:"contents,omitempty"`
-	AC            interface{}         `json:"ac,omitempty"`
-	Damage        interface{}         `json:"damage,omitempty"`
-	DamageType    string              `json:"damage-type,omitempty"`
-	Heal          interface{}         `json:"heal,omitempty"`
-	Ammunition    string              `json:"ammunition,omitempty"`
-	Range         string              `json:"range,omitempty"`
-	RangeLong     string              `json:"range-long,omitempty"`
-	Img           string              `json:"img,omitempty"`
-	Image         string              `json:"image,omitempty"`
-	Notes         []string            `json:"notes,omitempty"`
-	Extra         map[string]interface{} `json:"-"`
+	ID             string              `json:"id"`
+	Name           string              `json:"name"`
+	Description    string              `json:"description,omitempty"`
+	AIDescription  string              `json:"ai_description,omitempty"`
+	Rarity         string              `json:"rarity"`
+	Price          int                 `json:"price"`
+	Weight         float64             `json:"weight"`
+	Stack          int                 `json:"stack"`
+	Type           string              `json:"type"`
+	GearSlot       string              `json:"gear_slot,omitempty"`
+	ContainerSlots int                 `json:"container_slots,omitempty"`
+	AllowedTypes   interface{}         `json:"allowed_types,omitempty"`
+	AC             interface{}         `json:"ac,omitempty"`
+	Damage         interface{}         `json:"damage,omitempty"`
+	DamageType     string              `json:"damage-type,omitempty"`
+	Heal           interface{}         `json:"heal,omitempty"`
+	Ammunition     string              `json:"ammunition,omitempty"`
+	Range          string              `json:"range,omitempty"`
+	RangeLong      string              `json:"range-long,omitempty"`
+	Effects        []interface{}       `json:"effects,omitempty"`
+	Tags           []string            `json:"tags,omitempty"`
+	Notes          []string            `json:"notes,omitempty"`
+	Image          string              `json:"image,omitempty"`
+	Img            string              `json:"img,omitempty"`
+	Contents       [][]interface{}     `json:"contents,omitempty"`
+	Provides       string              `json:"provides,omitempty"`
+	Extra          map[string]interface{} `json:"-"`
 }
 
 // Editor holds the item editor state

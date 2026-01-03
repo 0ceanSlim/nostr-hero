@@ -1,27 +1,21 @@
 {
-  "id": "lantern-hooded",
-  "name": "Lantern hooded",
-  "description": "A lantern with shutters that can be opened or closed to control the light.",
   "ai_description": "metal lantern with glass panels and adjustable shutters, oil-burning light source with carrying handle and wick",
-  "price": 500,
-  "type": "Adventuring Gear",
-  "weight": 2,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
+  "description": "A lantern with shutters that can be opened or closed to control the light.",
+  "id": "lantern-hooded",
+  "image": "/res/img/items/lantern-hooded.png",
   "img": "equipment/adventuring-gear.jpg",
-  "rarity": "common",
-  "tags": [
-    "light-source",
-    "oil-burning"
-  ],
+  "name": "Lantern hooded",
   "notes": [
     "Light can be dimmed or blocked by closing shutters",
     "Burns for 6 hours on one flask of oil"
   ],
-  "range": "null",
-  "range-long": "null",
-  "ammunition": "",
-  "image": "/res/img/items/lantern-hooded.png"
+  "price": 500,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "light-source",
+    "oil-burning"
+  ],
+  "type": "Adventuring Gear",
+  "weight": 2
 }

@@ -1,27 +1,26 @@
 {
   "id": "blowgun",
   "name": "Blowgun",
-  "description": "",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "long hollow wooden tube with carved mouthpiece, slender blowpipe for shooting small darts, tribal hunting weapon",
-  "price": 0,
-  "type": "Martial Ranged Weapons",
+  "rarity": "common",
+  "price": 1,
   "weight": 1,
-  "stack": 1,
-  "ac": null,
+  "stack": 25,
+  "type": "Martial Ranged Weapons",
+  "gear_slot": "hands",
   "damage": "1",
-  "heal": null,
-  "ammunition": "dart",
   "damage-type": "piercing",
-  "img": "equipment/weapon.jpg",
+  "ammunition": "blowgun-needle",
   "range": "1",
   "range-long": "3",
-  "rarity": "common",
   "tags": [
     "ammunition",
     "loading",
     "equipment"
   ],
-  "notes": [],
-  "gear_slot": "hands",
+  "notes": [
+    "maybe add some poision effect later or another couple items poison to dip these in and a new poisoned dart, need to figure out poison effects mechanic first"
+  ],
   "image": "/res/img/items/blowgun.png"
 }

@@ -1,20 +1,22 @@
 {
   "id": "reliquary",
   "name": "Reliquary",
+  "description": "NEEDS DESCRIPTION",
   "ai_description": "Ornate golden container with sacred symbols and gemstones",
+  "rarity": "rare",
   "price": 500,
-  "type": "Holy Symbol",
   "weight": 2,
   "stack": 1,
+  "type": "Holy Symbol",
   "gear_slot": "necklace",
-  "rarity": "common",
   "tags": [
-    "equipment"
+    "equipment",
+    "focus"
   ],
-  "img": "equipment/holy-symbol.jpg",
-  "image": "/res/img/items/reliquary.png",
   "notes": [
     "Can be used as a spellcasting focus for divine magic",
     "Provides unlimited Holy Water for turning undead and cleansing spells"
-  ]
+  ],
+  "image": "/res/img/items/reliquary.png",
+  "provides": "holy-water"
 }

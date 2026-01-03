@@ -1,30 +1,24 @@
 {
-  "id": "staff",
-  "name": "Staff",
-  "description": "",
   "ai_description": "tall wooden staff topped with glowing crystal, arcane focus with carved runes and magical gemstone",
-  "price": 500,
-  "type": "Arcane Focus",
-  "weight": 4,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "staff",
+  "image": "/res/img/items/staff.png",
   "img": "equipment/arcane-focus.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Staff",
+  "notes": [
+    "Can be used as a spellcasting focus for arcane magic",
+    "Provides unlimited Mana Crystals for large and ritual spells"
+  ],
+  "price": 500,
+  "provides": "mana-crystals",
   "rarity": "common",
+  "stack": 1,
   "substitues": "",
   "tags": [
     "focus",
     "equipment"
   ],
-  "provides": "mana-crystals",
-  "notes": [
-    "Can be used as a spellcasting focus for arcane magic",
-    "Provides unlimited Mana Crystals for large and ritual spells"
-  ],
-  "Gear_Slot": "hands",
-  "image": "/res/img/items/staff.png"
+  "type": "Arcane Focus",
+  "weight": 4
 }

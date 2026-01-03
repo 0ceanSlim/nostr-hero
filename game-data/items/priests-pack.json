@@ -1,16 +1,4 @@
 {
-  "id": "priests-pack",
-  "name": "Priest's Pack",
-  "description": "A religious kit containing ceremonial supplies and basic adventuring gear for traveling clergy. Unpacking equips a backpack and places all contents inside it.",
-  "price": 2830,
-  "type": "Pack",
-  "weight": 29,
-  "stack": 1,
-  "gear_slot": "consumable",
-  "rarity": "common",
-  "tags": [
-    "pack"
-  ],
   "ai_description": "Simple brown pack with holy symbol, candles, and sacred texts",
   "contents": [
     [
@@ -46,5 +34,17 @@
       1
     ]
   ],
-  "image": "/res/img/items/priests-pack.png"
+  "description": "A religious kit containing ceremonial supplies and basic adventuring gear for traveling clergy. Unpacking equips a backpack and places all contents inside it.",
+  "id": "priests-pack",
+  "image": "/res/img/items/priests-pack.png",
+  "name": "Priest's Pack",
+  "notes": [],
+  "price": 2830,
+  "rarity": "common",
+  "stack": 1,
+  "tags": [
+    "pack"
+  ],
+  "type": "Pack",
+  "weight": 29
 }

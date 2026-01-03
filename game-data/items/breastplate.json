@@ -1,18 +1,19 @@
 {
-  "id": "breastplate",
-  "name": "Breastplate",
-  "description": "",
+  "ac": "14 + Dex(max2)",
   "ai_description": "fitted steel chestplate with shoulder straps, partial armor covering torso with decorative engravings",
-  "price": 40000,
-  "type": "Medium Armor",
-  "weight": 20,
-  "stack": 1,
+  "description": "NEEDS DESCRIPTION",
   "gear_slot": "armor",
+  "id": "breastplate",
+  "image": "/res/img/items/breastplate.png",
+  "img": "equipment/armor.jpg",
+  "name": "Breastplate",
+  "notes": [],
+  "price": 40000,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "equipment"
   ],
-  "ac": "14 + Dex(max2)",
-  "img": "equipment/armor.jpg",
-  "image": "/res/img/items/breastplate.png"
+  "type": "Medium Armor",
+  "weight": 20
 }

@@ -1,21 +1,24 @@
 {
-  "id": "wooden-staff",
-  "name": "Wooden Staff",
   "ai_description": "tall wooden walking staff with natural bark texture, druidic focus carved from living oak branch",
-  "price": 500,
-  "type": "Druidic Focus",
-  "weight": 4,
-  "stack": 1,
-  "ammunition": "",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
+  "id": "wooden-staff",
+  "image": "/res/img/items/wooden-staff.png",
   "img": "equipment/druidic-focus.jpg",
-  "rarity": "common",
-  "substitutes": "",
-  "tags": ["focus", "equipment"],
-  "provides": "bark-shavings",
+  "name": "Wooden Staff",
   "notes": [
     "Can be used as a spellcasting focus for druidic magic",
     "Provides unlimited Bark Shavings for growth and healing spells"
   ],
-  "gear_slot": "hands",
-  "image": "/res/img/items/wooden-staff.png"
+  "price": 500,
+  "provides": "bark-shavings",
+  "rarity": "common",
+  "stack": 1,
+  "substitutes": "",
+  "tags": [
+    "focus",
+    "equipment"
+  ],
+  "type": "Druidic Focus",
+  "weight": 4
 }

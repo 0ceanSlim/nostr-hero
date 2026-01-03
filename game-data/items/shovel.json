@@ -1,24 +1,19 @@
 {
-  "id": "shovel",
-  "name": "Shovel",
-  "description": "A tool with a broad flat blade and typically upturned sides, used for moving earth, snow, or other material. Essential for digging holes, graves, or excavation work.",
-  "price": 2,
-  "type": "Tools",
-  "weight": 5,
-  "stack": 1,
-  "ac": null,
+  "ai_description": "Iron-headed digging tool with wooden handle and broad blade",
   "damage": "1d6",
-  "heal": null,
   "damage-type": "bludgeon",
+  "description": "A tool with a broad flat blade and typically upturned sides, used for moving earth, snow, or other material. Essential for digging holes, graves, or excavation work.",
+  "id": "shovel",
+  "image": "/res/img/items/shovel.png",
   "img": "equipment/adventuring-gear.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Shovel",
+  "notes": [],
+  "price": 2,
   "rarity": "common",
+  "stack": 1,
   "tags": [
     "improvised-weapon"
   ],
-  "ai_description": "Iron-headed digging tool with wooden handle and broad blade",
-  "notes": [],
-  "ammunition": "",
-  "image": "/res/img/items/shovel.png"
+  "type": "Tools",
+  "weight": 5
 }

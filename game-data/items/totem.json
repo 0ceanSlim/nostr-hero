@@ -1,29 +1,24 @@
 {
+  "ai_description": "Carved wooden animal figurine with tribal symbols and feathers",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "hands",
   "id": "totem",
-  "name": "Totem",
-  "price": 100,
-  "type": "Druidic Focus",
-  "weight": 0.5,
-  "stack": 1,
-  "ac": null,
-  "damage": null,
-  "heal": null,
-  "ammunition": "",
+  "image": "/res/img/items/totem.png",
   "img": "equipment/druidic-focus.jpg",
-  "range": "null",
-  "range-long": "null",
+  "name": "Totem",
+  "notes": [
+    "Can be used as a spellcasting focus for druidic magic",
+    "Provides unlimited Bone Dust for necromancy and summoning magic"
+  ],
+  "price": 100,
+  "provides": "bone-dust",
   "rarity": "common",
+  "stack": 1,
   "substitutes": "",
   "tags": [
     "focus",
     "equipment"
   ],
-  "ai_description": "Carved wooden animal figurine with tribal symbols and feathers",
-  "provides": "bone-dust",
-  "notes": [
-    "Can be used as a spellcasting focus for druidic magic",
-    "Provides unlimited Bone Dust for necromancy and summoning magic"
-  ],
-  "Gear_Slot": "hands",
-  "image": "/res/img/items/totem.png"
+  "type": "Druidic Focus",
+  "weight": 0.5
 }

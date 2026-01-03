@@ -1,16 +1,18 @@
 {
-  "id": "sling-bullet",
-  "name": "Sling Bullets",
-  "description": "A pouch containing up to 8 sling bullets made of lead or stone.",
-  "price": 0,
-  "type": "Ammunition",
-  "weight": 0.015,
-  "stack": 8,
-  "gear_slot": "ammunition",
-  "rarity": "common",
-  "tags": [
-    "ammunition"
-  ],
   "ai_description": "Smooth round stones and lead bullets in leather pouch",
-  "image": "/res/img/items/sling-bullet.png"
+  "description": "A pouch containing up to 8 sling bullets made of lead or stone.",
+  "gear_slot": "ammunition",
+  "id": "sling-bullet",
+  "image": "/res/img/items/sling-bullet.png",
+  "name": "Sling Bullets",
+  "notes": [],
+  "price": 0,
+  "rarity": "common",
+  "stack": 8,
+  "tags": [
+    "ammunition",
+    "equipment"
+  ],
+  "type": "Ammunition",
+  "weight": 0.015
 }

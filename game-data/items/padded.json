@@ -1,23 +1,22 @@
 {
-  "id": "padded",
-  "name": "Padded",
-  "description": "",
-  "ai_description": "quilted cloth armor with thick padding, soft fabric protection stuffed with cotton layers",
-  "price": 500,
-  "type": "Light Armor",
-  "weight": 8,
-  "stack": 1,
   "ac": "11 + Dex",
-  "ammunition": "",
+  "ai_description": "quilted cloth armor with thick padding, soft fabric protection stuffed with cotton layers",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "armor",
+  "id": "padded",
+  "image": "/res/img/items/padded.png",
   "img": "equipment/armor.jpg",
+  "name": "Padded",
+  "notes": [
+    "Disadvantage on Stealth"
+  ],
+  "price": 500,
   "rarity": "common",
+  "stack": 1,
   "stealth": "-1",
   "tags": [
     "equipment"
   ],
-  "notes": [
-    "Disadvantage on Stealth"
-  ],
-  "gear_slot": "armor",
-  "image": "/res/img/items/padded.png"
+  "type": "Light Armor",
+  "weight": 8
 }
