@@ -445,8 +445,8 @@ func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*Game
 				slotMap["quantity"] = 0
 				log.Printf("✅ Dropped entire stack of %s (%d items)", itemID, currentQty)
 			} else {
-				// Drop partial stack
-				slotMap["quantity"] = float64(currentQty - dropQuantity)
+				// Drop partial stack (store as int)
+				slotMap["quantity"] = currentQty - dropQuantity
 				log.Printf("✅ Dropped %d %s (keeping %d)", dropQuantity, itemID, currentQty-dropQuantity)
 			}
 			break
@@ -1053,15 +1053,20 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 		return nil, fmt.Errorf("item mismatch in source slot")
 	}
 
-	// Get current quantity
-	currentQty, ok := fromSlotMap["quantity"].(float64)
-	if !ok {
+	// Get current quantity (handle both int and float64 types)
+	var currentQty int
+	switch v := fromSlotMap["quantity"].(type) {
+	case float64:
+		currentQty = int(v)
+	case int:
+		currentQty = v
+	default:
 		return nil, fmt.Errorf("invalid quantity in source slot")
 	}
 
 	// Validate split quantity
-	if splitQuantity <= 0 || splitQuantity >= int(currentQty) {
-		return nil, fmt.Errorf("invalid split quantity: %d (current: %d)", splitQuantity, int(currentQty))
+	if splitQuantity <= 0 || splitQuantity >= currentQty {
+		return nil, fmt.Errorf("invalid split quantity: %d (current: %d)", splitQuantity, currentQty)
 	}
 
 	// Check destination slot is empty
@@ -1074,14 +1079,14 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	}
 
 	// Perform split
-	remainingQty := int(currentQty) - splitQuantity
+	remainingQty := currentQty - splitQuantity
 
-	// Update source slot
-	fromSlotMap["quantity"] = float64(remainingQty)
+	// Update source slot (store as int, not float64)
+	fromSlotMap["quantity"] = remainingQty
 
-	// Update destination slot
+	// Update destination slot (store as int, not float64)
 	toSlotMap["item"] = itemID
-	toSlotMap["quantity"] = float64(splitQuantity)
+	toSlotMap["quantity"] = splitQuantity
 	toSlotMap["slot"] = toSlot
 
 	log.Printf("✅ Split complete: %s (%d remaining in slot %d, %d in new slot %d)", itemID, remainingQty, fromSlot, splitQuantity, toSlot)
@@ -1584,8 +1589,12 @@ func getGoldQuantity(state *SaveFile) int {
 		for _, slotData := range generalSlots {
 			if slotMap, ok := slotData.(map[string]interface{}); ok {
 				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
-					if qty, ok := slotMap["quantity"].(float64); ok {
-						totalGold += int(qty)
+					// Handle both int and float64 types
+					switch v := slotMap["quantity"].(type) {
+					case float64:
+						totalGold += int(v)
+					case int:
+						totalGold += v
 					}
 				}
 			}
@@ -1599,8 +1608,12 @@ func getGoldQuantity(state *SaveFile) int {
 				for _, slotData := range contents {
 					if slotMap, ok := slotData.(map[string]interface{}); ok {
 						if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
-							if qty, ok := slotMap["quantity"].(float64); ok {
-								totalGold += int(qty)
+							// Handle both int and float64 types
+							switch v := slotMap["quantity"].(type) {
+							case float64:
+								totalGold += int(v)
+							case int:
+								totalGold += v
 							}
 						}
 					}
@@ -1628,23 +1641,31 @@ func deductGold(state *SaveFile, amount int) bool {
 			}
 			if slotMap, ok := slotData.(map[string]interface{}); ok {
 				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
-					if qty, ok := slotMap["quantity"].(float64); ok {
-						currentQty := int(qty)
-						if currentQty >= remaining {
-							// This slot has enough gold
-							slotMap["quantity"] = float64(currentQty - remaining)
-							if currentQty == remaining {
-								// Clear slot if depleted
-								slotMap["item"] = nil
-								slotMap["quantity"] = 0
-							}
-							remaining = 0
-						} else {
-							// Take all gold from this slot
-							remaining -= currentQty
+					// Handle both int and float64 types
+					var currentQty int
+					switch v := slotMap["quantity"].(type) {
+					case float64:
+						currentQty = int(v)
+					case int:
+						currentQty = v
+					default:
+						continue
+					}
+
+					if currentQty >= remaining {
+						// This slot has enough gold (store as int)
+						slotMap["quantity"] = currentQty - remaining
+						if currentQty == remaining {
+							// Clear slot if depleted
 							slotMap["item"] = nil
 							slotMap["quantity"] = 0
 						}
+						remaining = 0
+					} else {
+						// Take all gold from this slot
+						remaining -= currentQty
+						slotMap["item"] = nil
+						slotMap["quantity"] = 0
 					}
 				}
 			}
@@ -1662,20 +1683,29 @@ func deductGold(state *SaveFile, amount int) bool {
 						}
 						if slotMap, ok := slotData.(map[string]interface{}); ok {
 							if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
-								if qty, ok := slotMap["quantity"].(float64); ok {
-									currentQty := int(qty)
-									if currentQty >= remaining {
-										slotMap["quantity"] = float64(currentQty - remaining)
-										if currentQty == remaining {
-											slotMap["item"] = nil
-											slotMap["quantity"] = 0
-										}
-										remaining = 0
-									} else {
-										remaining -= currentQty
+								// Handle both int and float64 types
+								var currentQty int
+								switch v := slotMap["quantity"].(type) {
+								case float64:
+									currentQty = int(v)
+								case int:
+									currentQty = v
+								default:
+									continue
+								}
+
+								if currentQty >= remaining {
+									// This slot has enough gold (store as int)
+									slotMap["quantity"] = currentQty - remaining
+									if currentQty == remaining {
 										slotMap["item"] = nil
 										slotMap["quantity"] = 0
 									}
+									remaining = 0
+								} else {
+									remaining -= currentQty
+									slotMap["item"] = nil
+									slotMap["quantity"] = 0
 								}
 							}
 						}

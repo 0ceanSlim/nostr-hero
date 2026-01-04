@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"nostr-hero/db"
+	"nostr-hero/merchant"
 	"nostr-hero/types"
 )
 
@@ -46,7 +47,14 @@ func ShopHandler(w http.ResponseWriter, r *http.Request) {
 
 // Get shop data including inventory with prices
 func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
-	log.Printf("📂 Loading shop data for merchant: %s", merchantID)
+	// Get npub from query parameter
+	npub := r.URL.Query().Get("npub")
+	if npub == "" {
+		http.Error(w, "Missing npub parameter", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf("📂 Loading shop data for merchant: %s (player: %s)", merchantID, npub[:12])
 
 	// Get NPC data from database
 	npcData, err := db.GetNPCByID(merchantID)
@@ -71,13 +79,38 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 		return
 	}
 
-	// Get item prices from database
+	// Initialize merchant inventory items for state manager
+	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	for _, invItem := range shopConfig.Inventory {
+		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+			ItemID:       invItem.ItemID,
+			CurrentStock: invItem.Stock,
+			MaxStock:     invItem.MaxStock,
+		})
+	}
+
+	// Get or initialize merchant state for this player
+	restockInterval := 1440 // Default: 24 hours (in minutes)
+	if shopConfig.RestockInterval > 0 {
+		restockInterval = shopConfig.RestockInterval
+	}
+
+	merchantManager := merchant.GetManager()
+	merchantState, restocked := merchantManager.GetMerchantState(npub, merchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+
+	// Get item prices and current stock from merchant state
 	itemsWithPrices := make([]map[string]interface{}, 0)
 	for _, invItem := range shopConfig.Inventory {
 		item, err := db.GetItemByID(invItem.ItemID)
 		if err != nil {
 			log.Printf("⚠️ Item not found: %s", invItem.ItemID)
 			continue
+		}
+
+		// Get current stock from merchant state
+		currentStock := 0
+		if stateItem, exists := merchantState.Inventory[invItem.ItemID]; exists {
+			currentStock = stateItem.CurrentStock
 		}
 
 		// Calculate buy/sell prices
@@ -93,21 +126,27 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 			"value":       basePrice,
 			"buy_price":   buyPrice,   // What player pays to buy
 			"sell_price":  sellPrice,  // What player gets when selling
-			"stock":       invItem.Stock,
+			"stock":       currentStock, // Current stock from merchant state
 			"max_stock":   invItem.MaxStock,
 		})
 	}
+
+	// Calculate time until next restock
+	timeUntilRestock := merchantManager.GetTimeUntilRestock(npub, merchantID)
 
 	response := map[string]interface{}{
 		"merchant_id":           merchantID,
 		"merchant_name":         npcData.Name,
 		"shop_type":             shopConfig.ShopType,
 		"buys_items":            shopConfig.BuysItems,
-		"current_gold":          shopConfig.StartingGold, // For now, always starting gold (stateless)
+		"current_gold":          merchantState.CurrentGold, // Current gold from state
 		"max_gold":              shopConfig.MaxGold,
 		"buy_price_multiplier":  shopConfig.BuyPriceMultiplier,
 		"sell_price_multiplier": shopConfig.SellPriceMultiplier,
 		"inventory":             itemsWithPrices,
+		"restock_interval":      restockInterval, // Minutes between restocks
+		"time_until_restock":    int(timeUntilRestock), // Minutes until next restock
+		"just_restocked":        restocked, // Whether merchant just restocked
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -119,7 +158,12 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	var transaction types.ShopTransaction
 	if err := json.NewDecoder(r.Body).Decode(&transaction); err != nil {
-		http.Error(w, "Invalid transaction data", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid transaction data",
+		})
 		return
 	}
 
@@ -129,7 +173,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	session, err := sessionManager.GetSession(transaction.Npub, transaction.SaveID)
 	if err != nil {
 		log.Printf("❌ Session not found: %v", err)
-		http.Error(w, "Session not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Session not found",
+		})
 		return
 	}
 
@@ -139,7 +188,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	npcData, err := db.GetNPCByID(transaction.MerchantID)
 	if err != nil {
 		log.Printf("❌ Error loading merchant: %v", err)
-		http.Error(w, "Merchant not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Merchant not found",
+		})
 		return
 	}
 
@@ -148,7 +202,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	var shopConfig types.ShopConfig
 	json.Unmarshal(configJSON, &shopConfig)
 
-	// Find item in shop inventory
+	// Find item in shop inventory config
 	var shopItem *types.ShopInventoryItem
 	for i := range shopConfig.Inventory {
 		if shopConfig.Inventory[i].ItemID == transaction.ItemID {
@@ -158,13 +212,46 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if shopItem == nil {
-		http.Error(w, "Item not in shop inventory", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Item not in shop inventory",
+		})
 		return
 	}
 
-	// Check stock
-	if shopItem.Stock < transaction.Quantity {
-		http.Error(w, fmt.Sprintf("Not enough stock (available: %d)", shopItem.Stock), http.StatusBadRequest)
+	// Get merchant state to check current stock
+	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	for _, invItem := range shopConfig.Inventory {
+		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+			ItemID:       invItem.ItemID,
+			CurrentStock: invItem.Stock,
+			MaxStock:     invItem.MaxStock,
+		})
+	}
+
+	restockInterval := 1440
+	if shopConfig.RestockInterval > 0 {
+		restockInterval = shopConfig.RestockInterval
+	}
+
+	merchantManager := merchant.GetManager()
+	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+
+	// Check current stock from merchant state
+	currentStock := 0
+	if stateItem, exists := merchantState.Inventory[transaction.ItemID]; exists {
+		currentStock = stateItem.CurrentStock
+	}
+
+	if currentStock < transaction.Quantity {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   fmt.Sprintf("Not enough stock (available: %d)", currentStock),
+		})
 		return
 	}
 
@@ -172,7 +259,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	item, err := db.GetItemByID(transaction.ItemID)
 	if err != nil {
 		log.Printf("❌ Error loading item: %v", err)
-		http.Error(w, "Item not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Item not found",
+		})
 		return
 	}
 
@@ -184,7 +276,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	playerGold := getGoldQuantity(save)
 
 	if playerGold < totalCost {
-		http.Error(w, fmt.Sprintf("Not enough gold (need %d, have %d)", totalCost, playerGold), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   fmt.Sprintf("Not enough gold (need %d, have %d)", totalCost, playerGold),
+		})
 		return
 	}
 
@@ -207,16 +304,29 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 
 	// Deduct gold for items that were added
 	if !deductGold(save, actualCost) {
-		http.Error(w, "Failed to deduct gold", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Failed to deduct gold",
+		})
 		return
 	}
 
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
-		http.Error(w, "Failed to update session", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Failed to update session",
+		})
 		return
 	}
+
+	// Update merchant state (deduct stock, add gold from player)
+	merchantManager.UpdateMerchantInventory(transaction.Npub, transaction.MerchantID, transaction.ItemID, -itemsAdded, actualCost)
 
 	// Build response message
 	var message string
@@ -242,7 +352,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	var transaction types.ShopTransaction
 	if err := json.NewDecoder(r.Body).Decode(&transaction); err != nil {
-		http.Error(w, "Invalid transaction data", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Invalid transaction data",
+		})
 		return
 	}
 
@@ -252,7 +367,12 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	session, err := sessionManager.GetSession(transaction.Npub, transaction.SaveID)
 	if err != nil {
 		log.Printf("❌ Session not found: %v", err)
-		http.Error(w, "Session not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Session not found",
+		})
 		return
 	}
 
@@ -262,7 +382,12 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	npcData, err := db.GetNPCByID(transaction.MerchantID)
 	if err != nil {
 		log.Printf("❌ Error loading merchant: %v", err)
-		http.Error(w, "Merchant not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Merchant not found",
+		})
 		return
 	}
 
@@ -273,7 +398,12 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 
 	// Check if merchant buys items
 	if !shopConfig.BuysItems {
-		http.Error(w, "This merchant doesn't buy items", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "This merchant doesn't buy items",
+		})
 		return
 	}
 
@@ -281,7 +411,12 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	item, err := db.GetItemByID(transaction.ItemID)
 	if err != nil {
 		log.Printf("❌ Error loading item: %v", err)
-		http.Error(w, "Item not found", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Item not found",
+		})
 		return
 	}
 
@@ -289,24 +424,57 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	sellPrice := int(float64(item.Value) * shopConfig.BuyPriceMultiplier)
 	totalValue := sellPrice * transaction.Quantity
 
-	// Check merchant gold (stateless - always has starting gold)
-	merchantGold := shopConfig.StartingGold
+	// Get merchant state to check current gold
+	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	for _, invItem := range shopConfig.Inventory {
+		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+			ItemID:       invItem.ItemID,
+			CurrentStock: invItem.Stock,
+			MaxStock:     invItem.MaxStock,
+		})
+	}
+
+	restockInterval := 1440
+	if shopConfig.RestockInterval > 0 {
+		restockInterval = shopConfig.RestockInterval
+	}
+
+	merchantManager := merchant.GetManager()
+	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+
+	// Check merchant gold from state
+	merchantGold := merchantState.CurrentGold
 	if merchantGold < totalValue {
-		http.Error(w, fmt.Sprintf("Merchant doesn't have enough gold (needs %d, has %d)", totalValue, merchantGold), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   fmt.Sprintf("Merchant doesn't have enough gold (needs %d, has %d)", totalValue, merchantGold),
+		})
 		return
 	}
 
 	// Check player has items and remove them
 	if err := removeItemFromInventory(save, transaction.ItemID, transaction.Quantity); err != nil {
 		log.Printf("❌ Error removing item from inventory: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
 		return
 	}
 
 	// Add gold to player (using existing helper function)
 	if err := addGoldToInventory(save.Inventory, totalValue); err != nil {
 		log.Printf("❌ Error adding gold to inventory: %v", err)
-		http.Error(w, "Failed to add gold", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Failed to add gold",
+		})
 		return
 	}
 
@@ -315,9 +483,17 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
-		http.Error(w, "Failed to update session", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "Failed to update session",
+		})
 		return
 	}
+
+	// Update merchant state (add stock, deduct gold paid to player)
+	merchantManager.UpdateMerchantInventory(transaction.Npub, transaction.MerchantID, transaction.ItemID, transaction.Quantity, -totalValue)
 
 	log.Printf("✅ Sell successful: %s sold %dx %s for %dg (IN MEMORY)", transaction.Npub, transaction.Quantity, transaction.ItemID, totalValue)
 

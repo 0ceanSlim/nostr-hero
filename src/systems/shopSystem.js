@@ -11,6 +11,7 @@ import { gameAPI } from '../lib/api.js';
 import { getGameStateSync, refreshGameState } from '../state/gameState.js';
 import { showMessage } from '../ui/messaging.js';
 import { updateAllDisplays } from '../ui/displayCoordinator.js';
+import { sessionManager } from '../lib/session.js';
 
 // Module state
 let currentMerchantID = null;
@@ -32,7 +33,13 @@ export async function openShop(merchantID) {
 
     // Fetch shop data from backend
     try {
-        const response = await fetch(`/api/shop/${merchantID}`);
+        // Get npub from session
+        const npub = sessionManager.getNpub();
+        if (!npub) {
+            throw new Error('No npub found in session');
+        }
+
+        const response = await fetch(`/api/shop/${merchantID}?npub=${encodeURIComponent(npub)}`);
         if (!response.ok) {
             throw new Error('Failed to load shop data');
         }
@@ -65,6 +72,145 @@ export function closeShop() {
     modal.classList.add('hidden');
     currentMerchantID = null;
     currentShopData = null;
+}
+
+/**
+ * Open buy quantity modal for custom amount
+ * @param {object} shopItem - Shop item data
+ */
+function openBuyQuantityModal(shopItem) {
+    logger.debug('Opening buy quantity modal for:', shopItem.item_id);
+
+    // Create modal backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[100]';
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: #1a1a1a;
+        color: white;
+        padding: 20px;
+        min-width: 300px;
+        border-top: 2px solid #4a4a4a;
+        border-left: 2px solid #4a4a4a;
+        border-right: 2px solid #0a0a0a;
+        border-bottom: 2px solid #0a0a0a;
+    `;
+
+    // Title
+    const title = document.createElement('h3');
+    title.textContent = `Buy ${shopItem.name}`;
+    title.className = 'text-lg font-bold mb-4 text-green-400';
+    modal.appendChild(title);
+
+    // Stock info
+    const stockInfo = document.createElement('p');
+    stockInfo.textContent = `Available: ${shopItem.stock}`;
+    stockInfo.className = 'text-sm text-gray-400 mb-3';
+    modal.appendChild(stockInfo);
+
+    // Quantity input
+    const inputLabel = document.createElement('label');
+    inputLabel.textContent = 'Quantity:';
+    inputLabel.className = 'block text-sm mb-1';
+    modal.appendChild(inputLabel);
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '1';
+    input.max = shopItem.stock.toString();
+    input.value = '1';
+    input.className = 'w-full px-3 py-2 mb-3 text-base';
+    input.style.cssText = `
+        background: #0a0a0a;
+        color: white;
+        border-top: 2px solid #0a0a0a;
+        border-left: 2px solid #0a0a0a;
+        border-right: 2px solid #3a3a3a;
+        border-bottom: 2px solid #3a3a3a;
+    `;
+    modal.appendChild(input);
+
+    // Total cost preview
+    const costPreview = document.createElement('div');
+    costPreview.className = 'mb-4 p-2';
+    costPreview.style.cssText = `
+        background: #0a0a0a;
+        border: 1px solid #4a4a4a;
+    `;
+    const updateCostPreview = () => {
+        const qty = Math.min(Math.max(parseInt(input.value) || 1, 1), shopItem.stock);
+        const total = qty * shopItem.buy_price;
+        costPreview.innerHTML = `
+            <div class="text-sm">
+                <span class="text-gray-400">${qty}x ${shopItem.name}</span>
+            </div>
+            <div class="text-lg font-bold text-yellow-400 mt-1">
+                Total: ${total}g
+            </div>
+        `;
+    };
+    updateCostPreview();
+    input.addEventListener('input', updateCostPreview);
+    modal.appendChild(costPreview);
+
+    // Buttons container
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'flex gap-2';
+
+    // Confirm button
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Buy';
+    confirmBtn.className = 'flex-1 px-4 py-2 font-medium';
+    confirmBtn.style.cssText = `
+        background: #15803d;
+        color: white;
+        border-top: 2px solid #22c55e;
+        border-left: 2px solid #22c55e;
+        border-right: 2px solid #166534;
+        border-bottom: 2px solid #166534;
+    `;
+    confirmBtn.onclick = async () => {
+        const qty = Math.min(Math.max(parseInt(input.value) || 1, 1), shopItem.stock);
+        document.body.removeChild(backdrop);
+        await buyItemNow(shopItem.item_id, shopItem.name, qty, shopItem.buy_price, shopItem.stock);
+    };
+    buttonsContainer.appendChild(confirmBtn);
+
+    // Cancel button
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className = 'flex-1 px-4 py-2 font-medium';
+    cancelBtn.style.cssText = `
+        background: #7f1d1d;
+        color: white;
+        border-top: 2px solid #dc2626;
+        border-left: 2px solid #dc2626;
+        border-right: 2px solid #991b1b;
+        border-bottom: 2px solid #991b1b;
+    `;
+    cancelBtn.onclick = () => {
+        document.body.removeChild(backdrop);
+    };
+    buttonsContainer.appendChild(cancelBtn);
+
+    modal.appendChild(buttonsContainer);
+    backdrop.appendChild(modal);
+    document.body.appendChild(backdrop);
+
+    // Focus input
+    input.focus();
+    input.select();
+
+    // Enter key to confirm
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            confirmBtn.click();
+        } else if (e.key === 'Escape') {
+            cancelBtn.click();
+        }
+    });
 }
 
 /**
@@ -292,46 +438,12 @@ function showBuyContextMenu(e, shopItem) {
     });
     menu.appendChild(buy1Btn);
 
-    // Buy 5 button
-    const buy5Btn = createMenuButton('Buy 5', async () => {
-        const qty = Math.min(5, shopItem.stock);
+    // Buy X button (opens modal)
+    const buyXBtn = createMenuButton('Buy X', () => {
         closeContextMenu();
-        await buyItemNow(shopItem.item_id, shopItem.name, qty, shopItem.buy_price, shopItem.stock);
+        openBuyQuantityModal(shopItem);
     });
-    menu.appendChild(buy5Btn);
-
-    // Buy X section (input INSIDE menu)
-    const buyXContainer = document.createElement('div');
-    buyXContainer.className = 'p-2 border-t border-gray-700';
-
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.min = '1';
-    input.max = shopItem.stock;
-    input.placeholder = 'Quantity';
-    input.className = 'w-full px-2 py-1 text-xs';
-    input.style.cssText = 'background: #1a1a1a; color: white; border: 1px solid #4a4a4a;';
-
-    const buyBtn = document.createElement('button');
-    buyBtn.textContent = 'Buy';
-    buyBtn.className = 'w-full mt-1 px-2 py-1 text-xs font-medium';
-    buyBtn.style.cssText = `
-        background: #15803d;
-        color: white;
-        border-top: 2px solid #22c55e;
-        border-left: 2px solid #22c55e;
-        border-right: 2px solid #166534;
-        border-bottom: 2px solid #166534;
-    `;
-    buyBtn.onclick = async () => {
-        const qty = Math.min(parseInt(input.value) || 1, shopItem.stock);
-        closeContextMenu();
-        await buyItemNow(shopItem.item_id, shopItem.name, qty, shopItem.buy_price, shopItem.stock);
-    };
-
-    buyXContainer.appendChild(input);
-    buyXContainer.appendChild(buyBtn);
-    menu.appendChild(buyXContainer);
+    menu.appendChild(buyXBtn);
 
     document.body.appendChild(menu);
 

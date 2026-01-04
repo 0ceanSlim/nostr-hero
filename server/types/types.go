@@ -101,6 +101,7 @@ type ShopConfig struct {
 	MaxGold             int                 `json:"max_gold"`
 	GoldRegenRate       int                 `json:"gold_regen_rate"`
 	GoldRegenInterval   string              `json:"gold_regen_interval"`
+	RestockInterval     int                 `json:"restock_interval"` // Minutes between restocks (real-world time)
 	Inventory           []ShopInventoryItem `json:"inventory"`
 }
 
