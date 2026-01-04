@@ -1,15 +1,12 @@
 {
-  "ai_description": "wooden rectangular counting frame with horizontal rods, colorful sliding beads arranged in rows, ancient calculation tool",
-  "description": "A standard tool used to make calculations.",
   "id": "abacus",
-  "image": "/res/img/items/abacus.png",
-  "img": "equipment/adventuring-gear.jpg",
   "name": "Abacus",
-  "notes": [],
-  "price": 200,
+  "description": "A standard tool used to make calculations.",
+  "ai_description": "wooden rectangular counting frame with horizontal rods, colorful sliding beads arranged in rows, ancient calculation tool",
   "rarity": "common",
-  "stack": 1,
-  "tags": [],
+  "price": 205,
+  "weight": 2,
+  "stack": 0,
   "type": "Adventuring Gear",
-  "weight": 2
+  "image": "/res/img/items/abacus.png"
 }
