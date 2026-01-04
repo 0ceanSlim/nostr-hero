@@ -11,14 +11,16 @@ import (
 	"strings"
 	"time"
 
+	"nostr-hero/codex/config"
 	"nostr-hero/codex/pixellab"
+	"nostr-hero/codex/staging"
 
 	"github.com/gorilla/mux"
 )
 
 // HandleItemEditor renders the item editor UI
 func (e *Editor) HandleItemEditor(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "templates/item-editor-v2.html")
+	http.ServeFile(w, r, "game-data/CODEX/html/item-editor-v2.html")
 }
 
 // HandleGetItems returns all items as JSON
@@ -42,7 +44,7 @@ func (e *Editor) HandleGetItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(item)
 }
 
-// HandleSaveItem saves an item to disk
+// HandleSaveItem saves an item to disk or stages it for PR
 func (e *Editor) HandleSaveItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filename := vars["filename"]
@@ -53,20 +55,72 @@ func (e *Editor) HandleSaveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Save to file
-	if err := e.SaveItemToFile(filename, &item); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	// Detect mode
+	cfg := e.Config.(*config.Config)
+	mode := staging.DetectMode(r, cfg)
+	sessionID := r.Header.Get("X-Session-ID")
+
+	if mode == staging.ModeDirect {
+		// DIRECT MODE - Save to disk immediately
+		if err := e.SaveItemToFile(filename, &item); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Update in memory
+		e.Items[filename] = &item
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "saved",
+			"mode":   "direct",
+		})
+	} else {
+		// STAGING MODE - Add to session
+		session := staging.Manager.GetSession(sessionID)
+		if session == nil {
+			http.Error(w, "Session required in staging mode", http.StatusBadRequest)
+			return
+		}
+
+		// Read old content
+		filePath := filepath.Join("game-data/items", filename+".json")
+		oldContent, _ := os.ReadFile(filePath)
+
+		// Create new content
+		newContent, _ := json.MarshalIndent(item, "", "  ")
+
+		// Determine change type
+		changeType := staging.ChangeUpdate
+		if len(oldContent) == 0 {
+			changeType = staging.ChangeCreate
+		}
+
+		// Convert path to Git format (forward slashes) for cross-platform compatibility
+		gitPath := strings.ReplaceAll(filePath, "\\", "/")
+
+		// Add change to session
+		session.AddChange(staging.Change{
+			Type:       changeType,
+			FilePath:   gitPath,
+			OldContent: oldContent,
+			NewContent: newContent,
+			Timestamp:  time.Now(),
+		})
+
+		// Update in-memory cache so UI shows changes immediately
+		e.Items[filename] = &item
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "staged",
+			"mode":    "staging",
+			"changes": len(session.Changes),
+		})
 	}
-
-	// Update in memory
-	e.Items[filename] = &item
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
 }
 
-// HandleDeleteItem deletes an item
+// HandleDeleteItem deletes an item or stages deletion for PR
 func (e *Editor) HandleDeleteItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filename := vars["filename"]
@@ -77,21 +131,62 @@ func (e *Editor) HandleDeleteItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete the file
-	itemsDir := "../items"
-	filePath := filepath.Join(itemsDir, filename+".json")
-	if err := os.Remove(filePath); err != nil {
-		http.Error(w, fmt.Sprintf("Failed to delete file: %v", err), http.StatusInternalServerError)
-		return
+	// Detect mode
+	cfg := e.Config.(*config.Config)
+	mode := staging.DetectMode(r, cfg)
+	sessionID := r.Header.Get("X-Session-ID")
+
+	filePath := filepath.Join("game-data/items", filename+".json")
+
+	if mode == staging.ModeDirect {
+		// DIRECT MODE - Delete file immediately
+		if err := os.Remove(filePath); err != nil {
+			http.Error(w, fmt.Sprintf("Failed to delete file: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		// Remove from memory
+		delete(e.Items, filename)
+		log.Printf("🗑️ Deleted item: %s", filename)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "deleted",
+			"mode":   "direct",
+		})
+	} else {
+		// STAGING MODE - Add deletion to session
+		session := staging.Manager.GetSession(sessionID)
+		if session == nil {
+			http.Error(w, "Session required in staging mode", http.StatusBadRequest)
+			return
+		}
+
+		// Read current content before "deleting"
+		oldContent, _ := os.ReadFile(filePath)
+
+		// Convert path to Git format (forward slashes) for cross-platform compatibility
+		gitPath := strings.ReplaceAll(filePath, "\\", "/")
+
+		// Add deletion change
+		session.AddChange(staging.Change{
+			Type:       staging.ChangeDelete,
+			FilePath:   gitPath,
+			OldContent: oldContent,
+			NewContent: nil,
+			Timestamp:  time.Now(),
+		})
+
+		// Remove from memory so UI reflects deletion
+		delete(e.Items, filename)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "staged",
+			"mode":    "staging",
+			"changes": len(session.Changes),
+		})
 	}
-
-	// Remove from memory
-	delete(e.Items, filename)
-
-	log.Printf("🗑️ Deleted item: %s", filename)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
 }
 
 // HandleValidate validates all items
@@ -209,7 +304,7 @@ func (e *Editor) HandleGenerateImage(w http.ResponseWriter, r *http.Request) {
 
 	// Save image with timestamp to history folder
 	timestamp := time.Now().Format("20060102_150405")
-	historyDir := filepath.Join("../../www/res/img/items/_history", item.ID)
+	historyDir := filepath.Join("www/res/img/items/_history", item.ID)
 	if err := os.MkdirAll(historyDir, 0755); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -251,7 +346,7 @@ func (e *Editor) HandleGetImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if image exists
-	imagePath := filepath.Join("../../www/res/img/items", item.ID+".png")
+	imagePath := filepath.Join("www/res/img/items", item.ID+".png")
 	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -261,7 +356,7 @@ func (e *Editor) HandleGetImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Also check for images in history
-	historyDir := filepath.Join("../../www/res/img/items/_history", item.ID)
+	historyDir := filepath.Join("www/res/img/items/_history", item.ID)
 	var historyFiles []string
 	if entries, err := os.ReadDir(historyDir); err == nil {
 		for _, entry := range entries {
@@ -306,7 +401,7 @@ func (e *Editor) HandleAcceptImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save to main items directory
-	mainImagePath := filepath.Join("../../www/res/img/items", item.ID+".png")
+	mainImagePath := filepath.Join("www/res/img/items", item.ID+".png")
 	if err := os.WriteFile(mainImagePath, imageData, 0644); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

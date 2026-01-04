@@ -22,8 +22,8 @@ export default defineConfig({
     // Generate source maps for debugging
     sourcemap: true,
 
-    // Prevent CSS code splitting - combine all CSS into one file
-    cssCodeSplit: false,
+    // Enable CSS code splitting for separate entry point CSS files
+    cssCodeSplit: true,
 
     // Multiple entry points
     rollupOptions: {
@@ -44,8 +44,8 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           // Keep CSS filenames predictable (no hash) for easy linking in Go templates
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            // Force all CSS to be named main.css since we only have one CSS file
-            return 'main.css';
+            // Use the entry point name for CSS files (no hash)
+            return '[name].css';
           }
           return 'assets/[name]-[hash][extname]';
         }

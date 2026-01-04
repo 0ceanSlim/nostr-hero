@@ -31,7 +31,7 @@ func CleanupAllItems(dryRun bool) (*CleanupResult, error) {
 		Changes: []Change{},
 	}
 
-	itemsPath := "../items"
+	itemsPath := "game-data/items"
 
 	err := filepath.WalkDir(itemsPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

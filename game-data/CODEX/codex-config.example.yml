@@ -1,0 +1,19 @@
+# CODEX Configuration Example
+# Copy this file to codex-config.yml and fill in your credentials
+
+server:
+  port: 8080
+  staging_mode: "auto"  # Options: "auto" (localhost=direct, public=staging), "direct", "staging"
+
+github:
+  # GitHub Personal Access Token with repo permissions
+  # Required for staging mode to create pull requests
+  # Generate at: https://github.com/settings/tokens
+  token: ""
+  repo_owner: "your-username"
+  repo_name: "nostr-hero"
+
+pixellab:
+  # PixelLab API key for image generation
+  # Get your key at: https://pixellab.ai
+  api_key: ""

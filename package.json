@@ -1,0 +1,28 @@
+{
+  "name": "nostr-hero",
+  "version": "1.0.0",
+  "description": "Nostr Hero - A D&D 5e-inspired RPG using Nostr for authentication",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/vite": "^4.1.18",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "terser": "^5.44.1",
+    "vite": "^5.0.0",
+    "@types/bun": "latest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

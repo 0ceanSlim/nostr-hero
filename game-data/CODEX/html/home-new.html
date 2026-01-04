@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEX - Nostr Hero</title>
+    <link rel="stylesheet" href="/dist/codex/styles.css">
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold mb-2" style="color: var(--codex-green);">
+                🎯 CODEX
+            </h1>
+            <p class="text-lg" style="color: var(--codex-cyan);">
+                Content Organization & Data Entry eXperience
+            </p>
+            <p class="mt-2" style="color: var(--codex-text-muted);">
+                Manage game data for Nostr Hero
+            </p>
+        </header>
+
+        <!-- Tools Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Item Editor -->
+            <a href="/tools/item-editor" class="codex-panel hover:codex-panel-highlight transition-all block">
+                <div class="text-2xl mb-3">📦</div>
+                <h2 class="text-xl font-bold mb-2" style="color: var(--codex-purple);">Item Editor</h2>
+                <p style="color: var(--codex-text-secondary);">
+                    Edit game items, weapons, armor, and equipment
+                </p>
+                <div class="mt-4">
+                    <span class="codex-tag text-xs">JSON Editor</span>
+                </div>
+            </a>
+
+            <!-- Database Migration -->
+            <a href="/tools/database-migration" class="codex-panel hover:codex-panel-highlight transition-all block">
+                <div class="text-2xl mb-3">🔄</div>
+                <h2 class="text-xl font-bold mb-2" style="color: var(--codex-cyan);">Database Migration</h2>
+                <p style="color: var(--codex-text-secondary);">
+                    Migrate JSON data to SQLite database
+                </p>
+                <div class="mt-4">
+                    <span class="codex-tag text-xs">Migration</span>
+                </div>
+            </a>
+
+            <!-- Validation Tool -->
+            <a href="/tools/validation" class="codex-panel hover:codex-panel-highlight transition-all block">
+                <div class="text-2xl mb-3">✓</div>
+                <h2 class="text-xl font-bold mb-2" style="color: var(--codex-yellow);">Validation</h2>
+                <p style="color: var(--codex-text-secondary);">
+                    Validate and clean up game data
+                </p>
+                <div class="mt-4">
+                    <span class="codex-tag text-xs">Quality Control</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Info Section -->
+        <div class="codex-panel mt-8">
+            <h3 class="text-lg font-bold mb-3" style="color: var(--codex-green);">About CODEX</h3>
+            <p class="mb-2" style="color: var(--codex-text-secondary);">
+                CODEX is a specialized tool for managing Nostr Hero's game data. It provides:
+            </p>
+            <ul class="list-disc list-inside space-y-1 ml-4" style="color: var(--codex-text-secondary);">
+                <li>Visual JSON editor for game items</li>
+                <li>Database migration tools</li>
+                <li>Data validation and cleanup utilities</li>
+                <li>Image generation for items (coming soon)</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center" style="color: var(--codex-text-muted);">
+            <p>Made with ⚡ for Nostr Hero | v1.0</p>
+        </footer>
+    </div>
+
+    <script type="module" src="/dist/codex/home.js"></script>
+</body>
+</html>

@@ -1,3 +1,11 @@
+/**
+ * CODEX Item Editor Entry Point
+ */
+
+// Import styles
+import './styles.css';
+
+// ===== STATE =====
 let allItems = {};
 let currentItem = null;
 let isNewItem = false;
@@ -7,6 +15,10 @@ let currentPackContents = [];
 let allItemTypes = new Set();
 let spellComponents = [];
 let allItemIds = [];
+
+// ===== STAGING STATE =====
+let stagingSessionID = null;
+let stagingMode = null;
 
 // ===== INITIALIZATION =====
 async function loadItems() {
@@ -85,7 +97,7 @@ function populateAllowedTypesDropdown() {
     const allowedTypesSelect = document.getElementById('allowedTypes');
     allowedTypesSelect.innerHTML = '<option value="any">any (all items)</option>';
 
-    // Add separator comment
+    // Add item types
     const optgroupTypes = document.createElement('optgroup');
     optgroupTypes.label = 'Item Types';
     Array.from(allItemTypes).sort().forEach(type => {
@@ -121,8 +133,9 @@ function populatePackItemsDropdown() {
 }
 
 function updateItemCount() {
-    const visibleItems = document.querySelectorAll('.item-card').length;
-    document.getElementById('itemCount').textContent = visibleItems;
+    const visibleItems = document.querySelectorAll('.item-row').length;
+    const totalItems = Object.keys(allItems).length;
+    document.getElementById('itemCount').textContent = `${visibleItems}/${totalItems}`;
 }
 
 // ===== FILTERING =====
@@ -156,17 +169,22 @@ function renderItemList(searchFilter = '', typeFilter = '') {
     });
 
     items.forEach(([filename, item]) => {
-        const card = document.createElement('div');
-        card.className = 'item-card';
+        const row = document.createElement('div');
+        row.className = 'item-row';
         if (currentItem === filename) {
-            card.classList.add('selected');
+            row.classList.add('active');
         }
-        card.onclick = () => selectItem(filename);
-        card.innerHTML =
-            '<div class="item-card-name">' + item.name + '</div>' +
-            '<div class="item-card-type">' + item.type + '</div>';
-        container.appendChild(card);
+        row.onclick = () => selectItem(filename);
+        row.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: bold;">${item.name}</span>
+                <span style="color: #6272a4; font-size: 12px;">(${item.type})</span>
+            </div>
+        `;
+        container.appendChild(row);
     });
+
+    updateItemCount();
 }
 
 // ===== ITEM SELECTION =====
@@ -187,7 +205,7 @@ function populateForm(item) {
 
     // Basic info
     document.getElementById('itemId').value = item.id || '';
-    document.getElementById('itemId').readOnly = true;
+    document.getElementById('itemId').disabled = true;
     document.getElementById('itemNameInput').value = item.name || '';
     document.getElementById('itemType').value = item.type || '';
     document.getElementById('itemDescription').value = item.description || '';
@@ -195,7 +213,7 @@ function populateForm(item) {
     document.getElementById('itemRarity').value = item.rarity || 'common';
     document.getElementById('itemPrice').value = item.price || 0;
     document.getElementById('itemWeight').value = item.weight || 1;
-    document.getElementById('itemStack').value = item.stack || 1;
+    document.getElementById('itemStack').value = item.stack_size || 1;
 
     // Tags
     currentTags = item.tags || [];
@@ -206,12 +224,11 @@ function populateForm(item) {
 
     // Container
     document.getElementById('containerSlots').value = item.container_slots || '';
-    // Handle allowed_types multi-select
     const allowedTypesSelect = document.getElementById('allowedTypes');
     Array.from(allowedTypesSelect.options).forEach(opt => opt.selected = false);
     if (item.allowed_types) {
         if (item.allowed_types === 'any') {
-            allowedTypesSelect.options[0].selected = true; // Select "any"
+            allowedTypesSelect.options[0].selected = true;
         } else if (Array.isArray(item.allowed_types)) {
             item.allowed_types.forEach(type => {
                 Array.from(allowedTypesSelect.options).forEach(opt => {
@@ -226,12 +243,12 @@ function populateForm(item) {
     // Combat
     document.getElementById('itemAC').value = item.ac || '';
     document.getElementById('itemDamage').value = item.damage || '';
-    document.getElementById('damageType').value = item['damage-type'] || '';
+    document.getElementById('damageType').value = item['damage-type'] || item.damage_type || '';
 
     // Ranged
     document.getElementById('ammunition').value = item.ammunition || '';
     document.getElementById('range').value = item.range || '';
-    document.getElementById('rangeLong').value = item['range-long'] || '';
+    document.getElementById('rangeLong').value = item['range-long'] || item.range_long || '';
 
     // Consumable
     document.getElementById('itemHeal').value = item.heal || '';
@@ -242,7 +259,7 @@ function populateForm(item) {
     document.getElementById('itemProvides').value = item.provides || '';
 
     // Pack contents
-    currentPackContents = item.contents || [];
+    currentPackContents = item.pack_contents || item.contents || [];
     renderPackContents();
 
     // Notes
@@ -263,7 +280,7 @@ function showEditor() {
 }
 
 function hideEditor() {
-    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').style.display = 'flex';
     document.getElementById('editorForm').style.display = 'none';
 }
 
@@ -283,7 +300,7 @@ function createNewItem() {
 
     // Clear form
     document.getElementById('itemId').value = '';
-    document.getElementById('itemId').readOnly = false;
+    document.getElementById('itemId').disabled = false;
     document.getElementById('itemNameInput').value = '';
     document.getElementById('itemType').value = '';
     document.getElementById('itemDescription').value = '';
@@ -294,7 +311,6 @@ function createNewItem() {
     document.getElementById('itemStack').value = 1;
     document.getElementById('gearSlot').value = '';
     document.getElementById('containerSlots').value = '';
-    // Clear multi-select
     const allowedTypesSelect = document.getElementById('allowedTypes');
     Array.from(allowedTypesSelect.options).forEach(opt => opt.selected = false);
     document.getElementById('itemAC').value = '';
@@ -314,8 +330,8 @@ function createNewItem() {
     updateConditionalSections();
 
     // Clear selection
-    document.querySelectorAll('.item-card').forEach(card => {
-        card.classList.remove('selected');
+    document.querySelectorAll('.item-row').forEach(row => {
+        row.classList.remove('active');
     });
 }
 
@@ -327,6 +343,7 @@ function updateConditionalSections() {
     const hasFocus = currentTags.includes('focus');
     const hasPack = currentTags.includes('pack');
     const hasThrown = currentTags.includes('thrown');
+    const hasRanged = currentTags.includes('ranged');
 
     const itemType = document.getElementById('itemType').value.toLowerCase();
 
@@ -335,9 +352,9 @@ function updateConditionalSections() {
                     itemType.includes('melee') ||
                     itemType.includes('martial') ||
                     itemType.includes('simple') ||
-                    hasThrown; // Thrown items are weapons too
+                    hasThrown;
     const isArmor = itemType.includes('armor');
-    const isRanged = itemType.includes('ranged') || hasThrown; // Thrown weapons are ranged
+    const isRangedWeapon = itemType.includes('ranged') || hasThrown || hasRanged;
 
     // Show/hide sections
     document.getElementById('equipmentSection').style.display = hasEquipment ? 'block' : 'none';
@@ -345,25 +362,9 @@ function updateConditionalSections() {
     document.getElementById('consumableSection').style.display = hasConsumable ? 'block' : 'none';
     document.getElementById('focusSection').style.display = hasFocus ? 'block' : 'none';
     document.getElementById('packSection').style.display = hasPack ? 'block' : 'none';
-    // Show weapon section for all weapons (melee, ranged, and thrown all need damage/damage-type)
     document.getElementById('weaponSection').style.display = isWeapon ? 'block' : 'none';
     document.getElementById('armorSection').style.display = isArmor ? 'block' : 'none';
-    // Show ranged section for ranged weapons AND thrown weapons (for range properties)
-    document.getElementById('rangedSection').style.display = isRanged ? 'block' : 'none';
-
-    // Update ammunition field based on thrown status
-    const ammoGroup = document.querySelector('#ammunition').parentElement;
-    if (hasThrown) {
-        // Hide ammunition field for thrown weapons
-        ammoGroup.style.display = 'none';
-    } else {
-        // Show ammunition field for non-thrown ranged weapons
-        ammoGroup.style.display = 'block';
-        const ammoLabel = ammoGroup.querySelector('label');
-        if (ammoLabel) {
-            ammoLabel.innerHTML = 'Ammunition *';
-        }
-    }
+    document.getElementById('rangedSection').style.display = isRangedWeapon ? 'block' : 'none';
 }
 
 // ===== TAGS MANAGEMENT =====
@@ -374,9 +375,10 @@ function renderTags() {
     currentTags.forEach(tag => {
         const tagElement = document.createElement('div');
         tagElement.className = 'tag';
-        tagElement.innerHTML =
-            tag +
-            '<span class="tag-remove" onclick="removeTag(\'' + tag + '\')">×</span>';
+        tagElement.innerHTML = `
+            ${tag}
+            <button type="button" class="tag-remove" onclick="window.removeTag('${tag}')">×</button>
+        `;
         container.appendChild(tagElement);
     });
 
@@ -406,10 +408,11 @@ function renderNotes() {
 
     currentNotes.forEach((note, index) => {
         const noteElement = document.createElement('div');
-        noteElement.className = 'note-item';
-        noteElement.innerHTML =
-            note +
-            '<span class="note-remove" onclick="removeNote(' + index + ')">×</span>';
+        noteElement.className = 'tag';
+        noteElement.innerHTML = `
+            ${note}
+            <button type="button" class="tag-remove" onclick="window.removeNote(${index})">×</button>
+        `;
         container.appendChild(noteElement);
     });
 }
@@ -436,25 +439,18 @@ function renderPackContents() {
     container.innerHTML = '';
 
     currentPackContents.forEach((packItem, index) => {
-        const itemId = packItem[0];
-        const quantity = packItem[1];
+        const itemId = Array.isArray(packItem) ? packItem[0] : packItem.item;
+        const quantity = Array.isArray(packItem) ? packItem[1] : packItem.quantity;
         const itemData = allItems[itemId];
 
         const packItemElement = document.createElement('div');
-        packItemElement.className = 'pack-item';
+        packItemElement.className = 'tag';
 
         const itemName = itemData ? itemData.name : '⚠️ Unknown Item';
-        const itemIdDisplay = `(${itemId})`;
-
-        packItemElement.innerHTML =
-            '<div class="pack-item-info">' +
-                '<div>' +
-                    '<span class="pack-item-name">' + itemName + '</span>' +
-                    '<span class="pack-item-id">' + itemIdDisplay + '</span>' +
-                '</div>' +
-                '<span class="pack-item-quantity">Qty: ' + quantity + '</span>' +
-            '</div>' +
-            '<span class="pack-item-remove" onclick="removePackItem(' + index + ')">×</span>';
+        packItemElement.innerHTML = `
+            ${itemName} (x${quantity})
+            <button type="button" class="tag-remove" onclick="window.removePackItem(${index})">×</button>
+        `;
 
         container.appendChild(packItemElement);
     });
@@ -477,15 +473,8 @@ function addPackItem() {
         return;
     }
 
-    // Check if item already exists in pack
-    const existingIndex = currentPackContents.findIndex(item => item[0] === itemId);
-    if (existingIndex !== -1) {
-        // Update quantity
-        currentPackContents[existingIndex][1] = quantity;
-    } else {
-        // Add new item
-        currentPackContents.push([itemId, quantity]);
-    }
+    // Use object format {item, quantity}
+    currentPackContents.push({ item: itemId, quantity: quantity });
 
     renderPackContents();
     itemSelect.value = '';
@@ -521,7 +510,7 @@ async function saveItem() {
         rarity: document.getElementById('itemRarity').value,
         price: parseInt(document.getElementById('itemPrice').value) || 0,
         weight: parseFloat(document.getElementById('itemWeight').value) || 1,
-        stack: parseInt(document.getElementById('itemStack').value) || 1,
+        stack_size: parseInt(document.getElementById('itemStack').value) || 1,
         type: document.getElementById('itemType').value.trim(),
         tags: currentTags,
         notes: currentNotes,
@@ -535,7 +524,6 @@ async function saveItem() {
 
     if (currentTags.includes('container')) {
         item.container_slots = parseInt(document.getElementById('containerSlots').value) || 20;
-        // Handle multi-select allowed_types
         const allowedTypesSelect = document.getElementById('allowedTypes');
         const selectedOptions = Array.from(allowedTypesSelect.selectedOptions).map(opt => opt.value);
 
@@ -554,7 +542,7 @@ async function saveItem() {
     if (damage) item.damage = damage;
 
     const damageType = document.getElementById('damageType').value;
-    if (damageType) item['damage-type'] = damageType;
+    if (damageType) item.damage_type = damageType;
 
     // Ranged properties
     const ammunition = document.getElementById('ammunition').value.trim();
@@ -564,7 +552,7 @@ async function saveItem() {
     if (range) item.range = range;
 
     const rangeLong = document.getElementById('rangeLong').value.trim();
-    if (rangeLong) item['range-long'] = rangeLong;
+    if (rangeLong) item.range_long = rangeLong;
 
     // Consumable properties
     const heal = document.getElementById('itemHeal').value.trim();
@@ -587,20 +575,35 @@ async function saveItem() {
 
     // Pack contents
     if (currentTags.includes('pack')) {
-        item.contents = currentPackContents;
+        item.pack_contents = currentPackContents;
     }
 
     // Save to server
     try {
         const filename = isNewItem ? itemId : currentItem;
+
+        // Add session header if in staging mode
+        const headers = { 'Content-Type': 'application/json' };
+        if (stagingSessionID) {
+            headers['X-Session-ID'] = stagingSessionID;
+        }
+
         const response = await fetch(`/api/items/${filename}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify(item)
         });
 
         if (response.ok) {
-            showStatus('Item saved successfully!', 'success');
+            const result = await response.json();
+
+            // Update change count if in staging mode
+            if (result.mode === 'staging') {
+                updateChangeCount(result.changes);
+                showStatus('Item staged for PR (' + result.changes + ' changes)', 'success');
+            } else {
+                showStatus('Item saved successfully!', 'success');
+            }
 
             // Update local cache
             allItems[itemId] = item;
@@ -610,8 +613,12 @@ async function saveItem() {
                 if (!allItemTypes.has(item.type)) {
                     allItemTypes.add(item.type);
                     populateTypeFilter();
-                    populateTypeDatalist();
+                    populateTypeDropdown();
                 }
+
+                // Add to item IDs list
+                allItemIds.push({ id: itemId, name: item.name });
+                allItemIds.sort((a, b) => a.name.localeCompare(b.name));
 
                 isNewItem = false;
                 currentItem = itemId;
@@ -637,12 +644,27 @@ async function deleteItem() {
     }
 
     try {
+        // Add session header if in staging mode
+        const headers = {};
+        if (stagingSessionID) {
+            headers['X-Session-ID'] = stagingSessionID;
+        }
+
         const response = await fetch(`/api/items/${currentItem}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: headers
         });
 
         if (response.ok) {
-            showStatus('Item deleted successfully', 'success');
+            const result = await response.json();
+
+            // Update change count if in staging mode
+            if (result.mode === 'staging') {
+                updateChangeCount(result.changes);
+                showStatus('Item deletion staged for PR (' + result.changes + ' changes)', 'success');
+            } else {
+                showStatus('Item deleted successfully', 'success');
+            }
 
             delete allItems[currentItem];
             currentItem = null;
@@ -660,10 +682,8 @@ async function deleteItem() {
 
 // ===== VALIDATION =====
 async function validateItem() {
-    // Run validation check
-    showStatus('Validating item...', 'warning');
+    showStatus('Validating item...', 'info');
 
-    // You could call the validation API here
     setTimeout(() => {
         showStatus('Validation complete - no issues found', 'success');
     }, 500);
@@ -681,6 +701,8 @@ async function checkImage() {
 
     // Try to load the image
     const img = new Image();
+    img.style.width = '100%';
+    img.style.imageRendering = 'pixelated';
     img.onload = function() {
         container.innerHTML = '';
         container.appendChild(img);
@@ -693,17 +715,18 @@ async function checkImage() {
 }
 
 async function generateImage() {
-    showStatus('Image generation not yet implemented', 'warning');
+    showStatus('Image generation not yet implemented', 'info');
 }
 
 // ===== UTILITY =====
 function showStatus(message, type = 'success') {
     const statusEl = document.getElementById('statusMessage');
     statusEl.textContent = message;
-    statusEl.className = 'status-message ' + type + ' show';
+    statusEl.className = 'status-message ' + type;
+    statusEl.style.display = 'block';
 
     setTimeout(() => {
-        statusEl.classList.remove('show');
+        statusEl.style.display = 'none';
     }, 5000);
 }
 
@@ -718,19 +741,37 @@ function cancelEdit() {
     }
 }
 
+// ===== EXPOSE FUNCTIONS TO WINDOW =====
+window.createNewItem = createNewItem;
+window.selectItem = selectItem;
+window.applyFilters = applyFilters;
+window.addTag = addTag;
+window.removeTag = removeTag;
+window.addNote = addNote;
+window.removeNote = removeNote;
+window.addPackItem = addPackItem;
+window.removePackItem = removePackItem;
+window.saveItem = saveItem;
+window.deleteItem = deleteItem;
+window.validateItem = validateItem;
+window.cancelEdit = cancelEdit;
+window.checkImage = checkImage;
+window.generateImage = generateImage;
+
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', () => {
     loadItems();
+    initStaging();
 
     // Add enter key support for tag/note input
-    document.getElementById('newTagInput').addEventListener('keypress', (e) => {
+    document.getElementById('newTagInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             addTag();
             e.preventDefault();
         }
     });
 
-    document.getElementById('newNoteInput').addEventListener('keypress', (e) => {
+    document.getElementById('newNoteInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             addNote();
             e.preventDefault();
@@ -738,5 +779,182 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Update conditional sections when type changes
-    document.getElementById('itemType').addEventListener('input', updateConditionalSections);
+    document.getElementById('itemType')?.addEventListener('input', updateConditionalSections);
 });
+
+// ===== STAGING FUNCTIONS =====
+
+// Initialize staging system
+async function initStaging() {
+    try {
+        // Detect mode
+        const modeResponse = await fetch('/api/staging/mode');
+        const modeData = await modeResponse.json();
+        stagingMode = modeData.mode;
+
+        if (stagingMode === 'staging') {
+            // Show staging panel
+            document.getElementById('staging-panel').style.display = 'block';
+
+            // Create session
+            const npub = localStorage.getItem('codex_npub') || 'anonymous';
+            const initResponse = await fetch('/api/staging/init', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ npub })
+            });
+            const session = await initResponse.json();
+            stagingSessionID = session.session_id;
+
+            // Load npub from localStorage if exists
+            const savedNpub = localStorage.getItem('codex_npub');
+            if (savedNpub && document.getElementById('npub-input')) {
+                document.getElementById('npub-input').value = savedNpub;
+            }
+
+            console.log('✅ Staging mode active, session:', stagingSessionID);
+        } else {
+            console.log('✅ Direct mode - changes save immediately');
+        }
+    } catch (error) {
+        console.error('Failed to initialize staging:', error);
+    }
+}
+
+// Update change count display
+function updateChangeCount(count) {
+    const countEl = document.getElementById('change-count');
+    if (countEl) {
+        countEl.textContent = `${count} change${count !== 1 ? 's' : ''}`;
+    }
+}
+
+// View staged changes
+async function viewStagedChanges() {
+    try {
+        const response = await fetch(`/api/staging/changes?session_id=${stagingSessionID}`);
+        const data = await response.json();
+
+        const changesList = document.getElementById('changes-list');
+        changesList.innerHTML = '';
+
+        if (data.changes.length === 0) {
+            changesList.innerHTML = '<p style="text-align: center; color: var(--codex-text-secondary);">No changes staged yet</p>';
+        } else {
+            data.changes.forEach(change => {
+                const changeEl = document.createElement('div');
+                changeEl.className = 'change-item';
+
+                let typeColor = '#f1fa8c'; // yellow for update
+                let typeLabel = 'UPDATE';
+                if (change.type === 'create') {
+                    typeColor = '#50fa7b';
+                    typeLabel = 'CREATE';
+                }
+                if (change.type === 'delete') {
+                    typeColor = '#ff5555';
+                    typeLabel = 'DELETE';
+                }
+
+                changeEl.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge" style="background: ${typeColor}; color: #282a36; font-weight: bold;">
+                            ${typeLabel}
+                        </span>
+                        <code style="color: var(--codex-cyan);">${change.file_path}</code>
+                    </div>
+                `;
+
+                changesList.appendChild(changeEl);
+            });
+        }
+
+        document.getElementById('changes-modal').style.display = 'flex';
+    } catch (error) {
+        console.error('Failed to load changes:', error);
+        alert('Failed to load staged changes');
+    }
+}
+
+// Close changes modal
+function closeChangesModal() {
+    document.getElementById('changes-modal').style.display = 'none';
+}
+
+// Submit PR
+async function submitPR() {
+    const npub = document.getElementById('npub-input')?.value || 'anonymous';
+    localStorage.setItem('codex_npub', npub);
+
+    await confirmSubmitPR();
+}
+
+// Confirm and submit PR
+async function confirmSubmitPR() {
+    closeChangesModal();
+
+    try {
+        const npub = document.getElementById('npub-input')?.value || 'anonymous';
+
+        const response = await fetch('/api/staging/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: stagingSessionID,
+                npub: npub
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            alert('✅ Pull request created!\n\nOpening PR in new tab...');
+            window.open(data.pr_url, '_blank');
+
+            // Re-initialize session
+            await initStaging();
+            updateChangeCount(0);
+        } else if (response.status === 429) {
+            // Rate limit error
+            const errorData = await response.json();
+            const hours = errorData.retry_after_hours || 0;
+            const minutes = errorData.retry_after_minutes || 0;
+            alert(`⏱️ Rate Limit Exceeded\n\nYou can only submit once every 12 hours.\n\nPlease try again in ${hours}h ${minutes}m.`);
+        } else {
+            const error = await response.text();
+            alert('❌ Failed to create PR:\n' + error);
+        }
+    } catch (error) {
+        console.error('Failed to submit PR:', error);
+        alert('❌ Failed to create PR: ' + error.message);
+    }
+}
+
+// Clear staging
+async function clearStaging() {
+    if (!confirm('Clear all staged changes? This cannot be undone.')) {
+        return;
+    }
+
+    try {
+        await fetch(`/api/staging/clear?session_id=${stagingSessionID}`, {
+            method: 'DELETE'
+        });
+
+        // Re-initialize session
+        await initStaging();
+        updateChangeCount(0);
+        alert('✅ Staging cleared');
+    } catch (error) {
+        console.error('Failed to clear staging:', error);
+        alert('Failed to clear staging');
+    }
+}
+
+// Expose staging functions to window for onclick handlers
+window.viewStagedChanges = viewStagedChanges;
+window.closeChangesModal = closeChangesModal;
+window.submitPR = submitPR;
+window.confirmSubmitPR = confirmSubmitPR;
+window.clearStaging = clearStaging;
+
+console.log('🎯 CODEX Item Editor loaded');

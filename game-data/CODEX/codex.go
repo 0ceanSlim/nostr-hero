@@ -7,14 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"runtime"
-	"time"
 
 	"nostr-hero/codex/config"
 	itemeditor "nostr-hero/codex/item-editor"
 	"nostr-hero/codex/migration"
 	"nostr-hero/codex/pixellab"
+	"nostr-hero/codex/staging"
 	"nostr-hero/codex/validation"
 
 	"github.com/gorilla/mux"
@@ -27,10 +25,19 @@ func main() {
 	migrateFlag := flag.Bool("migrate", false, "Run database migration and exit")
 	flag.Parse()
 
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("❌ Failed to load config: %v", err)
+	}
+	if cfg == nil {
+		log.Fatal("❌ codex-config.yml not found")
+	}
+
 	// Handle migration flag
 	if *migrateFlag {
 		fmt.Println("🔄 Running database migration...")
-		dbPath := "../../www/game.db"
+		dbPath := "./www/game.db"
 
 		err := migration.Migrate(dbPath, func(status migration.Status) {
 			if status.Progress > 0 {
@@ -51,19 +58,22 @@ func main() {
 
 	// Initialize item editor
 	editor = itemeditor.New()
+	editor.Config = cfg
 
 	if err := editor.LoadItems(); err != nil {
 		log.Fatal(err)
 	}
 
-	// Try to load config for PixelLab
-	cfg, err := config.Load()
-	if err != nil {
-		log.Printf("⚠️ Error loading config: %v - continuing without image generation", err)
-	} else if cfg != nil {
+	// Initialize PixelLab if API key is configured
+	if cfg.PixelLab.APIKey != "" {
 		editor.PixelLabClient = pixellab.NewClient(cfg.PixelLab.APIKey)
 		log.Printf("✅ PixelLab client initialized")
 	}
+
+	// Initialize staging system
+	staging.SetConfig(cfg)
+	staging.Manager.StartCleanupRoutine()
+	log.Printf("✅ Staging system initialized")
 
 	r := mux.NewRouter()
 
@@ -96,40 +106,33 @@ func main() {
 	r.HandleFunc("/api/validation/run", handleValidationRun).Methods("POST")
 	r.HandleFunc("/api/validation/cleanup", handleCleanupRun).Methods("POST")
 
-	// Static files
-	r.PathPrefix("/www/").Handler(http.StripPrefix("/www/", http.FileServer(http.Dir("../../www/"))))
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	// Staging routes
+	r.HandleFunc("/api/staging/init", staging.HandleStagingInit).Methods("POST")
+	r.HandleFunc("/api/staging/changes", staging.HandleGetStagingChanges).Methods("GET")
+	r.HandleFunc("/api/staging/submit", staging.HandleStagingSubmit).Methods("POST")
+	r.HandleFunc("/api/staging/clear", staging.HandleStagingClear).Methods("DELETE")
+	r.HandleFunc("/api/staging/mode", staging.HandleGetMode).Methods("GET")
 
+	// Static files - serve from main www directory (running from root)
+	r.PathPrefix("/www/").Handler(http.StripPrefix("/www/", http.FileServer(http.Dir("www"))))
+	r.PathPrefix("/game-res/").Handler(http.StripPrefix("/game-res/", http.FileServer(http.Dir("www/res"))))
+
+	// CODEX built assets - served from www/dist/codex/
+	r.PathPrefix("/dist/codex/").Handler(http.StripPrefix("/dist/codex/", http.FileServer(http.Dir("www/dist/codex"))))
+
+	// CODEX resources (if any static files in res/)
+	r.PathPrefix("/codex-res/").Handler(http.StripPrefix("/codex-res/", http.FileServer(http.Dir("game-data/CODEX/res"))))
+
+	port := fmt.Sprintf(":%d", cfg.Server.Port)
 	fmt.Println("🎯 CODEX - Content Organization & Data Entry eXperience")
-	fmt.Println("🔧 Starting on http://localhost:8080")
-	fmt.Println("Opening browser...")
+	fmt.Printf("🚀 Server starting on http://localhost%s\n", port)
 
-	// Open browser automatically
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		url := "http://localhost:8080"
-		var err error
-
-		switch runtime.GOOS {
-		case "linux":
-			err = exec.Command("xdg-open", url).Start()
-		case "windows":
-			err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-		case "darwin":
-			err = exec.Command("open", url).Start()
-		}
-
-		if err != nil {
-			fmt.Printf("Please open your browser to: %s\n", url)
-		}
-	}()
-
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(port, r))
 }
 
 // Home page handler
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "templates/home.html")
+	http.ServeFile(w, r, "game-data/CODEX/html/home-new.html")
 }
 
 // Database migration handlers
@@ -137,7 +140,7 @@ var migrationStatus migration.Status
 var migrationRunning bool
 
 func handleDatabaseMigration(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "templates/database-migration.html")
+	http.ServeFile(w, r, "game-data/CODEX/html/database-migration.html")
 }
 
 func handleMigrateStart(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +153,7 @@ func handleMigrateStart(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer func() { migrationRunning = false }()
 
-		dbPath := "../../../www/game.db"
+		dbPath := "./www/game.db"
 		err := migration.Migrate(dbPath, func(status migration.Status) {
 			migrationStatus = status
 		})
@@ -174,7 +177,7 @@ func handleMigrateStatus(w http.ResponseWriter, r *http.Request) {
 
 // Validation handlers
 func handleValidationTool(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "templates/validation.html")
+	http.ServeFile(w, r, "game-data/CODEX/html/validation.html")
 }
 
 func handleValidationRun(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,14 @@
+# CODEX Configuration Example
+# Copy this file to codex-config.yml and fill in your values
+
+server:
+  port: 8080
+  staging_mode: "auto"  # Options: "auto" (detect from hostname), "direct" (always save to disk), "staging" (always create PRs)
+
+github:
+  token: ""              # GitHub personal access token or bot token (for creating PRs)
+  repo_owner: "username" # GitHub repository owner (your username or organization)
+  repo_name: "nostr-hero" # Repository name
+
+pixellab:
+  api_key: ""           # PixelLab API key for image generation (optional)

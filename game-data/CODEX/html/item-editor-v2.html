@@ -4,13 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CODEX - Item Editor</title>
-    <link rel="stylesheet" href="/static/css/item-editor.css">
+    <link rel="stylesheet" href="/dist/codex/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>📦 CODEX - Item Editor</h1>
             <button class="btn" onclick="window.location.href='/'">← Back to Home</button>
+        </div>
+
+        <!-- Staging Panel (shown only in staging mode) -->
+        <div id="staging-panel" class="staging-panel" style="display: none;">
+            <div class="staging-header">
+                <h3 style="color: var(--codex-cyan);">🚀 Staging Mode - Changes will create a GitHub PR</h3>
+                <span id="change-count" class="badge">0 changes</span>
+            </div>
+
+            <div class="staging-content">
+                <div class="form-group">
+                    <label style="color: var(--codex-text-secondary);">Your identifier (optional):</label>
+                    <input
+                        type="text"
+                        id="npub-input"
+                        placeholder="npub1... or username or anonymous"
+                        class="text-input"
+                        style="width: 100%; max-width: 500px;"
+                    />
+                    <p class="field-hint">This will be included in the PR for attribution</p>
+                </div>
+
+                <div class="staging-actions">
+                    <button class="btn" onclick="viewStagedChanges()">📋 View Changes</button>
+                    <button class="btn btn-success" onclick="submitPR()">✅ Submit PR</button>
+                    <button class="btn btn-danger" onclick="clearStaging()">🗑️ Clear</button>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -43,7 +71,12 @@
                         <h2>
                             <span id="editorMode">Edit</span>: <span id="itemName"></span>
                         </h2>
-                        <button class="btn btn-danger" onclick="deleteItem()" id="deleteBtn">🗑️ Delete</button>
+                        <div class="editor-actions">
+                            <button class="btn btn-primary" onclick="saveItem()">💾 Save</button>
+                            <button class="btn" onclick="validateItem()">✓ Validate</button>
+                            <button class="btn" onclick="cancelEdit()">Cancel</button>
+                            <button class="btn btn-danger" onclick="deleteItem()" id="deleteBtn">🗑️ Delete</button>
+                        </div>
                     </div>
 
                     <div class="status-message" id="statusMessage"></div>
@@ -298,17 +331,31 @@
                         </div>
                     </div>
 
-                    <!-- ACTIONS -->
-                    <div class="actions-bar">
-                        <button class="btn btn-primary btn-large" onclick="saveItem()">💾 Save Item</button>
-                        <button class="btn" onclick="validateItem()">✓ Validate</button>
-                        <button class="btn" onclick="cancelEdit()">Cancel</button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/static/js/item-editor-v2.js"></script>
+    <!-- Changes Preview Modal -->
+    <div id="changes-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeChangesModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="color: var(--codex-purple);">📋 Staged Changes Preview</h2>
+                <button class="btn btn-close" onclick="closeChangesModal()">✕</button>
+            </div>
+
+            <div id="changes-list" class="changes-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="closeChangesModal()" class="btn">Close</button>
+                <button onclick="confirmSubmitPR()" class="btn btn-success">Submit PR</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/dist/codex/item-editor.js"></script>
 </body>
 </html>

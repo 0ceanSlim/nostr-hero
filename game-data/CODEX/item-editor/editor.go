@@ -47,6 +47,7 @@ type Item struct {
 type Editor struct {
 	Items          map[string]*Item
 	PixelLabClient *pixellab.Client
+	Config         interface{} // Will be *config.Config, using interface to avoid import cycle
 }
 
 // New creates a new item editor instance
@@ -58,7 +59,7 @@ func New() *Editor {
 
 // LoadItems loads all items from the items directory
 func (e *Editor) LoadItems() error {
-	itemsDir := "../items"
+	itemsDir := "game-data/items"
 	e.Items = make(map[string]*Item)
 
 	err := filepath.WalkDir(itemsDir, func(path string, d fs.DirEntry, err error) error {
@@ -94,7 +95,7 @@ func (e *Editor) LoadItems() error {
 
 // SaveItemToFile writes an item to its JSON file
 func (e *Editor) SaveItemToFile(filename string, item *Item) error {
-	itemsDir := "../items"
+	itemsDir := "game-data/items"
 	filepath := filepath.Join(itemsDir, filename+".json")
 
 	data, err := json.MarshalIndent(item, "", "  ")

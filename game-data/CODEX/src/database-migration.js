@@ -1,3 +1,10 @@
+/**
+ * CODEX Database Migration Entry Point
+ */
+
+// Import styles
+import './styles.css';
+
 async function startMigration() {
     const btn = document.getElementById('migrateBtn');
     const status = document.getElementById('status');
@@ -37,3 +44,8 @@ async function startMigration() {
         btn.disabled = false;
     }
 }
+
+// Expose function to window for onclick handler
+window.startMigration = startMigration;
+
+console.log('🎯 CODEX Database Migration loaded');

@@ -232,7 +232,7 @@ func migrateFromJSON(callback StatusCallback) error {
 func migrateCharacterData() error {
 	log.Println("Migrating character data...")
 
-	characterDataPath := filepath.Join("../systems/new-character")
+	characterDataPath := filepath.Join("game-data/systems/new-character")
 
 	// Define the files we want to migrate for character data
 	characterFiles := map[string]string{
@@ -259,7 +259,7 @@ func migrateCharacterData() error {
 func migrateItems(callback StatusCallback) error {
 	log.Println("Migrating items...")
 
-	itemsPath := "../items"
+	itemsPath := "game-data/items"
 
 	// Clear existing items
 	if _, err := database.Exec("DELETE FROM items"); err != nil {
@@ -343,7 +343,7 @@ func migrateItemFile(filePath string) error {
 func migrateSpells(callback StatusCallback) error {
 	log.Println("Migrating spells...")
 
-	spellsPath := "../magic/spells"
+	spellsPath := "game-data/magic/spells"
 
 	// Clear existing spells
 	if _, err := database.Exec("DELETE FROM spells"); err != nil {
@@ -451,7 +451,7 @@ func migrateContentData(callback StatusCallback) error {
 
 // migrateMonsters migrates all monster JSON files
 func migrateMonsters(callback StatusCallback) error {
-	monstersPath := "../monsters"
+	monstersPath := "game-data/monsters"
 
 	// Clear existing monsters
 	if _, err := database.Exec("DELETE FROM monsters"); err != nil {
@@ -512,7 +512,7 @@ func migrateMonsterFile(filePath string) error {
 
 // migrateLocations migrates location data
 func migrateLocations(callback StatusCallback) error {
-	locationsPath := "../locations"
+	locationsPath := "game-data/locations"
 
 	// Clear existing locations
 	if _, err := database.Exec("DELETE FROM locations"); err != nil {
@@ -582,7 +582,7 @@ func migrateLocationFile(filePath, locationType string) error {
 
 // migrateNPCs migrates all NPC JSON files from all location subdirectories
 func migrateNPCs(callback StatusCallback) error {
-	npcsPath := "../npcs"
+	npcsPath := "game-data/npcs"
 
 	// Clear existing NPCs
 	if _, err := database.Exec("DELETE FROM npcs"); err != nil {
@@ -598,7 +598,7 @@ func migrateNPCs(callback StatusCallback) error {
 		}
 
 		if !d.IsDir() && strings.HasSuffix(path, ".json") {
-			// Extract location from folder path (e.g., "../npcs/kingdom/..." -> "kingdom")
+			// Extract location from folder path (e.g., "game-data/npcs/kingdom/..." -> "kingdom")
 			relPath, _ := filepath.Rel(npcsPath, path)
 			locationFolder := filepath.Dir(relPath)
 
@@ -692,7 +692,7 @@ func migrateGenericJSON(filePath, tableName string) error {
 func migrateSystemData() error {
 	log.Println("Migrating system data...")
 
-	systemDataPath := "../systems"
+	systemDataPath := "game-data/systems"
 
 	// Migrate music.json
 	musicPath := filepath.Join(systemDataPath, "music.json")
@@ -701,7 +701,7 @@ func migrateSystemData() error {
 	}
 
 	// Migrate spell-slots.json
-	spellSlotsPath := "../magic/spell-slots.json"
+	spellSlotsPath := "game-data/magic/spell-slots.json"
 	if err := migrateGenericJSON(spellSlotsPath, "spell_slots_progression"); err != nil {
 		log.Printf("Warning: failed to migrate spell-slots.json: %v", err)
 	}

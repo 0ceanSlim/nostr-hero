@@ -92,7 +92,7 @@ func ValidateAll() (*Result, error) {
 // ValidateItems validates all item files
 func ValidateItems() ([]Issue, error) {
 	issues := []Issue{}
-	itemsPath := "../items"
+	itemsPath := "game-data/items"
 
 	// First, build a set of all valid item IDs for reference checking
 	validItemIDs := make(map[string]bool)
@@ -622,7 +622,7 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 
 	// Check if image file exists (warning, not error)
 	if image, ok := item["image"].(string); ok && image != "" {
-		imagePath := filepath.Join("../../www/res/img/items", idFromFilename+".png")
+		imagePath := filepath.Join("www/res/img/items", idFromFilename+".png")
 		if _, err := os.Stat(imagePath); os.IsNotExist(err) {
 			issues = append(issues, Issue{
 				Type:     "warning",
@@ -672,7 +672,7 @@ func checkUnnecessaryField(item map[string]interface{}, field, filename, context
 // ValidateSpells validates all spell files
 func ValidateSpells() ([]Issue, error) {
 	issues := []Issue{}
-	spellsPath := "../magic/spells"
+	spellsPath := "game-data/magic/spells"
 
 	err := filepath.WalkDir(spellsPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -762,7 +762,7 @@ func validateSpellFile(filePath string) []Issue {
 // ValidateMonsters validates all monster files
 func ValidateMonsters() ([]Issue, error) {
 	issues := []Issue{}
-	monstersPath := "../monsters"
+	monstersPath := "game-data/monsters"
 
 	err := filepath.WalkDir(monstersPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -825,7 +825,7 @@ func validateMonsterFile(filePath string) []Issue {
 // ValidateLocations validates all location files
 func ValidateLocations() ([]Issue, error) {
 	issues := []Issue{}
-	locationsPath := "../locations"
+	locationsPath := "game-data/locations"
 
 	// Check cities and environments
 	subDirs := []string{"cities", "environments"}
@@ -897,7 +897,7 @@ func validateLocationFile(filePath string) []Issue {
 // ValidateNPCs validates all NPC files
 func ValidateNPCs() ([]Issue, error) {
 	issues := []Issue{}
-	npcsPath := "../npcs"
+	npcsPath := "game-data/npcs"
 
 	err := filepath.WalkDir(npcsPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

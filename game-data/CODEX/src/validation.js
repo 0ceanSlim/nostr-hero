@@ -1,3 +1,10 @@
+/**
+ * CODEX Validation Entry Point
+ */
+
+// Import styles
+import './styles.css';
+
 async function runValidation() {
     const results = document.getElementById('results');
     results.classList.add('show');
@@ -121,3 +128,9 @@ async function runCleanup(dryRun) {
         cleanupResultsDiv.innerHTML = '<div style="color: #ff5555; padding: 20px;">Error running cleanup: ' + error.message + '</div>';
     }
 }
+
+// Expose functions to window for onclick handlers
+window.runValidation = runValidation;
+window.runCleanup = runCleanup;
+
+console.log('🎯 CODEX Validation loaded');

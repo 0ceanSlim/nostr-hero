@@ -113,7 +113,7 @@ func (e *Editor) generateRefactorPreview(oldID, newID, filename string) (*Refact
 
 // scanStartingGearReferences scans starting-gear.json for references
 func (e *Editor) scanStartingGearReferences(oldID, newID string) ([]Reference, error) {
-	startingGearPath := "../systems/new-character/starting-gear.json"
+	startingGearPath := "game-data/systems/new-character/starting-gear.json"
 
 	data, err := os.ReadFile(startingGearPath)
 	if err != nil {
@@ -236,7 +236,7 @@ func (e *Editor) applyRefactor(preview *RefactorPreview, filename string) error 
 	}
 
 	// 3. Delete old file
-	oldFilePath := filepath.Join("../items", filename+".json")
+	oldFilePath := filepath.Join("game-data/items", filename+".json")
 	if err := os.Remove(oldFilePath); err != nil {
 		return fmt.Errorf("failed to remove old file: %v", err)
 	}
@@ -260,7 +260,7 @@ func (e *Editor) applyRefactor(preview *RefactorPreview, filename string) error 
 
 // updateStartingGearReferences updates references in starting-gear.json
 func (e *Editor) updateStartingGearReferences(preview *RefactorPreview) error {
-	startingGearPath := "../systems/new-character/starting-gear.json"
+	startingGearPath := "game-data/systems/new-character/starting-gear.json"
 
 	data, err := os.ReadFile(startingGearPath)
 	if err != nil {

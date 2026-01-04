@@ -46,51 +46,64 @@ CODEX is a comprehensive web-based GUI tool for editing, validating, and managin
 ### Prerequisites
 
 - Go 1.21 or later
+- Node.js 18+ and npm (for frontend build)
 - PixelLab API key (optional, for image generation)
 
 ### Setup
 
-1. Navigate to the CODEX directory:
+1. Install dependencies:
    ```bash
-   cd game-data/CODEX
+   # From project root (nostr-hero/)
+   make -f game-data/CODEX/Makefile deps
    ```
 
-2. Install dependencies:
+2. Create configuration file:
    ```bash
-   go mod download
+   # Copy example config
+   cp codex-config.example.yml codex-config.yml
+
+   # Edit config
+   nano codex-config.yml
    ```
 
-3. (Optional) Configure PixelLab API:
-   - Add your API key to `config.yml` in the project root:
+3. Configure CODEX (`codex-config.yml`):
    ```yaml
+   server:
+     port: 8080  # CODEX port (separate from game server on 8585)
+
    pixellab:
-     api_key: "your-api-key-here"
+     api_key: "your-api-key-here"  # Optional
    ```
 
 ## Usage
 
 ### Running CODEX
 
-From the `game-data/CODEX` directory:
+**⚠️ IMPORTANT**: The CODEX executable runs from the project root (`nostr-hero/`), but the Makefile should be run from the CODEX directory!
 
-**Start the GUI (default)**:
+**Build and run**:
 ```bash
-go run .
-# or
+# From CODEX directory
+cd game-data/CODEX
+make build      # Build JS + Go
+make run        # Build and run (starts server from root)
+```
+
+Or from project root:
+```bash
+# From project root
+make -f game-data/CODEX/Makefile build
 ./codex.exe
 ```
 
-The tool will:
-1. Start a web server on `http://localhost:8080`
-2. Automatically open your browser
-3. Load all items from `game-data/items/`
+The server will start on `http://localhost:8080` (or the port in `codex-config.yml`).
 
-**Run database migration from command line**:
+**Run database migration**:
 ```bash
 ./codex.exe --migrate
 ```
 
-This will migrate all JSON game data to `www/game.db` and exit. Useful for CI/CD pipelines or automated builds.
+This migrates all JSON game data to `www/game.db`. Useful for CI/CD pipelines.
 
 ### Interface Overview
 
@@ -154,22 +167,22 @@ game-data/CODEX/
 ├── codex.go                      # Main entry point
 ├── go.mod, go.sum                # Go dependencies
 ├── README.md                     # This file
+├── Makefile                      # Build system
+├── package.json                  # NPM dependencies
+├── vite.config.js                # Frontend build config
 │
-├── templates/                    # HTML templates
-│   ├── home.html
-│   ├── item-editor.html
+├── html/                         # HTML templates
+│   ├── home-new.html
+│   ├── item-editor-v2.html
 │   ├── database-migration.html
 │   └── validation.html
 │
-├── static/                       # Static assets
-│   ├── css/                      # Stylesheets
-│   │   ├── codex.css
-│   │   ├── tool.css
-│   │   └── validation.css
-│   └── js/                       # JavaScript modules
-│       ├── item-editor.js
-│       ├── database-migration.js
-│       └── validation.js
+├── src/                          # JavaScript source
+│   ├── home.js
+│   ├── item-editor.js
+│   ├── database-migration.js
+│   ├── validation.js
+│   └── styles.css               # Tailwind CSS
 │
 ├── item-editor/                  # Item editor package
 │   ├── editor.go
@@ -186,7 +199,8 @@ game-data/CODEX/
 │   └── migration.go
 │
 └── validation/                   # Data validation
-    └── validation.go
+    ├── validation.go
+    └── cleanup.go
 ```
 
 ### Data Flow
@@ -202,11 +216,12 @@ CODEX operates directly on the JSON files in `game-data/`, which are the source 
 
 ### Path Resolution
 
-CODEX runs from `game-data/CODEX/`, so paths are relative:
-- Items: `../items/`
-- Starting Gear: `../systems/new-character/starting-gear.json`
-- Images: `../../www/res/img/items/`
-- Config: `../../config.yml`
+CODEX executable runs from project root (`nostr-hero/`), so paths are:
+- Items: `game-data/items/`
+- Starting Gear: `game-data/systems/new-character/starting-gear.json`
+- Images: `www/res/img/items/`
+- Config: `./codex-config.yml` (separate from game server's `config.yml`)
+- Frontend: `www/dist/codex/` (built assets)
 
 ## API Endpoints
 
@@ -264,14 +279,22 @@ func (e *ItemEditor) handleValidate(w http.ResponseWriter, r *http.Request) {
 ## Troubleshooting
 
 ### Items not loading
-- Ensure you're running from `game-data/CODEX/`
-- Check that `../items/` directory exists
+- Ensure you're running from project root (`nostr-hero/`)
+- Check that `game-data/items/` directory exists
 - Check console for JSON parsing errors
 
 ### Image generation fails
-- Verify `config.yml` exists in project root
+- Verify `codex-config.yml` exists in project root
 - Check PixelLab API key is valid
 - Check account balance with "🔄 Refresh Balance"
+
+### "Config not found" error
+- Copy `codex-config.example.yml` to `codex-config.yml`
+- Ensure running from project root
+
+### Port already in use
+- Edit `codex-config.yml` and change the port
+- Default is 8080 (game server uses 8585)
 
 ### Refactor not updating all references
 - Ensure starting-gear.json path is correct
@@ -303,8 +326,27 @@ CODEX is part of the Nostr Hero project.
 
 Same as Nostr Hero project.
 
+## Build System
+
+CODEX uses a dual build system:
+- **Frontend**: Vite + Tailwind CSS → `www/dist/codex/`
+- **Backend**: Go → `./codex.exe` (at project root)
+
+### Makefile Targets
+
+```bash
+make build      # Build everything (JS + Go)
+make build-js   # Build frontend only
+make build-go   # Build server only
+make run        # Build and run
+make clean      # Clean all builds
+make deps       # Install all dependencies
+make migrate    # Run database migration
+make help       # Show all targets
+```
+
 ---
 
-**Last Updated**: 2025-12-28
-**Version**: 1.0.0
+**Last Updated**: 2026-01-04
+**Version**: 2.0.0
 **Maintainer**: Nostr Hero Development Team

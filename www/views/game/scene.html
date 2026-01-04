@@ -1,36 +1,108 @@
 {{define "game/scene.html"}}
 <!-- Scene Image Area (4:3 ratio, 347x347px) - Win95 Style -->
-<div class="w-full h-full flex-shrink-0" style="background: #000000; border-top: 2px solid #808080; border-left: 2px solid #808080; border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff; box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #000000;">
-    <div id="scene-container" class="relative w-full h-full flex items-center justify-center">
-        <img id="scene-image" src="/res/img/locations/kingdom.png" alt="Scene" class="w-full h-full object-cover" style="image-rendering: pixelated;">
+<div
+  class="w-full h-full shrink-0"
+  style="
+    background: #000000;
+    border-top: 2px solid #808080;
+    border-left: 2px solid #808080;
+    border-right: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #000000;
+  "
+>
+  <div
+    id="scene-container"
+    class="relative flex items-center justify-center w-full h-full"
+  >
+    <img
+      id="scene-image"
+      src="/res/img/locations/kingdom.png"
+      alt="Scene"
+      class="object-cover w-full h-full"
+      style="image-rendering: pixelated"
+    />
 
-        <!-- Container Modal (positioned over scene) -->
-        {{template "game/container-modal.html"}}
+    <!-- Container Modal (positioned over scene) -->
+    {{template "game/container-modal.html"}}
 
-        <!-- Shop Modal (positioned over scene) -->
-        {{template "game/shop-modal.html"}}
-        <!-- City name at top -->
-        <div class="absolute top-0 left-0 right-0 text-center p-2" style="background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
-            <h2 id="city-name" class="text-sm font-bold text-white">Kingdom</h2>
-        </div>
-        <!-- Time indicator (top-right corner) -->
-        <div id="time-indicator" class="absolute top-2 right-2 flex flex-col items-center gap-0.5">
-            <img id="time-of-day-image" src="/res/img/time/06-highnoon.png" alt="Time of day" class="w-10 h-10" style="image-rendering: pixelated;">
-            <span id="day-counter" class="text-xs font-bold text-white" style="font-size: 8px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Day 1</span>
-        </div>
-        <!-- District name at bottom with ground button -->
-        <div class="absolute bottom-0 left-0 right-0 flex items-center justify-between p-2" style="background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);">
-            <!-- Ground button (left) -->
-            <button id="check-ground-btn" onclick="openGroundModal()" class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white font-bold" style="font-size: 8px; border: 1px solid #4a4a4a;">
-                GROUND
-            </button>
-            <!-- District name (center) -->
-            <h3 id="district-name" class="text-xs font-bold text-white flex-1 text-center">Kingdom Center</h3>
-            <!-- Empty space (right for symmetry) -->
-            <div style="width: 48px;"></div>
-        </div>
-        <!-- Action text (bottom-right, absolutely positioned outside flex) -->
-        <div id="action-text" class="absolute" style="display: none; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.9); bottom: 2px; right: 8px;"></div>
+    <!-- Shop Modal (positioned over scene) -->
+    {{template "game/shop-modal.html"}}
+    <!-- City name at top -->
+    <div
+      class="absolute top-0 left-0 right-0 p-2 text-center"
+      style="
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.8) 0%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      "
+    >
+      <h2 id="city-name" class="text-sm font-bold text-white">Kingdom</h2>
     </div>
+    <!-- Time indicator (top-right corner) -->
+    <div
+      id="time-indicator"
+      class="absolute top-2 right-2 flex flex-col items-center gap-0.5"
+    >
+      <img
+        id="time-of-day-image"
+        src="/res/img/time/06-highnoon.png"
+        alt="Time of day"
+        class="w-10 h-10"
+        style="image-rendering: pixelated"
+      />
+      <span
+        id="day-counter"
+        class="text-xs font-bold text-white"
+        style="font-size: 8px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8)"
+        >Day 1</span
+      >
+    </div>
+    <!-- District name at bottom with ground button -->
+    <div
+      class="absolute bottom-0 left-0 right-0 flex items-center justify-between p-2"
+      style="
+        background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.8) 0%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      "
+    >
+      <!-- Ground button (left) -->
+      <button
+        id="check-ground-btn"
+        onclick="openGroundModal()"
+        class="px-2 py-1 text-xs font-bold text-white bg-gray-700 hover:bg-gray-600"
+        style="font-size: 8px; border: 1px solid #4a4a4a"
+      >
+        GROUND
+      </button>
+      <!-- District name (center) -->
+      <h3
+        id="district-name"
+        class="flex-1 text-xs font-bold text-center text-white"
+      >
+        Kingdom Center
+      </h3>
+      <!-- Empty space (right for symmetry) -->
+      <div style="width: 48px"></div>
+    </div>
+    <!-- Action text (bottom-right, absolutely positioned outside flex) -->
+    <div
+      id="action-text"
+      class="absolute"
+      style="
+        display: none;
+        font-size: 10px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+        bottom: 2px;
+        right: 8px;
+      "
+    ></div>
+  </div>
 </div>
 {{end}}

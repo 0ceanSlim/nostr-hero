@@ -1,5 +1,6 @@
 /tmp
 config.yml
+codex-config.yml
 alpha-registry.json
 legacy-registry.json
 
@@ -19,6 +20,8 @@ item-editor-gui.exe
 nostr-hero.exe
 nostr-hero
 pixellab-gen.exe
+codex.exe
+/codex
 game-data/CODEX/codex.exe
 game-data/CODEX/codex
 
@@ -49,7 +52,7 @@ claude.md
 /www/res/img/items/_history
 /.gemini
 nul
-vite.config.js
-package-lock.json
-package.json
-postcss.config.js
+codex-config.yml
+
+# Build configuration files are now committed to version control
+# (These files define how to build the project and should be tracked)
