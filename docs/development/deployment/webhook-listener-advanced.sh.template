@@ -127,17 +127,64 @@ update_github_status() {
     #   exit 1
     # }
 
-    # Restart service
+    # Restart nostr-hero service
     echo "🔄 Restarting $SERVICE_NAME service..."
     sudo systemctl restart "$SERVICE_NAME"
 
     if [ $? -eq 0 ]; then
-      echo "✅ Service restarted successfully"
+      echo "✅ Nostr-hero service restarted successfully"
+    else
+      echo "❌ Nostr-hero service restart failed!"
+      update_github_status "failure" "Nostr-hero service restart failed"
+      exit 1
+    fi
+
+    # Build CODEX
+    echo "========================================="
+    echo "🎮 Building CODEX..."
+    echo "========================================="
+
+    cd game-data/CODEX
+    if [ $? -ne 0 ]; then
+      echo "❌ Failed to navigate to CODEX directory"
+      update_github_status "failure" "Failed to access CODEX directory"
+      exit 1
+    fi
+
+    # Build CODEX using Makefile
+    echo "🔨 Building CODEX (frontend + backend)..."
+    make build
+    if [ $? -ne 0 ]; then
+      echo "❌ CODEX build failed!"
+      update_github_status "failure" "CODEX build failed"
+      exit 1
+    fi
+    echo "✅ CODEX built successfully"
+
+    # Navigate back to repo root
+    cd ../..
+
+    # Run CODEX database migration
+    echo "🔄 Running CODEX database migration..."
+    ./codex --migrate
+    if [ $? -ne 0 ]; then
+      echo "❌ CODEX migration failed!"
+      update_github_status "failure" "CODEX migration failed"
+      exit 1
+    fi
+    echo "✅ CODEX migration completed"
+
+    # Restart CODEX service
+    echo "🔄 Restarting codex.service..."
+    sudo systemctl restart codex
+
+    if [ $? -eq 0 ]; then
+      echo "✅ CODEX service restarted successfully"
       echo "🎉 Deployment completed: $(date)"
       update_github_status "success" "Deployment completed successfully"
     else
-      echo "❌ Service restart failed!"
-      update_github_status "failure" "Service restart failed"
+      echo "❌ CODEX service restart failed!"
+      update_github_status "failure" "CODEX service restart failed"
       exit 1
     fi
   else
