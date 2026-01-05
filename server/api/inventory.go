@@ -811,9 +811,10 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 	}
 
 	// Save to correct location
-	if inventoryLocation == "general" {
+	switch inventoryLocation {
+	case "general":
 		save.Inventory["general_slots"] = inventory
-	} else if inventoryLocation == "backpack" {
+	case "backpack":
 		if gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{}); ok {
 			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
 				bag["contents"] = inventory
@@ -1024,7 +1025,7 @@ func handleDropItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 }
 
 // handleExamineItem returns item information
-func handleExamineItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActionResponse {
+func handleExamineItem(_ *SaveFile, _ *types.ItemActionRequest) *types.ItemActionResponse {
 	// This action doesn't modify state, just returns item info
 	// The frontend will fetch item details from cached data
 	return &types.ItemActionResponse{
@@ -1049,7 +1050,8 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 
 	// Get the source inventory array
 	var fromInventory []interface{}
-	if fromSlotType == "general" {
+	switch fromSlotType {
+	case "general":
 		inv, ok := save.Inventory["general_slots"].([]interface{})
 		if !ok {
 			return &types.ItemActionResponse{
@@ -1058,7 +1060,7 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			}
 		}
 		fromInventory = inv
-	} else if fromSlotType == "inventory" {
+	case "inventory":
 		// Get backpack contents from gear_slots.bag.contents
 		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 		if !ok {
@@ -1082,7 +1084,7 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			}
 		}
 		fromInventory = contents
-	} else {
+	default:
 		return &types.ItemActionResponse{
 			Success: false,
 			Error:   "Invalid source slot type: " + fromSlotType,
@@ -1197,7 +1199,8 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 
 	// Get the destination inventory array
 	var toInventory []interface{}
-	if toSlotType == "general" {
+	switch toSlotType {
+	case "general":
 		inv, ok := save.Inventory["general_slots"].([]interface{})
 		if !ok {
 			return &types.ItemActionResponse{
@@ -1206,7 +1209,7 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			}
 		}
 		toInventory = inv
-	} else if toSlotType == "inventory" {
+	case "inventory":
 		// Get backpack contents from gear_slots.bag.contents
 		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 		if !ok {
@@ -1230,7 +1233,7 @@ func handleMoveItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAct
 			}
 		}
 		toInventory = contents
-	} else {
+	default:
 		return &types.ItemActionResponse{
 			Success: false,
 			Error:   "Invalid destination slot type: " + toSlotType,
@@ -1625,13 +1628,14 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 	// Helper to get inventory array
 	getInventory := func(slotType string) ([]interface{}, error) {
-		if slotType == "general" {
+		switch slotType {
+		case "general":
 			inv, ok := save.Inventory["general_slots"].([]interface{})
 			if !ok {
 				return nil, fmt.Errorf("general_slots not found")
 			}
 			return inv, nil
-		} else if slotType == "inventory" {
+		case "inventory":
 			gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("gear_slots not found")
@@ -1645,8 +1649,9 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 				return nil, fmt.Errorf("bag contents not found")
 			}
 			return contents, nil
+		default:
+			return nil, fmt.Errorf("unknown slot type: %s", slotType)
 		}
-		return nil, fmt.Errorf("unknown slot type: %s", slotType)
 	}
 
 	fromInventory, err := getInventory(fromSlotType)
@@ -1739,17 +1744,19 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		fromItem["quantity"] = newSourceQty
 
 		// Save both inventories back
-		if fromSlotType == "general" {
+		switch fromSlotType {
+		case "general":
 			save.Inventory["general_slots"] = fromInventory
-		} else if fromSlotType == "inventory" {
+		case "inventory":
 			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 			bag := gearSlots["bag"].(map[string]interface{})
 			bag["contents"] = fromInventory
 		}
 
-		if toSlotType == "general" {
+		switch toSlotType {
+		case "general":
 			save.Inventory["general_slots"] = toInventory
-		} else if toSlotType == "inventory" {
+		case "inventory":
 			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 			bag := gearSlots["bag"].(map[string]interface{})
 			bag["contents"] = toInventory
@@ -1763,18 +1770,20 @@ func handleStackItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		}
 
 		// Save source inventory
-		if fromSlotType == "general" {
+		switch fromSlotType {
+		case "general":
 			save.Inventory["general_slots"] = fromInventory
-		} else if fromSlotType == "inventory" {
+		case "inventory":
 			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 			bag := gearSlots["bag"].(map[string]interface{})
 			bag["contents"] = fromInventory
 		}
 
 		// Save destination inventory
-		if toSlotType == "general" {
+		switch toSlotType {
+		case "general":
 			save.Inventory["general_slots"] = toInventory
-		} else if toSlotType == "inventory" {
+		case "inventory":
 			gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 			bag := gearSlots["bag"].(map[string]interface{})
 			bag["contents"] = toInventory
@@ -1794,13 +1803,14 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 	// Helper to get inventory array
 	getInventory := func(slotType string) ([]interface{}, error) {
-		if slotType == "general" {
+		switch slotType {
+		case "general":
 			inv, ok := save.Inventory["general_slots"].([]interface{})
 			if !ok {
 				return nil, fmt.Errorf("general_slots not found")
 			}
 			return inv, nil
-		} else if slotType == "inventory" {
+		case "inventory":
 			gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("gear_slots not found")
@@ -1814,8 +1824,9 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 				return nil, fmt.Errorf("bag contents not found")
 			}
 			return contents, nil
+		default:
+			return nil, fmt.Errorf("unknown slot type: %s", slotType)
 		}
-		return nil, fmt.Errorf("unknown slot type: %s", slotType)
 	}
 
 	// Get source inventory
@@ -1900,18 +1911,20 @@ func handleSplitItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	toInventory[req.ToSlot] = newItem
 
 	// Save source inventory
-	if req.FromSlotType == "general" {
+	switch req.FromSlotType {
+	case "general":
 		save.Inventory["general_slots"] = fromInventory
-	} else if req.FromSlotType == "inventory" {
+	case "inventory":
 		gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 		bag := gearSlots["bag"].(map[string]interface{})
 		bag["contents"] = fromInventory
 	}
 
 	// Save destination inventory
-	if req.ToSlotType == "general" {
+	switch req.ToSlotType {
+	case "general":
 		save.Inventory["general_slots"] = toInventory
-	} else if req.ToSlotType == "inventory" {
+	case "inventory":
 		gearSlots := save.Inventory["gear_slots"].(map[string]interface{})
 		bag := gearSlots["bag"].(map[string]interface{})
 		bag["contents"] = toInventory
@@ -2116,9 +2129,10 @@ func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.I
 	var sourceItem map[string]interface{}
 	var sourceIndex int
 
-	if req.FromSlotType == "general" {
+	switch req.FromSlotType {
+	case "general":
 		sourceInventory = generalSlots
-	} else if req.FromSlotType == "inventory" {
+	case "inventory":
 		gearSlots, ok := save.Inventory["gear_slots"].(map[string]interface{})
 		if !ok {
 			return &types.ItemActionResponse{Success: false, Error: "Gear slots not found", Color: "red"}
@@ -2132,7 +2146,7 @@ func handleAddToContainer(save *SaveFile, req *types.ItemActionRequest) *types.I
 			return &types.ItemActionResponse{Success: false, Error: "Backpack contents not found", Color: "red"}
 		}
 		sourceInventory = backpackContents
-	} else {
+	default:
 		return &types.ItemActionResponse{Success: false, Error: "Invalid source slot type", Color: "red"}
 	}
 

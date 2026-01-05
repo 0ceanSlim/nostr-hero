@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"maps"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
@@ -174,9 +174,7 @@ func (sm *SessionManager) GetAllSessions() map[string]*GameSession {
 
 	// Return a copy to avoid race conditions
 	sessionsCopy := make(map[string]*GameSession, len(sm.sessions))
-	for key, session := range sm.sessions {
-		sessionsCopy[key] = session
-	}
+	maps.Copy(sessionsCopy, sm.sessions)
 
 	return sessionsCopy
 }
@@ -215,10 +213,10 @@ func InitSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "Session initialized successfully",
-		"session": map[string]interface{}{
+		"session": map[string]any{
 			"npub":    session.Npub,
 			"save_id": session.SaveID,
 			"loaded_at": session.LoadedAt,
@@ -258,10 +256,10 @@ func ReloadSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "Session reloaded from disk successfully",
-		"session": map[string]interface{}{
+		"session": map[string]any{
 			"npub":       session.Npub,
 			"save_id":    session.SaveID,
 			"loaded_at":  session.LoadedAt,
@@ -313,7 +311,7 @@ func UpdateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		Npub     string                 `json:"npub"`
 		SaveID   string                 `json:"save_id"`
-		SaveData map[string]interface{} `json:"save_data"`
+		SaveData map[string]any `json:"save_data"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -351,7 +349,7 @@ func UpdateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "Session updated successfully",
 	})
@@ -399,7 +397,7 @@ func SaveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("✅ Session saved to disk: %s", sessionKey(request.Npub, request.SaveID))
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "Game saved successfully",
 		"save_id": request.SaveID,
@@ -422,7 +420,7 @@ func DebugSessionsHandler(w http.ResponseWriter, r *http.Request, debugMode bool
 	sessions := sessionManager.GetAllSessions()
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success":       true,
 		"session_count": len(sessions),
 		"sessions":      sessions,
@@ -450,7 +448,7 @@ func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	if npub == "" || saveID == "" {
 		sessions := sessionManager.GetAllSessions()
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]any{
 			"success":       true,
 			"session_count": len(sessions),
 			"sessions":      sessions,
@@ -470,7 +468,7 @@ func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"session": session,
 	})
@@ -500,17 +498,9 @@ func CleanupSessionHandler(w http.ResponseWriter, r *http.Request) {
 	sessionManager.UnloadSession(npub, saveID)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "Session unloaded from memory",
 	})
 }
 
-// Extract npub from URL path
-func extractNpubFromPath(path string) string {
-	parts := strings.Split(strings.TrimPrefix(path, "/api/session/"), "/")
-	if len(parts) > 0 {
-		return parts[0]
-	}
-	return ""
-}

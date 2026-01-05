@@ -191,10 +191,11 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 										log.Printf("🔍 Tag: %s", tagStr)
 										if tagStr == "two-handed" {
 											// Existing item is two-handed - also clear the other hand
-											otherSlot := ""
-											if equipSlot == "right_arm" {
+											var otherSlot string
+											switch equipSlot {
+											case "right_arm":
 												otherSlot = "left_arm"
-											} else if equipSlot == "left_arm" {
+											case "left_arm":
 												otherSlot = "right_arm"
 											}
 
@@ -672,7 +673,8 @@ func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*G
 
 	// Check if this is a two-handed weapon (item in both hands)
 	// If so, clear the other hand too
-	if equipSlot == "right_arm" {
+	switch equipSlot {
+	case "right_arm":
 		if leftArm, ok := gearSlots["left_arm"].(map[string]interface{}); ok {
 			if leftArm["item"] == itemID {
 				gearSlots["left_arm"] = map[string]interface{}{
@@ -682,7 +684,7 @@ func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*G
 				log.Printf("✅ Also cleared left_arm (two-handed weapon)")
 			}
 		}
-	} else if equipSlot == "left_arm" {
+	case "left_arm":
 		if rightArm, ok := gearSlots["right_arm"].(map[string]interface{}); ok {
 			if rightArm["item"] == itemID {
 				gearSlots["right_arm"] = map[string]interface{}{

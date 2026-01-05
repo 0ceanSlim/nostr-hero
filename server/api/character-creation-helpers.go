@@ -624,50 +624,6 @@ func getStartingCityForRace(database *sql.DB, race string) (string, error) {
 	return "millhaven", nil
 }
 
-func getDisplayNamesForSave(database *sql.DB, locationID, districtKey, buildingID string) (string, string, string) {
-	var name, propertiesJSON string
-	err := database.QueryRow("SELECT name, properties FROM locations WHERE id = ?", locationID).Scan(&name, &propertiesJSON)
-
-	if err != nil {
-		log.Printf("⚠️  Failed to get location name: %v", err)
-		return locationID, districtKey, buildingID
-	}
-
-	locationName := name
-
-	var properties map[string]interface{}
-	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
-		return locationName, districtKey, buildingID
-	}
-
-	districtName := districtKey
-	buildingName := buildingID
-
-	if districts, ok := properties["districts"].(map[string]interface{}); ok {
-		if district, ok := districts[districtKey].(map[string]interface{}); ok {
-			if dName, ok := district["name"].(string); ok {
-				districtName = dName
-			}
-
-			if buildingID != "" {
-				if buildings, ok := district["buildings"].([]interface{}); ok {
-					for _, bldg := range buildings {
-						if building, ok := bldg.(map[string]interface{}); ok {
-							if bid, ok := building["id"].(string); ok && bid == buildingID {
-								if bname, ok := building["name"].(string); ok {
-									buildingName = bname
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return locationName, districtName, buildingName
-}
-
 func getMusicTrackForLocation(database *sql.DB, locationID string) string {
 	var dataJSON string
 	err := database.QueryRow("SELECT data FROM music_tracks WHERE id = 'music'").Scan(&dataJSON)

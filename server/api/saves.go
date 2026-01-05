@@ -81,7 +81,7 @@ func SavesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get all saves for a user
-func handleGetSaves(w http.ResponseWriter, r *http.Request, npub string) {
+func handleGetSaves(w http.ResponseWriter, _ *http.Request, npub string) {
 	log.Printf("📂 Loading saves for npub: %s", npub)
 
 	savesDir := filepath.Join(SavesDirectory, npub)
@@ -219,7 +219,7 @@ func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
 }
 
 // Delete a save
-func handleDeleteSave(w http.ResponseWriter, r *http.Request, npub string, saveID string) {
+func handleDeleteSave(w http.ResponseWriter, _ *http.Request, npub string, saveID string) {
 	savePath := filepath.Join(SavesDirectory, npub, saveID+".json")
 
 	if err := os.Remove(savePath); err != nil {

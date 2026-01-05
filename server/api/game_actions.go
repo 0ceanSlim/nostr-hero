@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 
 	"nostr-hero/db"
 	"nostr-hero/types"
@@ -14,7 +15,7 @@ import (
 // GameAction represents any action a player can take
 type GameAction struct {
 	Type   string                 `json:"type"`   // "move", "use_item", "equip", "cast_spell", etc.
-	Params map[string]interface{} `json:"params"` // Action-specific parameters
+	Params map[string]any `json:"params"` // Action-specific parameters
 }
 
 // GameActionResponse is returned after processing an action
@@ -23,7 +24,7 @@ type GameActionResponse struct {
 	Message string                 `json:"message"`
 	Color   string                 `json:"color,omitempty"` // Message color (red, green, yellow, white, purple, blue)
 	State   *SaveFile              `json:"state,omitempty"` // Updated game state
-	Delta   map[string]interface{} `json:"delta,omitempty"` // Only changed fields (for optimization)
+	Delta   map[string]any `json:"delta,omitempty"` // Only changed fields (for optimization)
 	Error   string                 `json:"error,omitempty"`
 }
 
@@ -153,7 +154,7 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 // ============================================================================
 
 // handleMoveAction moves the player to a new location
-func handleMoveAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleMoveAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	location, ok := params["location"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid location parameter")
@@ -170,14 +171,7 @@ func handleMoveAction(state *SaveFile, params map[string]interface{}) (*GameActi
 	state.Building = building
 
 	// Add to discovered locations if not already there
-	discovered := false
-	for _, loc := range state.LocationsDiscovered {
-		if loc == location {
-			discovered = true
-			break
-		}
-	}
-	if !discovered {
+	if !slices.Contains(state.LocationsDiscovered, location) {
 		state.LocationsDiscovered = append(state.LocationsDiscovered, location)
 	}
 
@@ -188,7 +182,7 @@ func handleMoveAction(state *SaveFile, params map[string]interface{}) (*GameActi
 }
 
 // handleUseItemAction uses a consumable item
-func handleUseItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleUseItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, ok := params["item_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid item_id parameter")
@@ -204,10 +198,10 @@ func handleUseItemAction(state *SaveFile, params map[string]interface{}) (*GameA
 	var effects []string
 
 	// Check general slots
-	generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	generalSlots, ok := state.Inventory["general_slots"].([]any)
 	if ok {
 		for i, slotData := range generalSlots {
-			slotMap, ok := slotData.(map[string]interface{})
+			slotMap, ok := slotData.(map[string]any)
 			if !ok {
 				continue
 			}
@@ -233,12 +227,12 @@ func handleUseItemAction(state *SaveFile, params map[string]interface{}) (*GameA
 
 	// If not found in general, check backpack
 	if !itemFound {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if ok {
 			for i, slotData := range contents {
-				slotMap, ok := slotData.(map[string]interface{})
+				slotMap, ok := slotData.(map[string]any)
 				if !ok {
 					continue
 				}
@@ -298,7 +292,7 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 	}
 
 	// Parse properties JSON
-	var properties map[string]interface{}
+	var properties map[string]any
 	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
 		log.Printf("⚠️ Could not parse properties for item %s: %v", itemID, err)
 		return []string{"Used"}
@@ -312,7 +306,7 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 	}
 
 	// Parse effects array
-	effectsArray, ok := effectsRaw.([]interface{})
+	effectsArray, ok := effectsRaw.([]any)
 	if !ok {
 		log.Printf("⚠️ Item %s has invalid effects format", itemID)
 		return []string{"Used"}
@@ -320,7 +314,7 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 
 	// Apply each effect
 	for _, effectRaw := range effectsArray {
-		effectMap, ok := effectRaw.(map[string]interface{})
+		effectMap, ok := effectRaw.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -380,7 +374,7 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 // Equipment handlers are now in equipment.go
 
 // handleDropItemAction drops an item from inventory
-func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleDropItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, ok := params["item_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid item_id parameter")
@@ -402,29 +396,30 @@ func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*Game
 
 	// Find item in appropriate inventory
 	var itemFound bool
-	var inventory []interface{}
+	var inventory []any
 
-	if slotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	switch slotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid inventory structure")
 		}
 		inventory = generalSlots
-	} else if slotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		backpackContents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		backpackContents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack structure")
 		}
 		inventory = backpackContents
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid slot_type: %s", slotType)
 	}
 
 	// Search for item
 	for i, slotData := range inventory {
-		slotMap, ok := slotData.(map[string]interface{})
+		slotMap, ok := slotData.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -464,7 +459,7 @@ func handleDropItemAction(state *SaveFile, params map[string]interface{}) (*Game
 }
 
 // handlePickupItemAction picks up an item from the ground
-func handlePickupItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handlePickupItemAction(_ *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, ok := params["item_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid item_id parameter")
@@ -481,7 +476,7 @@ func handlePickupItemAction(state *SaveFile, params map[string]interface{}) (*Ga
 }
 
 // handleCastSpellAction casts a spell
-func handleCastSpellAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleCastSpellAction(_ *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	spellID, ok := params["spell_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid spell_id parameter")
@@ -499,7 +494,7 @@ func handleCastSpellAction(state *SaveFile, params map[string]interface{}) (*Gam
 }
 
 // handleRestAction rests to restore HP/Mana
-func handleRestAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleRestAction(state *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	// Restore HP and Mana
 	state.HP = state.MaxHP
 	state.Mana = state.MaxMana
@@ -518,7 +513,7 @@ func handleRestAction(state *SaveFile, params map[string]interface{}) (*GameActi
 }
 
 // handleAdvanceTimeAction advances game time
-func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleAdvanceTimeAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	segments, ok := params["segments"].(float64)
 	if !ok {
 		segments = 1 // Default to 1 time segment
@@ -560,7 +555,7 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]interface{}) (*G
 }
 
 // handleUpdateTimeAction syncs time from frontend clock to backend state
-func handleUpdateTimeAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	// Update time_of_day (minutes in day, 0-1439)
 	if timeOfDay, ok := params["time_of_day"].(float64); ok {
 		state.TimeOfDay = int(timeOfDay)
@@ -598,7 +593,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]interface{}) (*Ga
 }
 
 // handleVaultDepositAction deposits items into vault (uses existing move_item action for vault transfers)
-func handleVaultDepositAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleVaultDepositAction(_ *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	// Vaults work like containers - use the container system
 	// This is handled by frontend calling move_item or add_to_container with vault as destination
 	return &GameActionResponse{
@@ -608,7 +603,7 @@ func handleVaultDepositAction(state *SaveFile, params map[string]interface{}) (*
 }
 
 // handleVaultWithdrawAction withdraws items from vault (uses existing move_item action for vault transfers)
-func handleVaultWithdrawAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleVaultWithdrawAction(_ *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	// Vaults work like containers - use the container system
 	// This is handled by frontend calling move_item or remove_from_container with vault as source
 	return &GameActionResponse{
@@ -618,7 +613,7 @@ func handleVaultWithdrawAction(state *SaveFile, params map[string]interface{}) (
 }
 
 // handleMoveItemAction moves/swaps items between inventory slots
-func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleMoveItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, _ := params["item_id"].(string)
 	fromSlot := int(params["from_slot"].(float64))
 	toSlot := int(params["to_slot"].(float64))
@@ -628,7 +623,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 	log.Printf("🔀 Moving %s from %s[%d] to %s[%d]", itemID, fromSlotType, fromSlot, toSlotType, toSlot)
 
 	// Get the appropriate slot arrays
-	var fromSlots, toSlots []interface{}
+	var fromSlots, toSlots []any
 	var vaultBuilding string
 
 	// Get vault building ID if dealing with vault
@@ -637,26 +632,27 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 	}
 
 	// Get from slots
-	if fromSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	switch fromSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		fromSlots = generalSlots
-	} else if fromSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		fromSlots = contents
-	} else if fromSlotType == "vault" {
+	case "vault":
 		vault := getVaultForLocation(state, vaultBuilding)
 		if vault == nil {
 			return nil, fmt.Errorf("vault not found for building: %s", vaultBuilding)
 		}
-		slots, ok := vault["slots"].([]interface{})
+		slots, ok := vault["slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid vault slots")
 		}
@@ -664,26 +660,27 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 	}
 
 	// Get to slots
-	if toSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	switch toSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		toSlots = generalSlots
-	} else if toSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		toSlots = contents
-	} else if toSlotType == "vault" {
+	case "vault":
 		vault := getVaultForLocation(state, vaultBuilding)
 		if vault == nil {
 			return nil, fmt.Errorf("vault not found for building: %s", vaultBuilding)
 		}
-		slots, ok := vault["slots"].([]interface{})
+		slots, ok := vault["slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid vault slots")
 		}
@@ -718,7 +715,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 
 		log.Printf("📦 Raw tags JSON from database for '%s': %s", itemID, tagsJSON)
 
-		var tags []interface{}
+		var tags []any
 		if err := json.Unmarshal([]byte(tagsJSON), &tags); err != nil {
 			log.Printf("❌ CRITICAL: Failed to parse tags JSON for %s: %v", itemID, err)
 			return &GameActionResponse{
@@ -756,7 +753,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 		// Check if we're swapping (destination slot is not empty)
 		if toSlots != nil && toSlot < len(toSlots) {
 			log.Printf("🔍 Checking destination slot %d (toSlots length: %d)", toSlot, len(toSlots))
-			if destSlot, ok := toSlots[toSlot].(map[string]interface{}); ok {
+			if destSlot, ok := toSlots[toSlot].(map[string]any); ok {
 				log.Printf("🔍 Destination slot data: %+v", destSlot)
 				if destItem, ok := destSlot["item"].(string); ok && destItem != "" {
 					// There's an item in the destination - this is a swap
@@ -768,7 +765,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 						var tagsJSON string
 						err := database.QueryRow("SELECT tags FROM items WHERE id = ?", destItem).Scan(&tagsJSON)
 						if err == nil {
-							var tags []interface{}
+							var tags []any
 							if err := json.Unmarshal([]byte(tagsJSON), &tags); err == nil {
 								for _, tag := range tags {
 									if tagStr, ok := tag.(string); ok && tagStr == "container" {
@@ -796,10 +793,10 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 			fromSlots[fromSlot], fromSlots[toSlot] = fromSlots[toSlot], fromSlots[fromSlot]
 
 			// Update the "slot" field in each swapped item
-			if fromSlotMap, ok := fromSlots[fromSlot].(map[string]interface{}); ok {
+			if fromSlotMap, ok := fromSlots[fromSlot].(map[string]any); ok {
 				fromSlotMap["slot"] = fromSlot
 			}
-			if toSlotMap, ok := fromSlots[toSlot].(map[string]interface{}); ok {
+			if toSlotMap, ok := fromSlots[toSlot].(map[string]any); ok {
 				toSlotMap["slot"] = toSlot
 			}
 		} else {
@@ -809,10 +806,10 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 			toSlots[toSlot] = temp
 
 			// Update the "slot" field in each swapped item
-			if fromSlotMap, ok := fromSlots[fromSlot].(map[string]interface{}); ok {
+			if fromSlotMap, ok := fromSlots[fromSlot].(map[string]any); ok {
 				fromSlotMap["slot"] = fromSlot
 			}
-			if toSlotMap, ok := toSlots[toSlot].(map[string]interface{}); ok {
+			if toSlotMap, ok := toSlots[toSlot].(map[string]any); ok {
 				toSlotMap["slot"] = toSlot
 			}
 		}
@@ -821,7 +818,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 	}
 
 	// If vault was involved, return updated vault data
-	delta := map[string]interface{}{}
+	delta := map[string]any{}
 	if fromSlotType == "vault" || toSlotType == "vault" {
 		vault := getVaultForLocation(state, vaultBuilding)
 		if vault != nil {
@@ -842,7 +839,7 @@ func handleMoveItemAction(state *SaveFile, params map[string]interface{}) (*Game
 }
 
 // handleStackItemAction stacks items together
-func handleStackItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleStackItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, _ := params["item_id"].(string)
 	fromSlot := int(params["from_slot"].(float64))
 	toSlot := int(params["to_slot"].(float64))
@@ -852,52 +849,54 @@ func handleStackItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	log.Printf("📦 Stacking %s from %s[%d] to %s[%d]", itemID, fromSlotType, fromSlot, toSlotType, toSlot)
 
 	// Get source slots
-	var fromSlots []interface{}
-	if fromSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	var fromSlots []any
+	switch fromSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		fromSlots = generalSlots
-	} else if fromSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		fromSlots = contents
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid source slot type: %s", fromSlotType)
 	}
 
 	// Get destination slots
-	var toSlots []interface{}
-	if toSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	var toSlots []any
+	switch toSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		toSlots = generalSlots
-	} else if toSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		toSlots = contents
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid destination slot type: %s", toSlotType)
 	}
 
 	// Get source and destination items
-	fromSlotMap, ok := fromSlots[fromSlot].(map[string]interface{})
+	fromSlotMap, ok := fromSlots[fromSlot].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid source slot data")
 	}
 
-	toSlotMap, ok := toSlots[toSlot].(map[string]interface{})
+	toSlotMap, ok := toSlots[toSlot].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid destination slot data")
 	}
@@ -916,7 +915,7 @@ func handleStackItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	// Parse max stack from properties
 	maxStack := 1
 	if itemData.Properties != "" {
-		var properties map[string]interface{}
+		var properties map[string]any
 		if err := json.Unmarshal([]byte(itemData.Properties), &properties); err == nil {
 			if val, ok := properties["stack"].(float64); ok {
 				maxStack = int(val)
@@ -984,7 +983,7 @@ func handleStackItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 }
 
 // handleSplitItemAction splits a stack into two stacks
-func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleSplitItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, _ := params["item_id"].(string)
 	fromSlot := int(params["from_slot"].(float64))
 	toSlot := int(params["to_slot"].(float64))
@@ -995,42 +994,44 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	log.Printf("✂️ Splitting %s: %d from %s[%d] to %s[%d]", itemID, splitQuantity, fromSlotType, fromSlot, toSlotType, toSlot)
 
 	// Get source slot
-	var fromSlots []interface{}
-	if fromSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	var fromSlots []any
+	switch fromSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		fromSlots = generalSlots
-	} else if fromSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		fromSlots = contents
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid source slot type: %s", fromSlotType)
 	}
 
 	// Get destination slot
-	var toSlots []interface{}
-	if toSlotType == "general" {
-		generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	var toSlots []any
+	switch toSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid general slots")
 		}
 		toSlots = generalSlots
-	} else if toSlotType == "inventory" {
-		gearSlots, _ := state.Inventory["gear_slots"].(map[string]interface{})
-		bag, _ := gearSlots["bag"].(map[string]interface{})
-		contents, ok := bag["contents"].([]interface{})
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		contents, ok := bag["contents"].([]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid backpack")
 		}
 		toSlots = contents
-	} else {
+	default:
 		return nil, fmt.Errorf("invalid destination slot type: %s", toSlotType)
 	}
 
@@ -1043,7 +1044,7 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	}
 
 	// Get source item
-	fromSlotMap, ok := fromSlots[fromSlot].(map[string]interface{})
+	fromSlotMap, ok := fromSlots[fromSlot].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid source slot data")
 	}
@@ -1070,7 +1071,7 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	}
 
 	// Check destination slot is empty
-	toSlotMap, ok := toSlots[toSlot].(map[string]interface{})
+	toSlotMap, ok := toSlots[toSlot].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid destination slot data")
 	}
@@ -1098,7 +1099,7 @@ func handleSplitItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 }
 
 // handleAddItemAction adds an item to inventory
-func handleAddItemAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleAddItemAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	itemID, _ := params["item_id"].(string)
 	quantity := 1
 	if q, ok := params["quantity"].(float64); ok {
@@ -1108,13 +1109,13 @@ func handleAddItemAction(state *SaveFile, params map[string]interface{}) (*GameA
 	log.Printf("➕ Adding %dx %s to inventory", quantity, itemID)
 
 	// Find first empty slot in general inventory
-	generalSlots, ok := state.Inventory["general_slots"].([]interface{})
+	generalSlots, ok := state.Inventory["general_slots"].([]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid general slots")
 	}
 
 	for i, slotData := range generalSlots {
-		slotMap, ok := slotData.(map[string]interface{})
+		slotMap, ok := slotData.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -1165,14 +1166,14 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"state":   session.SaveData,
 	})
 }
 
 // handleEnterBuildingAction enters a building
-func handleEnterBuildingAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleEnterBuildingAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	buildingID, ok := params["building_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid building_id parameter")
@@ -1210,7 +1211,7 @@ func handleEnterBuildingAction(state *SaveFile, params map[string]interface{}) (
 }
 
 // handleExitBuildingAction exits a building
-func handleExitBuildingAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleExitBuildingAction(state *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	// Update state to remove building (back outdoors)
 	state.Building = ""
 
@@ -1231,7 +1232,7 @@ func handleExitBuildingAction(state *SaveFile, params map[string]interface{}) (*
 }
 
 // handleTalkToNPCAction initiates dialogue with an NPC
-func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleTalkToNPCAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	npcID, ok := params["npc_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing or invalid npc_id parameter")
@@ -1309,15 +1310,15 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*Gam
 		dialogueNode = scheduleInfo.AvailableDialogue[0]
 
 		// Get dialogue content
-		if nodeData, ok := npcData.Dialogue[dialogueNode].(map[string]interface{}); ok {
+		if nodeData, ok := npcData.Dialogue[dialogueNode].(map[string]any); ok {
 			dialogueText, _ = nodeData["text"].(string)
-			if opts, ok := nodeData["options"].([]interface{}); ok {
+			if opts, ok := nodeData["options"].([]any); ok {
 				for _, opt := range opts {
 					if optStr, ok := opt.(string); ok {
 						// Filter options based on requirements
-						optionNode, _ := npcData.Dialogue[optStr].(map[string]interface{})
+						optionNode, _ := npcData.Dialogue[optStr].(map[string]any)
 						if optionNode != nil {
-							requirements, _ := optionNode["requirements"].(map[string]interface{})
+							requirements, _ := optionNode["requirements"].(map[string]any)
 							if checkDialogueRequirements(state, requirements) {
 								options = append(options, optStr)
 							}
@@ -1342,8 +1343,8 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*Gam
 		Success: true,
 		Message: fmt.Sprintf("%s\n\n%s", greetingText, dialogueText),
 		Color:   "yellow",
-		Delta: map[string]interface{}{
-			"npc_dialogue": map[string]interface{}{
+		Delta: map[string]any{
+			"npc_dialogue": map[string]any{
 				"npc_id":         npcID,
 				"node":           dialogueNode,
 				"text":           dialogueText,
@@ -1355,7 +1356,7 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]interface{}) (*Gam
 }
 
 // handleNPCDialogueChoiceAction processes player's dialogue choice
-func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	npcID, _ := params["npc_id"].(string)
 	choice, _ := params["choice"].(string)
 
@@ -1372,20 +1373,20 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 	}
 
 	// Parse NPC properties
-	var npcData map[string]interface{}
+	var npcData map[string]any
 	if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
 		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
 	}
 
-	dialogue, _ := npcData["dialogue"].(map[string]interface{})
-	choiceNode, _ := dialogue[choice].(map[string]interface{})
+	dialogue, _ := npcData["dialogue"].(map[string]any)
+	choiceNode, _ := dialogue[choice].(map[string]any)
 
 	if choiceNode == nil {
 		return nil, fmt.Errorf("invalid dialogue choice: %s", choice)
 	}
 
 	// Check requirements
-	requirements, _ := choiceNode["requirements"].(map[string]interface{})
+	requirements, _ := choiceNode["requirements"].(map[string]any)
 	if !checkDialogueRequirements(state, requirements) {
 		return &GameActionResponse{
 			Success: false,
@@ -1433,9 +1434,9 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 			Success: true,
 			Message: responseText,
 			Color:   "yellow",
-			Delta: map[string]interface{}{
+			Delta: map[string]any{
 				"open_vault": vault,
-				"npc_dialogue": map[string]interface{}{
+				"npc_dialogue": map[string]any{
 					"action": "close",
 				},
 			},
@@ -1448,9 +1449,9 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 			Success: true,
 			Message: responseText,
 			Color:   "yellow",
-			Delta: map[string]interface{}{
+			Delta: map[string]any{
 				"open_shop": npcID,
-				"npc_dialogue": map[string]interface{}{
+				"npc_dialogue": map[string]any{
 					"action": "close",
 				},
 			},
@@ -1463,10 +1464,10 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 			Success: true,
 			Message: responseText,
 			Color:   "yellow",
-			Delta: map[string]interface{}{
+			Delta: map[string]any{
 				"open_shop": npcID,
 				"shop_tab":  "sell",
-				"npc_dialogue": map[string]interface{}{
+				"npc_dialogue": map[string]any{
 					"action": "close",
 				},
 			},
@@ -1477,8 +1478,8 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 			Success: true,
 			Message: responseText,
 			Color:   "yellow",
-			Delta: map[string]interface{}{
-				"npc_dialogue": map[string]interface{}{
+			Delta: map[string]any{
+				"npc_dialogue": map[string]any{
 					"action": "close",
 				},
 			},
@@ -1486,14 +1487,14 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 	}
 
 	// Get next options and filter based on requirements
-	options, _ := choiceNode["options"].([]interface{})
+	options, _ := choiceNode["options"].([]any)
 	var optionsList []string
 	for _, opt := range options {
 		if optStr, ok := opt.(string); ok {
 			// Get the option node to check requirements
-			optionNode, _ := dialogue[optStr].(map[string]interface{})
+			optionNode, _ := dialogue[optStr].(map[string]any)
 			if optionNode != nil {
-				requirements, _ := optionNode["requirements"].(map[string]interface{})
+				requirements, _ := optionNode["requirements"].(map[string]any)
 				// Only include option if requirements are met
 				if checkDialogueRequirements(state, requirements) {
 					optionsList = append(optionsList, optStr)
@@ -1516,8 +1517,8 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]interface{
 		Success: true,
 		Message: displayText,
 		Color:   "yellow",
-		Delta: map[string]interface{}{
-			"npc_dialogue": map[string]interface{}{
+		Delta: map[string]any{
+			"npc_dialogue": map[string]any{
 				"npc_id":  npcID,
 				"node":    choice,
 				"text":    displayText,
@@ -1572,12 +1573,7 @@ func isNativeRaceForLocation(race, location string) bool {
 		return false
 	}
 
-	for _, r := range races {
-		if r == race {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(races, race)
 }
 
 // Helper: Get total gold quantity from inventory
@@ -1585,9 +1581,9 @@ func getGoldQuantity(state *SaveFile) int {
 	totalGold := 0
 
 	// Check general slots
-	if generalSlots, ok := state.Inventory["general_slots"].([]interface{}); ok {
+	if generalSlots, ok := state.Inventory["general_slots"].([]any); ok {
 		for _, slotData := range generalSlots {
-			if slotMap, ok := slotData.(map[string]interface{}); ok {
+			if slotMap, ok := slotData.(map[string]any); ok {
 				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
 					// Handle both int and float64 types
 					switch v := slotMap["quantity"].(type) {
@@ -1602,11 +1598,11 @@ func getGoldQuantity(state *SaveFile) int {
 	}
 
 	// Check backpack
-	if gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{}); ok {
-		if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
-			if contents, ok := bag["contents"].([]interface{}); ok {
+	if gearSlots, ok := state.Inventory["gear_slots"].(map[string]any); ok {
+		if bag, ok := gearSlots["bag"].(map[string]any); ok {
+			if contents, ok := bag["contents"].([]any); ok {
 				for _, slotData := range contents {
-					if slotMap, ok := slotData.(map[string]interface{}); ok {
+					if slotMap, ok := slotData.(map[string]any); ok {
 						if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
 							// Handle both int and float64 types
 							switch v := slotMap["quantity"].(type) {
@@ -1634,12 +1630,12 @@ func deductGold(state *SaveFile, amount int) bool {
 	remaining := amount
 
 	// First, deduct from general slots
-	if generalSlots, ok := state.Inventory["general_slots"].([]interface{}); ok {
+	if generalSlots, ok := state.Inventory["general_slots"].([]any); ok {
 		for _, slotData := range generalSlots {
 			if remaining <= 0 {
 				break
 			}
-			if slotMap, ok := slotData.(map[string]interface{}); ok {
+			if slotMap, ok := slotData.(map[string]any); ok {
 				if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
 					// Handle both int and float64 types
 					var currentQty int
@@ -1674,14 +1670,14 @@ func deductGold(state *SaveFile, amount int) bool {
 
 	// Then, deduct from backpack if needed
 	if remaining > 0 {
-		if gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{}); ok {
-			if bag, ok := gearSlots["bag"].(map[string]interface{}); ok {
-				if contents, ok := bag["contents"].([]interface{}); ok {
+		if gearSlots, ok := state.Inventory["gear_slots"].(map[string]any); ok {
+			if bag, ok := gearSlots["bag"].(map[string]any); ok {
+				if contents, ok := bag["contents"].([]any); ok {
 					for _, slotData := range contents {
 						if remaining <= 0 {
 							break
 						}
-						if slotMap, ok := slotData.(map[string]interface{}); ok {
+						if slotMap, ok := slotData.(map[string]any); ok {
 							if itemID, ok := slotMap["item"].(string); ok && itemID == "gold-piece" {
 								// Handle both int and float64 types
 								var currentQty int
@@ -1719,7 +1715,7 @@ func deductGold(state *SaveFile, amount int) bool {
 }
 
 // Helper: Check dialogue requirements
-func checkDialogueRequirements(state *SaveFile, requirements map[string]interface{}) bool {
+func checkDialogueRequirements(state *SaveFile, requirements map[string]any) bool {
 	if requirements == nil {
 		return true
 	}
@@ -1754,7 +1750,7 @@ func checkDialogueRequirements(state *SaveFile, requirements map[string]interfac
 // Helper: Register vault at location
 func registerVault(state *SaveFile, buildingID string) {
 	if state.Vaults == nil {
-		state.Vaults = []map[string]interface{}{}
+		state.Vaults = []map[string]any{}
 	}
 
 	// Check if already registered
@@ -1765,16 +1761,16 @@ func registerVault(state *SaveFile, buildingID string) {
 	}
 
 	// Create new vault with 40 empty slots
-	slots := make([]map[string]interface{}, 40)
-	for i := 0; i < 40; i++ {
-		slots[i] = map[string]interface{}{
+	slots := make([]map[string]any, 40)
+	for i := range 40 {
+		slots[i] = map[string]any{
 			"slot":     i,
 			"item":     nil,
 			"quantity": 0,
 		}
 	}
 
-	vault := map[string]interface{}{
+	vault := map[string]any{
 		"building": buildingID,
 		"slots":    slots,
 	}
@@ -1784,7 +1780,7 @@ func registerVault(state *SaveFile, buildingID string) {
 }
 
 // Helper: Get vault for location
-func getVaultForLocation(state *SaveFile, buildingID string) map[string]interface{} {
+func getVaultForLocation(state *SaveFile, buildingID string) map[string]any {
 	if state.Vaults == nil {
 		return nil
 	}
@@ -1804,7 +1800,7 @@ func getVaultForLocation(state *SaveFile, buildingID string) map[string]interfac
 }
 
 // handleRegisterVaultAction registers a vault (called after payment)
-func handleRegisterVaultAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleRegisterVaultAction(state *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	buildingID := state.Building
 	if buildingID == "" {
 		return nil, fmt.Errorf("not in a building")
@@ -1820,7 +1816,7 @@ func handleRegisterVaultAction(state *SaveFile, params map[string]interface{}) (
 }
 
 // handleOpenVaultAction returns vault data for UI
-func handleOpenVaultAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleOpenVaultAction(state *SaveFile, _ map[string]any) (*GameActionResponse, error) {
 	buildingID := state.Building
 	if buildingID == "" {
 		return nil, fmt.Errorf("not in a building")
@@ -1834,14 +1830,14 @@ func handleOpenVaultAction(state *SaveFile, params map[string]interface{}) (*Gam
 	return &GameActionResponse{
 		Success: true,
 		Message: "Vault opened",
-		Delta: map[string]interface{}{
+		Delta: map[string]any{
 			"vault": vault,
 		},
 	}, nil
 }
 
 // handleAddToContainerAction adds an item to a container
-func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleAddToContainerAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	// Convert params to ItemActionRequest
 	itemID, _ := params["item_id"].(string)
 	fromSlot := -1
@@ -1886,7 +1882,7 @@ func handleAddToContainerAction(state *SaveFile, params map[string]interface{}) 
 }
 
 // handleRemoveFromContainerAction removes an item from a container
-func handleRemoveFromContainerAction(state *SaveFile, params map[string]interface{}) (*GameActionResponse, error) {
+func handleRemoveFromContainerAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	// Convert params to ItemActionRequest
 	itemID, _ := params["item_id"].(string)
 	containerSlot := -1
