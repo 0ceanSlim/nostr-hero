@@ -2,7 +2,18 @@
 # NOTE: This Makefile should be run from the CODEX directory (game-data/CODEX/)
 # You can also run it from the project root using: make -f game-data/CODEX/Makefile <target>
 
-.PHONY: all build build-js build-go run clean clean-js clean-go deps deps-js deps-go migrate help
+.PHONY: all build build-js build-go build-linux run clean clean-js clean-go deps deps-js deps-go migrate help
+
+# Detect OS
+ifeq ($(OS),Windows_NT)
+	BINARY_NAME := codex.exe
+	BINARY_PATH := ../../codex.exe
+	DETECTED_OS := Windows
+else
+	BINARY_NAME := codex
+	BINARY_PATH := ../../codex
+	DETECTED_OS := Linux
+endif
 
 # Default target - build everything
 all: build
@@ -16,16 +27,22 @@ build-js:
 	@npm run build
 	@echo "✅ Frontend build complete! (output: www/dist/codex/)"
 
-# Build Go executable
+# Build Go executable (auto-detect OS)
 build-go:
-	@echo "🔨 Building CODEX server..."
-	@go build -o ../../codex.exe .
-	@echo "✅ Server build complete! (executable: ./codex.exe)"
+	@echo "🔨 Building CODEX server for $(DETECTED_OS)..."
+	@go build -o $(BINARY_PATH) .
+	@echo "✅ Server build complete! (executable: $(BINARY_NAME))"
+
+# Build Go executable (Linux)
+build-linux:
+	@echo "🔨 Building CODEX server for Linux..."
+	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='amd64'; go build -o ../../codex ."
+	@echo "✅ Linux server build complete! (executable: ./codex)"
 
 # Build and run CODEX
 run: build
 	@echo "🚀 Starting CODEX..."
-	@cd ../.. && codex.exe
+	@cd ../.. && ./$(BINARY_NAME)
 
 # Run with auto-restart on changes (requires Air)
 dev:
@@ -42,9 +59,9 @@ clean-js:
 	@rm -rf ../../www/dist/codex
 	@rm -rf dist
 
-# Clean Go executable
+# Clean Go executable (both Windows and Linux)
 clean-go:
-	@echo "🧹 Cleaning CODEX server executable..."
+	@echo "🧹 Cleaning CODEX server executables..."
 	@rm -f ../../codex.exe ../../codex
 
 # Install all dependencies
@@ -65,7 +82,7 @@ deps-go:
 # Run database migration
 migrate:
 	@echo "🔄 Running database migration..."
-	@cd ../.. && codex.exe --migrate
+	@cd ../.. && ./$(BINARY_NAME) --migrate
 	@echo "✅ Migration complete!"
 
 # Help
@@ -76,7 +93,8 @@ help:
 	@echo "  make all        - Build everything (JS + Go)"
 	@echo "  make build      - Build everything (JS + Go)"
 	@echo "  make build-js   - Build frontend only (→ www/dist/codex/)"
-	@echo "  make build-go   - Build server only (→ ./codex.exe)"
+	@echo "  make build-go   - Build server for current OS (→ $(BINARY_NAME))"
+	@echo "  make build-linux - Build server for Linux (cross-compile)"
 	@echo "  make run        - Build and run CODEX"
 	@echo "  make dev        - Run with auto-restart (requires Air)"
 	@echo "  make clean      - Remove all build artifacts"
