@@ -4,21 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CODEX - Nostr Hero</title>
+    <link rel="icon" type="image/png" href="/www/res/img/codex.png" />
     <link rel="stylesheet" href="/dist/codex/styles.css">
 </head>
 <body class="min-h-screen p-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <header class="mb-8">
-            <h1 class="text-4xl font-bold mb-2" style="color: var(--codex-green);">
-                🎯 CODEX
-            </h1>
-            <p class="text-lg" style="color: var(--codex-cyan);">
-                Content Organization & Data Entry eXperience
-            </p>
-            <p class="mt-2" style="color: var(--codex-text-muted);">
-                Manage game data for Nostr Hero
-            </p>
+        <header class="mb-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="/www/res/img/codex.png" alt="CODEX" style="height: 4rem; width: auto; image-rendering: pixelated;" />
+                <div>
+                    <h1 class="text-4xl font-bold mb-1" style="color: var(--codex-green);">
+                        CODEX
+                    </h1>
+                    <p class="text-sm" style="color: var(--codex-cyan);">
+                        Content Organization & Data Entry eXperience
+                    </p>
+                    <p class="text-xs mt-1" style="color: var(--codex-text-muted);">
+                        Manage game data for Nostr Hero
+                    </p>
+                </div>
+            </div>
+            <div>
+                {{if .IsStaging}}
+                <span class="codex-tag text-xs px-3 py-1" style="background-color: var(--codex-purple); color: var(--codex-text-primary);">
+                    📝 Staging Mode
+                </span>
+                {{else}}
+                <span class="codex-tag text-xs px-3 py-1" style="background-color: var(--codex-green); color: var(--codex-bg-primary);">
+                    ⚡ Direct Mode
+                </span>
+                {{end}}
+            </div>
         </header>
 
         <!-- Tools Grid -->
@@ -35,7 +52,8 @@
                 </div>
             </a>
 
-            <!-- Database Migration -->
+            {{if not .IsStaging}}
+            <!-- Database Migration (Admin Only) -->
             <a href="/tools/database-migration" class="codex-panel hover:codex-panel-highlight transition-all block">
                 <div class="text-2xl mb-3">🔄</div>
                 <h2 class="text-xl font-bold mb-2" style="color: var(--codex-cyan);">Database Migration</h2>
@@ -44,10 +62,11 @@
                 </p>
                 <div class="mt-4">
                     <span class="codex-tag text-xs">Migration</span>
+                    <span class="codex-tag text-xs ml-2" style="background-color: var(--codex-red);">Admin</span>
                 </div>
             </a>
 
-            <!-- Validation Tool -->
+            <!-- Validation Tool (Admin Only) -->
             <a href="/tools/validation" class="codex-panel hover:codex-panel-highlight transition-all block">
                 <div class="text-2xl mb-3">✓</div>
                 <h2 class="text-xl font-bold mb-2" style="color: var(--codex-yellow);">Validation</h2>
@@ -56,8 +75,102 @@
                 </p>
                 <div class="mt-4">
                     <span class="codex-tag text-xs">Quality Control</span>
+                    <span class="codex-tag text-xs ml-2" style="background-color: var(--codex-red);">Admin</span>
                 </div>
             </a>
+            {{end}}
+        </div>
+
+        <!-- Coming Soon Section -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold mb-4" style="color: var(--codex-cyan);">
+                🚧 Coming Soon
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Starting Gear & Gold Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">⚔️</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Starting Gear & Gold</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Edit starting equipment and gold for each class and background
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">Character Creation</span>
+                    </div>
+                </div>
+
+                <!-- NPC Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">👥</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">NPC Editor</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Create and manage non-player characters across locations
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">World Building</span>
+                    </div>
+                </div>
+
+                <!-- Location Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">🗺️</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Location Editor</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Design cities, environments, and travel connections
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">World Building</span>
+                    </div>
+                </div>
+
+                <!-- POI Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">📍</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Points of Interest</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Add landmarks, shops, and special locations within cities
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">World Building</span>
+                    </div>
+                </div>
+
+                <!-- Monster Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">🐉</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Monster Editor</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Create and balance creature stat blocks and abilities
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">Combat</span>
+                    </div>
+                </div>
+
+                <!-- Spell Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">✨</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Spell Editor</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Design custom spells, effects, and casting mechanics
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">Magic Systems</span>
+                    </div>
+                </div>
+
+                <!-- Magic Systems Editor -->
+                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
+                    <div class="text-2xl mb-3">🔮</div>
+                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Magic Systems</h3>
+                    <p class="text-sm" style="color: var(--codex-text-muted);">
+                        Configure spell slots, schools of magic, and casting rules
+                    </p>
+                    <div class="mt-4">
+                        <span class="codex-tag text-xs" style="opacity: 0.7;">Magic Systems</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Info Section -->
@@ -75,8 +188,19 @@
         </div>
 
         <!-- Footer -->
-        <footer class="mt-8 text-center" style="color: var(--codex-text-muted);">
-            <p>Made with ⚡ for Nostr Hero | v1.0</p>
+        <footer class="mt-12 text-center border-t pt-6" style="color: var(--codex-text-muted); border-color: var(--codex-bg-secondary);">
+            <div class="flex flex-wrap justify-center gap-6 mb-4 text-sm">
+                <a href="/" class="hover:opacity-80 transition" style="color: var(--codex-cyan);">
+                    🏠 Main Game
+                </a>
+                <a href="https://github.com/0ceanSlim/nostr-hero" target="_blank" class="hover:opacity-80 transition" style="color: var(--codex-cyan);">
+                    💻 GitHub
+                </a>
+                <a href="https://happytavern.co" target="_blank" class="hover:opacity-80 transition" style="color: var(--codex-cyan);">
+                    🍻 Happy Tavern
+                </a>
+            </div>
+            <p class="text-xs">Made with ⚡ for Nostr Hero | CODEX v1.0</p>
         </footer>
     </div>
 

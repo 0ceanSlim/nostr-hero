@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ import (
 )
 
 var editor *itemeditor.Editor
+var cfg *config.Config
 
 func main() {
 	// Command-line flags
@@ -26,7 +28,8 @@ func main() {
 	flag.Parse()
 
 	// Load configuration
-	cfg, err := config.Load()
+	var err error
+	cfg, err = config.Load()
 	if err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
@@ -130,9 +133,30 @@ func main() {
 	log.Fatal(http.ListenAndServe(port, r))
 }
 
+// HomeData holds data for the home page template
+type HomeData struct {
+	IsStaging bool
+}
+
 // Home page handler
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "game-data/CODEX/html/home-new.html")
+	mode := staging.DetectMode(r, cfg)
+
+	tmpl, err := template.ParseFiles("game-data/CODEX/html/home-new.html")
+	if err != nil {
+		http.Error(w, "Failed to load template", http.StatusInternalServerError)
+		log.Printf("❌ Template error: %v", err)
+		return
+	}
+
+	data := HomeData{
+		IsStaging: mode == staging.ModeStaging,
+	}
+
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		log.Printf("❌ Template execution error: %v", err)
+	}
 }
 
 // Database migration handlers

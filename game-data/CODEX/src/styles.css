@@ -618,4 +618,53 @@
     color: var(--codex-cyan);
     font-family: 'Courier New', monospace;
   }
+
+  /* Home page panels */
+  .codex-panel {
+    padding: 1.5rem;
+    background: var(--codex-bg-secondary);
+    border: 2px solid var(--codex-bg-tertiary);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .codex-panel-highlight:hover {
+    border-color: var(--codex-purple);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(189, 147, 249, 0.3);
+  }
+
+  .codex-panel-disabled {
+    padding: 1.5rem;
+    background: var(--codex-bg-secondary);
+    border: 2px dashed var(--codex-bg-tertiary);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* Tags/Badges */
+  .codex-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    background: var(--codex-bg-tertiary);
+    color: var(--codex-text-primary);
+    font-weight: bold;
+  }
+
+  /* Responsive header for home page */
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem;
+    }
+
+    header > div:last-child {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+    }
+  }
 }
