@@ -30,14 +30,18 @@ build-js:
 # Build Go executable (auto-detect OS)
 build-go:
 	@echo "🔨 Building CODEX server for $(DETECTED_OS)..."
-	@go build -o $(BINARY_PATH) .
-	@echo "✅ Server build complete! (executable: $(BINARY_NAME))"
+	@go build -o ../../$(BINARY_NAME) .
+	@echo "✅ Server build complete! (../../$(BINARY_NAME))"
 
-# Build Go executable (Linux)
+# Build Go executable (Linux cross-compile)
 build-linux:
-	@echo "🔨 Building CODEX server for Linux..."
+	@echo "🔨 Building CODEX server for Linux (cross-compile)..."
+ifeq ($(OS),Windows_NT)
 	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='amd64'; go build -o ../../codex ."
-	@echo "✅ Linux server build complete! (executable: ./codex)"
+else
+	@GOOS=linux GOARCH=amd64 go build -o ../../codex .
+endif
+	@echo "✅ Linux server build complete! (../../codex)"
 
 # Build and run CODEX
 run: build
@@ -59,10 +63,11 @@ clean-js:
 	@rm -rf ../../www/dist/codex
 	@rm -rf dist
 
-# Clean Go executable (both Windows and Linux)
+# Clean Go executable (both Windows and Linux, in project root AND CODEX folder)
 clean-go:
 	@echo "🧹 Cleaning CODEX server executables..."
-	@rm -f ../../codex.exe ../../codex
+	@rm -f ../../codex.exe ../../codex codex.exe codex
+	@echo "✅ Cleaned codex binaries from project root and CODEX folder"
 
 # Install all dependencies
 deps: deps-js deps-go
