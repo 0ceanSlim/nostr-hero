@@ -78,6 +78,7 @@ func validateDatabase() error {
 		"starting_spells",
 		"spell_slots_progression",
 		"music_tracks",
+		"shop_pricing",
 	}
 
 	for _, table := range requiredTables {
@@ -179,6 +180,48 @@ func GetNPCByID(npcID string) (*NPCData, error) {
 	}
 
 	return &npcData, nil
+}
+
+// ShopPricingRules represents pricing formulas from shop-pricing.json
+type ShopPricingRules struct {
+	BuyPricing struct {
+		General struct {
+			BaseMultiplier float64 `json:"base_multiplier"`
+			CharismaRate   float64 `json:"charisma_rate"`
+		} `json:"general"`
+		Specialty struct {
+			BaseMultiplier float64 `json:"base_multiplier"`
+			CharismaRate   float64 `json:"charisma_rate"`
+		} `json:"specialty"`
+	} `json:"buy_pricing"`
+	SellPricing struct {
+		General struct {
+			BaseMultiplier float64 `json:"base_multiplier"`
+			CharismaRate   float64 `json:"charisma_rate"`
+		} `json:"general"`
+		Specialty struct {
+			BaseMultiplier float64 `json:"base_multiplier"`
+			CharismaRate   float64 `json:"charisma_rate"`
+		} `json:"specialty"`
+	} `json:"sell_pricing"`
+	CharismaBase int `json:"charisma_base"`
+}
+
+// GetShopPricingRules retrieves shop pricing rules from the database
+func GetShopPricingRules() (*ShopPricingRules, error) {
+	var dataJSON string
+
+	err := db.QueryRow(`SELECT data FROM shop_pricing WHERE id = 'shop-pricing' LIMIT 1`).Scan(&dataJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query shop pricing: %v", err)
+	}
+
+	var rules ShopPricingRules
+	if err := json.Unmarshal([]byte(dataJSON), &rules); err != nil {
+		return nil, fmt.Errorf("failed to parse shop pricing JSON: %v", err)
+	}
+
+	return &rules, nil
 }
 
 // Helper to parse JSON strings

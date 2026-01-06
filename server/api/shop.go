@@ -5,12 +5,182 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"nostr-hero/db"
 	"nostr-hero/merchant"
 	"nostr-hero/types"
 )
+
+// Helper: Parse interval string to minutes
+// Supports named intervals ("daily", "hourly", "weekly") or direct numeric strings ("60")
+func parseIntervalToMinutes(interval string) int {
+	switch interval {
+	case "daily":
+		return 10 // 10 minutes real-time = 1 game day
+	case "hourly":
+		return 1 // 1 minute real-time
+	case "weekly":
+		return 70 // 70 minutes real-time = 1 game week
+	default:
+		// Try parsing as direct minutes (e.g., "60" for 60 minutes)
+		if minutes, err := strconv.Atoi(interval); err == nil && minutes > 0 {
+			return minutes
+		}
+		return 10 // Default to daily if parsing fails
+	}
+}
+
+// Helper: Get charisma stat from session state
+func getCharismaFromSession(npub, saveID string) int {
+	session, err := sessionManager.GetSession(npub, saveID)
+	if err != nil {
+		log.Printf("⚠️ Failed to get session for charisma lookup: %v", err)
+		return 10 // Default charisma
+	}
+
+	if session.SaveData.Stats == nil {
+		return 10 // Default charisma
+	}
+
+	// Try to get charisma from stats map in session state
+	if cha, ok := session.SaveData.Stats["charisma"].(float64); ok {
+		return int(cha)
+	}
+	if cha, ok := session.SaveData.Stats["charisma"].(int); ok {
+		return cha
+	}
+
+	return 10 // Default charisma if not found
+}
+
+// Helper: Calculate price player pays when buying from merchant
+// Uses pricing rules from database (shop-pricing.json)
+func calculateBuyPrice(basePrice int, shopConfig types.ShopConfig, charisma int) int {
+	// Get pricing rules from database
+	rules, err := db.GetShopPricingRules()
+	if err != nil {
+		log.Printf("⚠️ Failed to load shop pricing rules, using defaults: %v", err)
+		// Fallback to hard-coded defaults if database fails
+		shopBaseMult := 1.625
+		charismaRate := 0.0625
+		if shopConfig.ShopType == "specialty" {
+			shopBaseMult = 1.675
+		}
+		charismaDiscount := float64(charisma-10) * charismaRate
+		finalMultiplier := shopBaseMult - charismaDiscount
+		if finalMultiplier < 0.5 {
+			finalMultiplier = 0.5
+		}
+		result := int(float64(basePrice)*finalMultiplier + 0.5)
+		if result < 1 {
+			result = 1
+		}
+		return result
+	}
+
+	// Get appropriate pricing based on shop type
+	var shopBaseMult float64
+	var charismaRate float64
+	charismaBase := rules.CharismaBase
+	if charismaBase == 0 {
+		charismaBase = 10 // Default if not set
+	}
+
+	if shopConfig.ShopType == "specialty" {
+		shopBaseMult = rules.BuyPricing.Specialty.BaseMultiplier
+		charismaRate = rules.BuyPricing.Specialty.CharismaRate
+	} else {
+		shopBaseMult = rules.BuyPricing.General.BaseMultiplier
+		charismaRate = rules.BuyPricing.General.CharismaRate
+	}
+
+	// Formula: base_value × (base_multiplier - (CHA - charisma_base) × charisma_rate)
+	charismaDiscount := float64(charisma-charismaBase) * charismaRate
+	finalMultiplier := shopBaseMult - charismaDiscount
+
+	// Ensure multiplier doesn't go below a minimum (prevent negative/zero prices)
+	if finalMultiplier < 0.5 {
+		finalMultiplier = 0.5
+	}
+
+	// Calculate final price
+	finalPrice := float64(basePrice) * finalMultiplier
+
+	// Round to nearest int, minimum 1 gold
+	result := int(finalPrice + 0.5)
+	if result < 1 {
+		result = 1
+	}
+
+	return result
+}
+
+// Helper: Calculate price merchant pays when buying from player
+// Uses pricing rules from database (shop-pricing.json)
+func calculateSellPrice(basePrice int, shopConfig types.ShopConfig, charisma int) int {
+	// Get pricing rules from database
+	rules, err := db.GetShopPricingRules()
+	if err != nil {
+		log.Printf("⚠️ Failed to load shop pricing rules, using defaults: %v", err)
+		// Fallback to hard-coded defaults
+		var baseMult float64
+		var charismaRate float64
+		if shopConfig.ShopType == "specialty" {
+			baseMult = 0.5
+			charismaRate = 0.05
+		} else {
+			baseMult = 0.3875
+			charismaRate = 0.05625
+		}
+		finalMultiplier := baseMult + float64(charisma-10)*charismaRate
+		if finalMultiplier < 0 {
+			finalMultiplier = 0
+		}
+		result := int(float64(basePrice)*finalMultiplier + 0.5)
+		if result < 0 {
+			result = 0
+		}
+		return result
+	}
+
+	// Get appropriate pricing based on shop type
+	var baseMult float64
+	var charismaRate float64
+	charismaBase := rules.CharismaBase
+	if charismaBase == 0 {
+		charismaBase = 10 // Default if not set
+	}
+
+	if shopConfig.ShopType == "specialty" {
+		baseMult = rules.SellPricing.Specialty.BaseMultiplier
+		charismaRate = rules.SellPricing.Specialty.CharismaRate
+	} else {
+		baseMult = rules.SellPricing.General.BaseMultiplier
+		charismaRate = rules.SellPricing.General.CharismaRate
+	}
+
+	// Formula: base_value × (base_multiplier + (CHA - charisma_base) × charisma_rate)
+	charismaBonus := float64(charisma-charismaBase) * charismaRate
+	finalMultiplier := baseMult + charismaBonus
+
+	// Ensure multiplier doesn't go below zero
+	if finalMultiplier < 0 {
+		finalMultiplier = 0
+	}
+
+	// Calculate final price
+	finalPrice := float64(basePrice) * finalMultiplier
+
+	// Round to nearest int, minimum 0 gold
+	result := int(finalPrice + 0.5)
+	if result < 0 {
+		result = 0
+	}
+
+	return result
+}
 
 // ShopHandler handles shop-related operations
 // Routes:
@@ -47,14 +217,22 @@ func ShopHandler(w http.ResponseWriter, r *http.Request) {
 
 // Get shop data including inventory with prices
 func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
-	// Get npub from query parameter
+	// Get npub and saveID from query parameters
 	npub := r.URL.Query().Get("npub")
+	saveID := r.URL.Query().Get("save_id")
 	if npub == "" {
 		http.Error(w, "Missing npub parameter", http.StatusBadRequest)
 		return
 	}
+	if saveID == "" {
+		http.Error(w, "Missing save_id parameter", http.StatusBadRequest)
+		return
+	}
 
 	log.Printf("📂 Loading shop data for merchant: %s (player: %s)", merchantID, npub[:12])
+
+	// Get player charisma from in-memory session state
+	playerCharisma := getCharismaFromSession(npub, saveID)
 
 	// Get NPC data from database
 	npcData, err := db.GetNPCByID(merchantID)
@@ -89,14 +267,24 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 		})
 	}
 
-	// Get or initialize merchant state for this player
-	restockInterval := 1440 // Default: 24 hours (in minutes)
-	if shopConfig.RestockInterval > 0 {
-		restockInterval = shopConfig.RestockInterval
+	// Parse intervals from JSON
+	itemRestockInterval := 10 // Default: 10 minutes
+	if shopConfig.ItemRestockInterval > 0 {
+		itemRestockInterval = shopConfig.ItemRestockInterval
+	}
+
+	goldRestockInterval := 30 // Default: 30 minutes
+	if shopConfig.GoldRestockInterval > 0 {
+		goldRestockInterval = shopConfig.GoldRestockInterval
+	}
+
+	goldRegenInterval := 10 // Default: 10 minutes (1 game day)
+	if shopConfig.GoldRegenInterval != "" {
+		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
 	merchantManager := merchant.GetManager()
-	merchantState, restocked := merchantManager.GetMerchantState(npub, merchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+	merchantState, restocked := merchantManager.GetMerchantState(npub, merchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Get item prices and current stock from merchant state
 	itemsWithPrices := make([]map[string]any, 0)
@@ -113,10 +301,10 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 			currentStock = stateItem.CurrentStock
 		}
 
-		// Calculate buy/sell prices
+		// Calculate buy/sell prices with shop type and charisma modifiers
 		basePrice := item.Value
-		buyPrice := int(float64(basePrice) * shopConfig.SellPriceMultiplier)  // Player pays this
-		sellPrice := int(float64(basePrice) * shopConfig.BuyPriceMultiplier)  // Merchant pays player this
+		buyPrice := calculateBuyPrice(basePrice, shopConfig, playerCharisma)   // Player pays this (affected by shop type + charisma)
+		sellPrice := calculateSellPrice(basePrice, shopConfig, playerCharisma) // Merchant pays player this (affected by charisma only)
 
 		itemsWithPrices = append(itemsWithPrices, map[string]any{
 			"item_id":     invItem.ItemID,
@@ -231,13 +419,23 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	restockInterval := 1440
-	if shopConfig.RestockInterval > 0 {
-		restockInterval = shopConfig.RestockInterval
+	itemRestockInterval := 10
+	if shopConfig.ItemRestockInterval > 0 {
+		itemRestockInterval = shopConfig.ItemRestockInterval
+	}
+
+	goldRestockInterval := 30
+	if shopConfig.GoldRestockInterval > 0 {
+		goldRestockInterval = shopConfig.GoldRestockInterval
+	}
+
+	goldRegenInterval := 10
+	if shopConfig.GoldRegenInterval != "" {
+		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
 	merchantManager := merchant.GetManager()
-	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Check current stock from merchant state
 	currentStock := 0
@@ -268,9 +466,12 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Calculate total cost
-	buyPrice := int(float64(item.Value) * shopConfig.SellPriceMultiplier)
+	// Calculate total cost with shop type and charisma modifiers (from session state)
+	playerCharisma := getCharismaFromSession(transaction.Npub, transaction.SaveID)
+	buyPrice := calculateBuyPrice(item.Value, shopConfig, playerCharisma)
 	totalCost := buyPrice * transaction.Quantity
+	log.Printf("💰 Price calculation: base=%dg, shop_type=%s, CHA=%d, final_price=%dg",
+		item.Value, shopConfig.ShopType, playerCharisma, buyPrice)
 
 	// Check player gold (using existing helper function)
 	playerGold := getGoldQuantity(save)
@@ -407,6 +608,26 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Specialty shops only buy items they stock
+	if shopConfig.ShopType == "specialty" {
+		itemInStock := false
+		for _, invItem := range shopConfig.Inventory {
+			if invItem.ItemID == transaction.ItemID {
+				itemInStock = true
+				break
+			}
+		}
+		if !itemInStock {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]any{
+				"success": false,
+				"error":   "This specialty shop doesn't buy that type of item",
+			})
+			return
+		}
+	}
+
 	// Get item data for price
 	item, err := db.GetItemByID(transaction.ItemID)
 	if err != nil {
@@ -420,9 +641,12 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Calculate total value
-	sellPrice := int(float64(item.Value) * shopConfig.BuyPriceMultiplier)
+	// Calculate total value with charisma modifier (from session state)
+	playerCharisma := getCharismaFromSession(transaction.Npub, transaction.SaveID)
+	sellPrice := calculateSellPrice(item.Value, shopConfig, playerCharisma)
 	totalValue := sellPrice * transaction.Quantity
+	log.Printf("💰 Sell price calculation: base=%dg, shop_type=%s, CHA=%d, merchant_pays=%dg",
+		item.Value, shopConfig.ShopType, playerCharisma, sellPrice)
 
 	// Get merchant state to check current gold
 	initialInventory := make([]merchant.MerchantInventoryItem, 0)
@@ -434,13 +658,23 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	restockInterval := 1440
-	if shopConfig.RestockInterval > 0 {
-		restockInterval = shopConfig.RestockInterval
+	itemRestockInterval := 10
+	if shopConfig.ItemRestockInterval > 0 {
+		itemRestockInterval = shopConfig.ItemRestockInterval
+	}
+
+	goldRestockInterval := 30
+	if shopConfig.GoldRestockInterval > 0 {
+		goldRestockInterval = shopConfig.GoldRestockInterval
+	}
+
+	goldRegenInterval := 10
+	if shopConfig.GoldRegenInterval != "" {
+		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
 	merchantManager := merchant.GetManager()
-	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, initialInventory, restockInterval)
+	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Check merchant gold from state
 	merchantGold := merchantState.CurrentGold

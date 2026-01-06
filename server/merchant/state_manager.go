@@ -15,11 +15,17 @@ type MerchantInventoryItem struct {
 
 // MerchantState represents the current state of a merchant for a specific player
 type MerchantState struct {
-	MerchantID      string                           `json:"merchant_id"`
-	CurrentGold     int                              `json:"current_gold"`
-	Inventory       map[string]*MerchantInventoryItem `json:"inventory"` // item_id -> stock info
-	LastRestock     time.Time                        `json:"last_restock"`
-	RestockInterval int                              `json:"restock_interval"` // Minutes
+	MerchantID            string                           `json:"merchant_id"`
+	CurrentGold           int                              `json:"current_gold"`
+	StartingGold          int                              `json:"starting_gold"` // For gold regen cap
+	GoldRegenRate         int                              `json:"gold_regen_rate"` // Gold restored per interval
+	Inventory             map[string]*MerchantInventoryItem `json:"inventory"` // item_id -> stock info
+	LastItemRestock       time.Time                        `json:"last_item_restock"`
+	LastGoldRestock       time.Time                        `json:"last_gold_restock"`
+	LastGoldRegen         time.Time                        `json:"last_gold_regen"` // Track gradual gold regen separately
+	ItemRestockInterval   int                              `json:"item_restock_interval"` // Minutes (default 10)
+	GoldRestockInterval   int                              `json:"gold_restock_interval"` // Minutes (default 30)
+	GoldRegenInterval     int                              `json:"gold_regen_interval"` // Minutes (default 10 for "daily")
 }
 
 // MerchantStateManager manages merchant states per player
@@ -48,7 +54,7 @@ func GetManager() *MerchantStateManager {
 
 // GetMerchantState gets or initializes merchant state for a player
 // Returns the state and whether a restock occurred
-func (m *MerchantStateManager) GetMerchantState(npub, merchantID string, initialGold int, initialInventory []MerchantInventoryItem, restockInterval int) (*MerchantState, bool) {
+func (m *MerchantStateManager) GetMerchantState(npub, merchantID string, initialGold int, goldRegenRate int, initialInventory []MerchantInventoryItem, itemRestockInterval int, goldRestockInterval int, goldRegenInterval int) (*MerchantState, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -65,11 +71,17 @@ func (m *MerchantStateManager) GetMerchantState(npub, merchantID string, initial
 		// First time seeing this merchant for this player - initialize
 		log.Printf("🆕 Initializing merchant state: %s for player %s", merchantID, npub[:12])
 		state = &MerchantState{
-			MerchantID:      merchantID,
-			CurrentGold:     initialGold,
-			Inventory:       make(map[string]*MerchantInventoryItem),
-			LastRestock:     time.Now(),
-			RestockInterval: restockInterval,
+			MerchantID:          merchantID,
+			CurrentGold:         initialGold,
+			StartingGold:        initialGold,
+			GoldRegenRate:       goldRegenRate,
+			Inventory:           make(map[string]*MerchantInventoryItem),
+			LastItemRestock:     time.Now(),
+			LastGoldRestock:     time.Now(),
+			LastGoldRegen:       time.Now(),
+			ItemRestockInterval: itemRestockInterval,
+			GoldRestockInterval: goldRestockInterval,
+			GoldRegenInterval:   goldRegenInterval,
 		}
 
 		// Copy initial inventory
@@ -83,11 +95,40 @@ func (m *MerchantStateManager) GetMerchantState(npub, merchantID string, initial
 
 		m.states[npub][merchantID] = state
 	} else {
-		// Check if restock is due (based on real-world time)
-		minutesSinceRestock := time.Since(state.LastRestock).Minutes()
-		if minutesSinceRestock >= float64(state.RestockInterval) {
-			log.Printf("🔄 Restocking merchant: %s for player %s (%.0f min since last restock)", merchantID, npub[:12], minutesSinceRestock)
-			m.restockMerchant(state, initialGold, initialInventory)
+		// Check if gradual gold regen is due (based on gold_regen_interval, typically 10 min for "daily")
+		minutesSinceGoldRegen := time.Since(state.LastGoldRegen).Minutes()
+		if minutesSinceGoldRegen >= float64(state.GoldRegenInterval) {
+			// Only regenerate if below starting gold
+			if state.CurrentGold < state.StartingGold {
+				oldGold := state.CurrentGold
+				state.CurrentGold += state.GoldRegenRate
+				// Cap at starting gold
+				if state.CurrentGold > state.StartingGold {
+					state.CurrentGold = state.StartingGold
+				}
+				state.LastGoldRegen = time.Now()
+				log.Printf("💰 Gold regenerated (gradual): %s for player %s (%d -> %d, +%d)",
+					merchantID, npub[:12], oldGold, state.CurrentGold, state.CurrentGold-oldGold)
+			}
+		}
+
+		// Check if full gold restock is due (default 30 minutes)
+		minutesSinceGoldRestock := time.Since(state.LastGoldRestock).Minutes()
+		if minutesSinceGoldRestock >= float64(state.GoldRestockInterval) {
+			if state.CurrentGold < state.StartingGold {
+				oldGold := state.CurrentGold
+				state.CurrentGold = state.StartingGold
+				state.LastGoldRestock = time.Now()
+				log.Printf("💰 Gold restocked (full): %s for player %s (%d -> %d)",
+					merchantID, npub[:12], oldGold, state.CurrentGold)
+			}
+		}
+
+		// Check if inventory restock is due (default 10 minutes)
+		minutesSinceItemRestock := time.Since(state.LastItemRestock).Minutes()
+		if minutesSinceItemRestock >= float64(state.ItemRestockInterval) {
+			log.Printf("🔄 Restocking merchant items: %s for player %s (%.0f min since last restock)", merchantID, npub[:12], minutesSinceItemRestock)
+			m.restockMerchant(state, initialInventory)
 			restocked = true
 		}
 	}
@@ -95,15 +136,19 @@ func (m *MerchantStateManager) GetMerchantState(npub, merchantID string, initial
 	return state, restocked
 }
 
-// restockMerchant restores merchant inventory and gold
-func (m *MerchantStateManager) restockMerchant(state *MerchantState, restoreGold int, restoreInventory []MerchantInventoryItem) {
-	// Restore gold to starting value
-	state.CurrentGold = restoreGold
+// restockMerchant restores merchant inventory only (gold regen handled separately)
+// Only restocks items that are below max stock
+func (m *MerchantStateManager) restockMerchant(state *MerchantState, restoreInventory []MerchantInventoryItem) {
+	restockedItems := 0
 
-	// Restore inventory to max stock
+	// Restore inventory to max stock (only if below max)
 	for _, item := range restoreInventory {
 		if invItem, exists := state.Inventory[item.ItemID]; exists {
-			invItem.CurrentStock = invItem.MaxStock
+			// Only restock if below max stock
+			if invItem.CurrentStock < invItem.MaxStock {
+				invItem.CurrentStock = invItem.MaxStock
+				restockedItems++
+			}
 		} else {
 			// Item was added to shop config since last time - add it
 			state.Inventory[item.ItemID] = &MerchantInventoryItem{
@@ -111,11 +156,12 @@ func (m *MerchantStateManager) restockMerchant(state *MerchantState, restoreGold
 				CurrentStock: item.CurrentStock,
 				MaxStock:     item.MaxStock,
 			}
+			restockedItems++
 		}
 	}
 
-	state.LastRestock = time.Now()
-	log.Printf("✅ Merchant restocked: %s (Gold: %d)", state.MerchantID, state.CurrentGold)
+	state.LastItemRestock = time.Now()
+	log.Printf("✅ Merchant inventory restocked: %s (%d items)", state.MerchantID, restockedItems)
 }
 
 // UpdateMerchantInventory updates stock and gold after a transaction
@@ -144,7 +190,7 @@ func (m *MerchantStateManager) UpdateMerchantInventory(npub, merchantID, itemID 
 	return nil
 }
 
-// GetTimeUntilRestock returns minutes until next restock
+// GetTimeUntilRestock returns minutes until next item restock
 func (m *MerchantStateManager) GetTimeUntilRestock(npub, merchantID string) float64 {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -154,8 +200,27 @@ func (m *MerchantStateManager) GetTimeUntilRestock(npub, merchantID string) floa
 	}
 
 	state := m.states[npub][merchantID]
-	elapsed := time.Since(state.LastRestock).Minutes()
-	remaining := float64(state.RestockInterval) - elapsed
+	elapsed := time.Since(state.LastItemRestock).Minutes()
+	remaining := float64(state.ItemRestockInterval) - elapsed
+
+	if remaining < 0 {
+		return 0
+	}
+	return remaining
+}
+
+// GetTimeUntilGoldRestock returns minutes until next gold restock
+func (m *MerchantStateManager) GetTimeUntilGoldRestock(npub, merchantID string) float64 {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if m.states[npub] == nil || m.states[npub][merchantID] == nil {
+		return 0
+	}
+
+	state := m.states[npub][merchantID]
+	elapsed := time.Since(state.LastGoldRestock).Minutes()
+	remaining := float64(state.GoldRestockInterval) - elapsed
 
 	if remaining < 0 {
 		return 0

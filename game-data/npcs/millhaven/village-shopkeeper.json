@@ -102,62 +102,19 @@
   "shop_config": {
     "shop_type": "general",
     "buys_items": true,
-    "buy_price_multiplier": 0.6,
-    "sell_price_multiplier": 1.0,
     "starting_gold": 300,
-    "max_gold": 600,
     "gold_regen_rate": 75,
     "gold_regen_interval": "daily",
+    "gold_restock_interval": 30,
+    "item_restock_interval": 10,
     "inventory": [
-      {
-        "item_id": "rope-hemp",
-        "stock": 8,
-        "max_stock": 8,
-        "restock_rate": 4,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "torch",
-        "stock": 15,
-        "max_stock": 15,
-        "restock_rate": 15,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "rations",
-        "stock": 25,
-        "max_stock": 25,
-        "restock_rate": 25,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "waterskin",
-        "stock": 12,
-        "max_stock": 12,
-        "restock_rate": 8,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "backpack",
-        "stock": 4,
-        "max_stock": 4,
-        "restock_rate": 2,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "bedroll",
-        "stock": 6,
-        "max_stock": 6,
-        "restock_rate": 4,
-        "restock_interval": "daily"
-      },
-      {
-        "item_id": "tinderbox",
-        "stock": 8,
-        "max_stock": 8,
-        "restock_rate": 4,
-        "restock_interval": "daily"
-      }
+      {"item_id": "rope-hemp", "stock": 8, "max_stock": 8},
+      {"item_id": "torch", "stock": 15, "max_stock": 15},
+      {"item_id": "rations", "stock": 25, "max_stock": 25},
+      {"item_id": "waterskin", "stock": 12, "max_stock": 12},
+      {"item_id": "backpack", "stock": 4, "max_stock": 4},
+      {"item_id": "bedroll", "stock": 6, "max_stock": 6},
+      {"item_id": "tinderbox", "stock": 8, "max_stock": 8}
     ]
   }
 }

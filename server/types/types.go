@@ -95,13 +95,14 @@ type ShopInventoryItem struct {
 type ShopConfig struct {
 	ShopType            string              `json:"shop_type"`
 	BuysItems           bool                `json:"buys_items"`
-	BuyPriceMultiplier  float64             `json:"buy_price_multiplier"`  // What merchant pays player
-	SellPriceMultiplier float64             `json:"sell_price_multiplier"` // What player pays merchant
+	BuyPriceMultiplier  float64             `json:"buy_price_multiplier"`  // What merchant pays player (deprecated - not used)
+	SellPriceMultiplier float64             `json:"sell_price_multiplier"` // What player pays merchant (deprecated - not used)
 	StartingGold        int                 `json:"starting_gold"`
-	MaxGold             int                 `json:"max_gold"`
-	GoldRegenRate       int                 `json:"gold_regen_rate"`
-	GoldRegenInterval   string              `json:"gold_regen_interval"`
-	RestockInterval     int                 `json:"restock_interval"` // Minutes between restocks (real-world time)
+	MaxGold             int                 `json:"max_gold"` // Not enforced - merchants can accumulate unlimited gold
+	GoldRegenRate       int                 `json:"gold_regen_rate"`       // Gold restored per gradual regen interval
+	GoldRegenInterval   string              `json:"gold_regen_interval"`   // "daily" (10min), "hourly" (1min), "weekly" (70min), or direct minutes
+	ItemRestockInterval int                 `json:"item_restock_interval"` // Minutes between item restocks (default 10)
+	GoldRestockInterval int                 `json:"gold_restock_interval"` // Minutes between gold restocks (default 30)
 	Inventory           []ShopInventoryItem `json:"inventory"`
 }
 

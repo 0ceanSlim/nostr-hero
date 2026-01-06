@@ -33,13 +33,14 @@ export async function openShop(merchantID) {
 
     // Fetch shop data from backend
     try {
-        // Get npub from session
-        const npub = sessionManager.getNpub();
-        if (!npub) {
-            throw new Error('No npub found in session');
+        // Get npub and saveID from gameAPI (initialized at game start)
+        const npub = gameAPI.npub;
+        const saveID = gameAPI.saveID;
+        if (!npub || !saveID) {
+            throw new Error('Session not initialized');
         }
 
-        const response = await fetch(`/api/shop/${merchantID}?npub=${encodeURIComponent(npub)}`);
+        const response = await fetch(`/api/shop/${merchantID}?npub=${encodeURIComponent(npub)}&save_id=${encodeURIComponent(saveID)}`);
         if (!response.ok) {
             throw new Error('Failed to load shop data');
         }
