@@ -320,21 +320,24 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 	}
 
 	// Calculate time until next restock
-	timeUntilRestock := merchantManager.GetTimeUntilRestock(npub, merchantID)
+	timeUntilItemRestock := merchantManager.GetTimeUntilRestock(npub, merchantID)
+	timeUntilGoldRestock := merchantManager.GetTimeUntilGoldRestock(npub, merchantID)
 
 	response := map[string]any{
-		"merchant_id":           merchantID,
-		"merchant_name":         npcData.Name,
-		"shop_type":             shopConfig.ShopType,
-		"buys_items":            shopConfig.BuysItems,
-		"current_gold":          merchantState.CurrentGold, // Current gold from state
-		"max_gold":              shopConfig.MaxGold,
-		"buy_price_multiplier":  shopConfig.BuyPriceMultiplier,
-		"sell_price_multiplier": shopConfig.SellPriceMultiplier,
-		"inventory":             itemsWithPrices,
-		"restock_interval":      restockInterval, // Minutes between restocks
-		"time_until_restock":    int(timeUntilRestock), // Minutes until next restock
-		"just_restocked":        restocked, // Whether merchant just restocked
+		"merchant_id":              merchantID,
+		"merchant_name":            npcData.Name,
+		"shop_type":                shopConfig.ShopType,
+		"buys_items":               shopConfig.BuysItems,
+		"current_gold":             merchantState.CurrentGold, // Current gold from state
+		"max_gold":                 shopConfig.MaxGold,
+		"buy_price_multiplier":     shopConfig.BuyPriceMultiplier,
+		"sell_price_multiplier":    shopConfig.SellPriceMultiplier,
+		"inventory":                itemsWithPrices,
+		"item_restock_interval":    itemRestockInterval,      // Minutes between item restocks
+		"gold_restock_interval":    goldRestockInterval,      // Minutes between gold restocks
+		"time_until_item_restock":  int(timeUntilItemRestock), // Minutes until next item restock
+		"time_until_gold_restock":  int(timeUntilGoldRestock), // Minutes until next gold restock
+		"just_restocked":           restocked,                 // Whether merchant just restocked items
 	}
 
 	w.Header().Set("Content-Type", "application/json")
