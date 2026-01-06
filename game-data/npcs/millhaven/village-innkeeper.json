@@ -3,14 +3,12 @@
   "name": "Marigold Sweetwater",
   "title": "Innkeeper",
   "race": "Halfling",
-  "location": "village-west",
-  "building": "village_inn",
   "description": "A cheerful halfling with rosy cheeks and a welcoming demeanor. Her inn smells of fresh bread and feels like home, no matter where you're from.",
   "schedule": [
-    {"start": 0, "end": 240, "location_type": "building", "location_id": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
-    {"start": 240, "end": 360, "location_type": "building", "location_id": "marigold_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
-    {"start": 360, "end": 420, "location_type": "building", "location_id": "marigold_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
-    {"start": 420, "end": 1440, "location_type": "building", "location_id": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
+    {"start": 0, "end": 240, "location": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
+    {"start": 240, "end": 360, "location": "marigold_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location": "marigold_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
   ],
   "greeting": {
     "first_time": "Oh hello, dear! Welcome to the Grain & Grape! I'm Marigold. Can I get you something? A room? A meal? You look like you could use both!",

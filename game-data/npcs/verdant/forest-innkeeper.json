@@ -3,14 +3,12 @@
   "name": "Faelyn Nightbreeze",
   "title": "Innkeeper",
   "race": "Elf",
-  "location": "city-south",
-  "building": "moonlit_glade_inn",
   "description": "A serene elf with silver hair and gentle eyes. Her inn is a peaceful sanctuary infused with the calm of the surrounding forest.",
   "schedule": [
-    {"start": 0, "end": 240, "location_type": "building", "location_id": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
-    {"start": 240, "end": 360, "location_type": "building", "location_id": "faelyn_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
-    {"start": 360, "end": 420, "location_type": "building", "location_id": "faelyn_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
-    {"start": 420, "end": 1440, "location_type": "building", "location_id": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
+    {"start": 0, "end": 240, "location": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
+    {"start": 240, "end": 360, "location": "faelyn_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location": "faelyn_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location": "moonlit_glade_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
   ],
   "greeting": {
     "first_time": "Mae govannen, traveler. Welcome to the Moonlit Glade. I am Faelyn. May I offer you rest beneath our trees?",

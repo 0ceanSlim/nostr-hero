@@ -3,15 +3,12 @@
   "name": "Grommash Ironhide",
   "title": "Hoardkeeper",
   "race": "Orc",
-  "location": "village-southwest",
-  "building": "warhoard",
   "description": "A battle-scarred orc with iron-gray skin and tusks decorated with war trophies. Grommash guards the clan's communal war spoils with fierce loyalty and unexpected wisdom.",
   "schedule": [
     {
       "start": 0,
       "end": 1440,
-      "location_type": "building",
-      "location_id": "warhoard",
+      "location": "warhoard",
       "state": "working",
       "dialogue_options": ["about_service"],
       "available_actions": ["open_storage", "register_storage"]

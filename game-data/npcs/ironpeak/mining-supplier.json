@@ -3,15 +3,12 @@
   "name": "Brogni Ironhand",
   "title": "Supply Master",
   "race": "Dwarf",
-  "location": "town-northeast",
-  "building": "ironpeak_general_supplies",
   "description": "A stocky dwarf with soot-stained hands and a no-nonsense demeanor. His shop is crammed with sturdy, practical gear that can survive the harsh mountain conditions.",
   "schedule": [
     {
       "start": 0,
       "end": 360,
-      "location_type": "building",
-      "location_id": "brogni_home",
+      "location": "brogni_home",
       "state": "sleeping",
       "dialogue_options": ["sleeping"],
       "available_actions": []
@@ -19,8 +16,7 @@
     {
       "start": 360,
       "end": 420,
-      "location_type": "district",
-      "location_id": "town-northeast",
+      "location": "town-northeast",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -28,8 +24,7 @@
     {
       "start": 420,
       "end": 1200,
-      "location_type": "building",
-      "location_id": "ironpeak_general_supplies",
+      "location": "ironpeak_general_supplies",
       "state": "working",
       "dialogue_options": ["main_menu"],
       "available_actions": ["open_shop", "open_sell"]
@@ -37,8 +32,7 @@
     {
       "start": 1200,
       "end": 1260,
-      "location_type": "district",
-      "location_id": "town-northeast",
+      "location": "town-northeast",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []

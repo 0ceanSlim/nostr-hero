@@ -3,14 +3,12 @@
   "name": "Captain Reylia Stormwave",
   "title": "Tavern Master",
   "race": "Dragonborn",
-  "location": "goldenhaven-east",
-  "building": "sailors_tavern",
   "description": "A bronze-scaled dragonborn with the bearing of a seasoned sea captain. Her tavern caters to sailors, merchants, and dock workers with strong drinks and hearty food.",
   "schedule": [
-    {"start": 0, "end": 240, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
-    {"start": 240, "end": 360, "location_type": "building", "location_id": "reylia_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
-    {"start": 360, "end": 420, "location_type": "building", "location_id": "reylia_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
-    {"start": 420, "end": 1440, "location_type": "building", "location_id": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
+    {"start": 0, "end": 240, "location": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
+    {"start": 240, "end": 360, "location": "reylia_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location": "reylia_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location": "sailors_tavern", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
   ],
   "greeting": {
     "first_time": "Ahoy there! Welcome to the Salty Anchor. I'm Captain Reylia—ran ships for twenty years before opening this place. What'll it be?",

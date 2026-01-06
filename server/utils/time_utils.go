@@ -1,6 +1,9 @@
 package utils
 
-import "nostr-hero/types"
+import (
+	"nostr-hero/types"
+	"strings"
+)
 
 // GetCurrentScheduleSlot finds the active schedule slot for a given time of day
 // timeOfDay: minutes from midnight (0-1439)
@@ -37,17 +40,26 @@ func GetCurrentScheduleSlot(schedule []types.NPCScheduleSlot, timeOfDay int) *ty
 	return &schedule[0]
 }
 
+// DetermineLocationType determines if a location ID is a building or district
+// Buildings use underscores (e.g., "kingdom_general_store", "aurelia_home")
+// Districts use hyphens (e.g., "kingdom-center", "city-east")
+func DetermineLocationType(locationID string) string {
+	if strings.Contains(locationID, "_") {
+		return "building"
+	}
+	return "district"
+}
+
 // ResolveNPCSchedule returns current schedule state for an NPC
 func ResolveNPCSchedule(npc *types.NPCData, timeOfDay int) *types.NPCScheduleInfo {
 	currentSlot := GetCurrentScheduleSlot(npc.Schedule, timeOfDay)
 
 	if currentSlot == nil {
-		// No schedule - use default location/building from NPC data (backward compatibility)
+		// No schedule - NPC is always available (fallback for NPCs without schedules)
 		return &types.NPCScheduleInfo{
 			CurrentSlot:       nil,
 			IsAvailable:       true,
-			LocationType:      "building",
-			LocationID:        npc.Building,
+			Location:          "",
 			State:             "working",
 			AvailableDialogue: getAllDialogueKeys(npc.Dialogue),
 			AvailableActions:  getAllActions(npc),
@@ -57,8 +69,7 @@ func ResolveNPCSchedule(npc *types.NPCData, timeOfDay int) *types.NPCScheduleInf
 	return &types.NPCScheduleInfo{
 		CurrentSlot:       currentSlot,
 		IsAvailable:       len(currentSlot.AvailableActions) > 0 || len(currentSlot.DialogueOptions) > 0,
-		LocationType:      currentSlot.LocationType,
-		LocationID:        currentSlot.LocationID,
+		Location:          currentSlot.Location,
 		State:             currentSlot.State,
 		AvailableDialogue: currentSlot.DialogueOptions,
 		AvailableActions:  currentSlot.AvailableActions,

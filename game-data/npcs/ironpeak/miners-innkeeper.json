@@ -3,14 +3,12 @@
   "name": "Helga Stonebrew",
   "title": "Innkeeper",
   "race": "Dwarf",
-  "location": "town-northeast",
-  "building": "miners_inn",
   "description": "A stout dwarf with flour-dusted apron and a warm smile. She runs the Pickaxe & Pint with the efficiency of a mine foreman and the heart of a mother.",
   "schedule": [
-    {"start": 0, "end": 240, "location_type": "building", "location_id": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
-    {"start": 240, "end": 360, "location_type": "building", "location_id": "helga_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
-    {"start": 360, "end": 420, "location_type": "building", "location_id": "helga_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
-    {"start": 420, "end": 1440, "location_type": "building", "location_id": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
+    {"start": 0, "end": 240, "location": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]},
+    {"start": 240, "end": 360, "location": "helga_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location": "helga_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location": "miners_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["rent_room", "buy_drink"]}
   ],
   "greeting": {
     "first_time": "Aye, welcome! I'm Helga Stonebrew. Ye look like ye could use a hot meal and a cold ale! What'll it be?",

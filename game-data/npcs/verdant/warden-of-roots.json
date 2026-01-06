@@ -3,15 +3,12 @@
   "name": "Silvanthir Moonbough",
   "title": "Warden of Roots",
   "race": "Elf",
-  "location": "city-south",
-  "building": "glade_of_safekeeping",
   "description": "An ancient elf with bark-like skin and eyes the color of spring leaves. Silvanthir tends the enchanted trees that serve as living vaults, speaking to them in the old tongue.",
   "schedule": [
     {
       "start": 0,
       "end": 1440,
-      "location_type": "building",
-      "location_id": "glade_of_safekeeping",
+      "location": "glade_of_safekeeping",
       "state": "working",
       "dialogue_options": ["about_service"],
       "available_actions": ["open_storage", "register_storage"]

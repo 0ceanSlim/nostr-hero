@@ -3,15 +3,12 @@
   "name": "Marcus Goldvault",
   "title": "Royal Custodian",
   "race": "Human",
-  "location": "kingdom",
-  "building": "vault_of_crowns",
   "description": "A distinguished older man in fine royal livery, Marcus oversees the kingdom's official storage facility with meticulous care. His ledgers are impeccable and his reputation for discretion is legendary.",
   "schedule": [
     {
       "start": 0,
       "end": 1440,
-      "location_type": "building",
-      "location_id": "vault_of_crowns",
+      "location": "vault_of_crowns",
       "state": "working",
       "dialogue_options": ["about_service"],
       "available_actions": ["open_storage", "register_storage"]

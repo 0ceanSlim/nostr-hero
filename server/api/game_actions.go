@@ -1259,14 +1259,17 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]any) (*GameActionR
 	// Resolve NPC schedule based on current time
 	scheduleInfo := utils.ResolveNPCSchedule(&npcData, state.TimeOfDay)
 
+	// Determine location type from location ID
+	locationType := utils.DetermineLocationType(scheduleInfo.Location)
+
 	// Check if player is at NPC's current location
 	playerAtLocation := false
-	if scheduleInfo.LocationType == "building" && state.Building == scheduleInfo.LocationID {
+	if locationType == "building" && state.Building == scheduleInfo.Location {
 		playerAtLocation = true
-	} else if scheduleInfo.LocationType == "district" && state.Building == "" {
+	} else if locationType == "district" && state.Building == "" {
 		// Construct full district ID from location + district (e.g., "kingdom" + "center" = "kingdom-center")
 		playerDistrictID := fmt.Sprintf("%s-%s", state.Location, state.District)
-		if playerDistrictID == scheduleInfo.LocationID {
+		if playerDistrictID == scheduleInfo.Location {
 			playerAtLocation = true
 		}
 	}
@@ -1290,7 +1293,7 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]any) (*GameActionR
 
 	// Determine greeting based on state
 	greetingText := ""
-	isRegistered := isVaultRegistered(state, scheduleInfo.LocationID)
+	isRegistered := isVaultRegistered(state, scheduleInfo.Location)
 	isNativeRace := isNativeRaceForLocation(state.Race, state.Location)
 
 	if isNativeRace {

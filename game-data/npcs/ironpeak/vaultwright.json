@@ -3,15 +3,12 @@
   "name": "Thorin Ironledger",
   "title": "Vaultwright",
   "race": "Dwarf",
-  "location": "town-northeast",
-  "building": "stonevault",
   "description": "A stout dwarf with a braided beard adorned with iron rings. Thorin's hands are calloused from years of carving vaultstones, and his sharp eyes miss nothing.",
   "schedule": [
     {
       "start": 0,
       "end": 1440,
-      "location_type": "building",
-      "location_id": "stonevault",
+      "location": "stonevault",
       "state": "working",
       "dialogue_options": ["about_service"],
       "available_actions": ["open_storage", "register_storage"]

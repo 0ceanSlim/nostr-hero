@@ -3,15 +3,12 @@
   "name": "Pip Haversham",
   "title": "Shopkeeper",
   "race": "Halfling",
-  "location": "village-west",
-  "building": "general_store",
   "description": "A cheerful halfling with rosy cheeks and an infectious smile. His shop is tidy and welcoming, with every item neatly organized and clearly priced.",
   "schedule": [
     {
       "start": 0,
       "end": 420,
-      "location_type": "building",
-      "location_id": "pip_home",
+      "location": "pip_home",
       "state": "sleeping",
       "dialogue_options": ["sleeping"],
       "available_actions": []
@@ -19,8 +16,7 @@
     {
       "start": 420,
       "end": 480,
-      "location_type": "district",
-      "location_id": "village-west",
+      "location": "village-west",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -28,8 +24,7 @@
     {
       "start": 480,
       "end": 1200,
-      "location_type": "building",
-      "location_id": "general_store",
+      "location": "general_store",
       "state": "working",
       "dialogue_options": ["main_menu"],
       "available_actions": ["open_shop", "open_sell"]
@@ -37,8 +32,7 @@
     {
       "start": 1200,
       "end": 1260,
-      "location_type": "district",
-      "location_id": "village-west",
+      "location": "village-west",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []

@@ -3,15 +3,12 @@
   "name": "Aldric Goodsworth",
   "title": "General Merchant",
   "race": "Human",
-  "location": "kingdom",
-  "building": "kingdom_general_store",
   "description": "A portly, cheerful merchant with a quick smile and keen eye for business. His shop is packed with everything an adventurer might need, from rope to rations.",
   "schedule": [
     {
       "start": 0,
       "end": 360,
-      "location_type": "building",
-      "location_id": "aldric_home",
+      "location": "aldric_home",
       "state": "sleeping",
       "dialogue_options": ["sleeping"],
       "available_actions": []
@@ -19,8 +16,7 @@
     {
       "start": 360,
       "end": 420,
-      "location_type": "district",
-      "location_id": "kingdom-center",
+      "location": "kingdom-center",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -28,8 +24,7 @@
     {
       "start": 420,
       "end": 1320,
-      "location_type": "building",
-      "location_id": "kingdom_general_store",
+      "location": "kingdom_general_store",
       "state": "working",
       "dialogue_options": ["main_menu"],
       "available_actions": ["open_shop", "open_sell"]
@@ -37,8 +32,7 @@
     {
       "start": 1320,
       "end": 1380,
-      "location_type": "district",
-      "location_id": "kingdom-center",
+      "location": "kingdom-center",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []
@@ -46,8 +40,7 @@
     {
       "start": 1380,
       "end": 1440,
-      "location_type": "building",
-      "location_id": "aldric_home",
+      "location": "aldric_home",
       "state": "home",
       "dialogue_options": ["off_duty"],
       "available_actions": []

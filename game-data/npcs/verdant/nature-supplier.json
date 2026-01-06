@@ -3,15 +3,12 @@
   "name": "Thalindra Greenleaf",
   "title": "Nature's Provisioner",
   "race": "Elf",
-  "location": "city-south",
-  "building": "verdant_supplies",
   "description": "A graceful elf with vine-woven hair and earth-toned garments. Her shop smells of fresh herbs and treated leather, offering supplies that work in harmony with nature.",
   "schedule": [
     {
       "start": 0,
       "end": 420,
-      "location_type": "building",
-      "location_id": "thalindra_grove",
+      "location": "thalindra_grove",
       "state": "sleeping",
       "dialogue_options": ["sleeping"],
       "available_actions": []
@@ -19,8 +16,7 @@
     {
       "start": 420,
       "end": 480,
-      "location_type": "district",
-      "location_id": "city-south",
+      "location": "city-south",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -28,8 +24,7 @@
     {
       "start": 480,
       "end": 1200,
-      "location_type": "building",
-      "location_id": "verdant_supplies",
+      "location": "verdant_supplies",
       "state": "working",
       "dialogue_options": ["main_menu"],
       "available_actions": ["open_shop", "open_sell"]
@@ -37,8 +32,7 @@
     {
       "start": 1200,
       "end": 1260,
-      "location_type": "district",
-      "location_id": "city-south",
+      "location": "city-south",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []

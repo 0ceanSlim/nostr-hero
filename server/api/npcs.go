@@ -68,11 +68,14 @@ func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 		// Resolve schedule
 		scheduleInfo := utils.ResolveNPCSchedule(&npcData, timeOfDay)
 
+		// Determine location type from location ID
+		locationType := utils.DetermineLocationType(scheduleInfo.Location)
+
 		// Check if NPC is at player's current location
 		isVisible := false
-		if buildingID != "" && scheduleInfo.LocationType == "building" && scheduleInfo.LocationID == buildingID {
+		if buildingID != "" && locationType == "building" && scheduleInfo.Location == buildingID {
 			isVisible = true
-		} else if buildingID == "" && scheduleInfo.LocationType == "district" && scheduleInfo.LocationID == districtID {
+		} else if buildingID == "" && locationType == "district" && scheduleInfo.Location == districtID {
 			isVisible = true
 		}
 
@@ -81,8 +84,8 @@ func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 				NPCID:          npcID,
 				Name:           npcData.Name,
 				Title:          npcData.Title,
-				LocationType:   scheduleInfo.LocationType,
-				LocationID:     scheduleInfo.LocationID,
+				LocationType:   locationType,
+				LocationID:     scheduleInfo.Location,
 				State:          scheduleInfo.State,
 				IsInteractable: scheduleInfo.IsAvailable,
 			})

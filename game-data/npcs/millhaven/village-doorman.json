@@ -3,13 +3,12 @@
   "name": "Tobias Underhill",
   "title": "Entertainment Coordinator",
   "race": "Halfling",
-  "building": "village_inn",
   "description": "A friendly halfling with a warm smile and an open mind. He welcomes all performers, believing music brings the community together.",
   "schedule": [
-    {"start": 0, "end": 240, "location_type": "building", "location_id": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
-    {"start": 240, "end": 360, "location_type": "building", "location_id": "tobias_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
-    {"start": 360, "end": 420, "location_type": "building", "location_id": "tobias_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
-    {"start": 420, "end": 1440, "location_type": "building", "location_id": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
+    {"start": 0, "end": 240, "location": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]},
+    {"start": 240, "end": 360, "location": "tobias_quarters", "state": "sleeping", "dialogue_options": ["sleeping"], "available_actions": []},
+    {"start": 360, "end": 420, "location": "tobias_quarters", "state": "home", "dialogue_options": ["off_duty"], "available_actions": []},
+    {"start": 420, "end": 1440, "location": "village_inn", "state": "working", "dialogue_options": ["main_menu"], "available_actions": ["book_performance"]}
   ],
   "greeting": {
     "first_time": "Oh hello! I'm Toby! I book the entertainment here at the Grain & Grape. Do you play music? We'd love to have you!",
