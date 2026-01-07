@@ -12,11 +12,13 @@ import { getGameStateSync, refreshGameState } from '../state/gameState.js';
 import { showMessage } from '../ui/messaging.js';
 import { updateAllDisplays } from '../ui/displayCoordinator.js';
 import { sessionManager } from '../lib/session.js';
+import { getItemById } from '../state/staticData.js';
 
 // Module state
 let currentMerchantID = null;
 let currentShopData = null;
 let currentTab = 'buy';
+let shopIsOpen = false;
 
 // Staging state
 let buyStaging = [];   // {itemID, quantity, price, name}
@@ -30,6 +32,7 @@ export async function openShop(merchantID) {
     logger.debug('Opening shop for merchant:', merchantID);
     currentMerchantID = merchantID;
     currentTab = 'buy';
+    shopIsOpen = true;
 
     // Fetch shop data from backend
     try {
@@ -67,12 +70,23 @@ export async function openShop(merchantID) {
 /**
  * Close shop interface
  */
-export function closeShop() {
+export async function closeShop() {
     logger.debug('Closing shop');
+
+    // Restore any items in sell staging back to inventory
+    if (sellStaging.length > 0) {
+        await restoreSellStagingItems();
+    }
+
     const modal = document.getElementById('shop-modal');
     modal.classList.add('hidden');
     currentMerchantID = null;
     currentShopData = null;
+    shopIsOpen = false;
+    currentTab = 'buy';
+    // Clear staging when closing
+    buyStaging = [];
+    sellStaging = [];
 }
 
 /**
@@ -697,9 +711,15 @@ async function confirmBuyTransaction() {
 }
 
 /**
- * Render sell tab (player's inventory) - Grid Layout
+ * Render sell tab - NO LONGER RENDERS INVENTORY GRID
+ * Player inventory remains visible in main UI, clicking items adds them to sell staging
  */
 function renderSellTab() {
+    if (!currentShopData) {
+        logger.error('renderSellTab called but currentShopData is null!');
+        return;
+    }
+
     const state = getGameStateSync();
     const playerGold = getPlayerGold(state);
     const merchantGold = currentShopData.current_gold || 0;
@@ -708,106 +728,15 @@ function renderSellTab() {
     document.getElementById('shop-player-gold').textContent = playerGold;
     document.getElementById('shop-merchant-gold').textContent = merchantGold;
 
-    const grid = document.getElementById('shop-sell-grid');
-    grid.innerHTML = '';
-
+    // Show message if merchant doesn't buy items
     if (!currentShopData.buys_items) {
-        grid.innerHTML = '<p style="color: #9ca3af;">This merchant doesn\'t buy items.</p>';
+        const sellContent = document.getElementById('shop-sell-content');
+        sellContent.innerHTML = '<p class="text-center text-gray-400" style="font-size: 8px; padding: 20px;">This merchant doesn\'t buy items.</p>';
         return;
     }
 
-    // Use correct state structure: state.inventory = array, state.equipment = object
-    const generalSlots = Array.isArray(state.inventory) ? state.inventory : [];
-    const equipment = state.equipment || {};
-    const backpack = equipment.bag?.contents || [];
-
-    console.log('🛒 Rendering sell tab - general slots:', generalSlots);
-    console.log('🛒 Rendering sell tab - backpack:', backpack);
-
-    // Render general slots (skip gold-piece)
-    generalSlots.forEach((slot, index) => {
-        if (!slot || !slot.item || slot.item === 'gold-piece') return;
-        renderSellSlot(grid, slot, index, 'general');
-    });
-
-    // Render backpack slots (skip gold-piece)
-    backpack.forEach((slot, index) => {
-        if (!slot || !slot.item || slot.item === 'gold-piece') return;
-        renderSellSlot(grid, slot, index, 'backpack');
-    });
-}
-
-/**
- * Render a single sell slot
- */
-function renderSellSlot(grid, slot, slotIndex, slotType) {
-    console.log('🛒 renderSellSlot called for:', slot.item, 'at index', slotIndex);
-
-    // Get item data from static data using imported function
-    const itemData = getItemById(slot.item);
-    if (!itemData) {
-        console.log('🛒 No item data found for:', slot.item);
-        return;
-    }
-
-    console.log('🛒 Item data found:', itemData);
-
-    // Calculate sell value
-    const sellValue = Math.floor(itemData.value * currentShopData.buy_price_multiplier);
-    console.log('🛒 Sell value calculated:', sellValue, '(base:', itemData.value, 'x', currentShopData.buy_price_multiplier, ')');
-
-    // Create slot
-    const slotDiv = document.createElement('div');
-    slotDiv.className = 'relative cursor-pointer hover:bg-gray-700 transition-colors';
-    slotDiv.style.cssText = `
-        aspect-ratio: 1;
-        background: #1a1a1a;
-        border-top: 2px solid #3a3a3a;
-        border-left: 2px solid #3a3a3a;
-        border-right: 2px solid #0a0a0a;
-        border-bottom: 2px solid #0a0a0a;
-    `;
-
-    // Item image
-    const img = document.createElement('img');
-    img.src = `/res/img/items/${slot.item}.png`;
-    img.className = 'w-full h-full object-contain p-1';
-    img.style.imageRendering = 'pixelated';
-    img.onerror = () => { img.src = '/res/img/items/default.png'; };
-    slotDiv.appendChild(img);
-
-    // Quantity (if > 1)
-    if (slot.quantity > 1) {
-        const qtyBadge = document.createElement('div');
-        qtyBadge.className = 'absolute bottom-0 right-0 px-1 text-white font-bold';
-        qtyBadge.style.cssText = `
-            font-size: 9px;
-            background: rgba(0, 0, 0, 0.7);
-            text-shadow: 1px 1px 2px #000;
-        `;
-        qtyBadge.textContent = slot.quantity;
-        slotDiv.appendChild(qtyBadge);
-    }
-
-    // Left-click: add to staging
-    console.log('🛒 Adding click listener to slot for', slot.item);
-    slotDiv.addEventListener('click', (e) => {
-        console.log('🛒 CLICK EVENT FIRED for:', slot.item);
-        e.preventDefault();
-        e.stopPropagation();
-        addToSellStaging(slot.item, itemData.name, 1, sellValue, slotIndex, slotType);
-    });
-
-    // Also try onclick as a fallback
-    slotDiv.onclick = (e) => {
-        console.log('🛒 ONCLICK EVENT FIRED for:', slot.item);
-        e.preventDefault();
-        e.stopPropagation();
-        addToSellStaging(slot.item, itemData.name, 1, sellValue, slotIndex, slotType);
-    };
-
-    console.log('🛒 Appending slot to grid');
-    grid.appendChild(slotDiv);
+    // Render the staging area (initially empty, items added by clicking inventory)
+    renderSellStaging();
 }
 
 /**
@@ -830,7 +759,7 @@ function addToSellStaging(itemID, name, quantity, value, slotIndex, slotType) {
     sellStaging.push({ itemID, name, quantity, value, slotIndex, slotType });
     console.log('🛒 Sell staging now has', sellStaging.length, 'items');
     renderSellStaging();
-    showStagingArea('sell');
+    // Note: sell-staging div is always visible now, no need to show/hide
 }
 
 /**
@@ -842,6 +771,7 @@ function renderSellStaging() {
 
     let totalValue = 0;
     sellStaging.forEach((item, index) => {
+        console.log('🛒 Staging item:', item);
         totalValue += item.value * item.quantity;
 
         // Create staged item badge (same as buy staging)
@@ -879,32 +809,87 @@ function renderSellStaging() {
             line-height: 1;
         `;
         removeBtn.textContent = '✕';
-        removeBtn.onclick = () => removeStagedSell(index);
+        removeBtn.onclick = async () => await removeStagedSell(index);
         badge.appendChild(removeBtn);
 
         container.appendChild(badge);
     });
 
+    console.log('🛒 Total sell value:', totalValue);
     document.getElementById('sell-total-value').textContent = totalValue;
 }
 
 /**
- * Remove staged sell item
+ * Remove staged sell item (restore to inventory)
  */
-function removeStagedSell(index) {
-    sellStaging.splice(index, 1);
-    renderSellStaging();
-    if (sellStaging.length === 0) {
-        document.getElementById('sell-staging').classList.add('hidden');
+async function removeStagedSell(index) {
+    const item = sellStaging[index];
+
+    // Restore item to inventory
+    try {
+        const result = await gameAPI.sendAction('add_item', {
+            item_id: item.itemID,
+            quantity: item.quantity
+        });
+
+        if (!result.success) {
+            logger.error('Failed to restore item to inventory:', item.itemID, result.error);
+            showMessage('Failed to restore item', 'error');
+            return;
+        }
+
+        // Remove from staging
+        sellStaging.splice(index, 1);
+        renderSellStaging();
+
+        // Refresh displays to show restored item
+        await refreshGameState();
+        await updateAllDisplays();
+
+    } catch (error) {
+        logger.error('Error restoring item:', error);
+        showMessage('Failed to restore item', 'error');
     }
 }
 
 /**
  * Clear sell staging
  */
-function clearSellStaging() {
+async function clearSellStaging() {
+    // Restore items to inventory before clearing
+    if (sellStaging.length > 0) {
+        await restoreSellStagingItems();
+    }
     sellStaging = [];
-    document.getElementById('sell-staging').classList.add('hidden');
+    renderSellStaging(); // Re-render to show empty staging area
+    // Note: sell-staging div is always visible now, no need to hide
+}
+
+/**
+ * Restore all sell staging items back to inventory
+ */
+async function restoreSellStagingItems() {
+    logger.debug('Restoring sell staging items to inventory');
+
+    for (const item of sellStaging) {
+        try {
+            const result = await gameAPI.sendAction('add_item', {
+                item_id: item.itemID,
+                quantity: item.quantity,
+                to_slot_type: 'auto' // Auto-find available slot
+            });
+
+            if (!result.success) {
+                logger.error('Failed to restore item to inventory:', item.itemID, result.error);
+            }
+        } catch (error) {
+            logger.error('Error restoring item:', error);
+        }
+    }
+
+    // Refresh displays to show restored items
+    await refreshGameState();
+    await updateAllDisplays();
 }
 
 /**
@@ -959,6 +944,139 @@ async function confirmSellTransaction() {
     await openShop(currentMerchantID);
     updateAllDisplays();
     showMessage('Sale complete!', 'success');
+}
+
+/**
+ * Check if shop is open
+ * @returns {boolean}
+ */
+export function isShopOpen() {
+    return shopIsOpen;
+}
+
+/**
+ * Get current shop tab
+ * @returns {string} 'buy' or 'sell'
+ */
+export function getCurrentTab() {
+    return currentTab;
+}
+
+/**
+ * Add item from player inventory to sell staging
+ * Called when player clicks inventory item while shop sell tab is open
+ * @param {string} itemId - Item ID
+ * @param {number} slotIndex - Slot index in inventory
+ * @param {string} slotType - 'general' or 'inventory' (backpack)
+ */
+export async function addItemToSell(itemId, slotIndex, slotType) {
+    if (!shopIsOpen || currentTab !== 'sell') {
+        logger.warn('Attempted to add item to sell but shop is not open or not on sell tab');
+        return;
+    }
+
+    if (!currentShopData || !currentShopData.buys_items) {
+        showMessage("This merchant doesn't buy items", 'error');
+        return;
+    }
+
+    // Get item data
+    const itemData = getItemById(itemId);
+    console.log('🔍 getItemById result:', itemData);
+
+    if (!itemData) {
+        logger.warn('Item not found:', itemId);
+        showMessage('Item not found', 'error');
+        return;
+    }
+
+    // Get current state to check item exists in inventory
+    const state = getGameStateSync();
+    let inventorySlot = null;
+
+    if (slotType === 'general') {
+        const generalSlots = Array.isArray(state.inventory) ? state.inventory : [];
+        inventorySlot = generalSlots[slotIndex];
+    } else if (slotType === 'inventory') {
+        const backpack = state.equipment?.bag?.contents || [];
+        inventorySlot = backpack[slotIndex];
+    }
+
+    if (!inventorySlot || inventorySlot.item !== itemId) {
+        showMessage('Item not found in that slot', 'error');
+        return;
+    }
+
+    console.log('📦 Inventory slot:', inventorySlot);
+
+    // Calculate sell value (what merchant pays player)
+    // Price can be in itemData.price OR itemData.properties.price
+    const basePrice = itemData.price || itemData.properties?.price || 0;
+
+    // Get player charisma for pricing calculation
+    const playerCharisma = state.stats?.charisma || 10;
+    const shopType = currentShopData.shop_type || 'general';
+
+    // Apply shop pricing formula from shop-pricing.json
+    // Formula: base_value × (base_multiplier + (CHA - 10) × charisma_rate)
+    let baseMultiplier, charismaRate;
+    if (shopType === 'specialty') {
+        baseMultiplier = 0.5;
+        charismaRate = 0.05;
+    } else {
+        baseMultiplier = 0.3875;
+        charismaRate = 0.05625;
+    }
+
+    const charismaBonus = (playerCharisma - 10) * charismaRate;
+    const finalMultiplier = baseMultiplier + charismaBonus;
+    const sellValue = Math.floor(basePrice * finalMultiplier);
+
+    console.log('💰 Price calculation:', {
+        itemId,
+        itemName: itemData.name,
+        basePrice: basePrice,
+        playerCharisma: playerCharisma,
+        shopType: shopType,
+        baseMultiplier: baseMultiplier,
+        charismaRate: charismaRate,
+        charismaBonus: charismaBonus,
+        finalMultiplier: finalMultiplier,
+        sellValue: sellValue
+    });
+
+    // Validate merchant has gold
+    const merchantGold = currentShopData.current_gold || currentShopData.starting_gold || 0;
+    if (merchantGold < sellValue) {
+        showMessage("Merchant doesn't have enough gold", 'error');
+        return;
+    }
+
+    // Remove 1 item from inventory immediately via backend
+    try {
+        const result = await gameAPI.sendAction('remove_from_inventory', {
+            item_id: itemId,
+            from_slot: slotIndex,
+            from_slot_type: slotType,
+            quantity: 1
+        });
+
+        if (!result.success) {
+            showMessage(result.error || 'Failed to remove item from inventory', 'error');
+            return;
+        }
+
+        // Refresh inventory display to show item removed
+        await refreshGameState();
+        await updateAllDisplays();
+
+        // Add to staging list
+        addToSellStaging(itemId, itemData.name, 1, sellValue, slotIndex, slotType);
+
+    } catch (error) {
+        logger.error('Error removing item from inventory:', error);
+        showMessage('Failed to add item to sell', 'error');
+    }
 }
 
 // Expose functions to window for onclick handlers

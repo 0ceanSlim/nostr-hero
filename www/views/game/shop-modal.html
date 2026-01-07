@@ -8,7 +8,7 @@
                 <span style="font-size: 12px;">🏪</span>
                 <span id="shop-merchant-name" class="text-white font-bold" style="font-size: 9px;">Shop</span>
             </div>
-            <button onclick="window.closeShop()" class="text-white hover:bg-red-600 px-1" style="font-size: 9px; background: #c0c0c0; color: black; border: 1px solid #000;">✕</button>
+            <button onclick="(async () => await window.closeShop())()" class="text-white hover:bg-red-600 px-1" style="font-size: 9px; background: #c0c0c0; color: black; border: 1px solid #000;">✕</button>
         </div>
 
         <!-- Shop Info -->
@@ -51,17 +51,16 @@
 
         <!-- Sell Tab Content -->
         <div id="shop-sell-content" class="hidden p-2 bg-win95-bgDark" style="max-height: 250px; overflow-y: auto;">
-            <!-- Player Inventory Grid -->
-            <div class="text-xs mb-1" style="color: #9ca3af; font-size: 7px;">Your Items:</div>
-            <div id="shop-sell-grid" class="grid gap-1 mb-2" style="grid-template-columns: repeat(5, 1fr);">
-                <!-- Populated by JS -->
+            <!-- Instructions -->
+            <div class="text-center mb-2" style="color: #9ca3af; font-size: 7px;">
+                Click items in your inventory to add them to the sell list
             </div>
 
-            <!-- Staging Area (initially hidden) -->
-            <div id="sell-staging" class="hidden mt-2 pt-2 border-t border-gray-700">
-                <div class="text-xs mb-1" style="color: #22c55e; font-size: 7px;">Selling:</div>
-                <div id="sell-staged-items" class="flex flex-wrap gap-1 mb-1">
-                    <!-- Staged item badges -->
+            <!-- Staging Area (always visible, empty when no items selected) -->
+            <div id="sell-staging" class="mt-2 pt-2 border-t border-gray-700">
+                <div class="text-xs mb-1" style="color: #22c55e; font-size: 7px;">Items to Sell:</div>
+                <div id="sell-staged-items" class="flex flex-wrap gap-1 mb-1 min-h-[40px]">
+                    <!-- Staged item badges (populated when clicking inventory items) -->
                 </div>
                 <div class="flex justify-between items-center mb-1">
                     <span class="font-bold" style="color: #22c55e; font-size: 7px;">
@@ -71,7 +70,7 @@
                         CONFIRM
                     </button>
                 </div>
-                <button onclick="window.clearSellStaging()" class="w-full px-2 py-1 font-bold" style="font-size: 7px; background: #6b7280; color: white; border-top: 2px solid #9ca3af; border-left: 2px solid #9ca3af; border-right: 2px solid #374151; border-bottom: 2px solid #374151;">
+                <button onclick="(async () => await window.clearSellStaging())()" class="w-full px-2 py-1 font-bold" style="font-size: 7px; background: #6b7280; color: white; border-top: 2px solid #9ca3af; border-left: 2px solid #9ca3af; border-right: 2px solid #374151; border-bottom: 2px solid #374151;">
                     CLEAR
                 </button>
             </div>

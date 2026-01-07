@@ -106,6 +106,8 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleUnequipItemAction(state, action.Params)
 	case "drop_item":
 		return handleDropItemAction(state, action.Params)
+	case "remove_from_inventory":
+		return handleRemoveFromInventoryAction(state, action.Params)
 	case "pickup_item":
 		return handlePickupItemAction(state, action.Params)
 	case "cast_spell":
@@ -455,6 +457,103 @@ func handleDropItemAction(state *SaveFile, params map[string]any) (*GameActionRe
 	return &GameActionResponse{
 		Success: true,
 		Message: fmt.Sprintf("Dropped %s", itemID),
+	}, nil
+}
+
+// handleRemoveFromInventoryAction removes an item from inventory (for sell staging)
+func handleRemoveFromInventoryAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	itemID, ok := params["item_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing or invalid item_id parameter")
+	}
+
+	fromSlot, _ := params["from_slot"].(float64)
+	fromSlotType, _ := params["from_slot_type"].(string)
+	if fromSlotType == "" {
+		fromSlotType = "general" // Default to general slots
+	}
+
+	// Get the quantity to remove (default to 1)
+	removeQuantity := 1
+	if qty, ok := params["quantity"].(float64); ok {
+		removeQuantity = int(qty)
+	}
+
+	log.Printf("🛒 Removing %dx %s from %s[%d] for sell staging", removeQuantity, itemID, fromSlotType, int(fromSlot))
+
+	// Find item in appropriate inventory
+	var itemFound bool
+	var inventory []any
+
+	switch fromSlotType {
+	case "general":
+		generalSlots, ok := state.Inventory["general_slots"].([]any)
+		if !ok {
+			return nil, fmt.Errorf("invalid inventory structure")
+		}
+		inventory = generalSlots
+	case "inventory":
+		gearSlots, _ := state.Inventory["gear_slots"].(map[string]any)
+		bag, _ := gearSlots["bag"].(map[string]any)
+		backpackContents, ok := bag["contents"].([]any)
+		if !ok {
+			return nil, fmt.Errorf("invalid backpack structure")
+		}
+		inventory = backpackContents
+	default:
+		return nil, fmt.Errorf("invalid slot_type: %s", fromSlotType)
+	}
+
+	// Search for item at specific slot
+	if int(fromSlot) < 0 || int(fromSlot) >= len(inventory) {
+		return nil, fmt.Errorf("invalid slot index: %d", int(fromSlot))
+	}
+
+	slotMap, ok := inventory[int(fromSlot)].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid slot data at index %d", int(fromSlot))
+	}
+
+	if slotMap["item"] != itemID {
+		return nil, fmt.Errorf("item mismatch: expected %s, found %v", itemID, slotMap["item"])
+	}
+
+	itemFound = true
+
+	// Get current quantity (ensure it's an integer)
+	currentQty := 1
+	if qty, ok := slotMap["quantity"].(float64); ok {
+		currentQty = int(qty)
+	} else if qty, ok := slotMap["quantity"].(int); ok {
+		currentQty = qty
+	}
+
+	log.Printf("🔢 Current quantity at slot: %d (type: %T)", currentQty, slotMap["quantity"])
+
+	if currentQty < removeQuantity {
+		return nil, fmt.Errorf("not enough items: have %d, trying to remove %d", currentQty, removeQuantity)
+	}
+
+	// Remove from stack (ALWAYS store as int, not float64)
+	newQty := currentQty - removeQuantity
+	if newQty <= 0 {
+		// Remove entire stack
+		slotMap["item"] = nil
+		slotMap["quantity"] = 0
+		log.Printf("✅ Removed entire stack of %s (%d items)", itemID, currentQty)
+	} else {
+		// Remove partial stack - store as int
+		slotMap["quantity"] = newQty
+		log.Printf("✅ Removed %d %s (keeping %d) - stored as %T", removeQuantity, itemID, newQty, slotMap["quantity"])
+	}
+
+	if !itemFound {
+		return nil, fmt.Errorf("item not found: %s at slot %d", itemID, int(fromSlot))
+	}
+
+	return &GameActionResponse{
+		Success: true,
+		Message: fmt.Sprintf("Removed %dx %s from inventory", removeQuantity, itemID),
 	}, nil
 }
 
@@ -1108,29 +1207,57 @@ func handleAddItemAction(state *SaveFile, params map[string]any) (*GameActionRes
 
 	log.Printf("➕ Adding %dx %s to inventory", quantity, itemID)
 
-	// Find first empty slot in general inventory
+	// Try general slots first
 	generalSlots, ok := state.Inventory["general_slots"].([]any)
-	if !ok {
-		return nil, fmt.Errorf("invalid general slots")
+	if ok {
+		for i, slotData := range generalSlots {
+			slotMap, ok := slotData.(map[string]any)
+			if !ok {
+				continue
+			}
+
+			// Check if slot is empty
+			if slotMap["item"] == nil || slotMap["item"] == "" {
+				// Add item to this slot (ensure quantity is int)
+				slotMap["item"] = itemID
+				slotMap["quantity"] = int(quantity)
+				log.Printf("✅ Added %dx %s to general_slots[%d] (type: %T)", quantity, itemID, i, slotMap["quantity"])
+
+				return &GameActionResponse{
+					Success: true,
+					Message: fmt.Sprintf("Added %dx %s", quantity, itemID),
+				}, nil
+			}
+		}
 	}
 
-	for i, slotData := range generalSlots {
-		slotMap, ok := slotData.(map[string]any)
-		if !ok {
-			continue
-		}
+	// Try backpack if general slots are full
+	gearSlots, ok := state.Inventory["gear_slots"].(map[string]any)
+	if ok {
+		bag, ok := gearSlots["bag"].(map[string]any)
+		if ok {
+			backpack, ok := bag["contents"].([]any)
+			if ok {
+				for i, slotData := range backpack {
+					slotMap, ok := slotData.(map[string]any)
+					if !ok {
+						continue
+					}
 
-		// Check if slot is empty
-		if slotMap["item"] == nil || slotMap["item"] == "" {
-			// Add item to this slot
-			slotMap["item"] = itemID
-			slotMap["quantity"] = quantity
-			log.Printf("✅ Added item to slot %d", i)
+					// Check if slot is empty
+					if slotMap["item"] == nil || slotMap["item"] == "" {
+						// Add item to this slot (ensure quantity is int)
+						slotMap["item"] = itemID
+						slotMap["quantity"] = int(quantity)
+						log.Printf("✅ Added %dx %s to backpack[%d] (type: %T)", quantity, itemID, i, slotMap["quantity"])
 
-			return &GameActionResponse{
-				Success: true,
-				Message: fmt.Sprintf("Added %dx %s", quantity, itemID),
-			}, nil
+						return &GameActionResponse{
+							Success: true,
+							Message: fmt.Sprintf("Added %dx %s", quantity, itemID),
+						}, nil
+					}
+				}
+			}
 		}
 	}
 

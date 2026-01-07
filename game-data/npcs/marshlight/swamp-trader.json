@@ -27,7 +27,7 @@
       "location": "bog_trader",
       "state": "working",
       "dialogue_options": ["main_menu"],
-      "available_actions": ["open_shop", "open_sell"]
+      "available_actions": ["open_shop"]
     },
     {
       "start": 1200,
@@ -71,20 +71,11 @@
     },
     "main_menu": {
       "text": "Speak. What do you want?",
-      "options": ["browse_shop", "sell_items", "ask_about_survival", "goodbye"]
+      "options": ["browse_shop", "ask_about_survival", "goodbye"]
     },
     "browse_shop": {
       "text": "Look. Everything here will keep you alive in the swamp. Weak gear gets you killed. Mine does not.",
       "action": "open_shop",
-      "options": ["main_menu"]
-    },
-    "sell_items": {
-      "text": "You have goods to trade? Show me. If they have value and I have coin, we make deal.",
-      "action": "open_sell",
-      "requirements": {
-        "shop_gold": 1
-      },
-      "failure": "No coin left. Marsh spirits were generous to others today. Return tomorrow.",
       "options": ["main_menu"]
     },
     "ask_about_survival": {
@@ -105,21 +96,18 @@
     "gold_restock_interval": 30,
     "item_restock_interval": 10,
     "inventory": [
-      {"item_id": "rope-hemp", "stock": 10, "max_stock": 10},
-      {"item_id": "torch", "stock": 25, "max_stock": 25},
-      {"item_id": "rations", "stock": 30, "max_stock": 30},
-      {"item_id": "waterskin", "stock": 15, "max_stock": 15},
-      {"item_id": "backpack", "stock": 5, "max_stock": 5},
-      {"item_id": "bedroll", "stock": 6, "max_stock": 6},
-      {"item_id": "tinderbox", "stock": 10, "max_stock": 10},
-      {"item_id": "oil-flask", "stock": 12, "max_stock": 12},
-      {"item_id": "antitoxin", "stock": 6, "max_stock": 6},
-      {"item_id": "healers-kit", "stock": 4, "max_stock": 4},
-      {"item_id": "net", "stock": 6, "max_stock": 6},
-      {"item_id": "pole", "stock": 8, "max_stock": 8},
-      {"item_id": "hunting-trap", "stock": 5, "max_stock": 5},
-      {"item_id": "waterproof-bag", "stock": 8, "max_stock": 8},
-      {"item_id": "insect-repellent", "stock": 12, "max_stock": 12}
+      { "item_id": "rope", "stock": 10, "max_stock": 10 },
+      { "item_id": "torch", "stock": 25, "max_stock": 25 },
+      { "item_id": "rations", "stock": 30, "max_stock": 30 },
+      { "item_id": "waterskin", "stock": 15, "max_stock": 15 },
+      { "item_id": "backpack", "stock": 5, "max_stock": 5 },
+      { "item_id": "bedroll", "stock": 6, "max_stock": 6 },
+      { "item_id": "tinderbox", "stock": 10, "max_stock": 10 },
+      { "item_id": "oil", "stock": 12, "max_stock": 12 },
+      { "item_id": "healers-kit", "stock": 4, "max_stock": 4 },
+      { "item_id": "net", "stock": 6, "max_stock": 6 },
+      { "item_id": "pole", "stock": 8, "max_stock": 8 },
+      { "item_id": "hunting-trap", "stock": 5, "max_stock": 5 }
     ]
   }
 }

@@ -713,45 +713,83 @@ func generateStartingVault(locationID string) map[string]interface{} {
 // ============================================================================
 
 func addGoldToInventory(inventory map[string]interface{}, goldAmount int) error {
-	generalSlots, ok := inventory["general_slots"].([]map[string]interface{})
+	log.Printf("💰 Adding %dg to inventory", goldAmount)
+
+	// Try general_slots first (type is []any, not []map[string]interface{})
+	generalSlotsRaw, ok := inventory["general_slots"].([]any)
 	if !ok {
+		log.Printf("❌ general_slots type assertion failed, got type: %T", inventory["general_slots"])
 		return fmt.Errorf("invalid general_slots format")
 	}
 
-	// Try to add gold to first empty general slot
-	for i, slot := range generalSlots {
-		if slot["item"] == nil || slot["item"] == "" {
-			generalSlots[i] = map[string]interface{}{
-				"slot":     i,
-				"item":     "gold-piece",
-				"quantity": goldAmount,
+	// Try to find existing gold stack or empty slot in general slots
+	for i, slotData := range generalSlotsRaw {
+		slot, ok := slotData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// Check if slot has gold already - add to it
+		if slot["item"] == "gold-piece" {
+			currentQty := 0
+			if qty, ok := slot["quantity"].(float64); ok {
+				currentQty = int(qty)
+			} else if qty, ok := slot["quantity"].(int); ok {
+				currentQty = qty
 			}
+			slot["quantity"] = currentQty + goldAmount
+			log.Printf("✅ Added %dg to existing gold stack in general_slots[%d] (new total: %d)", goldAmount, i, currentQty+goldAmount)
+			return nil
+		}
+
+		// Found empty slot - add gold here
+		if slot["item"] == nil || slot["item"] == "" {
+			slot["item"] = "gold-piece"
+			slot["quantity"] = goldAmount
+			log.Printf("✅ Added %dg to general_slots[%d]", goldAmount, i)
 			return nil
 		}
 	}
 
-	// If general slots are full, try to add to backpack
-	gearSlots, ok := inventory["gear_slots"].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("invalid gear_slots format")
-	}
-
-	bag, ok := gearSlots["bag"].(map[string]interface{})
-	if ok && bag["item"] != nil {
-		if contents, ok := bag["contents"].([]map[string]interface{}); ok {
-			for i, slot := range contents {
-				if slot["item"] == nil || slot["item"] == "" {
-					contents[i] = map[string]interface{}{
-						"slot":     slot["slot"],
-						"item":     "gold-piece",
-						"quantity": goldAmount,
+	// If general slots are full, try backpack
+	gearSlots, ok := inventory["gear_slots"].(map[string]any)
+	if ok {
+		bag, ok := gearSlots["bag"].(map[string]any)
+		if ok {
+			contents, ok := bag["contents"].([]any)
+			if ok {
+				for i, slotData := range contents {
+					slot, ok := slotData.(map[string]any)
+					if !ok {
+						continue
 					}
-					return nil
+
+					// Check if slot has gold already - add to it
+					if slot["item"] == "gold-piece" {
+						currentQty := 0
+						if qty, ok := slot["quantity"].(float64); ok {
+							currentQty = int(qty)
+						} else if qty, ok := slot["quantity"].(int); ok {
+							currentQty = qty
+						}
+						slot["quantity"] = currentQty + goldAmount
+						log.Printf("✅ Added %dg to existing gold stack in backpack[%d] (new total: %d)", goldAmount, i, currentQty+goldAmount)
+						return nil
+					}
+
+					// Found empty slot
+					if slot["item"] == nil || slot["item"] == "" {
+						slot["item"] = "gold-piece"
+						slot["quantity"] = goldAmount
+						log.Printf("✅ Added %dg to backpack[%d]", goldAmount, i)
+						return nil
+					}
 				}
 			}
 		}
 	}
 
+	log.Printf("❌ No empty slots available for gold")
 	return fmt.Errorf("no empty slots available for gold")
 }
 

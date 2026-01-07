@@ -15,6 +15,7 @@ import { updateAllDisplays } from '../ui/displayCoordinator.js';
 import { showMessage } from '../ui/messaging.js';
 import { showVaultUI } from '../ui/locationDisplay.js';
 import { openContainer } from './containers.js';
+import { isShopOpen, getCurrentTab, addItemToSell } from './shopSystem.js';
 
 // State for drag-and-drop
 let draggedItem = null;
@@ -446,7 +447,16 @@ async function handleLeftClick(e, itemId, slotType, slotIndex, openContainer = n
         return;
     }
 
-    // Normal behavior (vault not open)
+    // Check if shop is open on sell tab - change default behavior
+    if (isShopOpen() && getCurrentTab() === 'sell') {
+        if (slotType === 'general' || slotType === 'inventory') {
+            // Clicking inventory item -> add to sell staging
+            addItemToSell(itemId, slotIndex, slotType);
+        }
+        return;
+    }
+
+    // Normal behavior (vault and shop not affecting behavior)
     // Get item data to determine default action
     const itemData = getItemById(itemId);
     if (!itemData) {

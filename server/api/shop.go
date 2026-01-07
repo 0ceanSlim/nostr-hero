@@ -691,17 +691,9 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check player has items and remove them
-	if err := removeItemFromInventory(save, transaction.ItemID, transaction.Quantity); err != nil {
-		log.Printf("❌ Error removing item from inventory: %v", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{
-			"success": false,
-			"error":   err.Error(),
-		})
-		return
-	}
+	// NOTE: Items are already removed from inventory when added to sell staging
+	// Frontend removes items via remove_from_inventory action, so we don't remove them here
+	log.Printf("ℹ️ Items already removed from inventory during sell staging")
 
 	// Add gold to player (using existing helper function)
 	if err := addGoldToInventory(save.Inventory, totalValue); err != nil {
@@ -942,40 +934,81 @@ func getSlotQuantity(slot map[string]any) int {
 func removeItemFromInventory(save *SaveFile, itemID string, quantity int) error {
 	inventory := save.Inventory
 
-	// Get general_slots
+	// Try general_slots first
 	generalSlots, ok := inventory["general_slots"].([]any)
-	if !ok {
-		return fmt.Errorf("invalid inventory structure")
+	if ok {
+		for i, slotData := range generalSlots {
+			slot, ok := slotData.(map[string]any)
+			if !ok {
+				continue
+			}
+
+			if slot["item"] == itemID {
+				currentQty := 0
+				if qty, ok := slot["quantity"].(float64); ok {
+					currentQty = int(qty)
+				}
+
+				if currentQty < quantity {
+					return fmt.Errorf("not enough items (have %d, need %d)", currentQty, quantity)
+				}
+
+				newQty := currentQty - quantity
+				if newQty <= 0 {
+					slot["item"] = nil
+					slot["quantity"] = 0
+				} else {
+					slot["quantity"] = newQty
+				}
+
+				generalSlots[i] = slot
+				inventory["general_slots"] = generalSlots
+				log.Printf("✅ Removed %dx %s from general_slots[%d]", quantity, itemID, i)
+				return nil
+			}
+		}
 	}
 
-	// Find item and check quantity
-	for i, slotData := range generalSlots {
-		slot, ok := slotData.(map[string]any)
-		if !ok {
-			continue
-		}
+	// Try backpack (gear_slots.bag.contents)
+	gearSlots, ok := inventory["gear_slots"].(map[string]any)
+	if ok {
+		bag, ok := gearSlots["bag"].(map[string]any)
+		if ok {
+			contents, ok := bag["contents"].([]any)
+			if ok {
+				for i, slotData := range contents {
+					slot, ok := slotData.(map[string]any)
+					if !ok {
+						continue
+					}
 
-		if slot["item"] == itemID {
-			currentQty := 0
-			if qty, ok := slot["quantity"].(float64); ok {
-				currentQty = int(qty)
+					if slot["item"] == itemID {
+						currentQty := 0
+						if qty, ok := slot["quantity"].(float64); ok {
+							currentQty = int(qty)
+						}
+
+						if currentQty < quantity {
+							return fmt.Errorf("not enough items (have %d, need %d)", currentQty, quantity)
+						}
+
+						newQty := currentQty - quantity
+						if newQty <= 0 {
+							slot["item"] = nil
+							slot["quantity"] = 0
+						} else {
+							slot["quantity"] = newQty
+						}
+
+						contents[i] = slot
+						bag["contents"] = contents
+						gearSlots["bag"] = bag
+						inventory["gear_slots"] = gearSlots
+						log.Printf("✅ Removed %dx %s from backpack[%d]", quantity, itemID, i)
+						return nil
+					}
+				}
 			}
-
-			if currentQty < quantity {
-				return fmt.Errorf("not enough items (have %d, need %d)", currentQty, quantity)
-			}
-
-			newQty := currentQty - quantity
-			if newQty <= 0 {
-				slot["item"] = nil
-				slot["quantity"] = 0
-			} else {
-				slot["quantity"] = newQty
-			}
-
-			generalSlots[i] = slot
-			inventory["general_slots"] = generalSlots
-			return nil
 		}
 	}
 
