@@ -39,8 +39,21 @@
           "id": "miners_inn",
           "name": "The Pickaxe & Pint",
           "description": "A rowdy inn run by the sturdy dwarf Helga Stonebrew, where miners gather after long shifts underground. Loud rhythmic music echoes through the halls.",
-          "open": 7,
-          "close": 4
+          "open": 1020,
+          "close": 120,
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [{"id": "drum-mountain", "name": "Mountain Drums", "description": "Thunderous drumming echoes", "required_instruments": ["drum"], "base_gold": 12, "base_xp": 10, "charisma_gold_bonus": 2}],
+              "1": [{"id": "horn-depths", "name": "Depths Horn Call", "description": "Horn calls from the mines", "required_instruments": ["horn"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "2": [{"id": "viol-stone", "name": "Stone Songs", "description": "Viol ballads of stone and ore", "required_instruments": ["viol"], "base_gold": 13, "base_xp": 11, "charisma_gold_bonus": 2}],
+              "3": [{"id": "drum-forge", "name": "Forge Rhythms", "description": "Rhythmic beats like hammers", "required_instruments": ["drum"], "base_gold": 12, "base_xp": 10, "charisma_gold_bonus": 2}],
+              "4": [{"id": "horn-mountain", "name": "Mountain Fanfare", "description": "Triumphant horn melodies", "required_instruments": ["horn"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "5": [{"id": "drum-horn-feast", "name": "Miners' Feast", "description": "Drums and horn together", "required_instruments": ["drum", "horn"], "base_gold": 23, "base_xp": 19, "charisma_gold_bonus": 3}],
+              "6": [{"id": "viol-celebration", "name": "Clan Celebration", "description": "Traditional viol songs", "required_instruments": ["viol"], "base_gold": 13, "base_xp": 11, "charisma_gold_bonus": 2}]
+            }
+          }
         },
         {
           "id": "ironpeak_general_supplies",

@@ -84,9 +84,16 @@
         {
           "id": "travelers_inn",
           "name": "The Wayward Traveler Inn",
-          "description": "A cozy inn catering to merchants and adventurers from distant lands.",
-          "open": 7,
-          "close": 4
+          "description": "A cozy inn catering to merchants and adventurers from distant lands. Rooms available for weary travelers.",
+          "open": 1020,
+          "close": 480
+        },
+        {
+          "id": "mara_quarters",
+          "name": "Mara's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         },
         {
           "id": "stable",
@@ -138,12 +145,46 @@
           "id": "tavern_golden_griffin",
           "name": "The Golden Griffin Tavern",
           "description": "A popular upscale tavern where merchants, adventurers, and locals gather for fine drinks, live music, and news. Gareth Thornfield runs a refined establishment with quality entertainment.",
-          "open": 7,
-          "close": 4,
+          "open": 1020,
+          "close": 120,
           "special_features": [
             "vip_section_for_happytavern_nip5",
             "live_music_nightly"
-          ]
+          ],
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [
+                {"id": "lute-ballad-night", "name": "Ballad Night", "description": "Romantic ballads on the lute", "required_instruments": ["lute"], "base_gold": 15, "base_xp": 10, "charisma_gold_bonus": 2},
+                {"id": "flute-serenade", "name": "Flute Serenade", "description": "Gentle melodies to start the week", "required_instruments": ["flute"], "base_gold": 12, "base_xp": 8, "charisma_gold_bonus": 2}
+              ],
+              "1": [
+                {"id": "viol-ensemble", "name": "Viol Ensemble", "description": "Sophisticated string performance", "required_instruments": ["viol"], "base_gold": 16, "base_xp": 12, "charisma_gold_bonus": 2},
+                {"id": "lyre-tales", "name": "Bardic Tales", "description": "Stories accompanied by lyre", "required_instruments": ["lyre"], "base_gold": 14, "base_xp": 10, "charisma_gold_bonus": 2}
+              ],
+              "2": [
+                {"id": "horn-fanfare", "name": "Horn Fanfare", "description": "Triumphant horn melodies", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2},
+                {"id": "drum-rhythm", "name": "Drum Circle", "description": "Energetic rhythmic performance", "required_instruments": ["drum"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}
+              ],
+              "3": [
+                {"id": "lute-classical", "name": "Classical Lute", "description": "Refined classical pieces", "required_instruments": ["lute"], "base_gold": 15, "base_xp": 10, "charisma_gold_bonus": 2},
+                {"id": "flute-dance", "name": "Dance Night Flute", "description": "Lively dance tunes", "required_instruments": ["flute"], "base_gold": 12, "base_xp": 8, "charisma_gold_bonus": 2}
+              ],
+              "4": [
+                {"id": "viol-virtuoso", "name": "Viol Virtuoso", "description": "Masterful solo performance", "required_instruments": ["viol"], "base_gold": 16, "base_xp": 12, "charisma_gold_bonus": 2},
+                {"id": "lyre-evening", "name": "Evening Lyre", "description": "Relaxing melodies for the weekend", "required_instruments": ["lyre"], "base_gold": 14, "base_xp": 10, "charisma_gold_bonus": 2}
+              ],
+              "5": [
+                {"id": "mixed-ensemble", "name": "Mixed Ensemble", "description": "Lute and flute duo performance", "required_instruments": ["lute", "flute"], "base_gold": 25, "base_xp": 18, "charisma_gold_bonus": 3},
+                {"id": "horn-celebration", "name": "Celebration Horn", "description": "Festive horn performance for the busy night", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}
+              ],
+              "6": [
+                {"id": "grand-performance", "name": "Grand Performance", "description": "Epic multi-instrument showcase", "required_instruments": ["viol", "lyre"], "base_gold": 28, "base_xp": 20, "charisma_gold_bonus": 3},
+                {"id": "drum-feast", "name": "Feast Night Drums", "description": "Lively drumming for weekend festivities", "required_instruments": ["drum"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}
+              ]
+            }
+          }
         },
         {
           "id": "gareth_quarters",

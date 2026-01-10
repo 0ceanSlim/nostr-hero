@@ -18,6 +18,7 @@ import { updateAllDisplays } from './displayCoordinator.js';
 
 // Module-level state
 let lastDisplayedLocation = null;
+let lastBuildingState = null;
 
 /**
  * Fetch NPCs at current location from backend
@@ -120,14 +121,24 @@ export async function displayCurrentLocation() {
     // Update time of day display
     updateTimeDisplay();
 
-    // Show location description in action text (white color) - only if location changed
-    // Include building ID in location key to detect entering/exiting buildings
+    // Show location description in action text (white color) - only when:
+    // 1. District changes (moving between districts)
+    // 2. Exiting a building (going from building to outdoors)
+    // NOT when entering a building
     const currentBuildingId = state.location?.building || '';
-    const locationKey = `${cityId}-${districtKey}-${currentBuildingId}`;
-    if (locationData.description && lastDisplayedLocation !== locationKey) {
+    const districtOnlyKey = `${cityId}-${districtKey}`;
+    const wasInBuilding = lastBuildingState !== null && lastBuildingState !== '';
+    const isInBuilding = currentBuildingId !== '';
+    const exitedBuilding = wasInBuilding && !isInBuilding;
+    const districtChanged = lastDisplayedLocation !== districtOnlyKey;
+
+    if (locationData.description && (districtChanged || exitedBuilding)) {
         showActionText(locationData.description, 'white');
-        lastDisplayedLocation = locationKey;
+        lastDisplayedLocation = districtOnlyKey;
     }
+
+    // Track building state for next time
+    lastBuildingState = currentBuildingId;
 
     // Generate location actions based on city district structure
     const navContainer = document.getElementById('navigation-buttons');
@@ -250,6 +261,29 @@ export async function displayCurrentLocation() {
                         'building'  // Use green for exit button
                     );
                     buildingButtonContainer.appendChild(button);
+
+                    // Check if player has a rented room here - add Sleep button
+                    const hasRentedRoom = checkIfRoomRented(currentBuildingId);
+                    if (hasRentedRoom) {
+                        const sleepButton = createLocationButton(
+                            'Sleep',
+                            () => sleepInRoom(),
+                            'action'  // Special color for action
+                        );
+                        buildingButtonContainer.appendChild(sleepButton);
+                    }
+
+                    // Check if player has a booked show at the right time - add Play Show button
+                    const hasShow = checkIfShowReady(currentBuildingId, timeInMinutes);
+                    if (hasShow) {
+                        const showButton = createLocationButton(
+                            'Play Show',
+                            () => performShow(),
+                            'action'  // Special color for action
+                        );
+                        buildingButtonContainer.appendChild(showButton);
+                    }
+
                     return;
                 }
 
@@ -339,7 +373,8 @@ export function createLocationButton(text, onClick, type = 'navigation') {
         environment: '#9e6b6b',     // Outside city - muted red
         building: '#6b8e6b',        // Open buildings - muted green
         'building-closed': '#808080', // Closed buildings - grey
-        npc: '#8b6b9e'              // NPCs - muted purple
+        npc: '#8b6b9e',             // NPCs - muted purple
+        action: '#9e8b6b'           // Special actions (sleep, play show) - muted gold
     };
 
     const bgColor = typeStyles[type] || typeStyles.navigation;
@@ -589,23 +624,28 @@ export async function selectDialogueOption(npcId, choice) {
         });
 
         if (result.success) {
-            // Show NPC response in yellow
-            if (result.message) {
-                showMessage(result.message, 'warning');
-            }
+            // Refresh game state after successful dialogue action
+            await refreshGameState();
+            await updateAllDisplays();
 
             // Check if vault should open (check this first before close action)
             if (result.delta?.open_vault) {
                 logger.debug('Opening vault with data:', result.delta.open_vault);
                 closeNPCDialogue();
-                await refreshGameState();
+                // Show message before opening vault
+                if (result.message) {
+                    showMessage(result.message, 'warning');
+                }
                 showVaultUI(result.delta.open_vault);
             }
             // Check if shop should open
             else if (result.delta?.open_shop) {
                 logger.debug('Opening shop for merchant:', result.delta.open_shop);
                 closeNPCDialogue();
-                await refreshGameState();
+                // Show message before opening shop
+                if (result.message) {
+                    showMessage(result.message, 'warning');
+                }
                 // Open shop with optional tab selection
                 const shopTab = result.delta.shop_tab || 'buy';
                 window.openShop(result.delta.open_shop);
@@ -616,11 +656,20 @@ export async function selectDialogueOption(npcId, choice) {
             // Check if dialogue should close
             else if (result.delta?.npc_dialogue?.action === 'close') {
                 closeNPCDialogue();
-                await refreshGameState();
+                // Show message when closing dialogue
+                if (result.message) {
+                    showMessage(result.message, 'warning');
+                }
             }
             // Continue dialogue with new options
             else if (result.delta?.npc_dialogue) {
+                // When continuing dialogue, only show the message once
+                // The message will be shown by showNPCDialogue, so pass it there
                 showNPCDialogue(result.delta.npc_dialogue, result.message);
+            }
+            // No delta but has message - just show the message
+            else if (result.message) {
+                showMessage(result.message, 'warning');
             }
         } else {
             logger.error('Dialogue option failed:', result.error);
@@ -763,6 +812,12 @@ export function createVaultSlot(slotData, slotIndex, buildingId) {
         img.alt = slotData.item;
         img.className = 'w-full h-full object-contain';
         img.style.imageRendering = 'pixelated';
+        img.onerror = function() {
+            if (!this.dataset.fallbackAttempted) {
+                this.dataset.fallbackAttempted = 'true';
+                this.src = '/res/img/items/unknown.png';
+            }
+        };
         imgDiv.appendChild(img);
         slot.appendChild(imgDiv);
 
@@ -796,6 +851,120 @@ export function closeVaultUI() {
     import('./characterDisplay.js').then(module => {
         module.updateCharacterDisplay();
     });
+}
+
+/**
+ * Check if player has a rented room at the current building
+ * @param {string} buildingId - Building ID to check
+ * @returns {boolean} True if room is rented here
+ */
+export function checkIfRoomRented(buildingId) {
+    const state = getGameStateSync();
+
+    // Try multiple possible paths for rented_rooms
+    const rentedRooms = state.rented_rooms || state.character?.rented_rooms || [];
+    const currentDay = state.current_day || state.character?.current_day || 0;
+    const currentTime = state.time_of_day || state.character?.time_of_day || 0;
+
+    logger.debug('Checking rented room:', { buildingId, rentedRooms, currentDay, currentTime });
+
+    // Check if there's a valid (non-expired) rented room at this building
+    for (const room of rentedRooms) {
+        if (room.building === buildingId) {
+            const expDay = room.expiration_day || 0;
+            const expTime = room.expiration_time || 0;
+
+            logger.debug('Found rented room:', { room, expDay, expTime });
+
+            // Check if not expired
+            if (currentDay < expDay || (currentDay === expDay && currentTime <= expTime)) {
+                logger.debug('Room is valid!');
+                return true;
+            }
+        }
+    }
+
+    logger.debug('No valid room found');
+    return false;
+}
+
+/**
+ * Check if player has a show ready to perform at the current building
+ * @param {string} buildingId - Building ID to check
+ * @param {number} timeInMinutes - Current time in minutes
+ * @returns {boolean} True if show is ready to perform
+ */
+export function checkIfShowReady(buildingId, timeInMinutes) {
+    const state = getGameStateSync();
+
+    // Try multiple possible paths for booked_shows
+    const bookedShows = state.booked_shows || state.character?.booked_shows || [];
+    const currentDay = state.current_day || state.character?.current_day || 0;
+
+    logger.debug('Checking booked show:', { buildingId, bookedShows, currentDay, timeInMinutes });
+
+    // Check if there's an unperformed show at this venue
+    for (const show of bookedShows) {
+        if (show.venue_id === buildingId && show.day === currentDay && !show.performed) {
+            const showTime = show.show_time || 1260; // Default 9 PM
+            const timeDiff = timeInMinutes - showTime;
+
+            logger.debug('Found booked show:', { show, showTime, timeDiff });
+
+            // Show is ready if it's between show time and 30 minutes after
+            if (timeDiff >= 0 && timeDiff <= 30) {
+                logger.debug('Show is ready to perform!');
+                return true;
+            }
+        }
+    }
+
+    logger.debug('No show ready');
+    return false;
+}
+
+/**
+ * Sleep in rented room
+ */
+export async function sleepInRoom() {
+    logger.debug('Sleeping in rented room');
+
+    try {
+        const result = await gameAPI.sendAction('sleep', {});
+
+        if (result.success) {
+            showMessage(result.message || 'You wake up refreshed!', 'success');
+            await refreshGameState();
+            await updateAllDisplays();
+        } else {
+            showMessage(result.error || 'Failed to sleep', 'error');
+        }
+    } catch (error) {
+        logger.error('Error sleeping:', error);
+        showMessage('❌ Failed to sleep', 'error');
+    }
+}
+
+/**
+ * Perform booked show
+ */
+export async function performShow() {
+    logger.debug('Performing booked show');
+
+    try {
+        const result = await gameAPI.sendAction('play_show', {});
+
+        if (result.success) {
+            showMessage(result.message || 'Excellent performance!', 'success');
+            await refreshGameState();
+            await updateAllDisplays();
+        } else {
+            showMessage(result.error || 'Failed to perform show', 'error');
+        }
+    } catch (error) {
+        logger.error('Error performing show:', error);
+        showMessage('❌ Failed to perform show', 'error');
+    }
 }
 
 logger.debug('Location display module loaded');

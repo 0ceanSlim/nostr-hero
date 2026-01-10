@@ -352,7 +352,19 @@ export async function updateCharacterDisplay() {
                         // Replace placeholder with item image
                         const imageContainer = slotEl.querySelector('.w-10.h-10');
                         if (imageContainer) {
-                            imageContainer.innerHTML = `<img src="/res/img/items/${itemId}.png" alt="${itemData.name}" class="w-full h-full object-contain" style="image-rendering: pixelated;">`;
+                            const img = document.createElement('img');
+                            img.src = `/res/img/items/${itemId}.png`;
+                            img.alt = itemData.name;
+                            img.className = 'w-full h-full object-contain';
+                            img.style.imageRendering = 'pixelated';
+                            img.onerror = function() {
+                                if (!this.dataset.fallbackAttempted) {
+                                    this.dataset.fallbackAttempted = 'true';
+                                    this.src = '/res/img/items/unknown.png';
+                                }
+                            };
+                            imageContainer.innerHTML = '';
+                            imageContainer.appendChild(img);
                         }
 
                         // Add quantity label if > 1 (for ammunition, potions, etc.)
@@ -452,6 +464,12 @@ export async function updateCharacterDisplay() {
                 img.alt = slot.item;
                 img.className = 'w-full h-full object-contain';
                 img.style.imageRendering = 'pixelated';
+                img.onerror = function() {
+                    if (!this.dataset.fallbackAttempted) {
+                        this.dataset.fallbackAttempted = 'true';
+                        this.src = '/res/img/items/unknown.png';
+                    }
+                };
                 imgDiv.appendChild(img);
                 slotDiv.appendChild(imgDiv);
 
@@ -532,6 +550,12 @@ export async function updateCharacterDisplay() {
                     img.alt = slot.item;
                     img.className = 'w-full h-full object-contain';
                     img.style.imageRendering = 'pixelated';
+                    img.onerror = function() {
+                        if (!this.dataset.fallbackAttempted) {
+                            this.dataset.fallbackAttempted = 'true';
+                            this.src = '/res/img/items/unknown.png';
+                        }
+                    };
                     imgDiv.appendChild(img);
                     slotDiv.appendChild(imgDiv);
 

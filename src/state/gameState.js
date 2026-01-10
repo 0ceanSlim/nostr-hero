@@ -180,7 +180,10 @@ export function transformSaveDataToUIState(saveData) {
             spell_slots: saveData.spell_slots || {},
             music_tracks_unlocked: saveData.music_tracks_unlocked || [],
             current_day: saveData.current_day || 1,
-            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12
+            time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12,
+            rented_rooms: saveData.rented_rooms || [],
+            booked_shows: saveData.booked_shows || [],
+            performed_shows: saveData.performed_shows || []
         },
         location: {
             current: locationId,
@@ -191,7 +194,13 @@ export function transformSaveDataToUIState(saveData) {
         inventory: saveData.inventory?.general_slots || [],
         equipment: saveData.inventory?.gear_slots || {},
         spells: saveData.known_spells || [],
-        combat: null // Combat state not stored in save file
+        combat: null, // Combat state not stored in save file
+        // Top-level aliases for easier access
+        rented_rooms: saveData.rented_rooms || [],
+        booked_shows: saveData.booked_shows || [],
+        performed_shows: saveData.performed_shows || [],
+        current_day: saveData.current_day || 1,
+        time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12
     };
 }
 

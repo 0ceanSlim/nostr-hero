@@ -70,8 +70,21 @@
           "id": "marsh_inn",
           "name": "The Glowing Lantern",
           "description": "A cozy inn built over the water, run by the practical orc Grishka Marshborn. Rokgar the Grim guards the door and only allows strong, powerful music that befits warriors.",
-          "open": 14,
-          "close": 8
+          "open": 1020,
+          "close": 120,
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [{"id": "drum-war", "name": "War Drums", "description": "Thunderous battle rhythms", "required_instruments": ["drum"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "1": [{"id": "horn-warriors", "name": "Warriors' Call", "description": "Horn blasts of victory", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}],
+              "2": [{"id": "drum-thunder", "name": "Thunder March", "description": "Marching drums of power", "required_instruments": ["drum"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "3": [{"id": "horn-battle", "name": "Battle Horns", "description": "Horn calls to war", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}],
+              "4": [{"id": "drum-strength", "name": "Drums of Strength", "description": "Powerful rhythmic beats", "required_instruments": ["drum"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "5": [{"id": "drum-horn-triumph", "name": "Warriors' Triumph", "description": "Drums and horns together in glory", "required_instruments": ["drum", "horn"], "base_gold": 21, "base_xp": 17, "charisma_gold_bonus": 3}],
+              "6": [{"id": "horn-legends", "name": "Legends of Battle", "description": "Epic horn tales of heroes", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}]
+            }
+          }
         }
       ],
       "exit_to_environment": "shadowmere-wetlands"

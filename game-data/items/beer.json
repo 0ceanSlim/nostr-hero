@@ -1,0 +1,15 @@
+{
+  "name": "Beer",
+  "type": "Drink",
+  "description": "A frothy mug of ale. Restores a small amount of fatigue and satisfies thirst.",
+  "weight": 1,
+  "price": 5,
+  "stack": 1,
+  "rarity": "common",
+  "effects": [{ "type": "fatigue", "value": -1 }],
+  "image": "/res/img/items/unknown.png",
+  "tags": ["consumable"],
+  "notes": [
+    "should have effects array and I need to expand effects array to have effect delay duration etc."
+  ]
+}

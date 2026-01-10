@@ -93,8 +93,8 @@
           "id": "caravan_rest",
           "name": "Caravan Rest Inn",
           "description": "A large inn designed to accommodate merchant caravans and their guards.",
-          "open": 7,
-          "close": 4
+          "open": 1020,
+          "close": 480
         }
       ],
       "exit_to_environment": "merchants-highway"
@@ -138,8 +138,21 @@
           "id": "sailors_tavern",
           "name": "The Salty Anchor",
           "description": "A rowdy port tavern run by Captain Reylia Stormwave, where sailors, merchants, and adventurers gather for drinks, lodging, and loud music that carries over the harbor.",
-          "open": 7,
-          "close": 4
+          "open": 1020,
+          "close": 120,
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [{"id": "drum-ocean", "name": "Ocean Drums", "description": "Rhythmic beats like crashing waves", "required_instruments": ["drum"], "base_gold": 13, "base_xp": 10, "charisma_gold_bonus": 2}],
+              "1": [{"id": "horn-sailors", "name": "Sailor's Fanfare", "description": "Horn calls across the harbor", "required_instruments": ["horn"], "base_gold": 12, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "2": [{"id": "lute-shanty", "name": "Sea Shanties", "description": "Traditional sailor songs on lute", "required_instruments": ["lute"], "base_gold": 14, "base_xp": 11, "charisma_gold_bonus": 2}],
+              "3": [{"id": "drum-harbor", "name": "Harbor Rhythms", "description": "Drums echoing off the docks", "required_instruments": ["drum"], "base_gold": 13, "base_xp": 10, "charisma_gold_bonus": 2}],
+              "4": [{"id": "horn-voyage", "name": "Voyage Horns", "description": "Horn melodies of distant lands", "required_instruments": ["horn"], "base_gold": 12, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "5": [{"id": "drum-horn-storm", "name": "Storm at Sea", "description": "Drums and horns like a tempest", "required_instruments": ["drum", "horn"], "base_gold": 25, "base_xp": 19, "charisma_gold_bonus": 3}],
+              "6": [{"id": "lute-tales", "name": "Tales of the Deep", "description": "Epic lute ballads of ocean adventures", "required_instruments": ["lute"], "base_gold": 14, "base_xp": 11, "charisma_gold_bonus": 2}]
+            }
+          }
         },
         {
           "id": "reylia_quarters",

@@ -383,7 +383,12 @@ function renderBuyTab() {
         img.src = `/res/img/items/${shopItem.item_id}.png`;
         img.className = 'w-full h-full object-contain p-1';
         img.style.imageRendering = 'pixelated';
-        img.onerror = () => { img.src = '/res/img/items/default.png'; };
+        img.onerror = function() {
+            if (!this.dataset.fallbackAttempted) {
+                this.dataset.fallbackAttempted = 'true';
+                this.src = '/res/img/items/unknown.png';
+            }
+        };
         slot.appendChild(img);
 
         // Stock quantity (bottom-right)
@@ -589,7 +594,12 @@ function renderBuyStaging() {
         img.src = `/res/img/items/${item.itemID}.png`;
         img.className = 'w-full h-full object-contain';
         img.style.imageRendering = 'pixelated';
-        img.onerror = () => { img.src = '/res/img/items/default.png'; };
+        img.onerror = function() {
+            if (!this.dataset.fallbackAttempted) {
+                this.dataset.fallbackAttempted = 'true';
+                this.src = '/res/img/items/unknown.png';
+            }
+        };
         badge.appendChild(img);
 
         // Quantity
@@ -788,7 +798,12 @@ function renderSellStaging() {
         img.src = `/res/img/items/${item.itemID}.png`;
         img.className = 'w-full h-full object-contain';
         img.style.imageRendering = 'pixelated';
-        img.onerror = () => { img.src = '/res/img/items/default.png'; };
+        img.onerror = function() {
+            if (!this.dataset.fallbackAttempted) {
+                this.dataset.fallbackAttempted = 'true';
+                this.src = '/res/img/items/unknown.png';
+            }
+        };
         badge.appendChild(img);
 
         // Quantity

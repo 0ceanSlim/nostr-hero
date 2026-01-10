@@ -165,6 +165,12 @@ async function renderContainerSlots(grid, totalSlots, contents) {
                 img.alt = itemData.name;
                 img.className = 'w-full h-full object-contain';
                 img.style.imageRendering = 'pixelated';
+                img.onerror = function() {
+                    if (!this.dataset.fallbackAttempted) {
+                        this.dataset.fallbackAttempted = 'true';
+                        this.src = '/res/img/items/unknown.png';
+                    }
+                };
                 imgDiv.appendChild(img);
                 slot.appendChild(imgDiv);
 

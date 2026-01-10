@@ -47,8 +47,21 @@
           "id": "moonlit_glade_inn",
           "name": "The Moonlit Glade",
           "description": "A serene inn built among ancient trees, run by the gentle druid Faelyn Nightbreeze. Soft music flows through the branches as nature-loving guests rest beneath the stars.",
-          "open": 7,
-          "close": 4
+          "open": 1020,
+          "close": 120,
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [{"id": "lute-moonlight", "name": "Moonlight Serenade", "description": "Gentle lute melodies under the stars", "required_instruments": ["lute"], "base_gold": 12, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "1": [{"id": "flute-forest", "name": "Forest Whispers", "description": "Soft flute echoing through the trees", "required_instruments": ["flute"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}],
+              "2": [{"id": "lyre-nature", "name": "Nature's Hymn", "description": "Lyre songs honoring the forest", "required_instruments": ["lyre"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "3": [{"id": "flute-dawn", "name": "Dawn Chorus", "description": "Flute mimicking birdsong", "required_instruments": ["flute"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}],
+              "4": [{"id": "lute-evening", "name": "Evening Grove", "description": "Peaceful lute at twilight", "required_instruments": ["lute"], "base_gold": 12, "base_xp": 9, "charisma_gold_bonus": 2}],
+              "5": [{"id": "lute-flute-harmony", "name": "Forest Harmony", "description": "Lute and flute in natural harmony", "required_instruments": ["lute", "flute"], "base_gold": 22, "base_xp": 17, "charisma_gold_bonus": 3}],
+              "6": [{"id": "lyre-stars", "name": "Starlight Ballad", "description": "Lyre beneath the celestial canopy", "required_instruments": ["lyre"], "base_gold": 11, "base_xp": 9, "charisma_gold_bonus": 2}]
+            }
+          }
         },
         {
           "id": "faelyn_quarters",

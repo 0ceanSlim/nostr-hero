@@ -925,6 +925,12 @@ async function createSimpleItemCard(itemName, quantity, isInBundle = false) {
   img.style.imageRendering = 'pixelated';
   img.style.imageRendering = '-moz-crisp-edges';
   img.style.imageRendering = 'crisp-edges';
+  img.onerror = function() {
+    if (!this.dataset.fallbackAttempted) {
+      this.dataset.fallbackAttempted = 'true';
+      this.src = '/res/img/items/unknown.png';
+    }
+  };
   card.appendChild(img);
 
   const rarityDot = document.createElement('div');

@@ -1,0 +1,80 @@
+{{define "game/wait-modal.html"}}
+<!-- Wait Modal Overlay -->
+<div id="wait-modal" class="hidden absolute z-50" style="top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); pointer-events: none;">
+    <div class="relative bg-win95-bgDark m-2" style="border: 2px solid #808080; max-width: 300px; margin-left: auto; margin-right: auto; margin-top: 50px; pointer-events: auto;">
+        <!-- Title Bar -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 px-2 py-1 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span style="font-size: 12px;">🕐</span>
+                <span class="text-white font-bold" style="font-size: 9px;">Wait</span>
+            </div>
+            <button onclick="window.closeWaitModal()" class="text-white hover:bg-red-600 px-1" style="font-size: 9px; background: #c0c0c0; color: black; border: 1px solid #000;">✕</button>
+        </div>
+
+        <!-- Wait Content -->
+        <div class="p-4 bg-win95-bgDark">
+            <!-- Wait Duration Display -->
+            <div class="text-center mb-4">
+                <div class="text-gray-400" style="font-size: 8px;">Wait Duration</div>
+                <div class="text-white font-bold" style="font-size: 14px;">
+                    <span id="wait-hours-display">1</span> hour<span id="wait-hours-plural">s</span>
+                </div>
+                <div class="text-gray-400" style="font-size: 7px;">
+                    (Until <span id="wait-target-time">1:00 PM</span>)
+                </div>
+            </div>
+
+            <!-- Slider -->
+            <div class="mb-4">
+                <input
+                    type="range"
+                    id="wait-slider"
+                    min="1"
+                    max="6"
+                    value="1"
+                    class="w-full"
+                    style="accent-color: #3b82f6;"
+                    oninput="window.updateWaitDisplay(this.value)"
+                >
+                <div class="flex justify-between text-gray-400" style="font-size: 6px;">
+                    <span>1h</span>
+                    <span>2h</span>
+                    <span>3h</span>
+                    <span>4h</span>
+                    <span>5h</span>
+                    <span>6h</span>
+                </div>
+            </div>
+
+            <!-- Effects Preview -->
+            <div class="mb-4 p-2 bg-black bg-opacity-30 rounded" style="font-size: 7px;">
+                <div class="text-gray-400 mb-1">Expected effects:</div>
+                <div class="flex justify-between text-white">
+                    <span>Fatigue:</span>
+                    <span id="wait-fatigue-change" class="text-yellow-400">+1</span>
+                </div>
+                <div class="flex justify-between text-white">
+                    <span>Hunger:</span>
+                    <span id="wait-hunger-change" class="text-yellow-400">+0</span>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-2">
+                <button
+                    onclick="window.confirmWait()"
+                    class="flex-1 px-3 py-2 font-bold text-white"
+                    style="font-size: 8px; background: #15803d; border-top: 2px solid #22c55e; border-left: 2px solid #22c55e; border-right: 2px solid #166534; border-bottom: 2px solid #166534;">
+                    WAIT
+                </button>
+                <button
+                    onclick="window.closeWaitModal()"
+                    class="flex-1 px-3 py-2 font-bold text-white"
+                    style="font-size: 8px; background: #6b7280; border-top: 2px solid #9ca3af; border-left: 2px solid #9ca3af; border-right: 2px solid #374151; border-bottom: 2px solid #374151;">
+                    CANCEL
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

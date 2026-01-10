@@ -515,6 +515,12 @@ async function createGivenItemCard(itemName, quantity) {
   img.style.imageRendering = "pixelated";
   img.style.imageRendering = "-moz-crisp-edges";
   img.style.imageRendering = "crisp-edges";
+  img.onerror = function() {
+    if (!this.dataset.fallbackAttempted) {
+      this.dataset.fallbackAttempted = 'true';
+      this.src = '/res/img/items/unknown.png';
+    }
+  };
   card.appendChild(img);
 
   // Rarity dot (top right)

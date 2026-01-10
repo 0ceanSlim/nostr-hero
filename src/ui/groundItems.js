@@ -84,6 +84,12 @@ export function openGroundModal() {
             img.alt = ground.item;
             img.className = 'w-full h-full object-contain';
             img.style.imageRendering = 'pixelated';
+            img.onerror = function() {
+                if (!this.dataset.fallbackAttempted) {
+                    this.dataset.fallbackAttempted = 'true';
+                    this.src = '/res/img/items/unknown.png';
+                }
+            };
             imgDiv.appendChild(img);
             itemSlot.appendChild(imgDiv);
 

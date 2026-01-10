@@ -102,3 +102,9 @@ func getAllActions(npc *types.NPCData) []string {
 	}
 	return actions
 }
+
+// GetDayOfWeek calculates day of week from current day (0 = Sunday, 6 = Saturday)
+// Assumes all adventures start on Sunday (day 0)
+func GetDayOfWeek(currentDay int) int {
+	return currentDay % 7
+}

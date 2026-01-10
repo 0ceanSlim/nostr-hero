@@ -22,6 +22,7 @@ import { openContainer, closeContainer } from '../systems/containers.js';
 import { initTimeClock, cleanupTimeClock } from '../systems/timeClock.js';
 import { initMusicSystem } from '../systems/musicSystem.js';
 import '../systems/shopSystem.js'; // Auto-initializes shop functions on window
+import '../systems/waitModal.js'; // Auto-initializes wait modal functions on window
 
 // UI modules
 import { updateTimeDisplay } from '../ui/timeDisplay.js';

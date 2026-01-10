@@ -146,6 +146,16 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 		return handleRegisterVaultAction(state, action.Params)
 	case "open_vault":
 		return handleOpenVaultAction(state, action.Params)
+	case "rent_room":
+		return handleRentRoomAction(state, action.Params)
+	case "sleep":
+		return handleSleepAction(state, action.Params)
+	case "wait":
+		return handleWaitAction(state, action.Params)
+	case "book_show":
+		return handleBookShowAction(state, action.Params)
+	case "play_show":
+		return handlePlayShowAction(state, action.Params)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -1547,6 +1557,19 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]any) (*Gam
 			actionResult, _ = choiceNode["failure"].(string)
 		}
 
+	case "rent_room":
+		cost, _ := choiceNode["cost"].(float64)
+		result, err := handleRentRoomAction(state, map[string]any{"cost": cost})
+		if err != nil {
+			log.Printf("❌ Failed to rent room: %v", err)
+			actionResult, _ = choiceNode["failure"].(string)
+		} else if result.Success {
+			actionResult, _ = choiceNode["success"].(string)
+		} else {
+			// Failed but not an error (e.g., not enough gold, already rented)
+			actionResult = result.Message
+		}
+
 	case "open_storage":
 		// Return vault data
 		vault := getVaultForLocation(state, state.Building)
@@ -2047,4 +2070,555 @@ func handleRemoveFromContainerAction(state *SaveFile, params map[string]any) (*G
 	}
 
 	return nil, fmt.Errorf("%s", response.Error)
+}
+
+// ============================================================================
+// TAVERN ACTIONS
+// ============================================================================
+
+// handleRentRoomAction rents a room at an inn/tavern
+func handleRentRoomAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	buildingID := state.Building
+	if buildingID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	// Get cost from params (from NPC dialogue config)
+	cost := 50 // Default cost
+	if c, ok := params["cost"].(float64); ok {
+		cost = int(c)
+	}
+
+	// Check if player has enough gold
+	goldAmount := getGoldQuantity(state)
+	log.Printf("🪙 Player has %d gold, room costs %d gold", goldAmount, cost)
+	if goldAmount < cost {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("You need %d gold to rent a room. You have %d gold.", cost, goldAmount),
+			Color:   "red",
+		}, nil
+	}
+
+	// Deduct gold
+	log.Printf("💰 Attempting to deduct %d gold...", cost)
+	if !deductGold(state, cost) {
+		log.Printf("❌ Failed to deduct gold!")
+		return &GameActionResponse{
+			Success: false,
+			Message: "Failed to deduct gold for room rental",
+			Color:   "red",
+		}, nil
+	}
+
+	// Verify gold was deducted
+	newGoldAmount := getGoldQuantity(state)
+	log.Printf("✅ Gold deducted successfully. Old: %d, New: %d", goldAmount, newGoldAmount)
+
+	// Initialize rented rooms if needed
+	if state.RentedRooms == nil {
+		state.RentedRooms = []map[string]any{}
+	}
+
+	// Check if already rented at this building
+	for _, room := range state.RentedRooms {
+		if building, ok := room["building"].(string); ok && building == buildingID {
+			return &GameActionResponse{
+				Success: false,
+				Message: "You already have a room rented here",
+				Color:   "yellow",
+			}, nil
+		}
+	}
+
+	// Add rented room (expires at end of next day - 23:59)
+	expirationDay := state.CurrentDay + 1
+	expirationTime := 1439 // 23:59
+
+	room := map[string]any{
+		"building":        buildingID,
+		"expiration_day":  expirationDay,
+		"expiration_time": expirationTime,
+	}
+
+	state.RentedRooms = append(state.RentedRooms, room)
+
+	log.Printf("🏠 Rented room at %s for %d gold (expires day %d at %d)", buildingID, cost, expirationDay, expirationTime)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: fmt.Sprintf("Rented a room for %d gold. You can sleep here until tomorrow night.", cost),
+		Color:   "green",
+	}, nil
+}
+
+// handleSleepAction sleeps in a rented room
+func handleSleepAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	buildingID := state.Building
+	if buildingID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	// Check if player has a rented room here and find the index
+	hasRoom := false
+	roomIndex := -1
+	if state.RentedRooms != nil {
+		for i, room := range state.RentedRooms {
+			if building, ok := room["building"].(string); ok && building == buildingID {
+				// Check if expired
+				expDay, _ := room["expiration_day"].(int)
+				expTime, _ := room["expiration_time"].(int)
+
+				if state.CurrentDay > expDay || (state.CurrentDay == expDay && state.TimeOfDay > expTime) {
+					// Room expired, remove it
+					state.RentedRooms = append(state.RentedRooms[:i], state.RentedRooms[i+1:]...)
+					return &GameActionResponse{
+						Success: false,
+						Message: "Your room rental has expired. Please rent another room.",
+						Color:   "yellow",
+					}, nil
+				}
+
+				hasRoom = true
+				roomIndex = i
+				break
+			}
+		}
+	}
+
+	if !hasRoom {
+		return &GameActionResponse{
+			Success: false,
+			Message: "You don't have a room rented here",
+			Color:   "red",
+		}, nil
+	}
+
+	// Calculate sleep quality based on current time (late bedtime = poor sleep)
+	// Ideal bedtime: before midnight (0-359 minutes or 1320-1439 minutes)
+	// Late bedtime: after midnight (360-720 minutes) - fatigue penalty
+	poorSleep := false
+	if state.TimeOfDay >= 360 && state.TimeOfDay <= 720 {
+		poorSleep = true
+	}
+
+	// Advance time to 6 AM (360 minutes)
+	targetTime := 360
+	if state.TimeOfDay >= targetTime {
+		// Already past 6 AM, sleep until 6 AM next day
+		state.CurrentDay++
+	}
+	state.TimeOfDay = targetTime
+
+	// Reset fatigue based on sleep quality
+	if poorSleep {
+		state.Fatigue = 1 // Poor sleep - still a bit tired
+		log.Printf("😴 Poor sleep due to late bedtime (fatigue reset to 1)")
+	} else {
+		state.Fatigue = 0 // Good sleep - fully rested
+		log.Printf("😴 Good sleep (fatigue reset to 0)")
+	}
+	state.FatigueCounter = 0
+
+	// Reset hunger
+	state.Hunger = 1 // Hungry after waking up
+	state.HungerCounter = 0
+
+	// Restore HP and Mana fully
+	state.HP = state.MaxHP
+	state.Mana = state.MaxMana
+
+	// Remove the rented room after sleeping (room is used up)
+	if roomIndex >= 0 && roomIndex < len(state.RentedRooms) {
+		state.RentedRooms = append(state.RentedRooms[:roomIndex], state.RentedRooms[roomIndex+1:]...)
+		log.Printf("🚪 Room rental at %s has been used and removed", buildingID)
+	}
+
+	sleepMessage := "You wake up refreshed at 6 AM."
+	if poorSleep {
+		sleepMessage = "You wake up at 6 AM, but didn't sleep well due to going to bed late."
+	}
+
+	log.Printf("🛏️ Slept at %s - HP/Mana restored, fatigue=%d, hunger=%d", buildingID, state.Fatigue, state.Hunger)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: sleepMessage,
+		Color:   "green",
+	}, nil
+}
+
+// handleWaitAction waits for a specified number of hours
+func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	// Get hours from params
+	hoursFloat, ok := params["hours"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("hours parameter is required")
+	}
+
+	hours := int(hoursFloat)
+
+	// Validate hours (1-6 hours max)
+	if hours < 1 || hours > 6 {
+		return &GameActionResponse{
+			Success: false,
+			Message: "You can only wait between 1 and 6 hours",
+			Color:   "red",
+		}, nil
+	}
+
+	// Calculate time advancement in minutes
+	minutesToAdvance := hours * 60
+	newTimeOfDay := state.TimeOfDay + minutesToAdvance
+
+	// Handle day wrap-around
+	if newTimeOfDay >= 1440 {
+		state.CurrentDay++
+		state.TimeOfDay = newTimeOfDay % 1440
+	} else {
+		state.TimeOfDay = newTimeOfDay
+	}
+
+	// Increase fatigue by 1 per hour waited
+	fatigueIncrease := hours
+	state.Fatigue += fatigueIncrease
+	if state.Fatigue > 10 {
+		state.Fatigue = 10 // Cap at max fatigue
+	}
+
+	// Increase hunger by 1 every 3 hours
+	hungerIncrease := hours / 3
+	state.Hunger += hungerIncrease
+	if state.Hunger > 3 {
+		state.Hunger = 3 // Cap at max hunger
+	}
+
+	// Format message
+	hourText := "hour"
+	if hours > 1 {
+		hourText = "hours"
+	}
+
+	message := fmt.Sprintf("You waited %d %s.", hours, hourText)
+	if fatigueIncrease > 0 {
+		message += fmt.Sprintf(" Fatigue +%d", fatigueIncrease)
+	}
+	if hungerIncrease > 0 {
+		message += fmt.Sprintf(", Hunger +%d", hungerIncrease)
+	}
+
+	log.Printf("⏱️ Waited %d hours - Time: %d, Fatigue: %d, Hunger: %d", hours, state.TimeOfDay, state.Fatigue, state.Hunger)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: message,
+		Color:   "yellow",
+	}, nil
+}
+
+// handleBookShowAction books a performance at a tavern
+func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	showID, ok := params["show_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing show_id parameter")
+	}
+
+	venueID := state.Building
+	if venueID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	// Load show configuration from database
+	showConfig, err := loadShowConfig(state.Location, venueID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load show configuration: %v", err)
+	}
+
+	// Get day of week
+	dayOfWeek := utils.GetDayOfWeek(state.CurrentDay)
+	dayStr := fmt.Sprintf("%d", dayOfWeek)
+
+	// Get available shows for this day
+	availableShows, ok := showConfig["shows_by_day"].(map[string]any)[dayStr].([]any)
+	if !ok || len(availableShows) == 0 {
+		return &GameActionResponse{
+			Success: false,
+			Message: "No shows available today",
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Find the requested show
+	var selectedShow map[string]any
+	for _, show := range availableShows {
+		if showMap, ok := show.(map[string]any); ok {
+			if id, ok := showMap["id"].(string); ok && id == showID {
+				selectedShow = showMap
+				break
+			}
+		}
+	}
+
+	if selectedShow == nil {
+		return &GameActionResponse{
+			Success: false,
+			Message: "Show not available today",
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Check booking deadline (must book before specified time, e.g., 8 PM = 1200 minutes)
+	showTime := int(showConfig["show_time"].(float64))
+	bookingDeadline := int(showConfig["booking_deadline"].(float64))
+
+	// Check if current time is past the booking deadline
+	if state.TimeOfDay >= bookingDeadline && state.TimeOfDay < showTime {
+		return &GameActionResponse{
+			Success: false,
+			Message: fmt.Sprintf("Too late to book! Booking closes at %d:%02d.", bookingDeadline/60, bookingDeadline%60),
+			Color:   "red",
+		}, nil
+	}
+
+	// Check if player has required instruments
+	requiredInstruments, _ := selectedShow["required_instruments"].([]any)
+	for _, instrRaw := range requiredInstruments {
+		instrument, _ := instrRaw.(string)
+		if !playerHasItem(state, instrument) {
+			return &GameActionResponse{
+				Success: false,
+				Message: fmt.Sprintf("You need a %s to perform this show", instrument),
+				Color:   "red",
+			}, nil
+		}
+	}
+
+	// Check if already booked a show for today
+	if state.BookedShows == nil {
+		state.BookedShows = []map[string]any{}
+	}
+
+	for _, booking := range state.BookedShows {
+		if day, ok := booking["day"].(int); ok && day == state.CurrentDay {
+			return &GameActionResponse{
+				Success: false,
+				Message: "You've already booked a show for today",
+				Color:   "yellow",
+			}, nil
+		}
+	}
+
+	// Book the show
+	booking := map[string]any{
+		"show_id":    showID,
+		"venue_id":   venueID,
+		"day":        state.CurrentDay,
+		"show_time":  showTime,
+		"performed":  false,
+		"show_data":  selectedShow, // Store show data for later
+	}
+
+	state.BookedShows = append(state.BookedShows, booking)
+
+	showName, _ := selectedShow["name"].(string)
+	log.Printf("🎭 Booked show '%s' (ID: %s) at %s for day %d", showName, showID, venueID, state.CurrentDay)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: fmt.Sprintf("Booked '%s' for tonight at 9 PM!", showName),
+		Color:   "green",
+	}, nil
+}
+
+// handlePlayShowAction performs a booked show
+func handlePlayShowAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+	venueID := state.Building
+	if venueID == "" {
+		return nil, fmt.Errorf("not in a building")
+	}
+
+	// Find booked show for today at this venue
+	var booking map[string]any
+	var bookingIndex int
+	if state.BookedShows != nil {
+		for i, b := range state.BookedShows {
+			day, _ := b["day"].(int)
+			venue, _ := b["venue_id"].(string)
+			performed, _ := b["performed"].(bool)
+
+			if day == state.CurrentDay && venue == venueID && !performed {
+				booking = b
+				bookingIndex = i
+				break
+			}
+		}
+	}
+
+	if booking == nil {
+		return &GameActionResponse{
+			Success: false,
+			Message: "You don't have a show booked for tonight",
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Check if it's show time (must be within 30 minutes of show time)
+	showTime := int(booking["show_time"].(float64))
+	timeDiff := state.TimeOfDay - showTime
+	if timeDiff < 0 || timeDiff > 30 {
+		return &GameActionResponse{
+			Success: false,
+			Message: "It's not show time yet (show starts at 9 PM)",
+			Color:   "yellow",
+		}, nil
+	}
+
+	// Get show data
+	showData, _ := booking["show_data"].(map[string]any)
+	if showData == nil {
+		return nil, fmt.Errorf("show data not found in booking")
+	}
+
+	// Calculate rewards
+	baseGold := int(showData["base_gold"].(float64))
+	baseXP := int(showData["base_xp"].(float64))
+	charismaBonus := int(showData["charisma_gold_bonus"].(float64))
+
+	// Get charisma stat
+	charisma := 10 // Default
+	if stats, ok := state.Stats["charisma"]; ok {
+		if charInt, ok := stats.(int); ok {
+			charisma = charInt
+		} else if charFloat, ok := stats.(float64); ok {
+			charisma = int(charFloat)
+		}
+	}
+
+	// Calculate total gold (charisma bonus applies to points above 10)
+	charismaMod := charisma - 10
+	if charismaMod < 0 {
+		charismaMod = 0
+	}
+	totalGold := baseGold + (charismaMod * charismaBonus)
+
+	// Add gold to inventory
+	if err := addGoldToInventory(state.Inventory, totalGold); err != nil {
+		log.Printf("⚠️ Failed to add gold to inventory: %v", err)
+	}
+
+	// Add XP
+	state.Experience += baseXP
+
+	// Mark show as performed
+	state.BookedShows[bookingIndex]["performed"] = true
+
+	// Add to performed shows list (for daily tracking)
+	if state.PerformedShows == nil {
+		state.PerformedShows = []string{}
+	}
+	showID, _ := booking["show_id"].(string)
+	performedKey := fmt.Sprintf("%s_%d", showID, state.CurrentDay)
+	state.PerformedShows = append(state.PerformedShows, performedKey)
+
+	showName, _ := showData["name"].(string)
+	log.Printf("🎵 Performed show '%s' - Earned %d gold, %d XP", showName, totalGold, baseXP)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: fmt.Sprintf("Excellent performance! Earned %d gold and %d XP!", totalGold, baseXP),
+		Color:   "green",
+	}, nil
+}
+
+// Helper: Load show configuration from database
+func loadShowConfig(locationID, buildingID string) (map[string]any, error) {
+	// Get database connection
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	// Query location from database
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM locations WHERE id = ?", locationID).Scan(&propertiesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("location not found: %s", locationID)
+	}
+
+	// Parse location properties
+	var locationData map[string]any
+	if err := json.Unmarshal([]byte(propertiesJSON), &locationData); err != nil {
+		return nil, fmt.Errorf("failed to parse location data: %v", err)
+	}
+
+	// Location has districts, each district has buildings
+	// Search through districts to find the building
+	for _, districtRaw := range locationData {
+		district, ok := districtRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// Check if this district has buildings
+		buildingsRaw, ok := district["buildings"]
+		if !ok {
+			continue
+		}
+
+		buildings, ok := buildingsRaw.([]any)
+		if !ok {
+			continue
+		}
+
+		// Search for the building
+		for _, buildingRaw := range buildings {
+			building, ok := buildingRaw.(map[string]any)
+			if !ok {
+				continue
+			}
+
+			// Check if this is the building we're looking for
+			if id, ok := building["id"].(string); ok && id == buildingID {
+				// Check if building has shows configuration
+				showsConfig, ok := building["shows"].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("building %s does not have shows configuration", buildingID)
+				}
+				return showsConfig, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("building not found: %s in location %s", buildingID, locationID)
+}
+
+// Helper: Check if player has an item in inventory
+func playerHasItem(state *SaveFile, itemID string) bool {
+	// Check general slots
+	if generalSlots, ok := state.Inventory["general_slots"].([]any); ok {
+		for _, slotData := range generalSlots {
+			if slotMap, ok := slotData.(map[string]any); ok {
+				if item, ok := slotMap["item"].(string); ok && item == itemID {
+					return true
+				}
+			}
+		}
+	}
+
+	// Check backpack
+	if gearSlots, ok := state.Inventory["gear_slots"].(map[string]any); ok {
+		if bag, ok := gearSlots["bag"].(map[string]any); ok {
+			if contents, ok := bag["contents"].([]any); ok {
+				for _, slotData := range contents {
+					if slotMap, ok := slotData.(map[string]any); ok {
+						if item, ok := slotMap["item"].(string); ok && item == itemID {
+							return true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false
 }

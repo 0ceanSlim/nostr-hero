@@ -38,10 +38,13 @@ type SaveFile struct {
 	Vaults              []map[string]interface{} `json:"vaults"`
 	KnownSpells         []string               `json:"known_spells"`
 	SpellSlots          map[string]interface{} `json:"spell_slots"`
-	LocationsDiscovered []string               `json:"locations_discovered"`
-	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
-	InternalID          string                 `json:"-"`           // Not serialized, used internally for file naming
-	InternalNpub        string                 `json:"-"`                // Not serialized, used internally for directory structure
+	LocationsDiscovered []string                   `json:"locations_discovered"`
+	MusicTracksUnlocked []string                   `json:"music_tracks_unlocked"`
+	RentedRooms         []map[string]interface{}   `json:"rented_rooms,omitempty"`      // List of rented rooms with building_id and expiration
+	BookedShows         []map[string]interface{}   `json:"booked_shows,omitempty"`      // List of booked shows
+	PerformedShows      []string                   `json:"performed_shows,omitempty"`   // List of show IDs performed (for daily tracking)
+	InternalID          string                     `json:"-"`                           // Not serialized, used internally for file naming
+	InternalNpub        string                     `json:"-"`                           // Not serialized, used internally for directory structure
 }
 
 const SavesDirectory = "data/saves"

@@ -77,8 +77,21 @@
           "id": "village_inn",
           "name": "The Grain & Grape Inn",
           "description": "A humble but comfortable inn run by the cheerful halfling Marigold Sweetwater. All musicians are welcome here, and the hearty farm meals smell like home.",
-          "open": 7,
-          "close": 4
+          "open": 1020,
+          "close": 120,
+          "shows": {
+            "show_time": 1260,
+            "booking_deadline": 1200,
+            "shows_by_day": {
+              "0": [{"id": "lute-harvest", "name": "Harvest Songs", "description": "Peaceful lute ballads about farming life", "required_instruments": ["lute"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}],
+              "1": [{"id": "flute-morning", "name": "Morning Melodies", "description": "Gentle flute to start the week", "required_instruments": ["flute"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}],
+              "2": [{"id": "drum-work", "name": "Work Rhythms", "description": "Energetic drum beats", "required_instruments": ["drum"], "base_gold": 7, "base_xp": 5, "charisma_gold_bonus": 1}],
+              "3": [{"id": "lyre-tales", "name": "Village Tales", "description": "Stories with lyre accompaniment", "required_instruments": ["lyre"], "base_gold": 9, "base_xp": 7, "charisma_gold_bonus": 2}],
+              "4": [{"id": "horn-evening", "name": "Evening Horn", "description": "Horn calls at dusk", "required_instruments": ["horn"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}],
+              "5": [{"id": "mixed-celebration", "name": "Weekend Celebration", "description": "Lute and flute together", "required_instruments": ["lute", "flute"], "base_gold": 18, "base_xp": 14, "charisma_gold_bonus": 2}],
+              "6": [{"id": "feast-drums", "name": "Feast Day Drums", "description": "Lively drumming for the feast", "required_instruments": ["drum"], "base_gold": 7, "base_xp": 5, "charisma_gold_bonus": 1}]
+            }
+          }
         }
       ],
       "exit_to_environment": "windswept-hills"
