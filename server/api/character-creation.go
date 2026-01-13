@@ -210,9 +210,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		Mana:                mana,
 		MaxMana:             mana,
 		Fatigue:             0,
-		FatigueCounter:      0, // ← ADDED
-		Hunger:              1, // ← ADDED (1 = Hungry)
-		HungerCounter:       0, // ← ADDED
+		Hunger:              2, // Start satisfied (2 = Satisfied)
 		Stats:               statsInterface,
 		Location:            locationID,  // Use ID, not display name
 		District:            districtKey, // Use key, not display name
@@ -225,8 +223,26 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		SpellSlots:          spellSlots,
 		LocationsDiscovered: []string{startingCity}, // Only the city ID, not districts
 		MusicTracksUnlocked: musicTracks,
-		InternalNpub:        req.Npub,
-		InternalID:          fmt.Sprintf("save_%d", time.Now().Unix()),
+		ActiveEffects: []ActiveEffect{
+			{
+				EffectID:          "fatigue-accumulation",
+				EffectIndex:       0,
+				DurationRemaining: 0, // Permanent effect
+				DelayRemaining:    0,
+				TickAccumulator:   0,
+				AppliedAt:         12, // Noon
+			},
+			{
+				EffectID:          "hunger-accumulation-satisfied", // Start satisfied (Hunger=2)
+				EffectIndex:       0,
+				DurationRemaining: 0, // Permanent effect
+				DelayRemaining:    0,
+				TickAccumulator:   0,
+				AppliedAt:         12, // Noon
+			},
+		},
+		InternalNpub: req.Npub,
+		InternalID:   fmt.Sprintf("save_%d", time.Now().Unix()),
 	}
 
 	// 16. Save to disk

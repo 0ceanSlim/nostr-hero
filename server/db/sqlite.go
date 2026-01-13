@@ -71,6 +71,7 @@ func validateDatabase() error {
 		"monsters",
 		"locations",
 		"npcs",
+		"effects",
 		"generation_weights",
 		"starting_gear",
 		"starting_gold",

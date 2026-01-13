@@ -184,11 +184,11 @@ func getItemStackLimit(database *sql.DB, itemID string) (int, error) {
 
 func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string]interface{}, error) {
 	inventory := map[string]interface{}{
-		"general_slots": []map[string]interface{}{
-			{"slot": 0, "item": nil, "quantity": 0},
-			{"slot": 1, "item": nil, "quantity": 0},
-			{"slot": 2, "item": nil, "quantity": 0},
-			{"slot": 3, "item": nil, "quantity": 0},
+		"general_slots": []any{
+			map[string]any{"slot": 0, "item": nil, "quantity": 0},
+			map[string]any{"slot": 1, "item": nil, "quantity": 0},
+			map[string]any{"slot": 2, "item": nil, "quantity": 0},
+			map[string]any{"slot": 3, "item": nil, "quantity": 0},
 		},
 		"gear_slots": map[string]interface{}{
 			"bag":        map[string]interface{}{"item": nil, "quantity": 0},
@@ -203,7 +203,7 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 	}
 
 	gearSlots := inventory["gear_slots"].(map[string]interface{})
-	generalSlots := inventory["general_slots"].([]map[string]interface{})
+	generalSlots := inventory["general_slots"].([]any)
 
 	remainingItems := []ItemWithQty{}
 	twoHandedEquipped := false
@@ -307,10 +307,37 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 		// Containers go in general slots, not in bag
 		if isContainer {
 			if generalSlotIndex < 4 {
+				// Initialize container with empty contents array
+				containerSlots := 10 // default
+
+				// Check for container_slots in properties first, then root level
+				// JSON numbers unmarshal as float64, but also check int for robustness
+				if properties, ok := itemData["properties"].(map[string]interface{}); ok {
+					if val, ok := properties["container_slots"].(float64); ok {
+						containerSlots = int(val)
+					} else if val, ok := properties["container_slots"].(int); ok {
+						containerSlots = val
+					}
+				} else if val, ok := itemData["container_slots"].(float64); ok {
+					containerSlots = int(val)
+				} else if val, ok := itemData["container_slots"].(int); ok {
+					containerSlots = val
+				}
+
+				contents := make([]map[string]interface{}, containerSlots)
+				for i := 0; i < containerSlots; i++ {
+					contents[i] = map[string]interface{}{
+						"slot":     i,
+						"item":     nil,
+						"quantity": 0,
+					}
+				}
+
 				generalSlots[generalSlotIndex] = map[string]interface{}{
 					"slot":     generalSlotIndex,
 					"item":     item.Item,
 					"quantity": item.Quantity,
+					"contents": contents,
 				}
 				generalSlotIndex++
 			}

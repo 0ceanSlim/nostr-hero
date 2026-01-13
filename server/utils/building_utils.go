@@ -8,12 +8,12 @@ import (
 
 // BuildingHours represents open/close times for a building
 type BuildingHours struct {
-	Open  interface{} `json:"open"`  // int (hour 0-23) or "always"
-	Close interface{} `json:"close"` // int (hour 0-23) or null
+	Open  interface{} `json:"open"`  // int (minutes 0-1439) or "always"
+	Close interface{} `json:"close"` // int (minutes 0-1439) or null
 }
 
 // IsBuildingOpen checks if a building is accessible at the given time
-// Returns: (isOpen bool, openHour int, closeHour int, err)
+// Returns: (isOpen bool, openMinutes int, closeMinutes int, err)
 func IsBuildingOpen(db *sql.DB, locationID, buildingID string, timeOfDay int) (bool, int, int, error) {
 	// Get location data from database
 	var propertiesJSON string
@@ -60,7 +60,7 @@ func IsBuildingOpen(db *sql.DB, locationID, buildingID string, timeOfDay int) (b
 
 				// Check if always open
 				if openStr, ok := hours.Open.(string); ok && openStr == "always" {
-					return true, 0, 24, nil
+					return true, 0, 1440, nil
 				}
 
 				// Check if private/never accessible (open: -1)
@@ -68,34 +68,36 @@ func IsBuildingOpen(db *sql.DB, locationID, buildingID string, timeOfDay int) (b
 					return false, -1, -1, nil
 				}
 
-				// Get numeric hours
-				openHour, ok := hours.Open.(float64)
+				// Get numeric minutes (0-1439)
+				openMinutes, ok := hours.Open.(float64)
 				if !ok {
-					return false, 0, 0, fmt.Errorf("invalid open hour format")
+					return false, 0, 0, fmt.Errorf("invalid open time format")
 				}
 
-				closeHour := 24.0
+				closeMinutes := 1440.0 // Default to end of day
 				if hours.Close != nil {
-					closeHour, ok = hours.Close.(float64)
+					closeMinutes, ok = hours.Close.(float64)
 					if !ok {
-						return false, 0, 0, fmt.Errorf("invalid close hour format")
+						return false, 0, 0, fmt.Errorf("invalid close time format")
 					}
 				}
 
-				// Convert timeOfDay (minutes) to hour
-				currentHour := timeOfDay / 60
+				// Current time is already in minutes (0-1439)
+				currentTimeMinutes := timeOfDay
 
 				// Check if building is open
-				open := int(openHour)
-				close := int(closeHour)
+				open := int(openMinutes)
+				close := int(closeMinutes)
 
-				// Handle wrapping (e.g., 22:00 to 04:00)
+				// Handle wrapping (e.g., 1020 minutes [5 PM] to 480 minutes [8 AM] for overnight)
 				if close < open {
-					if currentHour >= open || currentHour < close {
+					// Overnight hours - open if current time >= open OR current time < close
+					if currentTimeMinutes >= open || currentTimeMinutes < close {
 						return true, open, close, nil
 					}
 				} else {
-					if currentHour >= open && currentHour < close {
+					// Normal hours - open if current time >= open AND current time < close
+					if currentTimeMinutes >= open && currentTimeMinutes < close {
 						return true, open, close, nil
 					}
 				}

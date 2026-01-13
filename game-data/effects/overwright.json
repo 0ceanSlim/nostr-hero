@@ -1,0 +1,41 @@
+{
+  "id": "overwright",
+  "name": "Overwright",
+  "description": "Mind and body pushed beyond their limits. Suffering from magical and physical exhaustion.",
+  "message": "You feel overwright - your mind and body are pushed beyond their limits!",
+  "category": "debuff",
+  "effects": [
+    {
+      "type": "strength",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "dexterity",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "constitution",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "intelligence",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "wisdom",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "overworked",
+  "color": "purple"
+}

@@ -122,7 +122,11 @@ export async function openContainer(itemId, fromSlot, fromSlotType = 'general') 
 
     // Show type restriction if not 'any'
     if (allowedTypes !== 'any') {
-        typeRestriction.textContent = `Only: ${allowedTypes.replace('-', ' ')}`;
+        // Handle both array and string types
+        const typesText = Array.isArray(allowedTypes)
+            ? allowedTypes.join(', ')
+            : allowedTypes.replace('-', ' ');
+        typeRestriction.textContent = `Only: ${typesText}`;
     } else {
         typeRestriction.textContent = 'Any items allowed';
     }

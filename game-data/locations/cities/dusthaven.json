@@ -29,15 +29,15 @@
           "id": "desert_inn",
           "name": "The Mirage's Rest",
           "description": "A cool, shaded inn built around the oasis where desert travelers rest.",
-          "open": 7,
-          "close": 4
+          "open": 1140,
+          "close": 240
         },
         {
           "id": "desert_supplies",
           "name": "Desert Walker's Supplies",
           "description": "A shop specializing in desert survival gear and supplies.",
-          "open": 6,
-          "close": 9
+          "open": 360,
+          "close": 1260
         },
         {
           "id": "oasis_shrine",

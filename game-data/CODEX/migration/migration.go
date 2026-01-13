@@ -168,6 +168,15 @@ func createTables() error {
 			items TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// Effects table
+		`CREATE TABLE IF NOT EXISTS effects (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			description TEXT,
+			properties TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, table := range tables {
@@ -214,6 +223,14 @@ func migrateFromJSON(callback StatusCallback) error {
 	}
 	if err := migrateContentData(callback); err != nil {
 		return fmt.Errorf("failed to migrate content data: %v", err)
+	}
+
+	// Migrate effects
+	if callback != nil {
+		callback(Status{Step: "effects", Message: "Migrating effects"})
+	}
+	if err := migrateEffects(callback); err != nil {
+		return fmt.Errorf("failed to migrate effects: %v", err)
 	}
 
 	// Migrate system data (spell slots, music)
@@ -650,6 +667,66 @@ func migrateNPCFile(filePath, locationFromPath string) error {
 	stmt := `INSERT INTO npcs (id, name, title, race, location, building, description, properties)
 	         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 	_, err = database.Exec(stmt, id, name, title, race, location, building, description, string(propertiesJSON))
+	return err
+}
+
+// migrateEffects migrates all effect JSON files
+func migrateEffects(callback StatusCallback) error {
+	effectsPath := "game-data/effects"
+
+	// Clear existing effects
+	if _, err := database.Exec("DELETE FROM effects"); err != nil {
+		return fmt.Errorf("failed to clear effects table: %v", err)
+	}
+
+	count := 0
+	err := filepath.WalkDir(effectsPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(path, ".json") {
+			if err := migrateEffectFile(path); err != nil {
+				log.Printf("Warning: failed to migrate effect file %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk effects directory: %v", err)
+	}
+
+	log.Printf("Migrated %d effects", count)
+	return nil
+}
+
+// migrateEffectFile migrates a single effect JSON file
+func migrateEffectFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var effect map[string]interface{}
+	if err := json.Unmarshal(data, &effect); err != nil {
+		return err
+	}
+
+	// Extract base filename as ID
+	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
+
+	// Convert effect data to required fields
+	name, _ := effect["name"].(string)
+	description, _ := effect["description"].(string)
+
+	// Serialize all properties as JSON
+	propertiesJSON, _ := json.Marshal(effect)
+
+	stmt := `INSERT INTO effects (id, name, description, properties) VALUES (?, ?, ?, ?)`
+	_, err = database.Exec(stmt, id, name, description, string(propertiesJSON))
 	return err
 }
 

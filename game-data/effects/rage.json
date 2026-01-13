@@ -1,0 +1,27 @@
+{
+  "id": "rage",
+  "name": "Rage",
+  "description": "Filled with battle fury - stronger but less intelligent",
+  "effects": [
+    {
+      "type": "strength",
+      "value": 4,
+      "duration": 120,
+      "delay": 0
+    },
+    {
+      "type": "constitution",
+      "value": 2,
+      "duration": 120,
+      "delay": 0
+    },
+    {
+      "type": "intelligence",
+      "value": -2,
+      "duration": 120,
+      "delay": 0
+    }
+  ],
+  "icon": "fire",
+  "color": "red"
+}

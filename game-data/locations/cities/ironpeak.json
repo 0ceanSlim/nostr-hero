@@ -59,8 +59,8 @@
           "id": "ironpeak_general_supplies",
           "name": "Ironhand's Supplies",
           "description": "Brogni Ironhand's no-nonsense supply shop, stocked with durable gear built to survive the harsh mountains.",
-          "open": 6,
-          "close": 8
+          "open": 420,
+          "close": 1200
         },
         {
           "id": "brogni_home",
@@ -87,15 +87,15 @@
           "id": "ore_exchange",
           "name": "Mountain Ore Exchange",
           "description": "A trading post that buys raw ores and sells mining equipment.",
-          "open": 7,
-          "close": 7
+          "open": 420,
+          "close": 1140
         },
         {
           "id": "miners_guild",
           "name": "Miners' Guild Hall",
           "description": "The administrative center for all mining operations in the region.",
-          "open": 8,
-          "close": 6
+          "open": 480,
+          "close": 1080
         }
       ]
     },

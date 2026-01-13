@@ -41,8 +41,8 @@
           "id": "kingdom_general_store",
           "name": "Grand Market",
           "description": "The largest marketplace in the kingdom, filled with merchants from distant lands. Aldric Goodsworth runs a well-stocked general store here.",
-          "open": 6,
-          "close": 22
+          "open": 420,
+          "close": 1320
         },
         {
           "id": "aldric_home",
@@ -66,8 +66,8 @@
           "id": "mage_tower",
           "name": "Mage Tower",
           "description": "A crystalline spire where court wizards study the arcane arts.",
-          "open": 8,
-          "close": 20
+          "open": 480,
+          "close": 1200
         }
       ],
       "exit_to_environment": "mistmarsh-swamplands"
@@ -99,8 +99,8 @@
           "id": "stable",
           "name": "Royal Stables",
           "description": "Well-maintained stables offering cart services to other cities.",
-          "open": 6,
-          "close": 22
+          "open": 360,
+          "close": 1320
         }
       ],
       "exit_to_environment": "darkwood-forest"
@@ -118,8 +118,22 @@
           "id": "grand_forge",
           "name": "Grand Forge",
           "description": "The largest smithy in the kingdom, where master craftsmen create weapons and armor.",
-          "open": 7,
-          "close": 19
+          "open": 420,
+          "close": 1140
+        },
+        {
+          "id": "kingdom_instrument_shop",
+          "name": "Songweaver's Instruments",
+          "description": "A melodious shop filled with fine instruments. Melodia Songweaver, a master instrumentalist, offers everything from drums to dulcimers for bards and performers.",
+          "open": 480,
+          "close": 1020
+        },
+        {
+          "id": "melodia_home",
+          "name": "Melodia's Private Residence",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
       ],
       "exit_to_environment": "merchants-highway"
@@ -137,9 +151,8 @@
           "id": "trading_post",
           "name": "Western Trading Post",
           "description": "A massive warehouse where exotic goods from distant lands are bought and sold.",
-
-          "open": 7,
-          "close": 21
+          "open": 420,
+          "close": 1260
         },
         {
           "id": "tavern_golden_griffin",
@@ -150,41 +163,7 @@
           "special_features": [
             "vip_section_for_happytavern_nip5",
             "live_music_nightly"
-          ],
-          "shows": {
-            "show_time": 1260,
-            "booking_deadline": 1200,
-            "shows_by_day": {
-              "0": [
-                {"id": "lute-ballad-night", "name": "Ballad Night", "description": "Romantic ballads on the lute", "required_instruments": ["lute"], "base_gold": 15, "base_xp": 10, "charisma_gold_bonus": 2},
-                {"id": "flute-serenade", "name": "Flute Serenade", "description": "Gentle melodies to start the week", "required_instruments": ["flute"], "base_gold": 12, "base_xp": 8, "charisma_gold_bonus": 2}
-              ],
-              "1": [
-                {"id": "viol-ensemble", "name": "Viol Ensemble", "description": "Sophisticated string performance", "required_instruments": ["viol"], "base_gold": 16, "base_xp": 12, "charisma_gold_bonus": 2},
-                {"id": "lyre-tales", "name": "Bardic Tales", "description": "Stories accompanied by lyre", "required_instruments": ["lyre"], "base_gold": 14, "base_xp": 10, "charisma_gold_bonus": 2}
-              ],
-              "2": [
-                {"id": "horn-fanfare", "name": "Horn Fanfare", "description": "Triumphant horn melodies", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2},
-                {"id": "drum-rhythm", "name": "Drum Circle", "description": "Energetic rhythmic performance", "required_instruments": ["drum"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}
-              ],
-              "3": [
-                {"id": "lute-classical", "name": "Classical Lute", "description": "Refined classical pieces", "required_instruments": ["lute"], "base_gold": 15, "base_xp": 10, "charisma_gold_bonus": 2},
-                {"id": "flute-dance", "name": "Dance Night Flute", "description": "Lively dance tunes", "required_instruments": ["flute"], "base_gold": 12, "base_xp": 8, "charisma_gold_bonus": 2}
-              ],
-              "4": [
-                {"id": "viol-virtuoso", "name": "Viol Virtuoso", "description": "Masterful solo performance", "required_instruments": ["viol"], "base_gold": 16, "base_xp": 12, "charisma_gold_bonus": 2},
-                {"id": "lyre-evening", "name": "Evening Lyre", "description": "Relaxing melodies for the weekend", "required_instruments": ["lyre"], "base_gold": 14, "base_xp": 10, "charisma_gold_bonus": 2}
-              ],
-              "5": [
-                {"id": "mixed-ensemble", "name": "Mixed Ensemble", "description": "Lute and flute duo performance", "required_instruments": ["lute", "flute"], "base_gold": 25, "base_xp": 18, "charisma_gold_bonus": 3},
-                {"id": "horn-celebration", "name": "Celebration Horn", "description": "Festive horn performance for the busy night", "required_instruments": ["horn"], "base_gold": 10, "base_xp": 8, "charisma_gold_bonus": 2}
-              ],
-              "6": [
-                {"id": "grand-performance", "name": "Grand Performance", "description": "Epic multi-instrument showcase", "required_instruments": ["viol", "lyre"], "base_gold": 28, "base_xp": 20, "charisma_gold_bonus": 3},
-                {"id": "drum-feast", "name": "Feast Night Drums", "description": "Lively drumming for weekend festivities", "required_instruments": ["drum"], "base_gold": 8, "base_xp": 6, "charisma_gold_bonus": 1}
-              ]
-            }
-          }
+          ]
         },
         {
           "id": "gareth_quarters",

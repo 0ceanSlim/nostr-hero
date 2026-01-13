@@ -17,6 +17,11 @@ type GameSession struct {
 	SaveData  SaveFile `json:"save_data"`
 	LoadedAt  int64    `json:"loaded_at"`
 	UpdatedAt int64    `json:"updated_at"`
+
+	// Session-only data (not persisted to save files)
+	BookedShows    []map[string]interface{} `json:"booked_shows,omitempty"`    // Current show bookings
+	PerformedShows []string                 `json:"performed_shows,omitempty"` // Shows performed today (to prevent re-booking)
+	RentedRooms    []map[string]interface{} `json:"rented_rooms,omitempty"`    // Current room rentals
 }
 
 // SessionManager manages all active game sessions in memory
@@ -59,6 +64,11 @@ func (sm *SessionManager) LoadSession(npub, saveID string) (*GameSession, error)
 		return nil, fmt.Errorf("failed to load save file: %w", err)
 	}
 
+	// Initialize fatigue/hunger accumulation and penalty effects
+	if err := initializeFatigueHungerEffects(saveData); err != nil {
+		log.Printf("⚠️ Warning: Failed to initialize fatigue/hunger effects: %v", err)
+	}
+
 	// Create new session in memory
 	session := &GameSession{
 		Npub:      npub,
@@ -85,6 +95,11 @@ func (sm *SessionManager) ReloadSession(npub, saveID string) (*GameSession, erro
 	saveData, err := LoadSaveByID(npub, saveID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load save file: %w", err)
+	}
+
+	// Initialize fatigue/hunger accumulation and penalty effects
+	if err := initializeFatigueHungerEffects(saveData); err != nil {
+		log.Printf("⚠️ Warning: Failed to initialize fatigue/hunger effects: %v", err)
 	}
 
 	// Create/overwrite session in memory

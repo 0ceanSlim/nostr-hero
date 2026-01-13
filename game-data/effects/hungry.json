@@ -1,0 +1,17 @@
+{
+  "id": "hungry",
+  "name": "Hungry",
+  "description": "Feeling hungry. Minor penalty to strength.",
+  "message": "Your stomach rumbles. You should find something to eat soon.",
+  "category": "debuff",
+  "effects": [
+    {
+      "type": "strength",
+      "value": -1,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "hungry",
+  "color": "orange"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "haste",
+  "name": "Haste",
+  "description": "Moving with supernatural speed and agility",
+  "effects": [
+    {
+      "type": "dexterity",
+      "value": 4,
+      "duration": 60,
+      "delay": 0
+    }
+  ],
+  "icon": "lightning",
+  "color": "cyan"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "blessed",
+  "name": "Blessed",
+  "description": "Protected by divine power, wiser and more charismatic",
+  "effects": [
+    {
+      "type": "wisdom",
+      "value": 2,
+      "duration": 600,
+      "delay": 0
+    },
+    {
+      "type": "charisma",
+      "value": 1,
+      "duration": 600,
+      "delay": 0
+    }
+  ],
+  "icon": "star",
+  "color": "gold"
+}

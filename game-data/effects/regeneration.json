@@ -1,0 +1,16 @@
+{
+  "id": "regeneration",
+  "name": "Regeneration",
+  "description": "Healing over time from magical regeneration",
+  "effects": [
+    {
+      "type": "hp",
+      "value": 1,
+      "duration": 600,
+      "delay": 0,
+      "tick_interval": 60
+    }
+  ],
+  "icon": "heart",
+  "color": "pink"
+}

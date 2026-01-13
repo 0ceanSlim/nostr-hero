@@ -1,0 +1,21 @@
+{
+  "id": "cursed",
+  "name": "Cursed",
+  "description": "Afflicted by dark magic - less wise and charismatic",
+  "effects": [
+    {
+      "type": "wisdom",
+      "value": -2,
+      "duration": 1440,
+      "delay": 0
+    },
+    {
+      "type": "charisma",
+      "value": -2,
+      "duration": 1440,
+      "delay": 0
+    }
+  ],
+  "icon": "dark_cloud",
+  "color": "black"
+}

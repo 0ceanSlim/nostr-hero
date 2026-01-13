@@ -40,8 +40,8 @@
           "id": "verdant_supplies",
           "name": "Greenleaf Provisions",
           "description": "Thalindra Greenleaf's nature-focused supply shop, offering general goods crafted in harmony with the forest.",
-          "open": 7,
-          "close": 8
+          "open": 480,
+          "close": 1200
         },
         {
           "id": "moonlit_glade_inn",

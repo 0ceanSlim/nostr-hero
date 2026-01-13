@@ -38,8 +38,8 @@
           "id": "general_store",
           "name": "Haversham's General Store",
           "description": "Pip Haversham's tidy family shop, offering honest prices on essential supplies for village life and adventuring.",
-          "open": 3,
-          "close": 8
+          "open": 480,
+          "close": 1200
         },
         {
           "id": "pip_home",

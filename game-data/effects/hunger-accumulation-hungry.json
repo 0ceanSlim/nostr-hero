@@ -1,0 +1,18 @@
+{
+  "id": "hunger-accumulation-hungry",
+  "name": "Hunger (Hungry)",
+  "description": "Hunger decreases quickly when already hungry. Decreases hunger level every 6 hours.",
+  "category": "system",
+  "silent": true,
+  "effects": [
+    {
+      "type": "hunger",
+      "value": -1,
+      "duration": 0,
+      "delay": 0,
+      "tick_interval": 360
+    }
+  ],
+  "icon": "clock",
+  "color": "gray"
+}

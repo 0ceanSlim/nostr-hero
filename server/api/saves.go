@@ -12,6 +12,16 @@ import (
 	"time"
 )
 
+// ActiveEffect stores only runtime state for an active effect (template data is in database)
+type ActiveEffect struct {
+	EffectID          string  `json:"effect_id"`          // ID of effect template (e.g., "performance-high")
+	EffectIndex       int     `json:"effect_index"`       // Index in effect's effects array (0 for single-effect templates)
+	DurationRemaining float64 `json:"duration_remaining"` // Minutes remaining until effect expires
+	DelayRemaining    float64 `json:"delay_remaining"`    // Minutes remaining before effect starts
+	TickAccumulator   float64 `json:"tick_accumulator"`   // Time accumulated since last tick (for periodic effects)
+	AppliedAt         int     `json:"applied_at"`         // Time of day (minutes) when effect was applied
+}
+
 type SaveFile struct {
 	D                   string                 `json:"d"`
 	CreatedAt           string                 `json:"created_at"`
@@ -24,10 +34,8 @@ type SaveFile struct {
 	MaxHP               int                    `json:"max_hp"`
 	Mana                int                    `json:"mana"`
 	MaxMana             int                    `json:"max_mana"`
-	Fatigue             int                    `json:"fatigue"`
-	FatigueCounter      float64                `json:"fatigue_counter"` // Minutes until next fatigue increase (0-239)
-	Hunger              int                    `json:"hunger"`          // 0-3 scale: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
-	HungerCounter       float64                `json:"hunger_counter"`  // Minutes until next hunger decrease (0-359 or 0-719)
+	Fatigue             int                    `json:"fatigue"`             // Fatigue level (0-10+), penalties applied via effects
+	Hunger              int                    `json:"hunger"`              // Hunger level (0-3: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full), penalties applied via effects
 	Stats               map[string]interface{} `json:"stats"`
 	Location            string                 `json:"location"`     // City ID (e.g., "kingdom", "village-west")
 	District            string                 `json:"district"`     // District key (e.g., "center", "north", "south")
@@ -40,11 +48,9 @@ type SaveFile struct {
 	SpellSlots          map[string]interface{} `json:"spell_slots"`
 	LocationsDiscovered []string                   `json:"locations_discovered"`
 	MusicTracksUnlocked []string                   `json:"music_tracks_unlocked"`
-	RentedRooms         []map[string]interface{}   `json:"rented_rooms,omitempty"`      // List of rented rooms with building_id and expiration
-	BookedShows         []map[string]interface{}   `json:"booked_shows,omitempty"`      // List of booked shows
-	PerformedShows      []string                   `json:"performed_shows,omitempty"`   // List of show IDs performed (for daily tracking)
-	InternalID          string                     `json:"-"`                           // Not serialized, used internally for file naming
-	InternalNpub        string                     `json:"-"`                           // Not serialized, used internally for directory structure
+	ActiveEffects       []ActiveEffect             `json:"active_effects,omitempty"` // Compact format: only runtime state, template data in DB
+	InternalID          string                     `json:"-"`                        // Not serialized, used internally for file naming
+	InternalNpub        string                     `json:"-"`                        // Not serialized, used internally for directory structure
 }
 
 const SavesDirectory = "data/saves"
@@ -134,9 +140,7 @@ func handleGetSaves(w http.ResponseWriter, _ *http.Request, npub string) {
 		saveMap["mana"] = save.Mana
 		saveMap["max_mana"] = save.MaxMana
 		saveMap["fatigue"] = save.Fatigue
-		saveMap["fatigue_counter"] = save.FatigueCounter
 		saveMap["hunger"] = save.Hunger
-		saveMap["hunger_counter"] = save.HungerCounter
 		saveMap["stats"] = save.Stats
 		saveMap["location"] = save.Location
 		saveMap["district"] = save.District

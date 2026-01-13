@@ -11,7 +11,7 @@
       "location": "tavern_golden_griffin",
       "state": "working",
       "dialogue_options": ["main_menu"],
-      "available_actions": ["buy_drink"]
+      "available_actions": []
     },
     {
       "start": 120,
@@ -35,7 +35,7 @@
       "location": "tavern_golden_griffin",
       "state": "working",
       "dialogue_options": ["main_menu"],
-      "available_actions": ["buy_drink"]
+      "available_actions": []
     }
   ],
   "greeting": {
@@ -61,18 +61,11 @@
       "options": ["main_menu"]
     },
     "buy_drink": {
-      "text": "A fine choice! Our ale is brewed locally—smooth and strong, just how adventurers like it. That'll be 5 gold.",
-      "action": "buy_drink",
-      "cost": 5,
-      "requirements": {
-        "gold": 5
-      },
-      "success": "Here you are! Enjoy!",
-      "failure": "Ah, you need 5 gold for a drink.",
+      "text": "Thirsty, are you? Talk to Marcus at the bar—he's our barkeep and he'll get you sorted with our finest ales and beers!",
       "options": ["main_menu"]
     },
     "ask_about_entertainment": {
-      "text": "We have live music every night! If you're a performer yourself, talk to Marcus at the door—he handles all the bookings. We pay well for quality entertainment!",
+      "text": "We have live music every night at 9 PM! Different shows are available depending on the day of the week. Marcus handles all the bookings and keeps our music schedule. He'll need you to have the right instruments, and bookings must be made before 8 PM. Talk to him if you're interested in performing!",
       "options": ["main_menu"]
     },
     "goodbye": {

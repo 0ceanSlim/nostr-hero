@@ -15,10 +15,14 @@ import { updateTimeDisplay, formatTime } from './timeDisplay.js';
 import { showActionText, showMessage } from './messaging.js';
 import { moveToLocation } from '../logic/mechanics.js';
 import { updateAllDisplays } from './displayCoordinator.js';
+import { eventBus } from '../lib/events.js';
 
 // Module-level state
 let lastDisplayedLocation = null;
 let lastBuildingState = null;
+let autoUpdateInitialized = false;
+let isRendering = false; // Prevent duplicate renders
+let renderTimeout = null; // For debouncing
 
 /**
  * Fetch NPCs at current location from backend
@@ -65,11 +69,29 @@ async function fetchNPCsAtLocation(location, district, building = '') {
  * Main location rendering function
  */
 export async function displayCurrentLocation() {
-    const state = getGameStateSync();
-    const cityId = state.location?.current;
-    const districtKey = state.location?.district || 'center';
+    // Prevent duplicate renders - if already rendering, skip
+    if (isRendering) {
+        logger.debug('Location display already rendering, skipping duplicate call');
+        return;
+    }
 
-    if (!cityId) return;
+    isRendering = true;
+
+    try {
+        // Initialize auto-update listeners on first call
+        if (!autoUpdateInitialized) {
+            initializeAutoUpdate();
+            autoUpdateInitialized = true;
+        }
+
+        const state = getGameStateSync();
+        const cityId = state.location?.current;
+        const districtKey = state.location?.district || 'center';
+
+        if (!cityId) return;
+
+        // Check if player is in a building that just closed and eject them
+        await checkAndEjectFromClosedBuilding();
 
     // Construct full district ID from city + district (e.g., "village-west-east")
     const districtId = `${cityId}-${districtKey}`;
@@ -248,9 +270,8 @@ export async function displayCurrentLocation() {
         const buildingButtonContainer = buildingContainer.querySelector('div');
 
         if (buildings && buildings.length > 0) {
-            // Get current time of day from game state (convert minutes to hours)
+            // Get current time of day from game state in minutes (0-1439)
             const timeInMinutes = state.character?.time_of_day !== undefined ? state.character.time_of_day : 720;
-            const currentTime = Math.floor(timeInMinutes / 60) % 24;
 
             buildings.forEach(building => {
                 // Check if this is the special "Exit Building" button
@@ -287,8 +308,8 @@ export async function displayCurrentLocation() {
                     return;
                 }
 
-                // Check if building is currently open
-                const isOpen = isBuildingOpen(building, currentTime);
+                // Check if building is currently open (pass time in minutes)
+                const isOpen = isBuildingOpen(building, timeInMinutes);
 
                 if (isOpen) {
                     // Open building - normal styling
@@ -339,6 +360,10 @@ export async function displayCurrentLocation() {
             emptyMessage.textContent = 'No one here. Check buildings.';
             npcButtonContainer.appendChild(emptyMessage);
         }
+    }
+    } finally {
+        // Always reset rendering flag
+        isRendering = false;
     }
 }
 
@@ -410,10 +435,10 @@ export function createLocationButton(text, onClick, type = 'navigation') {
 /**
  * Check if a building is currently open based on time of day
  * @param {Object} building - Building data
- * @param {number} currentTime - Current time (0-23)
+ * @param {number} currentTimeInMinutes - Current time in minutes (0-1439)
  * @returns {boolean} True if building is open
  */
-export function isBuildingOpen(building, currentTime) {
+export function isBuildingOpen(building, currentTimeInMinutes) {
     // Always open buildings
     if (building.open === 'always') {
         return true;
@@ -427,27 +452,23 @@ export function isBuildingOpen(building, currentTime) {
     const openTime = building.open;
     const closeTime = building.close;
 
-    // No hours specified - assume always open
+    // No time specified - assume always open
     if (openTime === undefined) {
         return true;
     }
 
-    // Convert old time values (0-11) to new 24-hour format if needed
-    // Old buildings may still use 0-11 values, so we need to handle both
-    // In 24-hour system: buildings should use actual hours (e.g., 6 = 6 AM, 14 = 2 PM)
-
     // Open rest of day (close is null)
     if (closeTime === null) {
-        return currentTime >= openTime;
+        return currentTimeInMinutes >= openTime;
     }
 
-    // Check if open hours wrap around midnight
+    // Check if open hours wrap around midnight (overnight businesses like inns/taverns)
     if (openTime < closeTime) {
-        // Normal hours (e.g., 6-18: 6 AM to 6 PM)
-        return currentTime >= openTime && currentTime < closeTime;
+        // Normal hours (e.g., 480-1020: 8 AM to 5 PM)
+        return currentTimeInMinutes >= openTime && currentTimeInMinutes < closeTime;
     } else {
-        // Overnight hours (e.g., 20-6: 8 PM through night to 6 AM)
-        return currentTime >= openTime || currentTime < closeTime;
+        // Overnight hours (e.g., 1020-480: 5 PM through night to 8 AM)
+        return currentTimeInMinutes >= openTime || currentTimeInMinutes < closeTime;
     }
 }
 
@@ -456,7 +477,15 @@ export function isBuildingOpen(building, currentTime) {
  * @param {Object} building - Building data
  */
 export function showBuildingClosedMessage(building) {
-    const openTimeName = building.open === 'always' ? 'always' : formatTime(building.open);
+    let openTimeName;
+    if (building.open === 'always') {
+        openTimeName = 'always';
+    } else {
+        // Convert minutes (0-1439) to hours and minutes
+        const openHour = Math.floor(building.open / 60);
+        const openMin = building.open % 60;
+        openTimeName = formatTime(openHour, openMin);
+    }
 
     showMessage(`🔒 ${building.name} is closed. Opens at ${openTimeName}.`, 'error');
 }
@@ -653,6 +682,12 @@ export async function selectDialogueOption(npcId, choice) {
                     window.switchShopTab('sell');
                 }
             }
+            // Check if show booking UI should open
+            else if (result.delta?.show_booking) {
+                logger.debug('Opening show booking UI:', result.delta.show_booking);
+                closeNPCDialogue();
+                showShowBookingUI(result.delta.show_booking);
+            }
             // Check if dialogue should close
             else if (result.delta?.npc_dialogue?.action === 'close') {
                 closeNPCDialogue();
@@ -700,6 +735,216 @@ export function closeNPCDialogue() {
     }
 
     logger.debug('Dialogue closed, action buttons restored');
+}
+
+/**
+ * Show booking UI overlay for selecting a show to perform
+ * @param {Object} bookingData - Show booking data with available shows
+ */
+export function showShowBookingUI(bookingData) {
+    logger.debug('Showing show booking UI with data:', bookingData);
+
+    const sceneContainer = document.getElementById('scene-container');
+    if (!sceneContainer) return;
+
+    // Create or get show booking overlay
+    let bookingOverlay = document.getElementById('show-booking-overlay');
+    if (!bookingOverlay) {
+        bookingOverlay = document.createElement('div');
+        bookingOverlay.id = 'show-booking-overlay';
+        bookingOverlay.className = 'absolute inset-0 flex items-center justify-center';
+        bookingOverlay.style.cssText = 'background: rgba(0, 0, 0, 0.85); z-index: 100;';
+        sceneContainer.appendChild(bookingOverlay);
+    }
+
+    // Clear previous content
+    bookingOverlay.innerHTML = '';
+
+    // Create booking container with retro window style
+    const bookingContainer = document.createElement('div');
+    bookingContainer.style.cssText = `
+        background: #2a2a2a;
+        border-top: 2px solid #4a4a4a;
+        border-left: 2px solid #4a4a4a;
+        border-right: 2px solid #0a0a0a;
+        border-bottom: 2px solid #0a0a0a;
+        clip-path: polygon(
+            4px 0, calc(100% - 4px) 0,
+            100% 4px, 100% calc(100% - 4px),
+            calc(100% - 4px) 100%, 4px 100%,
+            0 calc(100% - 4px), 0 4px
+        );
+        max-width: 480px;
+        width: 90%;
+        max-height: 85%;
+        display: flex;
+        flex-direction: column;
+    `;
+
+    // Title bar
+    const titleBar = document.createElement('div');
+    titleBar.style.cssText = `
+        background: #9e8b6b;
+        border-bottom: 2px solid #0a0a0a;
+        padding: 4px 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    `;
+
+    const title = document.createElement('div');
+    title.style.cssText = 'color: #ffffff; font-size: 10px; font-weight: bold;';
+    title.textContent = '♫ Performance Booking';
+
+    const closeButton = document.createElement('button');
+    closeButton.style.cssText = `
+        background: #dc2626;
+        color: white;
+        border-top: 1px solid #ef4444;
+        border-left: 1px solid #ef4444;
+        border-right: 1px solid #991b1b;
+        border-bottom: 1px solid #991b1b;
+        padding: 2px 6px;
+        font-size: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    `;
+    closeButton.textContent = 'X';
+    closeButton.onclick = () => {
+        bookingOverlay.remove();
+    };
+
+    titleBar.appendChild(title);
+    titleBar.appendChild(closeButton);
+    bookingContainer.appendChild(titleBar);
+
+    // Content area
+    const contentArea = document.createElement('div');
+    contentArea.style.cssText = 'padding: 6px; overflow-y: auto; flex: 1;';
+
+    // Show time info banner
+    const showTimeHour = Math.floor(bookingData.show_time / 60);
+    const showTimeMin = bookingData.show_time % 60;
+    const infoBanner = document.createElement('div');
+    infoBanner.style.cssText = `
+        background: #1a1a1a;
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        border-right: 1px solid #3a3a3a;
+        border-bottom: 1px solid #3a3a3a;
+        padding: 4px 6px;
+        margin-bottom: 6px;
+        font-size: 8px;
+        color: #cccccc;
+    `;
+    infoBanner.innerHTML = `<span style="color: #fbbf24;">Show Time:</span> ${showTimeHour}:${showTimeMin.toString().padStart(2, '0')} • Select a performance:`;
+    contentArea.appendChild(infoBanner);
+
+    // Shows list
+    bookingData.available_shows.forEach((show, index) => {
+        const showCard = document.createElement('div');
+        showCard.style.cssText = `
+            background: #1f1f1f;
+            border-top: 1px solid #3a3a3a;
+            border-left: 1px solid #3a3a3a;
+            border-right: 1px solid #0a0a0a;
+            border-bottom: 1px solid #0a0a0a;
+            margin-bottom: 4px;
+            padding: 5px;
+            cursor: pointer;
+        `;
+
+        // Format required instruments
+        const instruments = show.required_instruments.map(inst => {
+            return inst.charAt(0).toUpperCase() + inst.slice(1);
+        }).join(', ');
+
+        // Calculate charisma bonus display
+        const charBonus = show.charisma_gold_bonus || 0;
+
+        showCard.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="color: #fbbf24; font-size: 9px; font-weight: bold; margin-bottom: 2px;">${show.name}</div>
+                    <div style="color: #9ca3af; font-size: 7px; margin-bottom: 3px; line-height: 1.3;">${show.description}</div>
+                    <div style="font-size: 7px; color: #6b7280; line-height: 1.4;">
+                        <div>Req: ${instruments}</div>
+                        <div style="color: #10b981;">Pay: ${show.base_gold}g + ${show.base_xp}xp${charBonus > 0 ? ` (+${charBonus}g/CHA)` : ''}</div>
+                    </div>
+                </div>
+                <button class="book-show-btn" data-show-index="${index}" style="
+                    background: #16a34a;
+                    color: white;
+                    border-top: 1px solid #22c55e;
+                    border-left: 1px solid #22c55e;
+                    border-right: 1px solid #15803d;
+                    border-bottom: 1px solid #15803d;
+                    padding: 4px 8px;
+                    font-size: 7px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                ">BOOK</button>
+            </div>
+        `;
+
+        // Hover effect
+        showCard.addEventListener('mouseenter', () => {
+            showCard.style.background = '#2a2a2a';
+        });
+        showCard.addEventListener('mouseleave', () => {
+            showCard.style.background = '#1f1f1f';
+        });
+
+        // Handle booking
+        const bookButton = showCard.querySelector('.book-show-btn');
+        bookButton.addEventListener('mouseenter', () => {
+            bookButton.style.background = '#15803d';
+        });
+        bookButton.addEventListener('mouseleave', () => {
+            bookButton.style.background = '#16a34a';
+        });
+        bookButton.onclick = async (e) => {
+            e.stopPropagation();
+            await bookShow(show.id, bookingData.npc_id);
+            bookingOverlay.remove();
+        };
+
+        contentArea.appendChild(showCard);
+    });
+
+    bookingContainer.appendChild(contentArea);
+    bookingOverlay.appendChild(bookingContainer);
+    bookingOverlay.style.display = 'flex';
+}
+
+/**
+ * Book a show performance
+ * @param {string} showId - The ID of the show to book
+ * @param {string} npcId - The ID of the NPC booking the show
+ */
+async function bookShow(showId, npcId) {
+    logger.debug('Booking show:', showId, 'with NPC:', npcId);
+
+    try {
+        const result = await gameAPI.sendAction('book_show', {
+            show_id: showId,
+            npc_id: npcId
+        });
+
+        if (result.success) {
+            showMessage(result.message, 'success');
+            // Refresh state to get updated game time, gold, etc.
+            await refreshGameState();
+            updateAllDisplays();
+        } else {
+            showMessage(result.error || 'Failed to book show', 'error');
+        }
+    } catch (error) {
+        logger.error('Error booking show:', error);
+        showMessage('❌ Failed to book show', 'error');
+    }
 }
 
 /**
@@ -964,6 +1209,99 @@ export async function performShow() {
     } catch (error) {
         logger.error('Error performing show:', error);
         showMessage('❌ Failed to perform show', 'error');
+    }
+}
+
+/**
+ * Initialize auto-update listeners for time-based UI changes
+ * Sets up event listeners that update building/NPC UI when time changes
+ * Uses debouncing to prevent excessive re-renders
+ */
+function initializeAutoUpdate() {
+    logger.info('Initializing location auto-update listeners');
+
+    // Debounced update function - waits 100ms after last event before updating
+    const debouncedUpdate = () => {
+        // Clear any pending update
+        if (renderTimeout) {
+            clearTimeout(renderTimeout);
+        }
+
+        // Schedule new update after short delay
+        renderTimeout = setTimeout(async () => {
+            logger.debug('⏰ Time-based location update triggered');
+            await displayCurrentLocation();
+        }, 100);
+    };
+
+    // Listen for time changes from the time clock (fires every 5 seconds)
+    eventBus.on('gameStateChange', debouncedUpdate);
+
+    logger.debug('Location auto-update listeners initialized (debounced 100ms)');
+}
+
+/**
+ * Check if player is in a building that just closed and eject them
+ * Called on every location display update to ensure player isn't in closed building
+ */
+async function checkAndEjectFromClosedBuilding() {
+    const state = getGameStateSync();
+    const currentBuildingId = state.location?.building;
+
+    // Skip if not in a building
+    if (!currentBuildingId) {
+        return;
+    }
+
+    // Get current time in minutes
+    const timeInMinutes = state.character?.time_of_day !== undefined ? state.character.time_of_day : 720;
+
+    // Get current location data to find the building
+    const cityId = state.location?.current;
+    const districtKey = state.location?.district || 'center';
+    const districtId = `${cityId}-${districtKey}`;
+    const locationData = getLocationById(districtId);
+
+    if (!locationData) {
+        return;
+    }
+
+    // Get district data
+    let districtData = null;
+    if (locationData.properties?.districts) {
+        for (const district of Object.values(locationData.properties.districts)) {
+            if (district.id === districtId) {
+                districtData = district;
+                break;
+            }
+        }
+    }
+
+    const currentData = districtData || locationData;
+    const buildings = currentData.buildings || currentData.properties?.buildings;
+
+    if (!buildings) {
+        return;
+    }
+
+    // Find the current building
+    const currentBuilding = buildings.find(b => b.id === currentBuildingId);
+    if (!currentBuilding) {
+        return;
+    }
+
+    // Check if building is closed
+    const isOpen = isBuildingOpen(currentBuilding, timeInMinutes);
+
+    if (!isOpen) {
+        // Building is closed! Eject player
+        logger.info(`Building ${currentBuildingId} is now closed. Ejecting player...`);
+
+        // Exit the building
+        await exitBuilding();
+
+        // Show message to player
+        showMessage(`The ${currentBuilding.name} has closed for the day. You've been escorted out.`, 'warning');
     }
 }
 

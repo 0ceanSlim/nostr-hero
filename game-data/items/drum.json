@@ -11,5 +11,10 @@
   "stack": 1,
   "tags": [],
   "type": "Musical Instrument",
-  "weight": 3
+  "weight": 3,
+  "performance": {
+    "base_success": 75,
+    "charisma_modifier": 5,
+    "difficulty": "easy"
+  }
 }

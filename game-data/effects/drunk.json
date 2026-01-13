@@ -1,0 +1,27 @@
+{
+  "id": "drunk",
+  "name": "Drunk",
+  "description": "Intoxicated from alcohol - less coordinated but more charismatic",
+  "effects": [
+    {
+      "type": "dexterity",
+      "value": -2,
+      "duration": 240,
+      "delay": 0
+    },
+    {
+      "type": "wisdom",
+      "value": -1,
+      "duration": 240,
+      "delay": 0
+    },
+    {
+      "type": "charisma",
+      "value": 1,
+      "duration": 240,
+      "delay": 0
+    }
+  ],
+  "icon": "bottle",
+  "color": "yellow"
+}

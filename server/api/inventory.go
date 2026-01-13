@@ -775,7 +775,6 @@ func handleUseItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemActi
 					case "hunger":
 						save.Hunger += int(value)
 						save.Hunger = max(0, min(save.Hunger, 3)) // Clamp to 0-3
-						save.HungerCounter = 0                    // Reset hunger counter when eating
 						effectsApplied = append(effectsApplied, fmt.Sprintf("Hunger %+d", int(value)))
 
 					case "fatigue":

@@ -10,6 +10,7 @@
 import { logger } from '../lib/logger.js';
 import { getGameStateSync } from '../state/gameState.js';
 import { loadItemsFromDatabase } from '../data/items.js';
+import { eventBus } from '../lib/events.js';
 
 // Advancement data cache
 let advancementDataCache = null;
@@ -163,13 +164,20 @@ export async function calculateAndDisplayWeight(character) {
  * Update full character display from save data
  */
 export async function updateCharacterDisplay() {
+    logger.debug('📊 updateCharacterDisplay called');
     const state = getGameStateSync();
     const character = state.character;
 
     if (!character) {
-        logger.error('No character data found!');
+        logger.error('❌ No character data found!');
         return;
     }
+
+    logger.debug('✓ Character data:', {
+        fatigue: character.fatigue,
+        hunger: character.hunger,
+        hp: character.hp
+    });
 
     // Update character info
     if (document.getElementById('char-name')) {
@@ -753,5 +761,12 @@ async function updateStatsTab(character) {
         logger.error('Error calculating weight:', error);
     }
 }
+
+// Listen for game state changes and auto-update display
+eventBus.on('gameStateChange', (data) => {
+    logger.info('🔔 gameStateChange event received!', data);
+    logger.info('🎨 Updating character display from event...');
+    updateCharacterDisplay();
+});
 
 logger.debug('Character display module loaded');

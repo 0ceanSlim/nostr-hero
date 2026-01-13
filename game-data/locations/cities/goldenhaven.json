@@ -40,8 +40,8 @@
           "id": "goldenhaven_trade_goods",
           "name": "Goldscale Trading House",
           "description": "Aurelia Goldscale's prestigious trading house, offering quality general supplies for discerning adventurers.",
-          "open": 7,
-          "close": 8
+          "open": 480,
+          "close": 1200
         },
         {
           "id": "aurelia_home",
@@ -54,22 +54,22 @@
           "id": "grand_exchange",
           "name": "Grand Exchange",
           "description": "The financial heart of the city where currencies are exchanged and large transactions occur.",
-          "open": 8,
-          "close": 6
+          "open": 480,
+          "close": 1080
         },
         {
           "id": "luxury_market",
           "name": "Golden Bazaar",
           "description": "An upscale market selling rare and exotic goods from across the world.",
-          "open": 7,
-          "close": 9
+          "open": 420,
+          "close": 1260
         },
         {
           "id": "merchants_guild",
           "name": "Merchant Princes Guild",
           "description": "The most powerful guild in the city, controlling trade routes and merchant licenses.",
-          "open": 8,
-          "close": 7
+          "open": 480,
+          "close": 1140
         }
       ]
     },
@@ -86,8 +86,8 @@
           "id": "customs_house",
           "name": "Customs House",
           "description": "Where all goods entering the city are inspected and taxed.",
-          "open": 6,
-          "close": 10
+          "open": 360,
+          "close": 1320
         },
         {
           "id": "caravan_rest",
@@ -112,8 +112,8 @@
           "id": "miners_exchange",
           "name": "Mountain Ore Exchange",
           "description": "A major trading post for ores, gems, and mining equipment.",
-          "open": 7,
-          "close": 7
+          "open": 420,
+          "close": 1140
         }
       ],
       "exit_to_environment": "cragspire-mountains"
@@ -131,8 +131,8 @@
           "id": "harbor_master",
           "name": "Harbor Master's Office",
           "description": "Where ship passages are booked and cargo is registered.",
-          "open": 6,
-          "close": 8
+          "open": 360,
+          "close": 1200
         },
         {
           "id": "sailors_tavern",

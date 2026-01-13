@@ -38,8 +38,8 @@
           "id": "bog_trader",
           "name": "Swamp Treasures",
           "description": "Grokmar the Shrewd's practical trading post, stocked with survival gear for the harsh wetlands.",
-          "open": 8,
-          "close": 16
+          "open": 480,
+          "close": 1200
         },
         {
           "id": "grishka_quarters",

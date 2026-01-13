@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"slices"
 
@@ -24,7 +25,8 @@ type GameActionResponse struct {
 	Message string                 `json:"message"`
 	Color   string                 `json:"color,omitempty"` // Message color (red, green, yellow, white, purple, blue)
 	State   *SaveFile              `json:"state,omitempty"` // Updated game state
-	Delta   map[string]any `json:"delta,omitempty"` // Only changed fields (for optimization)
+	Delta   map[string]any         `json:"delta,omitempty"` // Only changed fields (for optimization)
+	Data    map[string]interface{} `json:"data,omitempty"`  // Additional response data
 	Error   string                 `json:"error,omitempty"`
 }
 
@@ -66,7 +68,7 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process the action based on type
-	response, err := processGameAction(&session.SaveData, request.Action)
+	response, err := processGameAction(session, request.Action)
 	if err != nil {
 		log.Printf("❌ Action failed: %v", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -94,7 +96,9 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // processGameAction routes to specific action handlers
-func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse, error) {
+func processGameAction(session *GameSession, action GameAction) (*GameActionResponse, error) {
+	state := &session.SaveData
+
 	switch action.Type {
 	case "move":
 		return handleMoveAction(state, action.Params)
@@ -141,21 +145,21 @@ func processGameAction(state *SaveFile, action GameAction) (*GameActionResponse,
 	case "talk_to_npc":
 		return handleTalkToNPCAction(state, action.Params)
 	case "npc_dialogue_choice":
-		return handleNPCDialogueChoiceAction(state, action.Params)
+		return handleNPCDialogueChoiceAction(session, action.Params)
 	case "register_vault":
 		return handleRegisterVaultAction(state, action.Params)
 	case "open_vault":
 		return handleOpenVaultAction(state, action.Params)
 	case "rent_room":
-		return handleRentRoomAction(state, action.Params)
+		return handleRentRoomAction(session, action.Params)
 	case "sleep":
-		return handleSleepAction(state, action.Params)
+		return handleSleepAction(session, action.Params)
 	case "wait":
 		return handleWaitAction(state, action.Params)
 	case "book_show":
-		return handleBookShowAction(state, action.Params)
+		return handleBookShowAction(session, action.Params)
 	case "play_show":
-		return handlePlayShowAction(state, action.Params)
+		return handlePlayShowAction(session, action.Params)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -354,6 +358,8 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 		case "hunger":
 			oldHunger := state.Hunger
 			state.Hunger = min(3, max(0, state.Hunger+int(effectValue)))
+			_, _ = updateHungerPenaltyEffects(state)
+			ensureHungerAccumulation(state)
 			if state.Hunger > oldHunger {
 				effectMessages = append(effectMessages, "Hunger restored")
 			} else if state.Hunger < oldHunger {
@@ -362,7 +368,17 @@ func applyItemEffects(state *SaveFile, itemID string) []string {
 
 		case "fatigue":
 			oldFatigue := state.Fatigue
-			state.Fatigue = max(0, state.Fatigue+int(effectValue))
+			state.Fatigue = max(0, min(10, state.Fatigue+int(effectValue)))
+
+			// Stop accumulation if we've reached max fatigue
+			if state.Fatigue >= 10 {
+				removeFatigueAccumulation(state)
+			} else {
+				// Ensure accumulation is active if below max
+				ensureFatigueAccumulation(state)
+			}
+
+			_, _ = updateFatiguePenaltyEffects(state)
 			if state.Fatigue < oldFatigue {
 				fatigueReduced := oldFatigue - state.Fatigue
 				effectMessages = append(effectMessages, fmt.Sprintf("Fatigue reduced by %d", fatigueReduced))
@@ -608,6 +624,7 @@ func handleRestAction(state *SaveFile, _ map[string]any) (*GameActionResponse, e
 	state.HP = state.MaxHP
 	state.Mana = state.MaxMana
 	state.Fatigue = 0
+	removeFatiguePenaltyEffects(state)
 
 	// Advance time
 	state.TimeOfDay = (state.TimeOfDay + 8) % 24 // Rest for 8 hours
@@ -637,25 +654,8 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]any) (*GameActio
 	state.CurrentDay += daysAdvanced
 	state.TimeOfDay = state.TimeOfDay % 1440
 
-	// Update fatigue counter (increments every 240 minutes = 4 hours)
-	state.FatigueCounter += float64(minutesToAdvance)
-	if state.FatigueCounter >= 240.0 {
-		state.Fatigue++
-		state.FatigueCounter = 0
-	}
-
-	// Update hunger counter (decreases every 360 minutes = 6 hours, or 720 minutes = 12 hours if already hungry)
-	state.HungerCounter += float64(minutesToAdvance)
-	hungerThreshold := 360.0 // 6 hours in minutes
-	if state.Hunger <= 1 {
-		hungerThreshold = 720.0 // 12 hours in minutes (slower when already hungry)
-	}
-	if state.HungerCounter >= hungerThreshold {
-		if state.Hunger > 0 {
-			state.Hunger--
-		}
-		state.HungerCounter = 0
-	}
+	// Fatigue and hunger are now handled by accumulation effects (fatigue-accumulation, hunger-accumulation-*)
+	// No need to manually tick them here
 
 	return &GameActionResponse{
 		Success: true,
@@ -665,39 +665,61 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]any) (*GameActio
 
 // handleUpdateTimeAction syncs time from frontend clock to backend state
 func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
-	// Update time_of_day (minutes in day, 0-1439)
-	if timeOfDay, ok := params["time_of_day"].(float64); ok {
-		state.TimeOfDay = int(timeOfDay)
+	// Get the new time from frontend
+	newTimeOfDay, timeOk := params["time_of_day"].(float64)
+	newCurrentDay, dayOk := params["current_day"].(float64)
+
+	if !timeOk || !dayOk {
+		return &GameActionResponse{
+			Success: false,
+			Message: "Missing time parameters",
+		}, nil
 	}
 
-	// Update current_day
-	if currentDay, ok := params["current_day"].(float64); ok {
-		state.CurrentDay = int(currentDay)
+	// Calculate time delta
+	oldTime := state.TimeOfDay
+	oldDay := state.CurrentDay
+
+	// Calculate total minutes elapsed
+	var minutesElapsed int
+	if int(newCurrentDay) == oldDay {
+		// Same day
+		minutesElapsed = int(newTimeOfDay) - oldTime
+	} else {
+		// Day(s) advanced
+		minutesElapsed = (1440 - oldTime) + int(newTimeOfDay) + ((int(newCurrentDay) - oldDay - 1) * 1440)
 	}
 
-	// Update fatigue counter (in minutes)
-	if fatigueCounter, ok := params["fatigue_counter"].(float64); ok {
-		state.FatigueCounter = fatigueCounter
+	log.Printf("⏰ Frontend time sync: oldTime=%d newTime=%d delta=%d minutes", oldTime, int(newTimeOfDay), minutesElapsed)
+
+	// Only process if time actually advanced
+	if minutesElapsed > 0 {
+		// Use advanceTime to properly process effects
+		advanceTime(state, minutesElapsed)
+
+		// Log tick accumulators after processing
+		for _, effect := range state.ActiveEffects {
+			if effect.EffectID == "fatigue-accumulation" ||
+			   effect.EffectID == "hunger-accumulation-satisfied" ||
+			   effect.EffectID == "hunger-accumulation-hungry" ||
+			   effect.EffectID == "hunger-accumulation-full" {
+				log.Printf("  Effect %s: tick_accumulator=%.2f", effect.EffectID, effect.TickAccumulator)
+			}
+		}
 	}
 
-	// Update hunger counter (in minutes)
-	if hungerCounter, ok := params["hunger_counter"].(float64); ok {
-		state.HungerCounter = hungerCounter
-	}
-
-	// Update fatigue level
-	if fatigue, ok := params["fatigue"].(float64); ok {
-		state.Fatigue = int(fatigue)
-	}
-
-	// Update hunger level
-	if hunger, ok := params["hunger"].(float64); ok {
-		state.Hunger = int(hunger)
-	}
-
+	// Return updated state so frontend can sync
 	return &GameActionResponse{
 		Success: true,
 		Message: "Time updated",
+		Data: map[string]interface{}{
+			"time_of_day":     state.TimeOfDay,
+			"current_day":     state.CurrentDay,
+			"fatigue":         state.Fatigue,
+			"hunger":          state.Hunger,
+			"hp":              state.HP,
+			"active_effects":  state.ActiveEffects,
+		},
 	}, nil
 }
 
@@ -1302,11 +1324,47 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	// Include session-specific data in the response
+	stateWithSession := map[string]any{
 		"success": true,
-		"state":   session.SaveData,
-	})
+		"state": map[string]any{
+			// Include all SaveData fields
+			"d":                    session.SaveData.D,
+			"created_at":           session.SaveData.CreatedAt,
+			"race":                 session.SaveData.Race,
+			"class":                session.SaveData.Class,
+			"background":           session.SaveData.Background,
+			"alignment":            session.SaveData.Alignment,
+			"experience":           session.SaveData.Experience,
+			"hp":                   session.SaveData.HP,
+			"max_hp":               session.SaveData.MaxHP,
+			"mana":                 session.SaveData.Mana,
+			"max_mana":             session.SaveData.MaxMana,
+			"fatigue":              session.SaveData.Fatigue,
+			"hunger":               session.SaveData.Hunger,
+			"stats":                session.SaveData.Stats,
+			"location":             session.SaveData.Location,
+			"district":             session.SaveData.District,
+			"building":             session.SaveData.Building,
+			"current_day":          session.SaveData.CurrentDay,
+			"time_of_day":          session.SaveData.TimeOfDay,
+			"inventory":            session.SaveData.Inventory,
+			"vaults":               session.SaveData.Vaults,
+			"known_spells":         session.SaveData.KnownSpells,
+			"spell_slots":          session.SaveData.SpellSlots,
+			"locations_discovered": session.SaveData.LocationsDiscovered,
+			"music_tracks_unlocked": session.SaveData.MusicTracksUnlocked,
+			"active_effects":       session.SaveData.ActiveEffects,
+
+			// Add session-specific data
+			"rented_rooms":    session.RentedRooms,
+			"booked_shows":    session.BookedShows,
+			"performed_shows": session.PerformedShows,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stateWithSession)
 }
 
 // handleEnterBuildingAction enters a building
@@ -1322,15 +1380,37 @@ func handleEnterBuildingAction(state *SaveFile, params map[string]any) (*GameAct
 		return nil, fmt.Errorf("database not available")
 	}
 
-	isOpen, openHour, closeHour, err := utils.IsBuildingOpen(database, state.Location, buildingID, state.TimeOfDay)
+	isOpen, openMinutes, closeMinutes, err := utils.IsBuildingOpen(database, state.Location, buildingID, state.TimeOfDay)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check building hours: %v", err)
 	}
 
 	if !isOpen {
+		// Convert minutes to hours:minutes format for display
+		openHour := openMinutes / 60
+		openMin := openMinutes % 60
+		closeHour := closeMinutes / 60
+		closeMin := closeMinutes % 60
+
+		// Format times with AM/PM
+		formatTime := func(hour, min int) string {
+			period := "AM"
+			displayHour := hour
+			if hour >= 12 {
+				period = "PM"
+				if hour > 12 {
+					displayHour = hour - 12
+				}
+			}
+			if displayHour == 0 {
+				displayHour = 12
+			}
+			return fmt.Sprintf("%d:%02d %s", displayHour, min, period)
+		}
+
 		return &GameActionResponse{
 			Success: false,
-			Message: fmt.Sprintf("The building is closed. Open hours: %02d:00 - %02d:00", openHour, closeHour),
+			Message: fmt.Sprintf("The building is closed. Open hours: %s - %s", formatTime(openHour, openMin), formatTime(closeHour, closeMin)),
 			Color:   "red",
 		}, nil
 	}
@@ -1354,10 +1434,9 @@ func handleExitBuildingAction(state *SaveFile, _ map[string]any) (*GameActionRes
 
 	log.Printf("🚪 Exited building")
 
-	// Check if fatigue increased to warn user
+	// Check fatigue level to warn user
 	message := "Exited building"
-	if state.Fatigue > 0 && state.FatigueCounter == 0 {
-		// Fatigue just increased
+	if state.Fatigue > 0 {
 		message = fmt.Sprintf("Exited building (Fatigue: %d)", state.Fatigue)
 	}
 
@@ -1496,7 +1575,8 @@ func handleTalkToNPCAction(state *SaveFile, params map[string]any) (*GameActionR
 }
 
 // handleNPCDialogueChoiceAction processes player's dialogue choice
-func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+func handleNPCDialogueChoiceAction(session *GameSession, params map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
 	npcID, _ := params["npc_id"].(string)
 	choice, _ := params["choice"].(string)
 
@@ -1559,7 +1639,7 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]any) (*Gam
 
 	case "rent_room":
 		cost, _ := choiceNode["cost"].(float64)
-		result, err := handleRentRoomAction(state, map[string]any{"cost": cost})
+		result, err := handleRentRoomAction(session, map[string]any{"cost": cost})
 		if err != nil {
 			log.Printf("❌ Failed to rent room: %v", err)
 			actionResult, _ = choiceNode["failure"].(string)
@@ -1620,6 +1700,141 @@ func handleNPCDialogueChoiceAction(state *SaveFile, params map[string]any) (*Gam
 			Delta: map[string]any{
 				"open_shop": npcID,
 				"shop_tab":  "sell",
+				"npc_dialogue": map[string]any{
+					"action": "close",
+				},
+			},
+		}, nil
+
+	case "book_show":
+		// Load show configuration from NPC data
+		log.Printf("✅ Getting available shows for NPC: %s", npcID)
+
+		// Get current building/venue for tracking
+		venueID := state.Building
+		if venueID == "" {
+			return &GameActionResponse{
+				Success: false,
+				Message: "Not in a building",
+				Color:   "red",
+			}, nil
+		}
+
+		// Get show configuration from NPC
+		showConfig, ok := npcData["show_config"].(map[string]any)
+		if !ok {
+			log.Printf("❌ NPC %s does not have show_config", npcID)
+			return &GameActionResponse{
+				Success: false,
+				Message: "This NPC doesn't offer show bookings",
+				Color:   "red",
+			}, nil
+		}
+
+		// Get day of week
+		dayOfWeek := utils.GetDayOfWeek(state.CurrentDay)
+		dayStr := fmt.Sprintf("%d", dayOfWeek)
+
+		// Get available shows for this day
+		availableShows, ok := showConfig["shows_by_day"].(map[string]any)[dayStr].([]any)
+		if !ok || len(availableShows) == 0 {
+			return &GameActionResponse{
+				Success: false,
+				Message: "No shows available today",
+				Color:   "yellow",
+				Delta: map[string]any{
+					"npc_dialogue": map[string]any{
+						"action": "close",
+					},
+				},
+			}, nil
+		}
+
+		// Check booking deadline
+		bookingDeadline := int(showConfig["booking_deadline"].(float64))
+		showTime := int(showConfig["show_time"].(float64))
+
+		if state.TimeOfDay >= bookingDeadline && state.TimeOfDay < showTime {
+			return &GameActionResponse{
+				Success: false,
+				Message: fmt.Sprintf("Too late to book! Booking closes at %d:%02d.", bookingDeadline/60, bookingDeadline%60),
+				Color:   "red",
+				Delta: map[string]any{
+					"npc_dialogue": map[string]any{
+						"action": "close",
+					},
+				},
+			}, nil
+		}
+
+		// Check if already booked a show for today (session-only data)
+		if session.BookedShows != nil {
+			for _, booking := range session.BookedShows {
+				if day, ok := booking["day"].(int); ok && day == state.CurrentDay {
+					return &GameActionResponse{
+						Success: false,
+						Message: "You've already booked a show for today",
+						Color:   "yellow",
+						Delta: map[string]any{
+							"npc_dialogue": map[string]any{
+								"action": "close",
+							},
+						},
+					}, nil
+				}
+			}
+		}
+
+		// Check instrument availability for each show (but include all shows)
+		var allShows []map[string]any
+		hasAnyBookableShow := false
+		for _, show := range availableShows {
+			if showMap, ok := show.(map[string]any); ok {
+				requiredInstruments, _ := showMap["required_instruments"].([]any)
+				hasAllInstruments := true
+				var missingInstruments []string
+				for _, instrRaw := range requiredInstruments {
+					instrument, _ := instrRaw.(string)
+					if !playerHasItem(state, instrument) {
+						hasAllInstruments = false
+						missingInstruments = append(missingInstruments, instrument)
+					}
+				}
+
+				// Add instrument availability info to the show
+				showWithAvailability := make(map[string]any)
+				for k, v := range showMap {
+					showWithAvailability[k] = v
+				}
+				showWithAvailability["can_book"] = hasAllInstruments
+				showWithAvailability["missing_instruments"] = missingInstruments
+
+				allShows = append(allShows, showWithAvailability)
+
+				if hasAllInstruments {
+					hasAnyBookableShow = true
+				}
+			}
+		}
+
+		// Modify message if player can't book any shows
+		displayMessage := responseText
+		if !hasAnyBookableShow {
+			displayMessage = "Here are tonight's available shows. You'll need the right instruments to book a performance."
+		}
+
+		// Return show selection UI with all shows
+		return &GameActionResponse{
+			Success: true,
+			Message: displayMessage,
+			Color:   "yellow",
+			Delta: map[string]any{
+				"show_booking": map[string]any{
+					"npc_id":         npcID,
+					"venue_id":       venueID,
+					"available_shows": allShows,
+					"show_time":      showTime,
+				},
 				"npc_dialogue": map[string]any{
 					"action": "close",
 				},
@@ -2077,7 +2292,8 @@ func handleRemoveFromContainerAction(state *SaveFile, params map[string]any) (*G
 // ============================================================================
 
 // handleRentRoomAction rents a room at an inn/tavern
-func handleRentRoomAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+func handleRentRoomAction(session *GameSession, params map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
 	buildingID := state.Building
 	if buildingID == "" {
 		return nil, fmt.Errorf("not in a building")
@@ -2115,13 +2331,13 @@ func handleRentRoomAction(state *SaveFile, params map[string]any) (*GameActionRe
 	newGoldAmount := getGoldQuantity(state)
 	log.Printf("✅ Gold deducted successfully. Old: %d, New: %d", goldAmount, newGoldAmount)
 
-	// Initialize rented rooms if needed
-	if state.RentedRooms == nil {
-		state.RentedRooms = []map[string]any{}
+	// Initialize rented rooms if needed (session-only data)
+	if session.RentedRooms == nil {
+		session.RentedRooms = []map[string]any{}
 	}
 
 	// Check if already rented at this building
-	for _, room := range state.RentedRooms {
+	for _, room := range session.RentedRooms {
 		if building, ok := room["building"].(string); ok && building == buildingID {
 			return &GameActionResponse{
 				Success: false,
@@ -2141,7 +2357,7 @@ func handleRentRoomAction(state *SaveFile, params map[string]any) (*GameActionRe
 		"expiration_time": expirationTime,
 	}
 
-	state.RentedRooms = append(state.RentedRooms, room)
+	session.RentedRooms = append(session.RentedRooms, room)
 
 	log.Printf("🏠 Rented room at %s for %d gold (expires day %d at %d)", buildingID, cost, expirationDay, expirationTime)
 
@@ -2149,21 +2365,25 @@ func handleRentRoomAction(state *SaveFile, params map[string]any) (*GameActionRe
 		Success: true,
 		Message: fmt.Sprintf("Rented a room for %d gold. You can sleep here until tomorrow night.", cost),
 		Color:   "green",
+		Data: map[string]interface{}{
+			"rented_rooms": session.RentedRooms,
+		},
 	}, nil
 }
 
 // handleSleepAction sleeps in a rented room
-func handleSleepAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+func handleSleepAction(session *GameSession, _ map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
 	buildingID := state.Building
 	if buildingID == "" {
 		return nil, fmt.Errorf("not in a building")
 	}
 
-	// Check if player has a rented room here and find the index
+	// Check if player has a rented room here and find the index (session-only data)
 	hasRoom := false
 	roomIndex := -1
-	if state.RentedRooms != nil {
-		for i, room := range state.RentedRooms {
+	if session.RentedRooms != nil {
+		for i, room := range session.RentedRooms {
 			if building, ok := room["building"].(string); ok && building == buildingID {
 				// Check if expired
 				expDay, _ := room["expiration_day"].(int)
@@ -2171,7 +2391,7 @@ func handleSleepAction(state *SaveFile, params map[string]any) (*GameActionRespo
 
 				if state.CurrentDay > expDay || (state.CurrentDay == expDay && state.TimeOfDay > expTime) {
 					// Room expired, remove it
-					state.RentedRooms = append(state.RentedRooms[:i], state.RentedRooms[i+1:]...)
+					session.RentedRooms = append(session.RentedRooms[:i], session.RentedRooms[i+1:]...)
 					return &GameActionResponse{
 						Success: false,
 						Message: "Your room rental has expired. Please rent another room.",
@@ -2213,24 +2433,27 @@ func handleSleepAction(state *SaveFile, params map[string]any) (*GameActionRespo
 	// Reset fatigue based on sleep quality
 	if poorSleep {
 		state.Fatigue = 1 // Poor sleep - still a bit tired
-		log.Printf("😴 Poor sleep due to late bedtime (fatigue reset to 1)")
+		log.Printf("😴 Poor sleep due to late bedtime (fatigue level 1)")
 	} else {
 		state.Fatigue = 0 // Good sleep - fully rested
-		log.Printf("😴 Good sleep (fatigue reset to 0)")
+		log.Printf("😴 Good sleep (fully rested)")
 	}
-	state.FatigueCounter = 0
+	resetFatigueAccumulator(state)
+	_, _ = updateFatiguePenaltyEffects(state)
 
-	// Reset hunger
-	state.Hunger = 1 // Hungry after waking up
-	state.HungerCounter = 0
+	// Reset hunger (hungry after waking up)
+	state.Hunger = 1
+	resetHungerAccumulator(state)
+	_, _ = updateHungerPenaltyEffects(state)
+	ensureHungerAccumulation(state)
 
 	// Restore HP and Mana fully
 	state.HP = state.MaxHP
 	state.Mana = state.MaxMana
 
 	// Remove the rented room after sleeping (room is used up)
-	if roomIndex >= 0 && roomIndex < len(state.RentedRooms) {
-		state.RentedRooms = append(state.RentedRooms[:roomIndex], state.RentedRooms[roomIndex+1:]...)
+	if roomIndex >= 0 && roomIndex < len(session.RentedRooms) {
+		session.RentedRooms = append(session.RentedRooms[:roomIndex], session.RentedRooms[roomIndex+1:]...)
 		log.Printf("🚪 Room rental at %s has been used and removed", buildingID)
 	}
 
@@ -2269,29 +2492,13 @@ func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionRespon
 
 	// Calculate time advancement in minutes
 	minutesToAdvance := hours * 60
-	newTimeOfDay := state.TimeOfDay + minutesToAdvance
 
-	// Handle day wrap-around
-	if newTimeOfDay >= 1440 {
-		state.CurrentDay++
-		state.TimeOfDay = newTimeOfDay % 1440
-	} else {
-		state.TimeOfDay = newTimeOfDay
-	}
+	// Track fatigue/hunger before wait
+	oldFatigue := state.Fatigue
+	oldHunger := state.Hunger
 
-	// Increase fatigue by 1 per hour waited
-	fatigueIncrease := hours
-	state.Fatigue += fatigueIncrease
-	if state.Fatigue > 10 {
-		state.Fatigue = 10 // Cap at max fatigue
-	}
-
-	// Increase hunger by 1 every 3 hours
-	hungerIncrease := hours / 3
-	state.Hunger += hungerIncrease
-	if state.Hunger > 3 {
-		state.Hunger = 3 // Cap at max hunger
-	}
+	// Advance time and process all effects (effects system handles fatigue/hunger)
+	timeMessages := advanceTime(state, minutesToAdvance)
 
 	// Format message
 	hourText := "hour"
@@ -2300,14 +2507,35 @@ func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionRespon
 	}
 
 	message := fmt.Sprintf("You waited %d %s.", hours, hourText)
-	if fatigueIncrease > 0 {
-		message += fmt.Sprintf(" Fatigue +%d", fatigueIncrease)
-	}
-	if hungerIncrease > 0 {
-		message += fmt.Sprintf(", Hunger +%d", hungerIncrease)
+
+	// Add explicit fatigue/hunger change messages
+	if state.Fatigue != oldFatigue {
+		fatigueChange := state.Fatigue - oldFatigue
+		if fatigueChange > 0 {
+			message += fmt.Sprintf("\n\n💤 Your fatigue increased by %d (now %d/10)", fatigueChange, state.Fatigue)
+		} else {
+			message += fmt.Sprintf("\n\n✨ Your fatigue decreased by %d (now %d/10)", -fatigueChange, state.Fatigue)
+		}
 	}
 
-	log.Printf("⏱️ Waited %d hours - Time: %d, Fatigue: %d, Hunger: %d", hours, state.TimeOfDay, state.Fatigue, state.Hunger)
+	if state.Hunger != oldHunger {
+		hungerChange := state.Hunger - oldHunger
+		hungerNames := map[int]string{0: "Famished", 1: "Hungry", 2: "Satisfied", 3: "Full"}
+		if hungerChange < 0 {
+			message += fmt.Sprintf("\n\n🍽️ You're feeling hungrier (now %s)", hungerNames[state.Hunger])
+		}
+	}
+
+	// Append any time-based messages (like starvation damage)
+	if len(timeMessages) > 0 {
+		for _, msg := range timeMessages {
+			if !msg.Silent {
+				message += "\n\n" + msg.Message
+			}
+		}
+	}
+
+	log.Printf("⏱️ Waited %d hours - Time: %d, Fatigue: %d→%d, Hunger: %d→%d", hours, state.TimeOfDay, oldFatigue, state.Fatigue, oldHunger, state.Hunger)
 
 	return &GameActionResponse{
 		Success: true,
@@ -2317,10 +2545,16 @@ func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionRespon
 }
 
 // handleBookShowAction books a performance at a tavern
-func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+func handleBookShowAction(session *GameSession, params map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
 	showID, ok := params["show_id"].(string)
 	if !ok {
 		return nil, fmt.Errorf("missing show_id parameter")
+	}
+
+	npcID, ok := params["npc_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing npc_id parameter")
 	}
 
 	venueID := state.Building
@@ -2328,10 +2562,28 @@ func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 		return nil, fmt.Errorf("not in a building")
 	}
 
-	// Load show configuration from database
-	showConfig, err := loadShowConfig(state.Location, venueID)
+	// Get NPC data from database
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM npcs WHERE id = ?", npcID).Scan(&propertiesJSON)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load show configuration: %v", err)
+		return nil, fmt.Errorf("NPC not found: %s", npcID)
+	}
+
+	// Parse NPC properties
+	var npcData map[string]any
+	if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
+		return nil, fmt.Errorf("failed to parse NPC data: %v", err)
+	}
+
+	// Load show configuration from NPC data
+	showConfig, ok := npcData["show_config"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("NPC %s does not have show_config", npcID)
 	}
 
 	// Get day of week
@@ -2393,12 +2645,12 @@ func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 		}
 	}
 
-	// Check if already booked a show for today
-	if state.BookedShows == nil {
-		state.BookedShows = []map[string]any{}
+	// Check if already booked a show for today (session-only data)
+	if session.BookedShows == nil {
+		session.BookedShows = []map[string]any{}
 	}
 
-	for _, booking := range state.BookedShows {
+	for _, booking := range session.BookedShows {
 		if day, ok := booking["day"].(int); ok && day == state.CurrentDay {
 			return &GameActionResponse{
 				Success: false,
@@ -2418,7 +2670,7 @@ func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 		"show_data":  selectedShow, // Store show data for later
 	}
 
-	state.BookedShows = append(state.BookedShows, booking)
+	session.BookedShows = append(session.BookedShows, booking)
 
 	showName, _ := selectedShow["name"].(string)
 	log.Printf("🎭 Booked show '%s' (ID: %s) at %s for day %d", showName, showID, venueID, state.CurrentDay)
@@ -2431,17 +2683,20 @@ func handleBookShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 }
 
 // handlePlayShowAction performs a booked show
-func handlePlayShowAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
+func handlePlayShowAction(session *GameSession, _ map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
+	log.Printf("🎭 handlePlayShowAction called - building: %s, day: %d, time: %d", state.Building, state.CurrentDay, state.TimeOfDay)
+
 	venueID := state.Building
 	if venueID == "" {
 		return nil, fmt.Errorf("not in a building")
 	}
 
-	// Find booked show for today at this venue
+	// Find booked show for today at this venue (session-only data)
 	var booking map[string]any
 	var bookingIndex int
-	if state.BookedShows != nil {
-		for i, b := range state.BookedShows {
+	if session.BookedShows != nil {
+		for i, b := range session.BookedShows {
 			day, _ := b["day"].(int)
 			venue, _ := b["venue_id"].(string)
 			performed, _ := b["performed"].(bool)
@@ -2463,7 +2718,7 @@ func handlePlayShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 	}
 
 	// Check if it's show time (must be within 30 minutes of show time)
-	showTime := int(booking["show_time"].(float64))
+	showTime := getIntValue(booking, "show_time", 0)
 	timeDiff := state.TimeOfDay - showTime
 	if timeDiff < 0 || timeDiff > 30 {
 		return &GameActionResponse{
@@ -2479,14 +2734,39 @@ func handlePlayShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 		return nil, fmt.Errorf("show data not found in booking")
 	}
 
-	// Calculate rewards
-	baseGold := int(showData["base_gold"].(float64))
-	baseXP := int(showData["base_xp"].(float64))
-	charismaBonus := int(showData["charisma_gold_bonus"].(float64))
+	// Get required instruments and find the first one the player has
+	requiredInstruments, _ := showData["required_instruments"].([]any)
+	var instrumentID string
+	for _, instrRaw := range requiredInstruments {
+		instr, _ := instrRaw.(string)
+		if playerHasItem(state, instr) {
+			instrumentID = instr
+			break
+		}
+	}
 
-	// Get charisma stat
+	if instrumentID == "" {
+		return &GameActionResponse{
+			Success: false,
+			Message: "You don't have the required instrument!",
+			Color:   "red",
+		}, nil
+	}
+
+	// Load instrument difficulty data
+	instrumentData, err := loadInstrumentData(instrumentID)
+	if err != nil {
+		log.Printf("⚠️ Failed to load instrument data for %s, using defaults: %v", instrumentID, err)
+		// Use safe defaults if instrument not found
+		instrumentData = map[string]interface{}{
+			"base_success":       70.0,
+			"charisma_modifier":  5.0,
+		}
+	}
+
+	// Get charisma stat (with active effect modifiers)
 	charisma := 10 // Default
-	if stats, ok := state.Stats["charisma"]; ok {
+	if stats, ok := state.Stats["Charisma"]; ok {
 		if charInt, ok := stats.(int); ok {
 			charisma = charInt
 		} else if charFloat, ok := stats.(float64); ok {
@@ -2494,102 +2774,131 @@ func handlePlayShowAction(state *SaveFile, params map[string]any) (*GameActionRe
 		}
 	}
 
-	// Calculate total gold (charisma bonus applies to points above 10)
-	charismaMod := charisma - 10
-	if charismaMod < 0 {
-		charismaMod = 0
-	}
-	totalGold := baseGold + (charismaMod * charismaBonus)
+	// Apply active charisma modifiers from effects
+	statModifiers := getActiveStatModifiers(state)
+	charisma += statModifiers["charisma"]
 
-	// Add gold to inventory
+	// Calculate performance success chance
+	baseSuccess := getFloatValue(instrumentData, "base_success", 50.0)
+	charismaMod := getFloatValue(instrumentData, "charisma_modifier", 5.0)
+	successChance := baseSuccess + (float64(charisma-10) * charismaMod)
+
+	// Clamp success chance between 5% and 95%
+	if successChance < 5 {
+		successChance = 5
+	}
+	if successChance > 95 {
+		successChance = 95
+	}
+
+	// Perform charisma check (roll 1-100)
+	roll := rand.Intn(100) + 1
+	performanceSuccess := float64(roll) <= successChance
+
+	log.Printf("🎲 Performance check: roll=%d, success_threshold=%.0f%% - %v", roll, successChance, performanceSuccess)
+
+	// Calculate rewards
+	baseGold := getIntValue(showData, "base_gold", 0)
+	baseXP := getIntValue(showData, "base_xp", 0)
+	charismaBonus := getIntValue(showData, "charisma_gold_bonus", 0)
+
+	// Calculate total gold (charisma bonus applies to points above 10)
+	charismaMod2 := charisma - 10
+	if charismaMod2 < 0 {
+		charismaMod2 = 0
+	}
+	totalGold := baseGold + (charismaMod2 * charismaBonus)
+
+	// Add gold to inventory (always get paid)
 	if err := addGoldToInventory(state.Inventory, totalGold); err != nil {
 		log.Printf("⚠️ Failed to add gold to inventory: %v", err)
 	}
 
-	// Add XP
-	state.Experience += baseXP
+	// Only award XP on successful performance
+	var resultMessage string
+	var resultColor string
+	if performanceSuccess {
+		state.Experience += baseXP
+		// Apply performance-high effect (+2 charisma for 12 hours)
+		if err := applyEffect(state, "performance-high"); err != nil {
+			log.Printf("⚠️ Failed to apply performance-high effect: %v", err)
+			resultMessage = fmt.Sprintf("🎵 Excellent performance! The crowd loved it! Earned %d gold and %d XP!", totalGold, baseXP)
+		} else {
+			resultMessage = fmt.Sprintf("🎵 Excellent performance! The crowd loved it! Earned %d gold and %d XP. You feel confident! (+2 Charisma for 12 hours)", totalGold, baseXP)
+		}
+		resultColor = "green"
+		log.Printf("✅ Performance success! Earned %d gold, %d XP", totalGold, baseXP)
+	} else {
+		// Apply stage-fright effect (-1 charisma for 12 hours)
+		if err := applyEffect(state, "stage-fright"); err != nil {
+			log.Printf("⚠️ Failed to apply stage-fright effect: %v", err)
+			resultMessage = fmt.Sprintf("😰 The performance was lackluster. Earned %d gold but no experience.", totalGold)
+		} else {
+			resultMessage = fmt.Sprintf("😰 The performance was lackluster. Earned %d gold but no experience. You feel shaken. (-1 Charisma for 12 hours)", totalGold)
+		}
+		resultColor = "yellow"
+		log.Printf("❌ Performance failure! Earned %d gold (no XP)", totalGold)
+	}
 
-	// Mark show as performed
-	state.BookedShows[bookingIndex]["performed"] = true
+	// Advance time by 60 minutes (1 hour performance)
+	oldTime := state.TimeOfDay
+	timeMessages := advanceTime(state, 60)
+	log.Printf("⏰ Time advanced from %d to %d (60 minutes)", oldTime, state.TimeOfDay)
 
-	// Add to performed shows list (for daily tracking)
-	if state.PerformedShows == nil {
-		state.PerformedShows = []string{}
+	// Append any time-based messages (like starvation damage) to result
+	if len(timeMessages) > 0 {
+		for _, msg := range timeMessages {
+			if !msg.Silent {
+				resultMessage += "\n\n" + msg.Message
+			}
+		}
+	}
+
+	// Mark show as performed (session-only data)
+	session.BookedShows[bookingIndex]["performed"] = true
+
+	// Add to performed shows list for daily tracking (session-only data)
+	if session.PerformedShows == nil {
+		session.PerformedShows = []string{}
 	}
 	showID, _ := booking["show_id"].(string)
 	performedKey := fmt.Sprintf("%s_%d", showID, state.CurrentDay)
-	state.PerformedShows = append(state.PerformedShows, performedKey)
-
-	showName, _ := showData["name"].(string)
-	log.Printf("🎵 Performed show '%s' - Earned %d gold, %d XP", showName, totalGold, baseXP)
+	session.PerformedShows = append(session.PerformedShows, performedKey)
 
 	return &GameActionResponse{
 		Success: true,
-		Message: fmt.Sprintf("Excellent performance! Earned %d gold and %d XP!", totalGold, baseXP),
-		Color:   "green",
+		Message: resultMessage,
+		Color:   resultColor,
 	}, nil
 }
 
-// Helper: Load show configuration from database
-func loadShowConfig(locationID, buildingID string) (map[string]any, error) {
-	// Get database connection
+// loadInstrumentData loads instrument difficulty data from database
+func loadInstrumentData(instrumentID string) (map[string]interface{}, error) {
 	database := db.GetDB()
 	if database == nil {
 		return nil, fmt.Errorf("database not available")
 	}
 
-	// Query location from database
+	// Query item properties from database
 	var propertiesJSON string
-	err := database.QueryRow("SELECT properties FROM locations WHERE id = ?", locationID).Scan(&propertiesJSON)
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", instrumentID).Scan(&propertiesJSON)
 	if err != nil {
-		return nil, fmt.Errorf("location not found: %s", locationID)
+		return nil, fmt.Errorf("instrument not found in database: %s", instrumentID)
 	}
 
-	// Parse location properties
-	var locationData map[string]any
-	if err := json.Unmarshal([]byte(propertiesJSON), &locationData); err != nil {
-		return nil, fmt.Errorf("failed to parse location data: %v", err)
+	// Parse properties JSON
+	var properties map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
+		return nil, fmt.Errorf("failed to parse instrument properties: %v", err)
 	}
 
-	// Location has districts, each district has buildings
-	// Search through districts to find the building
-	for _, districtRaw := range locationData {
-		district, ok := districtRaw.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		// Check if this district has buildings
-		buildingsRaw, ok := district["buildings"]
-		if !ok {
-			continue
-		}
-
-		buildings, ok := buildingsRaw.([]any)
-		if !ok {
-			continue
-		}
-
-		// Search for the building
-		for _, buildingRaw := range buildings {
-			building, ok := buildingRaw.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			// Check if this is the building we're looking for
-			if id, ok := building["id"].(string); ok && id == buildingID {
-				// Check if building has shows configuration
-				showsConfig, ok := building["shows"].(map[string]any)
-				if !ok {
-					return nil, fmt.Errorf("building %s does not have shows configuration", buildingID)
-				}
-				return showsConfig, nil
-			}
-		}
+	// Extract performance data
+	performance, ok := properties["performance"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("instrument %s has no performance data", instrumentID)
 	}
 
-	return nil, fmt.Errorf("building not found: %s in location %s", buildingID, locationID)
+	return performance, nil
 }
 
 // Helper: Check if player has an item in inventory
@@ -2621,4 +2930,601 @@ func playerHasItem(state *SaveFile, itemID string) bool {
 	}
 
 	return false
+}
+
+// ============================================================================
+// EFFECTS SYSTEM
+// ============================================================================
+
+// EffectMessage contains the message to display when an effect is applied
+type EffectMessage struct {
+	Message  string
+	Color    string
+	Category string
+	Silent   bool
+}
+
+// applyEffect applies an effect to the character (from game-data/effects/{effectID}.json)
+func applyEffect(state *SaveFile, effectID string) error {
+	_, err := applyEffectWithMessage(state, effectID)
+	return err
+}
+
+// applyEffectWithMessage applies an effect and returns a message to display
+func applyEffectWithMessage(state *SaveFile, effectID string) (*EffectMessage, error) {
+	// Load effect data from file
+	effectData, err := loadEffectData(effectID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load effect %s: %v", effectID, err)
+	}
+
+	// Initialize active_effects if nil
+	if state.ActiveEffects == nil {
+		state.ActiveEffects = []ActiveEffect{}
+	}
+
+	// Get effect details
+	effects, _ := effectData["effects"].([]interface{})
+	name, _ := effectData["name"].(string)
+	message, _ := effectData["message"].(string)
+	color, _ := effectData["color"].(string)
+	category, _ := effectData["category"].(string)
+	silent, _ := effectData["silent"].(bool)
+
+	if effects == nil {
+		return nil, fmt.Errorf("effect %s has no effects array", effectID)
+	}
+
+	// Apply each effect component
+	for idx, effectRaw := range effects {
+		effect, ok := effectRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		effectType, _ := effect["type"].(string)
+		value, _ := effect["value"].(float64)
+		duration, _ := effect["duration"].(float64)
+		delay, _ := effect["delay"].(float64)
+		tickInterval, _ := effect["tick_interval"].(float64)
+
+		// Determine if this should be an immediate effect or active effect
+		// Immediate effects: instant hp/mana/fatigue/hunger changes with no duration/delay/tick
+		// Active effects: everything else (stat modifiers, over-time effects, delayed effects)
+		isStatModifier := effectType == "strength" || effectType == "dexterity" ||
+			effectType == "constitution" || effectType == "intelligence" ||
+			effectType == "wisdom" || effectType == "charisma"
+
+		shouldBeActive := tickInterval > 0 || duration > 0 || delay > 0 || isStatModifier
+
+		if !shouldBeActive {
+			// Apply immediately (only for instant hp/mana/fatigue/hunger changes)
+			applyImmediateEffect(state, effectType, int(value))
+		} else {
+			// Add to active effects for over-time processing or permanent stat modifiers
+			activeEffect := ActiveEffect{
+				EffectID:          effectID,
+				EffectIndex:       idx,
+				DurationRemaining: duration,
+				DelayRemaining:    delay,
+				TickAccumulator:   0.0,
+				AppliedAt:         state.TimeOfDay,
+			}
+			state.ActiveEffects = append(state.ActiveEffects, activeEffect)
+		}
+	}
+
+	log.Printf("✅ Applied effect '%s' to character", name)
+
+	// Return effect message
+	effectMsg := &EffectMessage{
+		Message:  message,
+		Color:    color,
+		Category: category,
+		Silent:   silent,
+	}
+
+	return effectMsg, nil
+}
+
+// applyImmediateEffect applies an instant effect (no duration)
+func applyImmediateEffect(state *SaveFile, effectType string, value int) {
+	switch effectType {
+	case "hp":
+		state.HP += value
+		if state.HP > state.MaxHP {
+			state.HP = state.MaxHP
+		}
+		if state.HP < 0 {
+			state.HP = 0
+		}
+	case "mana":
+		state.Mana += value
+		if state.Mana > state.MaxMana {
+			state.Mana = state.MaxMana
+		}
+		if state.Mana < 0 {
+			state.Mana = 0
+		}
+	case "fatigue":
+		// Adjust fatigue level and update penalty effects
+		state.Fatigue += value
+		if state.Fatigue < 0 {
+			state.Fatigue = 0
+		}
+		if state.Fatigue > 10 {
+			state.Fatigue = 10
+		}
+
+		// Stop accumulation if we've reached max fatigue
+		if state.Fatigue >= 10 {
+			removeFatigueAccumulation(state)
+		} else {
+			// Ensure accumulation is active if below max
+			ensureFatigueAccumulation(state)
+		}
+
+		_, _ = updateFatiguePenaltyEffects(state)
+	case "hunger":
+		// Adjust hunger level and update penalty effects
+		state.Hunger += value
+		if state.Hunger < 0 {
+			state.Hunger = 0
+		}
+		if state.Hunger > 3 {
+			state.Hunger = 3
+		}
+		_, _ = updateHungerPenaltyEffects(state)
+		ensureHungerAccumulation(state)
+	}
+}
+
+// Fatigue and Hunger System Initialization
+
+// initializeFatigueHungerEffects ensures all accumulation and penalty effects are properly set
+// This should be called when loading a save or after modifying fatigue/hunger values
+func initializeFatigueHungerEffects(state *SaveFile) error {
+	// Ensure fatigue accumulation effect is present
+	if err := ensureFatigueAccumulation(state); err != nil {
+		return fmt.Errorf("failed to ensure fatigue accumulation: %w", err)
+	}
+
+	// Ensure hunger accumulation effect is present
+	if err := ensureHungerAccumulation(state); err != nil {
+		return fmt.Errorf("failed to ensure hunger accumulation: %w", err)
+	}
+
+	// Apply penalty effects based on current levels
+	if _, err := updateFatiguePenaltyEffects(state); err != nil {
+		return fmt.Errorf("failed to update fatigue penalty effects: %w", err)
+	}
+
+	if _, err := updateHungerPenaltyEffects(state); err != nil {
+		return fmt.Errorf("failed to update hunger penalty effects: %w", err)
+	}
+
+	return nil
+}
+
+// Fatigue management functions (penalty effects applied based on numeric fatigue level)
+
+// updateFatiguePenaltyEffects applies appropriate penalty effects based on fatigue level
+func updateFatiguePenaltyEffects(state *SaveFile) (*EffectMessage, error) {
+	// Remove all existing fatigue penalty effects
+	removeFatiguePenaltyEffects(state)
+
+	// Apply penalty effect based on current fatigue level
+	switch {
+	case state.Fatigue >= 10:
+		return applyEffectWithMessage(state, "exhaustion")
+	case state.Fatigue >= 7:
+		return applyEffectWithMessage(state, "fatigued")
+	case state.Fatigue >= 4:
+		return applyEffectWithMessage(state, "very-tired")
+	case state.Fatigue >= 1:
+		return applyEffectWithMessage(state, "tired")
+	default:
+		// No fatigue penalty
+		return nil, nil
+	}
+}
+
+// removeFatiguePenaltyEffects removes all fatigue penalty effects
+func removeFatiguePenaltyEffects(state *SaveFile) {
+	var remainingEffects []ActiveEffect
+	for _, activeEffect := range state.ActiveEffects {
+		// Keep non-fatigue-penalty effects
+		if activeEffect.EffectID != "tired" &&
+			activeEffect.EffectID != "very-tired" &&
+			activeEffect.EffectID != "fatigued" &&
+			activeEffect.EffectID != "exhaustion" {
+			remainingEffects = append(remainingEffects, activeEffect)
+		}
+	}
+	state.ActiveEffects = remainingEffects
+}
+
+// ensureFatigueAccumulation ensures the fatigue accumulation effect is active
+// Only adds if fatigue < 10 (stops accumulation at max)
+func ensureFatigueAccumulation(state *SaveFile) error {
+	// Don't accumulate if already at max fatigue
+	if state.Fatigue >= 10 {
+		removeFatigueAccumulation(state)
+		return nil
+	}
+
+	// Check if already present
+	for _, activeEffect := range state.ActiveEffects {
+		if activeEffect.EffectID == "fatigue-accumulation" {
+			return nil // Already present
+		}
+	}
+
+	// Apply it
+	return applyEffect(state, "fatigue-accumulation")
+}
+
+// removeFatigueAccumulation removes the fatigue accumulation effect
+func removeFatigueAccumulation(state *SaveFile) {
+	var remainingEffects []ActiveEffect
+	for _, activeEffect := range state.ActiveEffects {
+		if activeEffect.EffectID != "fatigue-accumulation" {
+			remainingEffects = append(remainingEffects, activeEffect)
+		}
+	}
+	state.ActiveEffects = remainingEffects
+}
+
+// resetFatigueAccumulator resets the tick accumulator for fatigue accumulation effect
+func resetFatigueAccumulator(state *SaveFile) {
+	for i, activeEffect := range state.ActiveEffects {
+		if activeEffect.EffectID == "fatigue-accumulation" {
+			state.ActiveEffects[i].TickAccumulator = 0
+			return
+		}
+	}
+}
+
+// Hunger management functions (penalty effects applied based on numeric hunger level)
+
+// updateHungerPenaltyEffects applies appropriate penalty effects based on hunger level
+func updateHungerPenaltyEffects(state *SaveFile) (*EffectMessage, error) {
+	// Remove all existing hunger penalty effects
+	removeHungerPenaltyEffects(state)
+
+	// Apply penalty/bonus effect based on current hunger level
+	switch state.Hunger {
+	case 0:
+		return applyEffectWithMessage(state, "famished")
+	case 1:
+		return applyEffectWithMessage(state, "hungry")
+	case 2:
+		// Satisfied - no effect (baseline)
+		return nil, nil
+	case 3:
+		return applyEffectWithMessage(state, "well-fed")
+	default:
+		// Clamp to valid range
+		if state.Hunger < 0 {
+			state.Hunger = 0
+			return applyEffectWithMessage(state, "famished")
+		}
+		state.Hunger = 3
+		return applyEffectWithMessage(state, "well-fed")
+	}
+}
+
+// removeHungerPenaltyEffects removes all hunger penalty effects
+func removeHungerPenaltyEffects(state *SaveFile) {
+	var remainingEffects []ActiveEffect
+	for _, activeEffect := range state.ActiveEffects {
+		// Keep non-hunger-penalty effects
+		if activeEffect.EffectID != "famished" &&
+			activeEffect.EffectID != "hungry" &&
+			activeEffect.EffectID != "well-fed" {
+			remainingEffects = append(remainingEffects, activeEffect)
+		}
+	}
+	state.ActiveEffects = remainingEffects
+}
+
+// ensureHungerAccumulation ensures hunger accumulation effect is present (no swapping needed)
+func ensureHungerAccumulation(state *SaveFile) error {
+	// Check if hunger accumulation effect already exists
+	for _, activeEffect := range state.ActiveEffects {
+		if activeEffect.EffectID == "hunger-accumulation-full" ||
+			activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+			activeEffect.EffectID == "hunger-accumulation-hungry" {
+			// Already present - don't remove/re-add (preserves tick_accumulator)
+			return nil
+		}
+	}
+
+	// Apply initial hunger accumulation effect based on current hunger level
+	var effectID string
+	switch state.Hunger {
+	case 3:
+		effectID = "hunger-accumulation-full"
+	case 2:
+		effectID = "hunger-accumulation-satisfied"
+	case 1:
+		effectID = "hunger-accumulation-hungry"
+	case 0:
+		// Don't apply hunger decrease accumulation when famished (hunger stays at 0)
+		return nil
+	default:
+		return nil
+	}
+
+	return applyEffect(state, effectID)
+}
+
+// removeHungerAccumulation removes all hunger accumulation effects
+func removeHungerAccumulation(state *SaveFile) {
+	var remainingEffects []ActiveEffect
+	for _, activeEffect := range state.ActiveEffects {
+		// Keep non-hunger-accumulation effects
+		if activeEffect.EffectID != "hunger-accumulation-full" &&
+			activeEffect.EffectID != "hunger-accumulation-satisfied" &&
+			activeEffect.EffectID != "hunger-accumulation-hungry" {
+			remainingEffects = append(remainingEffects, activeEffect)
+		}
+	}
+	state.ActiveEffects = remainingEffects
+}
+
+// resetHungerAccumulator resets the tick accumulator for hunger accumulation effects
+func resetHungerAccumulator(state *SaveFile) {
+	for i, activeEffect := range state.ActiveEffects {
+		if activeEffect.EffectID == "hunger-accumulation-full" ||
+			activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+			activeEffect.EffectID == "hunger-accumulation-hungry" {
+			state.ActiveEffects[i].TickAccumulator = 0
+			return
+		}
+	}
+}
+
+// getEffectTemplate loads effect template data and returns the specific effect at index
+func getEffectTemplate(effectID string, effectIndex int) (effectType string, value float64, tickInterval float64, name string, err error) {
+	effectData, err := loadEffectData(effectID)
+	if err != nil {
+		return "", 0, 0, "", fmt.Errorf("failed to load effect %s: %v", effectID, err)
+	}
+
+	name, _ = effectData["name"].(string)
+	effects, _ := effectData["effects"].([]interface{})
+
+	if effects == nil || effectIndex >= len(effects) {
+		return "", 0, 0, name, fmt.Errorf("invalid effect index %d for effect %s", effectIndex, effectID)
+	}
+
+	effectObj, ok := effects[effectIndex].(map[string]interface{})
+	if !ok {
+		return "", 0, 0, name, fmt.Errorf("invalid effect data at index %d", effectIndex)
+	}
+
+	effectType, _ = effectObj["type"].(string)
+	value, _ = effectObj["value"].(float64)
+	tickInterval, _ = effectObj["tick_interval"].(float64)
+
+	return effectType, value, tickInterval, name, nil
+}
+
+// tickEffects processes all active effects, applying stat modifiers and ticking down durations
+// Returns a slice of messages from effects that triggered (like starvation damage)
+func tickEffects(state *SaveFile, minutesElapsed int) []EffectMessage {
+	if len(state.ActiveEffects) == 0 {
+		return nil
+	}
+
+	var remainingEffects []ActiveEffect
+	var messages []EffectMessage
+
+	for _, activeEffect := range state.ActiveEffects {
+		// Load effect template to get type, value, tick_interval
+		effectType, value, tickInterval, name, err := getEffectTemplate(activeEffect.EffectID, activeEffect.EffectIndex)
+		if err != nil {
+			log.Printf("⚠️ Failed to load effect template for %s: %v", activeEffect.EffectID, err)
+			continue
+		}
+
+		// Tick down delay first
+		if activeEffect.DelayRemaining > 0 {
+			activeEffect.DelayRemaining -= float64(minutesElapsed)
+			if activeEffect.DelayRemaining > 0 {
+				remainingEffects = append(remainingEffects, activeEffect)
+				continue
+			}
+		}
+
+		// Process tick-based effects (damage/healing over time)
+		if tickInterval > 0 {
+			// For hunger accumulation, use dynamic tick interval based on current hunger level
+			if activeEffect.EffectID == "hunger-accumulation-full" ||
+				activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+				activeEffect.EffectID == "hunger-accumulation-hungry" {
+				// Override tick interval based on current hunger level
+				switch state.Hunger {
+				case 3: // Full
+					tickInterval = 720 // 12 hours
+				case 2: // Satisfied
+					tickInterval = 480 // 8 hours
+				case 1: // Hungry
+					tickInterval = 360 // 6 hours
+				case 0: // Famished - no accumulation (handled by famished penalty effect)
+					tickInterval = 0
+				}
+			}
+
+			if tickInterval > 0 {
+				activeEffect.TickAccumulator += float64(minutesElapsed)
+				for activeEffect.TickAccumulator >= tickInterval {
+					applyImmediateEffect(state, effectType, int(value))
+					activeEffect.TickAccumulator -= tickInterval
+
+					// For starvation damage, show message
+					if activeEffect.EffectID == "famished" && effectType == "hp" {
+						messages = append(messages, EffectMessage{
+							Message:  "You're starving! You lose 1 HP from lack of food.",
+							Color:    "red",
+							Category: "debuff",
+							Silent:   false,
+						})
+						log.Printf("💀 Starvation damage: Player lost 1 HP (current HP: %d)", state.HP)
+					}
+				}
+			}
+		}
+
+		// Tick down duration (but don't tick permanent effects with duration == 0)
+		if activeEffect.DurationRemaining > 0 {
+			activeEffect.DurationRemaining -= float64(minutesElapsed)
+		}
+
+		// Keep effect if duration remains or is permanent (0)
+		if activeEffect.DurationRemaining > 0 || activeEffect.DurationRemaining == 0 {
+			remainingEffects = append(remainingEffects, activeEffect)
+		} else {
+			log.Printf("⏱️ Effect '%s' expired", name)
+		}
+	}
+
+	state.ActiveEffects = remainingEffects
+	return messages
+}
+
+// getActiveStatModifiers calculates total stat modifiers from all active effects
+func getActiveStatModifiers(state *SaveFile) map[string]int {
+	modifiers := make(map[string]int)
+
+	if state.ActiveEffects == nil {
+		return modifiers
+	}
+
+	for _, activeEffect := range state.ActiveEffects {
+		// Skip effects that haven't started yet (still in delay)
+		if activeEffect.DelayRemaining > 0 {
+			continue
+		}
+
+		// Load effect template to get type and value
+		effectType, value, _, _, err := getEffectTemplate(activeEffect.EffectID, activeEffect.EffectIndex)
+		if err != nil {
+			log.Printf("⚠️ Failed to load effect template for %s: %v", activeEffect.EffectID, err)
+			continue
+		}
+
+		// Only apply stat modifiers (not instant effects like hp/mana)
+		switch effectType {
+		case "strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma":
+			modifiers[effectType] += int(value)
+		}
+	}
+
+	return modifiers
+}
+
+// loadEffectData loads effect data from database
+func loadEffectData(effectID string) (map[string]interface{}, error) {
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	// Query effect properties from database
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM effects WHERE id = ?", effectID).Scan(&propertiesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("effect not found in database: %s", effectID)
+	}
+
+	// Parse properties JSON
+	var effectData map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &effectData); err != nil {
+		return nil, fmt.Errorf("failed to parse effect properties: %v", err)
+	}
+
+	return effectData, nil
+}
+
+// advanceTime advances the game time by the specified minutes and ticks all time-based systems
+// Returns messages from any effects that triggered (like starvation damage)
+func advanceTime(state *SaveFile, minutes int) []EffectMessage {
+	oldTime := state.TimeOfDay
+	oldDay := state.CurrentDay
+
+	// Advance time
+	state.TimeOfDay += minutes
+
+	// Handle day wrap-around
+	if state.TimeOfDay >= 1440 {
+		daysAdvanced := state.TimeOfDay / 1440
+		state.CurrentDay += daysAdvanced
+		state.TimeOfDay = state.TimeOfDay % 1440
+	}
+
+	// Tick active effects (includes fatigue/hunger accumulation effects)
+	messages := tickEffects(state, minutes)
+
+	// Update penalty effects based on current fatigue/hunger levels
+	fatigueMsg, _ := updateFatiguePenaltyEffects(state)
+	hungerMsg, _ := updateHungerPenaltyEffects(state)
+
+	// Add any new penalty effect messages
+	if fatigueMsg != nil && !fatigueMsg.Silent {
+		messages = append(messages, *fatigueMsg)
+	}
+	if hungerMsg != nil && !hungerMsg.Silent {
+		messages = append(messages, *hungerMsg)
+	}
+
+	if state.CurrentDay != oldDay {
+		log.Printf("📅 Day advanced from %d to %d", oldDay, state.CurrentDay)
+	}
+	log.Printf("⏰ Time advanced: %d -> %d (%d minutes)", oldTime, state.TimeOfDay, minutes)
+
+	return messages
+}
+
+// ============================================================================
+// TYPE CONVERSION HELPERS
+// ============================================================================
+
+// getIntValue safely extracts an int from a map, handling both int and float64
+func getIntValue(m map[string]any, key string, defaultValue int) int {
+	val, ok := m[key]
+	if !ok {
+		return defaultValue
+	}
+
+	switch v := val.(type) {
+	case int:
+		return v
+	case float64:
+		return int(v)
+	case int64:
+		return int(v)
+	default:
+		return defaultValue
+	}
+}
+
+// getFloatValue safely extracts a float64 from a map, handling both int and float64
+func getFloatValue(m map[string]any, key string, defaultValue float64) float64 {
+	val, ok := m[key]
+	if !ok {
+		return defaultValue
+	}
+
+	switch v := val.(type) {
+	case float64:
+		return v
+	case int:
+		return float64(v)
+	case int64:
+		return float64(v)
+	default:
+		return defaultValue
+	}
 }

@@ -30,22 +30,22 @@
           "id": "frost_inn",
           "name": "The Frozen Mug Tavern",
           "description": "A warm tavern serving strong ales and hearty stews to ward off the northern cold.",
-          "open": 7,
-          "close": 4
+          "open": 1140,
+          "close": 240
         },
         {
           "id": "fur_trader",
           "name": "Northern Furs Trading Post",
           "description": "A shop specializing in warm clothing and cold-weather gear.",
-          "open": 7,
-          "close": 8
+          "open": 420,
+          "close": 1200
         },
         {
           "id": "town_hall",
           "name": "Town Hall",
           "description": "The administrative center where the town elder holds court.",
-          "open": 8,
-          "close": 6
+          "open": 480,
+          "close": 1080
         }
       ]
     },

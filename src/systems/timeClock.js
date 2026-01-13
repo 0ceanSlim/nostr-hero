@@ -11,6 +11,7 @@ import { getGameStateSync } from '../state/gameState.js';
 import { updateTimeDisplay } from '../ui/timeDisplay.js';
 import { updateCharacterDisplay } from '../ui/characterDisplay.js';
 import { gameAPI } from '../lib/api.js';
+import { eventBus } from '../lib/events.js';
 
 // Constants
 const TICK_INTERVAL_MS = 1000; // Process every 1 real second
@@ -126,18 +127,13 @@ async function tick() {
 }
 
 /**
- * Advance game time by specified minutes
+ * Advance game time by specified minutes (frontend display only)
+ * Backend calculates actual fatigue/hunger via effects system
  */
 function advanceGameTime(character, minutes) {
-    // Initialize counters if not present (backwards compatibility)
+    // Initialize time if not present (backwards compatibility)
     if (character.time_of_day === undefined) {
         character.time_of_day = 720; // Default to noon (720 minutes)
-    }
-    if (character.fatigue_counter === undefined) {
-        character.fatigue_counter = 0;
-    }
-    if (character.hunger_counter === undefined) {
-        character.hunger_counter = 0;
     }
 
     // Convert old hour-based values to minutes on first load
@@ -145,16 +141,6 @@ function advanceGameTime(character, minutes) {
         // Old save: time_of_day was in hours (0-23)
         character.time_of_day = character.time_of_day * 60;
         logger.info(`Converted time_of_day from hours to minutes: ${character.time_of_day}`);
-    }
-    if (character.fatigue_counter < 24 && character.fatigue_counter !== 0) {
-        // Old save: fatigue_counter was in hours
-        character.fatigue_counter = character.fatigue_counter * 60;
-        logger.info(`Converted fatigue_counter from hours to minutes: ${character.fatigue_counter}`);
-    }
-    if (character.hunger_counter < 24 && character.hunger_counter !== 0) {
-        // Old save: hunger_counter was in hours
-        character.hunger_counter = character.hunger_counter * 60;
-        logger.info(`Converted hunger_counter from hours to minutes: ${character.hunger_counter}`);
     }
 
     // Advance time of day (in minutes, 0-1439)
@@ -168,36 +154,16 @@ function advanceGameTime(character, minutes) {
         logger.info(`Day advanced to ${character.current_day}`);
     }
 
-    // Update fatigue counter (every 240 minutes = 4 hours)
-    character.fatigue_counter += minutes;
-    if (character.fatigue_counter >= FATIGUE_THRESHOLD_MINUTES) {
-        const fatigueIncreases = Math.floor(character.fatigue_counter / FATIGUE_THRESHOLD_MINUTES);
-        character.fatigue = Math.min(10, character.fatigue + fatigueIncreases);
-        character.fatigue_counter = character.fatigue_counter % FATIGUE_THRESHOLD_MINUTES;
-
-        // Update character display when stats change
-        updateCharacterDisplay();
-        logger.debug(`Fatigue increased to ${character.fatigue}`);
-    }
-
-    // Update hunger counter (every 360 minutes normally, 720 if hungry)
-    const hungerThreshold = character.hunger <= 1 ? HUNGER_THRESHOLD_HUNGRY_MINUTES : HUNGER_THRESHOLD_NORMAL_MINUTES;
-    character.hunger_counter += minutes;
-
-    if (character.hunger_counter >= hungerThreshold) {
-        const hungerDecreases = Math.floor(character.hunger_counter / hungerThreshold);
-        character.hunger = Math.max(0, character.hunger - hungerDecreases);
-        character.hunger_counter = character.hunger_counter % hungerThreshold;
-
-        // Update character display when stats change
-        updateCharacterDisplay();
-        logger.debug(`Hunger decreased to ${character.hunger}`);
-    }
+    // Fatigue and hunger are now calculated by backend effects system (not here!)
+    // Remove old fatigue_counter and hunger_counter from character object
+    delete character.fatigue_counter;
+    delete character.hunger_counter;
 }
 
 /**
  * Send time update to backend
  * Syncs the frontend time state to backend Go memory
+ * Backend processes effects and returns updated state
  */
 async function sendTimeUpdateToBackend(character) {
     if (!gameAPI.initialized) {
@@ -206,14 +172,48 @@ async function sendTimeUpdateToBackend(character) {
 
     try {
         // Send update via game action API
-        await gameAPI.sendAction('update_time', {
+        const response = await gameAPI.sendAction('update_time', {
             time_of_day: character.time_of_day,
-            fatigue_counter: character.fatigue_counter,
-            hunger_counter: character.hunger_counter,
-            fatigue: character.fatigue,
-            hunger: character.hunger,
             current_day: character.current_day
         });
+
+        // Update local state with backend's calculated values
+        if (response && response.data) {
+            let statsChanged = false;
+
+            if (response.data.fatigue !== undefined && response.data.fatigue !== character.fatigue) {
+                character.fatigue = response.data.fatigue;
+                statsChanged = true;
+                logger.debug(`Fatigue updated to ${character.fatigue}`);
+            }
+            if (response.data.hunger !== undefined && response.data.hunger !== character.hunger) {
+                character.hunger = response.data.hunger;
+                statsChanged = true;
+                logger.debug(`Hunger updated to ${character.hunger}`);
+            }
+            if (response.data.hp !== undefined && response.data.hp !== character.hp) {
+                character.hp = response.data.hp;
+                statsChanged = true;
+                logger.debug(`HP updated to ${character.hp}`);
+            }
+            if (response.data.active_effects) {
+                character.active_effects = response.data.active_effects;
+            }
+
+            // Emit event on every time update (not just when stats change)
+            // This ensures building open/close status updates even when fatigue/hunger don't change
+            logger.debug('📡 Emitting gameStateChange event for time update...');
+            eventBus.emit('gameStateChange', { character });
+            document.dispatchEvent(new CustomEvent('gameStateChange', { detail: { character } }));
+
+            // Update display when stats change
+            if (statsChanged) {
+                logger.info('⚡ Stats changed! Fatigue:', character.fatigue, 'Hunger:', character.hunger);
+                logger.info('🔄 Calling updateCharacterDisplay directly...');
+                await updateCharacterDisplay();
+                logger.info('✅ Display update complete');
+            }
+        }
     } catch (error) {
         logger.error('Failed to sync time to backend:', error);
     }

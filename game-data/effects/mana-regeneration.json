@@ -1,0 +1,16 @@
+{
+  "id": "mana-regeneration",
+  "name": "Mana Regeneration",
+  "description": "Restoring mana over time from meditation or potions",
+  "effects": [
+    {
+      "type": "mana",
+      "value": 1,
+      "duration": 300,
+      "delay": 0,
+      "tick_interval": 30
+    }
+  ],
+  "icon": "sparkles",
+  "color": "blue"
+}

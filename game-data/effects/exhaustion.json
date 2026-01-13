@@ -1,0 +1,47 @@
+{
+  "id": "exhaustion",
+  "name": "Exhaustion",
+  "description": "Completely exhausted. Severe penalties to all physical and mental abilities. You need rest immediately.",
+  "message": "You are completely exhausted! Rest now or risk collapse!",
+  "category": "debuff",
+  "effects": [
+    {
+      "type": "strength",
+      "value": -4,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "dexterity",
+      "value": -4,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "constitution",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "intelligence",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "wisdom",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "charisma",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "exhausted",
+  "color": "darkred"
+}
