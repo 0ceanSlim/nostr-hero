@@ -7,12 +7,17 @@
 ## Executive Summary
 
 This document outlines the implementation of a delta-based architecture that:
-1. **Fixes UI flickering** (99% reduction in DOM mutations)
-2. **Optimizes Nostr save files** (5-10KB instead of 20-50KB)
-3. **Aligns with Go-first philosophy** (backend authoritative, minimal JS)
-4. **Enables future features** (multiplayer, real-time updates, state rollback)
 
-**Estimated Effort:** 16-24 hours
+1. **Fixes UI flickering** (90%+ reduction in DOM mutations)
+2. **Implements smooth clock display** (60fps interpolated, no more jerky jumps)
+3. **Optimizes tick rate** (every in-game minute / ~417ms real time)
+4. **Reduces network usage** (91% less bandwidth despite 12x more ticks)
+5. **Optimizes Nostr save files** (5-10KB instead of 20-50KB)
+6. **Aligns with Go-first philosophy** (backend authoritative, minimal JS)
+7. **Enables future features** (multiplayer, real-time updates, state rollback)
+
+**Tick Rate Decision:** 1 tick per in-game minute (~2.4 ticks/second real time)
+**Estimated Effort:** 17-23 hours
 **Target Completion:** 4 weeks
 
 ---
@@ -21,12 +26,13 @@ This document outlines the implementation of a delta-based architecture that:
 
 1. [Problem Statement](#problem-statement)
 2. [Architecture Overview](#architecture-overview)
-3. [Nostr Integration](#nostr-integration)
-4. [Backend Implementation](#backend-implementation)
-5. [Frontend Implementation](#frontend-implementation)
-6. [Migration Guide](#migration-guide)
-7. [Testing Strategy](#testing-strategy)
-8. [Performance Benchmarks](#performance-benchmarks)
+3. [Tick System Design](#tick-system-design)
+4. [Smooth Clock Display](#smooth-clock-display)
+5. [Backend Implementation](#backend-implementation)
+6. [Frontend Implementation](#frontend-implementation)
+7. [Migration Guide](#migration-guide)
+8. [Testing Strategy](#testing-strategy)
+9. [Performance Benchmarks](#performance-benchmarks)
 
 ---
 
@@ -35,18 +41,21 @@ This document outlines the implementation of a delta-based architecture that:
 ### Current Issues
 
 **UI Flickering (Every 5 seconds):**
+
 - Complete DOM clearing with `innerHTML = ''`
 - 50+ DOM mutations per update cycle
 - Images recreated causing visual reloads
 - No change detection or diffing
 
 **Save File Size (Nostr Constraint):**
+
 - Current saves: 20-50KB (includes full item/spell/location data)
 - Nostr event limit: 64KB
 - Network cost: Every save publishes to relay
 - Privacy cost: Larger payload harder to encrypt
 
 **Architecture Issues:**
+
 - Client-side state management (violates Go-first philosophy)
 - Redundant NPC API calls (every 5 seconds)
 - No separation between session state and persistent state
@@ -156,185 +165,333 @@ This document outlines the implementation of a delta-based architecture that:
 
 ---
 
-## Nostr Integration
+## Tick System Design
 
-### Save File Optimization for Nostr
+### Decision: Tick Every In-Game Minute
 
-**Current Save Format (Too Large):**
+**Tick Rate Calculation:**
 
-```json
-{
-  "inventory": {
-    "general_slots": [
-      {
-        "item": {
-          "id": "longsword",
-          "name": "Longsword",
-          "description": "A versatile martial weapon...",
-          "damage": "1d8",
-          "damage_type": "slashing",
-          "weight": 3,
-          "value": 15,
-          "rarity": "common",
-          "properties": ["versatile"],
-          "image": "longsword.png"
-        },
-        "quantity": 1
-      }
-    ]
-  }
-}
 ```
-**Size:** ~500 bytes per item × 20 slots = **10KB** just for inventory!
+Time multiplier: 144x (1 real second = 144 in-game seconds)
+Target: 1 tick per in-game minute
+
+1 in-game minute = 60 in-game seconds
+60 / 144 = 0.417 real seconds = 417ms
+
+Result: ~2.4 ticks per real second
+```
+
+### Why This Rate?
+
+| Factor | Requirement | How This Satisfies |
+|--------|-------------|-------------------|
+| Effect resolution | Max 30 in-game minutes | Tick every 1 min = 30x finer than needed |
+| NPC schedules | Hourly changes | 60 ticks per hour = precise transitions |
+| Building open/close | 15-30 min granularity | Well within resolution |
+| Clock smoothness | Continuous display | Decoupled (see below) |
+| Player perception | No noticeable jumps | 417ms is imperceptible |
+
+### Computational Cost Analysis
+
+**Per-Tick Operations (Delta System):**
+
+| Operation | Cost | Notes |
+|-----------|------|-------|
+| Compare ~20 state fields | ~1-5μs | Integer comparisons |
+| Check effect triggers | ~1-10μs | Counter decrements |
+| Build delta object | ~5-20μs | Only changed fields |
+| JSON marshal delta | ~10-50μs | Tiny payload |
+| HTTP overhead | ~1-5ms | The "expensive" part |
+| Frontend apply delta | ~0.1-1ms | Surgical DOM updates |
+| **Total per tick** | **~2-10ms** | |
+
+**At 2.4 ticks/second: ~5-24ms compute per second (leaving 976ms idle)**
+
+### Most Ticks Are Nearly Empty
+
+| Event | Frequency | Delta Size |
+|-------|-----------|------------|
+| Time update | Every tick | ~35 bytes |
+| Hunger/Fatigue | Every 30-60 in-game min | +20 bytes |
+| NPC changes | Every in-game hour | +50-100 bytes |
+| Building state | Every 15-30 in-game min | +30-50 bytes |
+
+**Typical tick: 30-50 bytes | Occasional tick: 100-200 bytes**
+
+### Network Cost Comparison
+
+```
+Delta system (2.4 req/sec × ~50 bytes):  ~120 bytes/second
+Current system (0.2 req/sec × ~7KB):     ~1,400 bytes/second
+
+Delta system uses ~91% LESS bandwidth despite 12x more ticks
+```
+
+### Tick Rate Summary
+
+| Component | Rate | Purpose |
+|-----------|------|---------|
+| **Logic tick** | 417ms (~2.4/sec) | Backend processes effects, schedules |
+| **Display clock** | 60fps (decoupled) | Smooth visual interpolation |
+| **Backend sync** | On action + each tick | Authoritative time correction |
+| **Auto-save** | 5 real minutes | Persist to Nostr |
 
 ---
 
-**Optimized Save Format (Minimal):**
+## Smooth Clock Display
 
-```json
-{
-  "hp": 15,
-  "f": 3,           // fatigue (shortened field names)
-  "h": 2,           // hunger
-  "g": 250,         // gold
-  "xp": 100,
-  "loc": "kingdom",
-  "dist": "center",
-  "bld": "",
-  "inv": [
-    {"id": "longsword", "q": 1},
-    {"id": "health-potion", "q": 3}
-  ],
-  "eq": {
-    "mainHand": "longsword",
-    "armor": "leather-armor"
-  },
-  "sp": ["fire-bolt", "magic-missile"],
-  "eff": [
-    {"id": "fatigue-accumulation", "d": -1}
-  ],
-  "t": 720,
-  "d": 1
+### Problem: Jerky Clock
+
+The current clock display is jerky because:
+1. Clock updates are tied to tick timing
+2. Actions cause irregular time jumps
+3. No interpolation between ticks
+
+### Solution: Decouple Display from Logic
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ LOGIC LAYER (Backend/Go)                                    │
+│ - Processes at tick rate (every 417ms)                      │
+│ - Handles effects, NPC schedules, state changes             │
+│ - Returns authoritative time_of_day after each action       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ time_of_day (authoritative)
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│ DISPLAY LAYER (Frontend/JS)                                 │
+│ - Runs at 60fps (requestAnimationFrame)                     │
+│ - Interpolates clock display based on:                      │
+│     • lastKnownTime (from backend)                          │
+│     • timeSinceLastUpdate (real elapsed ms)                 │
+│     • timeMultiplier (144x)                                 │
+│     • isPaused flag                                         │
+│ - Syncs to backend time on each action/tick response        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Smooth Clock Implementation
+
+**File:** `src/systems/smoothClock.js`
+
+```javascript
+/**
+ * SmoothClock provides interpolated time display independent of tick rate.
+ * The display runs at 60fps for smooth visuals, while syncing to backend
+ * authoritative time on each action/response.
+ */
+export class SmoothClock {
+    constructor() {
+        this.gameTime = 0;           // Current in-game minutes (0-1439)
+        this.gameDay = 1;
+        this.lastSyncTime = 0;       // Last backend-confirmed time
+        this.lastSyncRealTime = 0;   // Real timestamp of last sync
+        this.timeMultiplier = 144;
+        this.isPaused = false;
+        this.animationId = null;
+    }
+
+    /**
+     * Sync clock to backend authoritative time.
+     * Called after every action response and tick.
+     */
+    syncFromBackend(timeOfDay, currentDay) {
+        this.lastSyncTime = timeOfDay;
+        this.lastSyncRealTime = performance.now();
+        this.gameTime = timeOfDay;
+        this.gameDay = currentDay;
+    }
+
+    /**
+     * Animation frame loop - runs at 60fps for smooth display.
+     */
+    tick() {
+        if (this.isPaused) {
+            this.animationId = requestAnimationFrame(() => this.tick());
+            return;
+        }
+
+        const now = performance.now();
+        const realElapsedMs = now - this.lastSyncRealTime;
+        const realElapsedSeconds = realElapsedMs / 1000;
+
+        // Calculate interpolated game time
+        const gameSecondsElapsed = realElapsedSeconds * this.timeMultiplier;
+        const gameMinutesElapsed = gameSecondsElapsed / 60;
+
+        let newTime = this.lastSyncTime + gameMinutesElapsed;
+        let newDay = this.gameDay;
+
+        // Handle day rollover
+        while (newTime >= 1440) {
+            newTime -= 1440;
+            newDay++;
+        }
+
+        this.gameTime = newTime;
+        this.gameDay = newDay;
+        this.updateDisplay();
+
+        this.animationId = requestAnimationFrame(() => this.tick());
+    }
+
+    /**
+     * Update DOM clock display (surgical update).
+     */
+    updateDisplay() {
+        const hours = Math.floor(this.gameTime / 60);
+        const minutes = Math.floor(this.gameTime % 60);
+
+        const clockEl = document.getElementById('game-clock');
+        if (clockEl) {
+            const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            // Only update if changed (avoid unnecessary DOM writes)
+            if (clockEl.textContent !== timeStr) {
+                clockEl.textContent = timeStr;
+            }
+        }
+
+        // Update day display if changed
+        const dayEl = document.getElementById('game-day');
+        if (dayEl) {
+            const dayStr = `Day ${this.gameDay}`;
+            if (dayEl.textContent !== dayStr) {
+                dayEl.textContent = dayStr;
+            }
+        }
+    }
+
+    pause() {
+        this.isPaused = true;
+    }
+
+    unpause() {
+        // Re-anchor to current time so we don't jump
+        this.lastSyncTime = this.gameTime;
+        this.lastSyncRealTime = performance.now();
+        this.isPaused = false;
+    }
+
+    start() {
+        this.lastSyncRealTime = performance.now();
+        this.tick();
+    }
+
+    stop() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+
+    /**
+     * Get current interpolated time (for UI queries).
+     */
+    getCurrentTime() {
+        return {
+            timeOfDay: Math.floor(this.gameTime),
+            currentDay: this.gameDay,
+            hours: Math.floor(this.gameTime / 60),
+            minutes: Math.floor(this.gameTime % 60)
+        };
+    }
+}
+
+export const smoothClock = new SmoothClock();
+```
+
+### Integration with Delta System
+
+**Flow When Player Takes Action:**
+
+```
+Player clicks "Enter Tavern"
+    ↓
+Frontend: smoothClock.pause()
+    ↓
+POST /api/action {action: "enter_building", building: "tavern"}
+    ↓
+Backend:
+  1. Advances time (e.g., +5 in-game minutes for travel)
+  2. Processes any triggered effects
+  3. Returns delta + authoritative time_of_day
+    ↓
+Frontend:
+  1. deltaApplier.applyDelta(response.delta)
+  2. smoothClock.syncFromBackend(response.time_of_day, response.current_day)
+  3. smoothClock.unpause()
+    ↓
+Clock resumes smooth progression from new synced time
+```
+
+**Flow During Normal Tick:**
+
+```
+Tick timer fires (every 417ms)
+    ↓
+POST /api/tick {time_of_day: smoothClock.getCurrentTime().timeOfDay}
+    ↓
+Backend processes effects, returns delta
+    ↓
+Frontend:
+  1. deltaApplier.applyDelta(response.delta)
+  2. smoothClock.syncFromBackend(response.time_of_day, response.current_day)
+    ↓
+Clock continues smoothly (minor correction if drifted)
+```
+
+### Pause/Unpause Integration
+
+```javascript
+// When player pauses time (voluntary)
+function pauseGame() {
+    smoothClock.pause();
+    // Optionally notify backend to stop processing
+    gameAPI.sendAction('pause_time');
+}
+
+// When player unpauses or takes action (auto-unpause)
+function unpauseGame() {
+    smoothClock.unpause();
+    gameAPI.sendAction('unpause_time');
+}
+
+// Actions auto-unpause if paused
+async function performAction(action, params) {
+    if (smoothClock.isPaused) {
+        smoothClock.unpause();
+    }
+    smoothClock.pause(); // Pause during request
+
+    const response = await gameAPI.sendAction(action, params);
+
+    if (response.delta) {
+        deltaApplier.applyDelta(response.delta);
+    }
+    smoothClock.syncFromBackend(response.time_of_day, response.current_day);
+    smoothClock.unpause();
+
+    return response;
 }
 ```
-**Size:** ~500 bytes total for entire save!
 
 ---
 
-### Save/Load Flow with Nostr
+## Nostr Save Optimization
 
-#### 1. Loading Game from Nostr
+> **Note:** Save file optimization for Nostr relays is a **separate concern** from the delta architecture. See `docs/draft/future-nostr-save-optimization.md` for detailed plans.
 
-```
-User clicks "Load Game"
-  ↓
-Backend fetches save from Nostr relay (minimal JSON, ~5-10KB)
-  ↓
-Backend HYDRATES save:
-  1. Parse minimal save JSON
-  2. Load item data from game-data/items/*.json
-     - longsword.json → full stats, description, image
-  3. Load spell data from game-data/magic/spells/*.json
-  4. Load location data from game-data/locations/*.json
-  5. Load NPC data from game-data/npcs/*.json
-  6. Calculate NPC positions (schedules + current time)
-  7. Calculate building states (open/close times + current time)
-  8. Compute inventory weight
-  ↓
-Backend creates rich SessionState (in-memory, ~100KB+)
-  ↓
-Backend returns initial DELTA to frontend (full state on first load)
-  ↓
-Frontend applies delta and renders UI
-```
+**Quick Summary:**
+- Current saves work fine for development
+- Future optimization: store IDs only, hydrate on load
+- Target: 5-10KB saves (down from 20-50KB)
+- Implement before production Nostr deployment
 
-#### 2. During Gameplay (Every 5 seconds)
-
-```
-Time clock ticks
-  ↓
-Frontend sends time update to backend
-  ↓
-Backend updates SessionState:
-  - Process effects (fatigue++, hunger--)
-  - Update NPC positions if hour changed
-  - Update building states if time changed
-  ↓
-Backend calculates DELTA (only changes)
-  Example delta: {"character": {"fatigue": 4}}  (~50 bytes)
-  ↓
-Backend returns delta to frontend
-  ↓
-Frontend applies surgical DOM update
-  ↓
-⚠️ NO SAVE TO NOSTR (would spam relays)
-```
-
-#### 3. Auto-Save (Every 5 minutes)
-
-```
-5-minute timer triggers
-  ↓
-Backend serializes SessionState to minimal save format
-  - Extract item IDs (not full data)
-  - Extract spell IDs
-  - Extract location IDs
-  - Compress JSON
-  ↓
-Backend publishes save to Nostr relay as event
-  - Event kind: TBD (custom kind for game saves)
-  - Content: minimal JSON (~5-10KB)
-  - Optional: Encrypt with NIP-17
-  ↓
-Relay stores event
-  ↓
-Other devices can fetch latest save
-```
-
----
-
-### Nostr Save File Types
-
-**Go Types:**
-
-```go
-// Optimized for Nostr storage
-type NostrSaveFile struct {
-    HP         int                    `json:"hp"`
-    Fatigue    int                    `json:"f"`    // Shortened
-    Hunger     int                    `json:"h"`
-    Gold       int                    `json:"g"`
-    XP         int                    `json:"xp"`
-
-    Location   string                 `json:"loc"`
-    District   string                 `json:"dist"`
-    Building   string                 `json:"bld"`
-
-    Items      []InventorySlotMinimal `json:"inv"`
-    Equipment  map[string]string      `json:"eq"`
-    Spells     []string               `json:"sp"`
-    Effects    []ActiveEffectMinimal  `json:"eff"`
-
-    Time       int                    `json:"t"`
-    Day        int                    `json:"d"`
-}
-
-type InventorySlotMinimal struct {
-    ID  string `json:"id"`   // "longsword"
-    Q   int    `json:"q"`    // quantity
-}
-
-type ActiveEffectMinimal struct {
-    ID  string `json:"id"`   // "fatigue-accumulation"
-    D   int    `json:"d"`    // duration (-1 = permanent)
-}
-```
-
-**Estimated Sizes:**
-- Minimal save: 5-10KB
-- Compressed (gzip): 2-5KB
-- Encrypted (NIP-17): 3-6KB
-- **Well within Nostr 64KB limit** ✅
+**For this delta architecture, assume:**
+- Auto-save every 5 real minutes (not every tick)
+- Save format unchanged for now
+- Backend manages session state in-memory between saves
 
 ---
 
@@ -822,250 +979,276 @@ func (h *GameActionsHandler) HandleUpdateTime(w http.ResponseWriter, r *http.Req
 **File:** `src/systems/deltaApplier.js`
 
 ```javascript
-import { logger } from '../lib/logger.js';
-import { createLocationButton } from '../ui/locationDisplay.js';
-import { getNPCById } from '../state/staticData.js';
+import { logger } from "../lib/logger.js";
+import { createLocationButton } from "../ui/locationDisplay.js";
+import { getNPCById } from "../state/staticData.js";
 
 /**
  * DeltaApplier handles surgical DOM updates
  * This is the ONLY place that modifies DOM in response to state changes
  */
 export class DeltaApplier {
-    applyDelta(delta) {
-        logger.debug('Applying delta:', delta);
+  applyDelta(delta) {
+    logger.debug("Applying delta:", delta);
 
-        if (delta.character) {
-            this.applyCharacterDelta(delta.character);
-        }
-        if (delta.npcs) {
-            this.applyNPCDelta(delta.npcs);
-        }
-        if (delta.buildings) {
-            this.applyBuildingDelta(delta.buildings);
-        }
-        if (delta.inventory) {
-            this.applyInventoryDelta(delta.inventory);
-        }
-        if (delta.equipment) {
-            this.applyEquipmentDelta(delta.equipment);
-        }
+    if (delta.character) {
+      this.applyCharacterDelta(delta.character);
+    }
+    if (delta.npcs) {
+      this.applyNPCDelta(delta.npcs);
+    }
+    if (delta.buildings) {
+      this.applyBuildingDelta(delta.buildings);
+    }
+    if (delta.inventory) {
+      this.applyInventoryDelta(delta.inventory);
+    }
+    if (delta.equipment) {
+      this.applyEquipmentDelta(delta.equipment);
+    }
+  }
+
+  applyCharacterDelta(charDelta) {
+    // HP
+    if (charDelta.hp !== undefined) {
+      const hpEl = document.getElementById("current-hp");
+      if (hpEl) hpEl.textContent = charDelta.hp;
+
+      const maxHpEl = document.getElementById("max-hp");
+      const hpBar = document.getElementById("hp-bar");
+      if (maxHpEl && hpBar) {
+        const maxHp = parseInt(maxHpEl.textContent);
+        hpBar.style.width = `${(charDelta.hp / maxHp) * 100}%`;
+      }
     }
 
-    applyCharacterDelta(charDelta) {
-        // HP
-        if (charDelta.hp !== undefined) {
-            const hpEl = document.getElementById('current-hp');
-            if (hpEl) hpEl.textContent = charDelta.hp;
-
-            const maxHpEl = document.getElementById('max-hp');
-            const hpBar = document.getElementById('hp-bar');
-            if (maxHpEl && hpBar) {
-                const maxHp = parseInt(maxHpEl.textContent);
-                hpBar.style.width = `${(charDelta.hp / maxHp) * 100}%`;
-            }
-        }
-
-        // Fatigue
-        if (charDelta.fatigue !== undefined) {
-            const fatigueEl = document.getElementById('fatigue-level');
-            if (fatigueEl) fatigueEl.textContent = charDelta.fatigue;
-            this.updateFatigueEmoji(charDelta.fatigue);
-        }
-
-        // Hunger
-        if (charDelta.hunger !== undefined) {
-            const hungerEl = document.getElementById('hunger-level');
-            if (hungerEl) hungerEl.textContent = charDelta.hunger;
-            this.updateHungerEmoji(charDelta.hunger);
-        }
-
-        // Gold
-        if (charDelta.gold !== undefined) {
-            const goldEl = document.getElementById('gold-amount');
-            if (goldEl) goldEl.textContent = charDelta.gold;
-        }
-
-        // Time
-        if (charDelta.time_of_day !== undefined) {
-            document.dispatchEvent(new CustomEvent('time:changed', {
-                detail: { timeOfDay: charDelta.time_of_day }
-            }));
-        }
+    // Fatigue
+    if (charDelta.fatigue !== undefined) {
+      const fatigueEl = document.getElementById("fatigue-level");
+      if (fatigueEl) fatigueEl.textContent = charDelta.fatigue;
+      this.updateFatigueEmoji(charDelta.fatigue);
     }
 
-    applyNPCDelta(npcDelta) {
-        const container = document.querySelector('#npc-buttons div');
-        if (!container) return;
-
-        // Remove NPCs
-        if (npcDelta.removed && npcDelta.removed.length > 0) {
-            npcDelta.removed.forEach(npcId => {
-                const button = container.querySelector(`[data-npc-id="${npcId}"]`);
-                if (button) {
-                    button.remove();
-                    logger.debug(`Removed NPC: ${npcId}`);
-                }
-            });
-        }
-
-        // Add NPCs
-        if (npcDelta.added && npcDelta.added.length > 0) {
-            npcDelta.added.forEach(npcId => {
-                const npcData = getNPCById(npcId);
-                const displayName = npcData?.name || npcId.replace(/_/g, ' ');
-                const button = createLocationButton(
-                    displayName,
-                    () => window.location.talkToNPC(npcId),
-                    'npc'
-                );
-                button.dataset.npcId = npcId;
-                container.appendChild(button);
-                logger.debug(`Added NPC: ${npcId}`);
-            });
-        }
-
-        // Update empty state
-        if (container.children.length === 0) {
-            container.innerHTML = '<div class="text-gray-400 text-xs p-2 text-center italic">No one here.</div>';
-        }
+    // Hunger
+    if (charDelta.hunger !== undefined) {
+      const hungerEl = document.getElementById("hunger-level");
+      if (hungerEl) hungerEl.textContent = charDelta.hunger;
+      this.updateHungerEmoji(charDelta.hunger);
     }
 
-    applyBuildingDelta(buildingDelta) {
-        if (!buildingDelta.state_changed) return;
-
-        for (const [buildingId, isOpen] of Object.entries(buildingDelta.state_changed)) {
-            const button = document.querySelector(`[data-building-id="${buildingId}"]`);
-            if (button) {
-                if (isOpen) {
-                    button.style.background = '#6b8e6b';
-                    button.style.color = '#ffffff';
-                    button.disabled = false;
-                } else {
-                    button.style.background = '#808080';
-                    button.style.color = '#000000';
-                    button.disabled = true;
-                }
-                logger.debug(`Building ${buildingId}: ${isOpen ? 'OPEN' : 'CLOSED'}`);
-            }
-        }
+    // Gold
+    if (charDelta.gold !== undefined) {
+      const goldEl = document.getElementById("gold-amount");
+      if (goldEl) goldEl.textContent = charDelta.gold;
     }
 
-    applyInventoryDelta(inventoryDelta) {
-        if (inventoryDelta.general_slots) {
-            for (const [slotIndex, slotDelta] of Object.entries(inventoryDelta.general_slots)) {
-                this.updateInventorySlot('general', parseInt(slotIndex), slotDelta);
-            }
-        }
+    // Time
+    if (charDelta.time_of_day !== undefined) {
+      document.dispatchEvent(
+        new CustomEvent("time:changed", {
+          detail: { timeOfDay: charDelta.time_of_day },
+        })
+      );
+    }
+  }
 
-        if (inventoryDelta.backpack_slots) {
-            for (const [slotIndex, slotDelta] of Object.entries(inventoryDelta.backpack_slots)) {
-                this.updateInventorySlot('backpack', parseInt(slotIndex), slotDelta);
-            }
+  applyNPCDelta(npcDelta) {
+    const container = document.querySelector("#npc-buttons div");
+    if (!container) return;
+
+    // Remove NPCs
+    if (npcDelta.removed && npcDelta.removed.length > 0) {
+      npcDelta.removed.forEach((npcId) => {
+        const button = container.querySelector(`[data-npc-id="${npcId}"]`);
+        if (button) {
+          button.remove();
+          logger.debug(`Removed NPC: ${npcId}`);
         }
+      });
     }
 
-    updateInventorySlot(type, slotIndex, slotDelta) {
-        const selector = type === 'general'
-            ? `[data-item-slot="${slotIndex}"]`
-            : `[data-backpack-slot="${slotIndex}"]`;
+    // Add NPCs
+    if (npcDelta.added && npcDelta.added.length > 0) {
+      npcDelta.added.forEach((npcId) => {
+        const npcData = getNPCById(npcId);
+        const displayName = npcData?.name || npcId.replace(/_/g, " ");
+        const button = createLocationButton(
+          displayName,
+          () => window.location.talkToNPC(npcId),
+          "npc"
+        );
+        button.dataset.npcId = npcId;
+        container.appendChild(button);
+        logger.debug(`Added NPC: ${npcId}`);
+      });
+    }
 
-        const slotDiv = document.querySelector(selector);
-        if (!slotDiv) return;
+    // Update empty state
+    if (container.children.length === 0) {
+      container.innerHTML =
+        '<div class="p-2 text-xs italic text-center text-gray-400">No one here.</div>';
+    }
+  }
 
-        const existingImg = slotDiv.querySelector('img');
-        const existingQty = slotDiv.querySelector('.quantity-label');
+  applyBuildingDelta(buildingDelta) {
+    if (!buildingDelta.state_changed) return;
 
-        // Empty slot
-        if (!slotDelta.item_id || slotDelta.item_id === '') {
-            existingImg?.parentElement.remove();
-            existingQty?.remove();
-            slotDiv.dataset.itemId = '';
-            return;
+    for (const [buildingId, isOpen] of Object.entries(
+      buildingDelta.state_changed
+    )) {
+      const button = document.querySelector(
+        `[data-building-id="${buildingId}"]`
+      );
+      if (button) {
+        if (isOpen) {
+          button.style.background = "#6b8e6b";
+          button.style.color = "#ffffff";
+          button.disabled = false;
+        } else {
+          button.style.background = "#808080";
+          button.style.color = "#000000";
+          button.disabled = true;
         }
+        logger.debug(`Building ${buildingId}: ${isOpen ? "OPEN" : "CLOSED"}`);
+      }
+    }
+  }
 
-        // Update or create image
-        const newSrc = `/res/img/items/${slotDelta.item_id}.png`;
+  applyInventoryDelta(inventoryDelta) {
+    if (inventoryDelta.general_slots) {
+      for (const [slotIndex, slotDelta] of Object.entries(
+        inventoryDelta.general_slots
+      )) {
+        this.updateInventorySlot("general", parseInt(slotIndex), slotDelta);
+      }
+    }
+
+    if (inventoryDelta.backpack_slots) {
+      for (const [slotIndex, slotDelta] of Object.entries(
+        inventoryDelta.backpack_slots
+      )) {
+        this.updateInventorySlot("backpack", parseInt(slotIndex), slotDelta);
+      }
+    }
+  }
+
+  updateInventorySlot(type, slotIndex, slotDelta) {
+    const selector =
+      type === "general"
+        ? `[data-item-slot="${slotIndex}"]`
+        : `[data-backpack-slot="${slotIndex}"]`;
+
+    const slotDiv = document.querySelector(selector);
+    if (!slotDiv) return;
+
+    const existingImg = slotDiv.querySelector("img");
+    const existingQty = slotDiv.querySelector(".quantity-label");
+
+    // Empty slot
+    if (!slotDelta.item_id || slotDelta.item_id === "") {
+      existingImg?.parentElement.remove();
+      existingQty?.remove();
+      slotDiv.dataset.itemId = "";
+      return;
+    }
+
+    // Update or create image
+    const newSrc = `/res/img/items/${slotDelta.item_id}.png`;
+
+    if (existingImg) {
+      const currentSrc = new URL(existingImg.src).pathname;
+      if (currentSrc !== newSrc) {
+        existingImg.src = newSrc;
+      }
+    } else {
+      const imgDiv = document.createElement("div");
+      imgDiv.className = "w-full h-full flex items-center justify-center p-1";
+      const img = document.createElement("img");
+      img.src = newSrc;
+      img.className = "w-full h-full object-contain";
+      img.style.imageRendering = "pixelated";
+      imgDiv.appendChild(img);
+      slotDiv.appendChild(imgDiv);
+    }
+
+    // Update quantity
+    if (slotDelta.quantity && slotDelta.quantity > 1) {
+      if (existingQty) {
+        existingQty.textContent = slotDelta.quantity;
+      } else {
+        const qtyLabel = document.createElement("div");
+        qtyLabel.className =
+          "quantity-label absolute bottom-0 right-0 text-white";
+        qtyLabel.style.fontSize = "10px";
+        qtyLabel.textContent = slotDelta.quantity;
+        slotDiv.appendChild(qtyLabel);
+      }
+    } else {
+      existingQty?.remove();
+    }
+
+    slotDiv.dataset.itemId = slotDelta.item_id;
+  }
+
+  applyEquipmentDelta(equipmentDelta) {
+    if (!equipmentDelta.changed) return;
+
+    for (const [slotName, itemId] of Object.entries(equipmentDelta.changed)) {
+      const slotDiv = document.querySelector(`[data-slot="${slotName}"]`);
+      if (!slotDiv) continue;
+
+      const existingImg = slotDiv.querySelector("img");
+
+      if (!itemId) {
+        existingImg?.parentElement.remove();
+        slotDiv.dataset.itemId = "";
+      } else {
+        const newSrc = `/res/img/items/${itemId}.png`;
 
         if (existingImg) {
-            const currentSrc = new URL(existingImg.src).pathname;
-            if (currentSrc !== newSrc) {
-                existingImg.src = newSrc;
-            }
+          existingImg.src = newSrc;
         } else {
-            const imgDiv = document.createElement('div');
-            imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
-            const img = document.createElement('img');
-            img.src = newSrc;
-            img.className = 'w-full h-full object-contain';
-            img.style.imageRendering = 'pixelated';
-            imgDiv.appendChild(img);
-            slotDiv.appendChild(imgDiv);
+          const imgDiv = document.createElement("div");
+          imgDiv.className =
+            "w-full h-full flex items-center justify-center p-1";
+          const img = document.createElement("img");
+          img.src = newSrc;
+          img.className = "w-full h-full object-contain";
+          img.style.imageRendering = "pixelated";
+          imgDiv.appendChild(img);
+          slotDiv.appendChild(imgDiv);
         }
 
-        // Update quantity
-        if (slotDelta.quantity && slotDelta.quantity > 1) {
-            if (existingQty) {
-                existingQty.textContent = slotDelta.quantity;
-            } else {
-                const qtyLabel = document.createElement('div');
-                qtyLabel.className = 'quantity-label absolute bottom-0 right-0 text-white';
-                qtyLabel.style.fontSize = '10px';
-                qtyLabel.textContent = slotDelta.quantity;
-                slotDiv.appendChild(qtyLabel);
-            }
-        } else {
-            existingQty?.remove();
-        }
-
-        slotDiv.dataset.itemId = slotDelta.item_id;
+        slotDiv.dataset.itemId = itemId;
+      }
     }
+  }
 
-    applyEquipmentDelta(equipmentDelta) {
-        if (!equipmentDelta.changed) return;
+  updateFatigueEmoji(fatigue) {
+    const emojiEl = document.getElementById("fatigue-emoji");
+    if (!emojiEl) return;
+    const emojis = [
+      "😊",
+      "😐",
+      "😑",
+      "😪",
+      "😴",
+      "🥱",
+      "😵",
+      "💀",
+      "⚰️",
+      "👻",
+      "☠️",
+    ];
+    emojiEl.textContent = emojis[Math.min(fatigue, emojis.length - 1)];
+  }
 
-        for (const [slotName, itemId] of Object.entries(equipmentDelta.changed)) {
-            const slotDiv = document.querySelector(`[data-slot="${slotName}"]`);
-            if (!slotDiv) continue;
-
-            const existingImg = slotDiv.querySelector('img');
-
-            if (!itemId) {
-                existingImg?.parentElement.remove();
-                slotDiv.dataset.itemId = '';
-            } else {
-                const newSrc = `/res/img/items/${itemId}.png`;
-
-                if (existingImg) {
-                    existingImg.src = newSrc;
-                } else {
-                    const imgDiv = document.createElement('div');
-                    imgDiv.className = 'w-full h-full flex items-center justify-center p-1';
-                    const img = document.createElement('img');
-                    img.src = newSrc;
-                    img.className = 'w-full h-full object-contain';
-                    img.style.imageRendering = 'pixelated';
-                    imgDiv.appendChild(img);
-                    slotDiv.appendChild(imgDiv);
-                }
-
-                slotDiv.dataset.itemId = itemId;
-            }
-        }
-    }
-
-    updateFatigueEmoji(fatigue) {
-        const emojiEl = document.getElementById('fatigue-emoji');
-        if (!emojiEl) return;
-        const emojis = ['😊', '😐', '😑', '😪', '😴', '🥱', '😵', '💀', '⚰️', '👻', '☠️'];
-        emojiEl.textContent = emojis[Math.min(fatigue, emojis.length - 1)];
-    }
-
-    updateHungerEmoji(hunger) {
-        const emojiEl = document.getElementById('hunger-emoji');
-        if (!emojiEl) return;
-        const emojis = ['☠️', '🥺', '😋', '😊'];
-        emojiEl.textContent = emojis[Math.min(hunger, emojis.length - 1)];
-    }
+  updateHungerEmoji(hunger) {
+    const emojiEl = document.getElementById("hunger-emoji");
+    if (!emojiEl) return;
+    const emojis = ["☠️", "🥺", "😋", "😊"];
+    emojiEl.textContent = emojis[Math.min(hunger, emojis.length - 1)];
+  }
 }
 
 export const deltaApplier = new DeltaApplier();
@@ -1078,26 +1261,25 @@ export const deltaApplier = new DeltaApplier();
 **File:** `src/systems/timeClock.js`
 
 ```javascript
-import { deltaApplier } from './deltaApplier.js';
+import { deltaApplier } from "./deltaApplier.js";
 
 async function sendTimeUpdateToBackend(character) {
-    if (!gameAPI.initialized) return;
+  if (!gameAPI.initialized) return;
 
-    try {
-        const response = await gameAPI.sendAction('update_time', {
-            time_of_day: character.time_of_day,
-            current_day: character.current_day
-        });
+  try {
+    const response = await gameAPI.sendAction("update_time", {
+      time_of_day: character.time_of_day,
+      current_day: character.current_day,
+    });
 
-        // Apply delta (not full state)
-        if (response && response.delta) {
-            logger.debug('Received delta:', response.delta);
-            deltaApplier.applyDelta(response.delta);
-        }
-
-    } catch (error) {
-        logger.error('Failed to sync time:', error);
+    // Apply delta (not full state)
+    if (response && response.delta) {
+      logger.debug("Received delta:", response.delta);
+      deltaApplier.applyDelta(response.delta);
     }
+  } catch (error) {
+    logger.error("Failed to sync time:", error);
+  }
 }
 ```
 
@@ -1108,6 +1290,7 @@ async function sendTimeUpdateToBackend(character) {
 ### Phase 1: Backend (8-10 hours)
 
 1. **Create session state infrastructure**
+
    ```bash
    # Create new files
    server/api/session_state.go
@@ -1115,6 +1298,7 @@ async function sendTimeUpdateToBackend(character) {
    ```
 
 2. **Init session manager in main.go**
+
    ```go
    import "server/api"
 
@@ -1128,6 +1312,7 @@ async function sendTimeUpdateToBackend(character) {
    ```
 
 3. **Modify game_actions.go**
+
    - Update `HandleUpdateTime` to return deltas
    - Update `HandleEnterBuilding` to return deltas
    - Update `HandleInventoryAction` to return deltas
@@ -1137,22 +1322,44 @@ async function sendTimeUpdateToBackend(character) {
    go test ./server/api -v
    ```
 
-### Phase 2: Frontend (4-6 hours)
+### Phase 2: Frontend (5-7 hours)
 
 1. **Create deltaApplier.js**
+
    ```bash
    # Create file
    src/systems/deltaApplier.js
    ```
 
-2. **Update timeClock.js**
-   - Import deltaApplier
-   - Replace full state updates with delta application
+2. **Create smoothClock.js**
 
-3. **Remove client-side state caching**
+   ```bash
+   # Create file
+   src/systems/smoothClock.js
+   ```
+
+   - 60fps interpolated clock display
+   - Syncs to backend authoritative time
+   - Pause/unpause support
+
+3. **Create tickManager.js**
+
+   ```bash
+   # Create file
+   src/systems/tickManager.js
+   ```
+
+   - Manages 417ms tick timer
+   - Sends tick requests to backend
+   - Applies returned deltas
+
+4. **Update existing systems**
+
+   - Replace old timeClock.js with smoothClock integration
+   - Remove client-side state management where possible
    - Simplify `gameState.js` (optional - can keep for backwards compat)
 
-4. **Test frontend**
+5. **Test frontend**
    ```bash
    npm run build
    # Start server and test manually
@@ -1161,12 +1368,14 @@ async function sendTimeUpdateToBackend(character) {
 ### Phase 3: Testing (4-6 hours)
 
 1. **Performance testing**
+
    - Open DevTools Performance tab
    - Record 30 seconds of gameplay
    - Verify <5 DOM mutations per 5-second cycle
    - Verify delta payloads <500 bytes
 
 2. **Edge case testing**
+
    - Hour changes (NPC updates)
    - Building open/close
    - Player ejection from closed buildings
@@ -1224,25 +1433,86 @@ func TestDeltaCalculation(t *testing.T) {
 
 ```javascript
 // Test delta applier
-describe('DeltaApplier', () => {
-    it('applies character HP delta', () => {
-        document.body.innerHTML = '<span id="current-hp">10</span>';
+describe("DeltaApplier", () => {
+  it("applies character HP delta", () => {
+    document.body.innerHTML = '<span id="current-hp">10</span>';
 
-        const delta = { character: { hp: 5 } };
-        deltaApplier.applyDelta(delta);
+    const delta = { character: { hp: 5 } };
+    deltaApplier.applyDelta(delta);
 
-        expect(document.getElementById('current-hp').textContent).toBe('5');
-    });
+    expect(document.getElementById("current-hp").textContent).toBe("5");
+  });
 
-    it('adds NPC to DOM', () => {
-        document.body.innerHTML = '<div id="npc-buttons"><div></div></div>';
+  it("adds NPC to DOM", () => {
+    document.body.innerHTML = '<div id="npc-buttons"><div></div></div>';
 
-        const delta = { npcs: { added: ['barkeep'] } };
-        deltaApplier.applyDelta(delta);
+    const delta = { npcs: { added: ["barkeep"] } };
+    deltaApplier.applyDelta(delta);
 
-        const npcButton = document.querySelector('[data-npc-id="barkeep"]');
-        expect(npcButton).toBeTruthy();
-    });
+    const npcButton = document.querySelector('[data-npc-id="barkeep"]');
+    expect(npcButton).toBeTruthy();
+  });
+});
+
+// Test smooth clock
+describe("SmoothClock", () => {
+  it("interpolates time correctly at 144x", () => {
+    const clock = new SmoothClock();
+    clock.syncFromBackend(720, 1); // Noon, day 1
+
+    // Simulate 1 real second passing
+    clock.lastSyncRealTime = performance.now() - 1000;
+
+    // 1 second * 144x = 144 game seconds = 2.4 minutes
+    const time = clock.getCurrentTime();
+    expect(time.timeOfDay).toBeCloseTo(722, 0); // 720 + 2.4 ≈ 722
+  });
+
+  it("handles day rollover", () => {
+    const clock = new SmoothClock();
+    clock.syncFromBackend(1438, 1); // 23:58, day 1
+
+    // Simulate 2 real seconds (4.8 in-game minutes)
+    clock.lastSyncRealTime = performance.now() - 2000;
+
+    const time = clock.getCurrentTime();
+    expect(time.currentDay).toBe(2);
+    expect(time.timeOfDay).toBeLessThan(5); // Early morning day 2
+  });
+
+  it("pauses interpolation", () => {
+    const clock = new SmoothClock();
+    clock.syncFromBackend(720, 1);
+    clock.pause();
+
+    // Simulate time passing
+    clock.lastSyncRealTime = performance.now() - 5000;
+
+    const time = clock.getCurrentTime();
+    expect(time.timeOfDay).toBe(720); // Should not have advanced
+  });
+});
+
+// Test tick timing
+describe("TickManager", () => {
+  it("fires ticks at correct interval", async () => {
+    const tickTimes = [];
+    const mockCallback = () => tickTimes.push(performance.now());
+
+    // Run for ~1 second, should get ~2-3 ticks
+    tickManager.start(mockCallback);
+    await new Promise(r => setTimeout(r, 1000));
+    tickManager.stop();
+
+    expect(tickTimes.length).toBeGreaterThanOrEqual(2);
+    expect(tickTimes.length).toBeLessThanOrEqual(3);
+
+    // Check interval is close to 417ms
+    if (tickTimes.length >= 2) {
+      const interval = tickTimes[1] - tickTimes[0];
+      expect(interval).toBeCloseTo(417, -2); // Within ~10ms
+    }
+  });
 });
 ```
 
@@ -1252,41 +1522,71 @@ describe('DeltaApplier', () => {
 
 ### Before (Current System)
 
-| Metric | Value |
-|--------|-------|
-| DOM mutations per 5s | ~50+ |
-| Network payload | 5-10KB |
-| NPC API calls | Every 5s |
-| Save file size | 20-50KB |
-| Flickering | Visible |
+| Metric               | Value       |
+| -------------------- | ----------- |
+| Tick rate            | Every 5s    |
+| In-game time per tick| 12 minutes  |
+| DOM mutations per 5s | ~50+        |
+| Network payload/tick | 5-10KB      |
+| Network bytes/sec    | ~1,400      |
+| NPC API calls        | Every 5s    |
+| Save file size       | 20-50KB     |
+| Flickering           | Visible     |
+| Clock display        | Jerky       |
 
-### After (Option 4)
+### After (Option 4 with 1-Minute Tick)
 
-| Metric | Value | Improvement |
-|--------|-------|-------------|
-| DOM mutations per 5s | ~2-5 | 90% reduction |
-| Network payload | 50-200 bytes | 95% reduction |
-| NPC API calls | Only on hour change | 85% reduction |
-| Save file size | 5-10KB | 75% reduction |
-| Flickering | None | 100% eliminated |
+| Metric               | Value               | Improvement      |
+| -------------------- | ------------------- | ---------------- |
+| Tick rate            | Every 417ms         | 12x more frequent |
+| In-game time per tick| 1 minute            | 12x finer        |
+| DOM mutations per 5s | ~12-30 (surgical)   | 40-75% reduction |
+| Network payload/tick | 30-200 bytes        | 97% reduction    |
+| Network bytes/sec    | ~120                | 91% reduction    |
+| NPC API calls        | Only on hour change | 85% reduction    |
+| Save file size       | 5-10KB              | 75% reduction    |
+| Flickering           | None                | 100% eliminated  |
+| Clock display        | Smooth (60fps)      | 100% improved    |
+
+### Tick Rate Comparison
+
+| System | Ticks/sec | Bytes/tick | Bytes/sec | DOM ops/tick |
+|--------|-----------|------------|-----------|--------------|
+| Current (5s) | 0.2 | ~7,000 | ~1,400 | ~50 |
+| Delta (417ms) | 2.4 | ~50 | ~120 | ~2-5 |
+| **Ratio** | **12x more** | **140x smaller** | **91% less** | **90% fewer** |
+
+### Why More Ticks = Less Load
+
+The counterintuitive result: **12x more ticks uses 91% less bandwidth**.
+
+This is because:
+1. **Delta payloads are tiny** - Only changed fields, not full state
+2. **Most ticks are near-empty** - Just time update (~35 bytes)
+3. **No full DOM re-renders** - Surgical updates only
+4. **NPC/building data cached** - Not re-fetched each tick
 
 ---
 
 ## Benefits Beyond Flicker Fix
 
 1. **Multiplayer Ready**
+
    - Backend authoritative state
    - Easy to broadcast deltas to multiple clients
 
 2. **Easier Testing**
+
    - All logic in Go (unit testable)
    - Frontend is pure rendering
 
 3. **Better Security**
+
    - No client-side state manipulation
    - Backend validates everything
 
 4. **Simpler Debugging**
+
    - Single source of truth
    - Clear delta logs
 
@@ -1301,14 +1601,27 @@ describe('DeltaApplier', () => {
 
 ## Timeline
 
-| Week | Focus | Hours | Deliverables |
-|------|-------|-------|-------------|
-| 1 | Backend setup | 4-5h | session_state.go, delta.go |
-| 2 | Backend endpoints | 4-5h | Modified game_actions.go |
-| 3 | Frontend delta applier | 4-6h | deltaApplier.js, updated timeClock.js |
-| 4 | Testing & polish | 4-6h | Tests, performance validation |
+| Week | Focus                  | Hours | Deliverables                          |
+| ---- | ---------------------- | ----- | ------------------------------------- |
+| 1    | Backend setup          | 4-5h  | session_state.go, delta.go            |
+| 2    | Backend endpoints      | 4-5h  | Modified game_actions.go, tick handler |
+| 3    | Frontend systems       | 5-7h  | deltaApplier.js, smoothClock.js       |
+| 4    | Testing & polish       | 4-6h  | Tests, performance validation         |
 
-**Total:** 16-22 hours over 4 weeks
+**Total:** 17-23 hours over 4 weeks
+
+### Key Implementation Files
+
+**Backend (Go):**
+- `server/api/session_state.go` - Session management
+- `server/api/delta.go` - Delta types and calculation
+- `server/api/game_actions.go` - Modified to return deltas
+- `server/api/tick_handler.go` - New tick endpoint
+
+**Frontend (JS):**
+- `src/systems/deltaApplier.js` - Surgical DOM updates
+- `src/systems/smoothClock.js` - 60fps interpolated clock display
+- `src/systems/tickManager.js` - 417ms tick timer management
 
 ---
 
