@@ -1,6 +1,6 @@
 /**
  * Wait Modal System
- * Handles the wait functionality with time slider
+ * Handles the wait functionality with granular time slider (minutes)
  */
 
 import { logger } from '../lib/logger.js';
@@ -8,9 +8,14 @@ import { gameAPI } from '../lib/api.js';
 import { getGameStateSync, refreshGameState } from '../state/gameState.js';
 import { updateAllDisplays } from '../ui/displayCoordinator.js';
 import { showMessage } from '../ui/messaging.js';
+import { deltaApplier } from './deltaApplier.js';
+import { smoothClock } from './smoothClock.js';
 
-let currentWaitHours = 1;
+let currentWaitMinutes = 15;
 let updateIntervalId = null;
+
+// Hunger level names (higher = better)
+const HUNGER_NAMES = ['Famished', 'Hungry', 'Satisfied', 'Full'];
 
 /**
  * Open the wait modal
@@ -24,19 +29,19 @@ export function openWaitModal() {
         return;
     }
 
-    // Reset to default 1 hour
-    currentWaitHours = 1;
+    // Reset to default 15 minutes
+    currentWaitMinutes = 15;
     const slider = document.getElementById('wait-slider');
     if (slider) {
-        slider.value = 1;
+        slider.value = 15;
     }
 
     // Update display with initial values
-    updateWaitDisplay(1);
+    updateWaitDisplay(15);
 
     // Start updating the display every 100ms to sync with live time
     updateIntervalId = setInterval(() => {
-        updateWaitDisplay(currentWaitHours);
+        updateWaitDisplay(currentWaitMinutes);
     }, 100);
 
     // Show modal
@@ -62,19 +67,33 @@ export function closeWaitModal() {
 }
 
 /**
- * Update the wait display based on slider value
+ * Format minutes as human-readable duration
+ * @param {number} minutes - Duration in minutes
+ * @returns {string} Formatted string like "1 hour 30 minutes"
  */
-export function updateWaitDisplay(hours) {
-    currentWaitHours = parseInt(hours);
+function formatDuration(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
 
-    // Update hours display
-    const hoursDisplay = document.getElementById('wait-hours-display');
-    const hoursPlural = document.getElementById('wait-hours-plural');
-    if (hoursDisplay) {
-        hoursDisplay.textContent = currentWaitHours;
+    if (hours === 0) {
+        return `${mins} minute${mins !== 1 ? 's' : ''}`;
+    } else if (mins === 0) {
+        return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+        return `${hours}h ${mins}m`;
     }
-    if (hoursPlural) {
-        hoursPlural.textContent = currentWaitHours === 1 ? '' : 's';
+}
+
+/**
+ * Update the wait display based on slider value (in minutes)
+ */
+export function updateWaitDisplay(minutes) {
+    currentWaitMinutes = parseInt(minutes);
+
+    // Update duration display
+    const durationDisplay = document.getElementById('wait-duration-display');
+    if (durationDisplay) {
+        durationDisplay.textContent = formatDuration(currentWaitMinutes);
     }
 
     // Calculate target time - use same source as time display for consistency
@@ -88,7 +107,7 @@ export function updateWaitDisplay(hours) {
         currentTimeMinutes = state.time_of_day || state.character?.time_of_day || 720;
     }
 
-    const targetTimeMinutes = (currentTimeMinutes + (currentWaitHours * 60)) % 1440;
+    const targetTimeMinutes = (currentTimeMinutes + currentWaitMinutes) % 1440;
 
     const targetHours = Math.floor(targetTimeMinutes / 60);
     const targetMins = targetTimeMinutes % 60;
@@ -100,24 +119,57 @@ export function updateWaitDisplay(hours) {
         targetTimeDisplay.textContent = `${targetHours12}:${targetMins.toString().padStart(2, '0')} ${targetPeriod}`;
     }
 
-    // Calculate fatigue and hunger changes
-    // Fatigue increases by 1 per hour waited
-    const fatigueIncrease = currentWaitHours;
+    // Get current fatigue and hunger from game state
+    const state = getGameStateSync();
+    const currentFatigue = state.character?.fatigue ?? 0;
+    const currentHunger = state.character?.hunger ?? 3; // 3 = Full
 
-    // Hunger increases by 1 every 3 hours (so 1-2 hours = 0, 3-5 hours = 1, 6 hours = 2)
-    const hungerIncrease = Math.floor(currentWaitHours / 3);
+    // Calculate expected effects based on actual game ticker rates
+    // Fatigue: increases by 1 per hour (60 minutes)
+    // Hunger: decreases by 1 every 3 hours (180 minutes)
+    // These match the backend effects system
 
+    const fatiguePerMinute = 1 / 60; // 1 fatigue per 60 minutes
+    const hungerPerMinute = 1 / 180; // 1 hunger loss per 180 minutes
+
+    // Calculate expected fatigue (capped at 10)
+    const expectedFatigueIncrease = Math.floor(currentWaitMinutes * fatiguePerMinute);
+    const expectedFatigue = Math.min(10, currentFatigue + expectedFatigueIncrease);
+
+    // Calculate expected hunger decrease (capped at 0=Famished)
+    const expectedHungerDecrease = Math.floor(currentWaitMinutes * hungerPerMinute);
+    const expectedHunger = Math.max(0, currentHunger - expectedHungerDecrease);
+
+    // Update fatigue display
     const fatigueChange = document.getElementById('wait-fatigue-change');
-    const hungerChange = document.getElementById('wait-hunger-change');
-
     if (fatigueChange) {
-        fatigueChange.textContent = `+${fatigueIncrease}`;
-        fatigueChange.className = fatigueIncrease > 0 ? 'text-red-400' : 'text-gray-400';
+        if (expectedFatigueIncrease > 0) {
+            fatigueChange.textContent = `${currentFatigue} → ${expectedFatigue} (+${expectedFatigueIncrease})`;
+            fatigueChange.className = 'text-red-400';
+        } else {
+            fatigueChange.textContent = `${currentFatigue} → ${expectedFatigue}`;
+            fatigueChange.className = 'text-gray-400';
+        }
     }
 
+    // Update hunger display - show level names
+    const hungerChange = document.getElementById('wait-hunger-change');
     if (hungerChange) {
-        hungerChange.textContent = hungerIncrease > 0 ? `+${hungerIncrease}` : '-';
-        hungerChange.className = hungerIncrease > 0 ? 'text-orange-400' : 'text-gray-400';
+        const currentHungerName = HUNGER_NAMES[currentHunger] || 'Unknown';
+        const expectedHungerName = HUNGER_NAMES[expectedHunger] || 'Unknown';
+
+        if (expectedHungerDecrease > 0) {
+            hungerChange.textContent = `${currentHungerName} → ${expectedHungerName}`;
+            // Color based on how bad it's getting
+            if (expectedHunger <= 1) {
+                hungerChange.className = 'text-red-400'; // Getting hungry/famished
+            } else {
+                hungerChange.className = 'text-orange-400';
+            }
+        } else {
+            hungerChange.textContent = `${currentHungerName} → ${expectedHungerName}`;
+            hungerChange.className = 'text-gray-400';
+        }
     }
 }
 
@@ -125,24 +177,43 @@ export function updateWaitDisplay(hours) {
  * Confirm and execute the wait action
  */
 export async function confirmWait() {
-    logger.debug(`Confirming wait for ${currentWaitHours} hours`);
+    logger.debug(`Confirming wait for ${currentWaitMinutes} minutes`);
 
     try {
+        // Send minutes directly - backend now supports granular waiting
         const result = await gameAPI.sendAction('wait', {
-            hours: currentWaitHours
+            minutes: currentWaitMinutes
         });
 
         if (result.success) {
-            showMessage(result.message || `You waited ${currentWaitHours} hour${currentWaitHours === 1 ? '' : 's'}.`, 'success');
-            await refreshGameState();
-            await updateAllDisplays();
+            // Apply delta if present (surgical updates)
+            if (result.delta) {
+                logger.debug('Applying wait delta:', result.delta);
+                deltaApplier.applyDelta(result.delta);
+            }
+
+            // Sync clock to new time from data (force sync for major time jump)
+            if (result.data) {
+                const timeOfDay = result.data.time_of_day;
+                const currentDay = result.data.current_day || 1;
+                if (timeOfDay !== undefined) {
+                    smoothClock.syncFromBackend(timeOfDay, currentDay, true); // Force sync
+                    logger.debug(`Clock synced after wait: Day ${currentDay}, time ${timeOfDay}`);
+                }
+            }
+
+            showMessage(result.message || `You waited ${formatDuration(currentWaitMinutes)}.`, 'warning');
             closeWaitModal();
+
+            // NOTE: Don't call displayCurrentLocation() here!
+            // The delta system already updated buildings/NPCs surgically.
+            // A full re-render would use stale cached state and overwrite the delta updates.
         } else {
             showMessage(result.error || 'Failed to wait', 'error');
         }
     } catch (error) {
         logger.error('Failed to execute wait:', error);
-        showMessage('❌ Failed to wait', 'error');
+        showMessage('Failed to wait', 'error');
     }
 }
 

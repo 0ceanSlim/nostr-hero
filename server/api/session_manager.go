@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"nostr-hero/db"
+	"nostr-hero/utils"
 )
 
 // GameSession holds the in-memory game state for an active session
@@ -22,6 +25,13 @@ type GameSession struct {
 	BookedShows    []map[string]interface{} `json:"booked_shows,omitempty"`    // Current show bookings
 	PerformedShows []string                 `json:"performed_shows,omitempty"` // Shows performed today (to prevent re-booking)
 	RentedRooms    []map[string]interface{} `json:"rented_rooms,omitempty"`    // Current room rentals
+
+	// Delta system: cached state for surgical updates
+	LastSnapshot   *SessionSnapshot `json:"-"` // Previous state for delta calculation
+	NPCsAtLocation []string         `json:"-"` // Cached NPCs at current location
+	NPCsLastHour   int              `json:"-"` // Hour when NPCs were last fetched
+	BuildingStates map[string]bool  `json:"-"` // Cached building open/close states
+	BuildingsLastCheck int          `json:"-"` // Time when buildings were last checked
 }
 
 // SessionManager manages all active game sessions in memory
@@ -54,7 +64,6 @@ func (sm *SessionManager) LoadSession(npub, saveID string) (*GameSession, error)
 
 	// Check if already loaded
 	if session, exists := sm.sessions[key]; exists {
-		log.Printf("📍 Session already loaded: %s", key)
 		return session, nil
 	}
 
@@ -71,15 +80,47 @@ func (sm *SessionManager) LoadSession(npub, saveID string) (*GameSession, error)
 
 	// Create new session in memory
 	session := &GameSession{
-		Npub:      npub,
-		SaveID:    saveID,
-		SaveData:  *saveData,
-		LoadedAt:  currentTimestamp(),
-		UpdatedAt: currentTimestamp(),
+		Npub:           npub,
+		SaveID:         saveID,
+		SaveData:       *saveData,
+		LoadedAt:       currentTimestamp(),
+		UpdatedAt:      currentTimestamp(),
+		BuildingStates: make(map[string]bool),
 	}
 
+	// Initialize building states and NPCs for current location
+	database := db.GetDB()
+	if database != nil {
+		timeOfDay := saveData.TimeOfDay
+		currentHour := timeOfDay / 60
+
+		// Load initial building states
+		buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			database,
+			saveData.Location,
+			saveData.District,
+			timeOfDay,
+		)
+		if err == nil && len(buildingStates) > 0 {
+			session.BuildingStates = buildingStates
+			session.BuildingsLastCheck = timeOfDay
+		}
+
+		// Load initial NPCs at location
+		npcIDs := GetNPCIDsAtLocation(
+			saveData.Location,
+			saveData.District,
+			saveData.Building,
+			timeOfDay,
+		)
+		session.NPCsAtLocation = npcIDs
+		session.NPCsLastHour = currentHour
+	}
+
+	// Initialize snapshot for delta system
+	session.InitializeSnapshot()
+
 	sm.sessions[key] = session
-	log.Printf("✅ Session loaded into memory: %s", key)
 
 	return session, nil
 }
@@ -104,12 +145,45 @@ func (sm *SessionManager) ReloadSession(npub, saveID string) (*GameSession, erro
 
 	// Create/overwrite session in memory
 	session := &GameSession{
-		Npub:      npub,
-		SaveID:    saveID,
-		SaveData:  *saveData,
-		LoadedAt:  currentTimestamp(),
-		UpdatedAt: currentTimestamp(),
+		Npub:           npub,
+		SaveID:         saveID,
+		SaveData:       *saveData,
+		LoadedAt:       currentTimestamp(),
+		UpdatedAt:      currentTimestamp(),
+		BuildingStates: make(map[string]bool),
 	}
+
+	// Initialize building states and NPCs for current location
+	database := db.GetDB()
+	if database != nil {
+		timeOfDay := saveData.TimeOfDay
+		currentHour := timeOfDay / 60
+
+		// Load initial building states
+		buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			database,
+			saveData.Location,
+			saveData.District,
+			timeOfDay,
+		)
+		if err == nil && len(buildingStates) > 0 {
+			session.BuildingStates = buildingStates
+			session.BuildingsLastCheck = timeOfDay
+		}
+
+		// Load initial NPCs at location
+		npcIDs := GetNPCIDsAtLocation(
+			saveData.Location,
+			saveData.District,
+			saveData.Building,
+			timeOfDay,
+		)
+		session.NPCsAtLocation = npcIDs
+		session.NPCsLastHour = currentHour
+	}
+
+	// Initialize snapshot for delta system
+	session.InitializeSnapshot()
 
 	sm.sessions[key] = session
 	log.Printf("🔄 Session reloaded from disk (discarded in-memory changes): %s", key)
@@ -147,8 +221,6 @@ func (sm *SessionManager) UpdateSession(npub, saveID string, saveData SaveFile) 
 	// Update the save data
 	session.SaveData = saveData
 	session.UpdatedAt = currentTimestamp()
-
-	log.Printf("✅ Session updated in memory: %s", key)
 	return nil
 }
 
@@ -164,10 +236,6 @@ func (sm *SessionManager) SaveSessionToDisk(npub, saveID string) error {
 		return fmt.Errorf("session not found in memory: %s", key)
 	}
 
-	// Write to disk using existing save logic
-	// (This will be called by the save endpoint)
-	log.Printf("💾 Writing session to disk: %s", key)
-
 	return nil // The actual write will happen in the handler
 }
 
@@ -178,8 +246,6 @@ func (sm *SessionManager) UnloadSession(npub, saveID string) {
 
 	key := sessionKey(npub, saveID)
 	delete(sm.sessions, key)
-
-	log.Printf("🗑️ Session unloaded from memory: %s", key)
 }
 
 // GetAllSessions returns all active sessions (for debugging)
@@ -492,6 +558,59 @@ func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 // Helper function to get current timestamp
 func currentTimestamp() int64 {
 	return time.Now().Unix()
+}
+
+// UpdateSnapshotAndCalculateDelta updates the session's snapshot and returns the delta
+func (s *GameSession) UpdateSnapshotAndCalculateDelta() *Delta {
+	// Create new snapshot from current state
+	newSnapshot := CreateSnapshot(&s.SaveData, s.NPCsAtLocation, s.BuildingStates)
+
+	// Calculate delta from old to new
+	var delta *Delta
+	if s.LastSnapshot != nil {
+		delta = CalculateDelta(s.LastSnapshot, newSnapshot)
+	}
+
+	// Update stored snapshot
+	s.LastSnapshot = newSnapshot
+
+	return delta
+}
+
+// InitializeSnapshot creates the initial snapshot (called when session is first loaded)
+func (s *GameSession) InitializeSnapshot() {
+	if s.BuildingStates == nil {
+		s.BuildingStates = make(map[string]bool)
+	}
+	s.LastSnapshot = CreateSnapshot(&s.SaveData, s.NPCsAtLocation, s.BuildingStates)
+}
+
+// UpdateNPCsAtLocation updates the cached NPC list (called when hour changes)
+func (s *GameSession) UpdateNPCsAtLocation(npcs []string, currentHour int) {
+	s.NPCsAtLocation = npcs
+	s.NPCsLastHour = currentHour
+}
+
+// UpdateBuildingStates updates the cached building states
+func (s *GameSession) UpdateBuildingStates(buildings map[string]bool, currentTime int) {
+	if s.BuildingStates == nil {
+		s.BuildingStates = make(map[string]bool)
+	}
+	for id, isOpen := range buildings {
+		s.BuildingStates[id] = isOpen
+	}
+	s.BuildingsLastCheck = currentTime
+}
+
+// ShouldRefreshNPCs returns true if NPCs should be refreshed (hour changed)
+func (s *GameSession) ShouldRefreshNPCs(currentHour int) bool {
+	return currentHour != s.NPCsLastHour || len(s.NPCsAtLocation) == 0
+}
+
+// ShouldRefreshBuildings returns true if building states should be refreshed
+func (s *GameSession) ShouldRefreshBuildings(currentTime int) bool {
+	// Refresh every 5 in-game minutes
+	return s.BuildingsLastCheck == 0 || (currentTime-s.BuildingsLastCheck) >= 5
 }
 
 // CleanupHandler removes a session from memory

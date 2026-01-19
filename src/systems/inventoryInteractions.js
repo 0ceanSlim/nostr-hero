@@ -12,10 +12,12 @@ import { gameAPI } from '../lib/api.js';
 import { getGameStateSync, refreshGameState } from '../state/gameState.js';
 import { getItemById } from '../state/staticData.js';
 import { updateAllDisplays } from '../ui/displayCoordinator.js';
+import { updateCharacterDisplay } from '../ui/characterDisplay.js';
 import { showMessage } from '../ui/messaging.js';
 import { showVaultUI } from '../ui/locationDisplay.js';
 import { openContainer } from './containers.js';
 import { isShopOpen, getCurrentTab, addItemToSell } from './shopSystem.js';
+import { deltaApplier } from './deltaApplier.js';
 
 // State for drag-and-drop
 let draggedItem = null;
@@ -207,7 +209,7 @@ function bindVaultSlotEvents(slotElement, slotIndex, buildingId) {
     if (!itemId) {
         // Empty slot - only allow dropping
         slotElement.addEventListener('dragover', handleDragOver);
-        slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId, showMessage, showVaultUI));
+        slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId));
         return;
     }
 
@@ -218,7 +220,7 @@ function bindVaultSlotEvents(slotElement, slotIndex, buildingId) {
     slotElement.addEventListener('dragstart', (e) => handleDragStart(e, itemId, 'vault', slotIndex, buildingId));
     slotElement.addEventListener('dragend', handleDragEnd);
     slotElement.addEventListener('dragover', handleDragOver);
-    slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId, showMessage, showVaultUI));
+    slotElement.addEventListener('drop', (e) => handleDropOnVault(e, slotIndex, buildingId));
 
     // Hover events
     slotElement.addEventListener('mouseenter', (e) => showItemTooltip(e, itemId, 'vault'));
@@ -293,7 +295,7 @@ async function handleDrop(e, toSlotType, toSlotIndex, showMessage, showVaultUI) 
         return;
     }
 
-    // If dragging from vault to inventory, handle specially to refresh vault UI
+    // If dragging from vault to inventory, handle specially with surgical updates
     if (draggedFromType === 'vault') {
         const vaultSlots = document.querySelectorAll('[data-vault-slot]');
         const buildingId = vaultSlots[0]?.getAttribute('data-vault-building');
@@ -312,18 +314,36 @@ async function handleDrop(e, toSlotType, toSlotIndex, showMessage, showVaultUI) 
             });
 
             if (result.success) {
+                // Log the full response for debugging
+                logger.debug('Vault drag-withdraw response:', JSON.stringify(result, null, 2));
+
+                // Apply delta for surgical inventory updates (no full refresh)
+                if (result.delta) {
+                    logger.debug('Applying delta:', Object.keys(result.delta));
+                    deltaApplier.applyDelta(result.delta);
+                }
+
+                // Silent refresh to update local cache without triggering location rebuild
+                await refreshGameState(true);
+
+                // Update character display (for gold changes etc)
+                await updateCharacterDisplay();
+
+                // Show updated vault directly (use imported function)
                 const vaultData = result.delta?.vault_data;
-                await refreshGameState();
-                await updateAllDisplays();
-                if (vaultData && showVaultUI) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
+                logger.debug('Vault data from delta:', vaultData ? 'present' : 'missing');
+                if (vaultData) {
+                    logger.debug('Updating vault UI via drag-withdraw, slots:', vaultData.slots?.length || 0);
                     showVaultUI(vaultData);
+                } else {
+                    logger.warn('No vault_data in response delta - vault UI will not update');
                 }
             } else {
-                if (showMessage) showMessage(result.error || 'Failed to withdraw from vault', 'error');
+                showMessage(result.error || 'Failed to withdraw from vault', 'error');
             }
         } catch (error) {
-            if (showMessage) showMessage('Failed to withdraw from vault', 'error');
+            logger.error('Error withdrawing from vault:', error);
+            showMessage('Failed to withdraw from vault', 'error');
         }
         return;
     }
@@ -396,8 +416,9 @@ async function handleDropOnEquipment(e, equipSlotName, showMessage, showVaultUI)
 
 /**
  * Handle drop on vault slot
+ * Uses surgical updates to avoid rebuilding the scene (which would destroy vault overlay)
  */
-async function handleDropOnVault(e, toSlotIndex, buildingId, showMessage, showVaultUI) {
+async function handleDropOnVault(e, toSlotIndex, buildingId) {
     e.preventDefault();
 
     if (!draggedItem) return;
@@ -413,18 +434,36 @@ async function handleDropOnVault(e, toSlotIndex, buildingId, showMessage, showVa
         });
 
         if (result.success) {
+            // Log the full response for debugging
+            logger.debug('Vault drag-drop response:', JSON.stringify(result, null, 2));
+
+            // Apply delta for surgical inventory updates (no full refresh)
+            if (result.delta) {
+                logger.debug('Applying delta:', Object.keys(result.delta));
+                deltaApplier.applyDelta(result.delta);
+            }
+
+            // Silent refresh to update local cache without triggering location rebuild
+            await refreshGameState(true);
+
+            // Update character display (for gold changes etc)
+            await updateCharacterDisplay();
+
+            // Show updated vault directly (use imported function)
             const vaultData = result.delta?.vault_data;
-            await refreshGameState();
-            await updateAllDisplays();
-            if (vaultData && showVaultUI) {
-                await new Promise(resolve => setTimeout(resolve, 50));
+            logger.debug('Vault data from delta:', vaultData ? 'present' : 'missing');
+            if (vaultData) {
+                logger.debug('Updating vault UI via drag-drop, slots:', vaultData.slots?.length || 0);
                 showVaultUI(vaultData);
+            } else {
+                logger.warn('No vault_data in response delta - vault UI will not update');
             }
         } else {
-            if (showMessage) showMessage(result.error || 'Failed to move item to vault', 'error');
+            showMessage(result.error || 'Failed to move item to vault', 'error');
         }
     } catch (error) {
-        if (showMessage) showMessage('Failed to move item to vault', 'error');
+        logger.error('Error in handleDropOnVault:', error);
+        showMessage('Failed to move item to vault', 'error');
     }
 }
 
@@ -1340,8 +1379,9 @@ export function getSaveId() {
 
 /**
  * Store item from inventory into vault (when vault is open)
+ * Uses surgical updates to avoid rebuilding the scene
  */
-export async function storeInVault(itemId, fromSlot, fromSlotType, showMessage, showVaultUI) {
+export async function storeInVault(itemId, fromSlot, fromSlotType) {
     // Get vault building ID from the vault overlay
     const vaultSlots = document.querySelectorAll('[data-vault-slot]');
     if (vaultSlots.length === 0) return;
@@ -1376,25 +1416,45 @@ export async function storeInVault(itemId, fromSlot, fromSlotType, showMessage, 
         });
 
         if (result.success) {
-            if (showMessage) showMessage('Item stored in vault', 'success');
+            showMessage('Item stored in vault', 'success');
+
+            // Log the full response for debugging
+            logger.debug('Vault store response:', JSON.stringify(result, null, 2));
+
+            // Apply delta for surgical inventory updates (no full refresh)
+            if (result.delta) {
+                logger.debug('Applying delta:', Object.keys(result.delta));
+                deltaApplier.applyDelta(result.delta);
+            }
+
+            // Silent refresh to update local cache without triggering location rebuild
+            await refreshGameState(true);
+
+            // Update character display (for gold changes etc)
+            await updateCharacterDisplay();
+
+            // Show updated vault directly (use imported function)
             const vaultData = result.delta?.vault_data;
-            await refreshGameState();
-            await updateAllDisplays();
-            if (vaultData && showVaultUI) {
-                await new Promise(resolve => setTimeout(resolve, 50));
+            logger.debug('Vault data from delta:', vaultData ? 'present' : 'missing');
+            if (vaultData) {
+                logger.debug('Updating vault UI after store, slots:', vaultData.slots?.length || 0);
                 showVaultUI(vaultData);
+            } else {
+                logger.warn('No vault_data in response delta - vault UI will not update');
             }
         }
     } catch (error) {
-        if (showMessage) showMessage('Failed to store item', 'error');
+        logger.error('Error storing in vault:', error);
+        showMessage('Failed to store item', 'error');
     }
 }
 
 /**
  * Withdraw item from vault to inventory (when vault is open)
  * Priority: backpack slots first, then general slots
+ * Uses surgical updates to avoid rebuilding the scene
  */
-export async function withdrawFromVault(itemId, vaultSlot, showMessage, showVaultUI) {
+export async function withdrawFromVault(itemId, vaultSlot) {
     const state = getGameStateSync();
     let targetSlot = null;
     let targetSlotType = null;
@@ -1445,17 +1505,36 @@ export async function withdrawFromVault(itemId, vaultSlot, showMessage, showVaul
         });
 
         if (result.success) {
-            if (showMessage) showMessage('Item withdrawn from vault', 'success');
+            showMessage('Item withdrawn from vault', 'success');
+
+            // Log the full response for debugging
+            logger.debug('Vault withdraw response:', JSON.stringify(result, null, 2));
+
+            // Apply delta for surgical inventory updates (no full refresh)
+            if (result.delta) {
+                logger.debug('Applying delta:', Object.keys(result.delta));
+                deltaApplier.applyDelta(result.delta);
+            }
+
+            // Silent refresh to update local cache without triggering location rebuild
+            await refreshGameState(true);
+
+            // Update character display (for gold changes etc)
+            await updateCharacterDisplay();
+
+            // Show updated vault directly (use imported function)
             const vaultData = result.delta?.vault_data;
-            await refreshGameState();
-            await updateAllDisplays();
-            if (vaultData && showVaultUI) {
-                await new Promise(resolve => setTimeout(resolve, 50));
+            logger.debug('Vault data from delta:', vaultData ? 'present' : 'missing');
+            if (vaultData) {
+                logger.debug('Updating vault UI after withdrawal, slots:', vaultData.slots?.length || 0);
                 showVaultUI(vaultData);
+            } else {
+                logger.warn('No vault_data in response delta - vault UI will not update');
             }
         }
     } catch (error) {
-        if (showMessage) showMessage('Failed to withdraw item', 'error');
+        logger.error('Error withdrawing from vault:', error);
+        showMessage('Failed to withdraw item', 'error');
     }
 }
 

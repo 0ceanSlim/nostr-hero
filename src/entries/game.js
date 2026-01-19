@@ -13,7 +13,7 @@ import '../systems/auth.js'; // Auto-initializes authentication
 
 // State management
 import { getGameState, getGameStateSync, refreshGameState, initializeGame } from '../state/gameState.js';
-import { getItemById, getSpellById, getLocationById, getAllMusicTracks, getAllStaticData } from '../state/staticData.js';
+import { getItemById, getSpellById, getLocationById, getNPCById, getAllMusicTracks, getAllStaticData } from '../state/staticData.js';
 
 // Systems
 import { saveGameToLocal } from '../systems/saveSystem.js';
@@ -55,6 +55,7 @@ window.initializeGame = initializeGame;
 window.getItemById = getItemById;
 window.getSpellById = getSpellById;
 window.getLocationById = getLocationById;
+window.getNPCById = getNPCById;
 window.staticData = getAllStaticData();
 window.saveGameToLocal = saveGameToLocal;
 window.saveGame = saveGameToLocal; // Alias for template compatibility

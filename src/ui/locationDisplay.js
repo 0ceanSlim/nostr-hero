@@ -167,15 +167,8 @@ export async function displayCurrentLocation() {
     const buildingContainer = document.getElementById('building-buttons');
     const npcContainer = document.getElementById('npc-buttons');
 
-    // Clear building and NPC containers (not navigation - that's handled per-slot)
-    if (buildingContainer) {
-        const buildingButtonContainer = buildingContainer.querySelector('div');
-        if (buildingButtonContainer) buildingButtonContainer.innerHTML = '';
-    }
-    if (npcContainer) {
-        const npcButtonContainer = npcContainer.querySelector('div');
-        if (npcButtonContainer) npcButtonContainer.innerHTML = '';
-    }
+    // NOTE: We no longer clear containers here - instead we build fragments and replace atomically below
+    // This reduces flicker by minimizing the time containers are empty
 
     // Get district data from location
     let districtData = null;
@@ -265,9 +258,10 @@ export async function displayCurrentLocation() {
         logger.debug('No connections found for this location');
     }
 
-    // 2. BUILDING BUTTONS
+    // 2. BUILDING BUTTONS - Build in fragment first, then replace atomically to reduce flicker
     if (buildingContainer) {
         const buildingButtonContainer = buildingContainer.querySelector('div');
+        const buildingFragment = document.createDocumentFragment();
 
         if (buildings && buildings.length > 0) {
             // Get current time of day from game state in minutes (0-1439)
@@ -281,7 +275,7 @@ export async function displayCurrentLocation() {
                         () => exitBuilding(),
                         'building'  // Use green for exit button
                     );
-                    buildingButtonContainer.appendChild(button);
+                    buildingFragment.appendChild(button);
 
                     // Check if player has a rented room here - add Sleep button
                     const hasRentedRoom = checkIfRoomRented(currentBuildingId);
@@ -291,7 +285,7 @@ export async function displayCurrentLocation() {
                             () => sleepInRoom(),
                             'action'  // Special color for action
                         );
-                        buildingButtonContainer.appendChild(sleepButton);
+                        buildingFragment.appendChild(sleepButton);
                     }
 
                     // Check if player has a booked show at the right time - add Play Show button
@@ -302,7 +296,7 @@ export async function displayCurrentLocation() {
                             () => performShow(),
                             'action'  // Special color for action
                         );
-                        buildingButtonContainer.appendChild(showButton);
+                        buildingFragment.appendChild(showButton);
                     }
 
                     return;
@@ -318,7 +312,8 @@ export async function displayCurrentLocation() {
                         () => enterBuilding(building.id),
                         'building'
                     );
-                    buildingButtonContainer.appendChild(button);
+                    button.dataset.buildingId = building.id; // For delta applier
+                    buildingFragment.appendChild(button);
                 } else {
                     // Closed building - grey styling with different click handler
                     const button = createLocationButton(
@@ -326,7 +321,10 @@ export async function displayCurrentLocation() {
                         () => showBuildingClosedMessage(building),
                         'building-closed'
                     );
-                    buildingButtonContainer.appendChild(button);
+                    button.dataset.buildingId = building.id; // For delta applier
+                    button.disabled = true;
+                    button.classList.add('opacity-50', 'cursor-not-allowed');
+                    buildingFragment.appendChild(button);
                 }
             });
         } else {
@@ -334,13 +332,17 @@ export async function displayCurrentLocation() {
             const emptyMessage = document.createElement('div');
             emptyMessage.className = 'text-gray-400 text-xs p-2 text-center italic';
             emptyMessage.textContent = 'No buildings here.';
-            buildingButtonContainer.appendChild(emptyMessage);
+            buildingFragment.appendChild(emptyMessage);
         }
+
+        // Atomic replace - minimizes flicker
+        buildingButtonContainer.replaceChildren(buildingFragment);
     }
 
-    // 3. NPC BUTTONS (only district-level NPCs, not building NPCs)
+    // 3. NPC BUTTONS - Build in fragment first, then replace atomically to reduce flicker
     if (npcContainer) {
         const npcButtonContainer = npcContainer.querySelector('div');
+        const npcFragment = document.createDocumentFragment();
 
         if (npcs && npcs.length > 0) {
             npcs.forEach(npcId => {
@@ -351,15 +353,19 @@ export async function displayCurrentLocation() {
                     () => talkToNPC(npcId),
                     'npc'
                 );
-                npcButtonContainer.appendChild(button);
+                button.dataset.npcId = npcId; // For delta applier
+                npcFragment.appendChild(button);
             });
         } else {
             // Show message when no NPCs in district (they're all in buildings)
             const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'text-gray-400 text-xs p-2 text-center italic';
+            emptyMessage.className = 'empty-message text-gray-400 text-xs p-2 text-center italic';
             emptyMessage.textContent = 'No one here. Check buildings.';
-            npcButtonContainer.appendChild(emptyMessage);
+            npcFragment.appendChild(emptyMessage);
         }
+
+        // Atomic replace - minimizes flicker
+        npcButtonContainer.replaceChildren(npcFragment);
     }
     } finally {
         // Always reset rendering flag
@@ -1017,8 +1023,16 @@ export function showVaultUI(vaultData) {
     vaultOverlay.appendChild(vaultContainer);
     vaultOverlay.style.display = 'flex';
 
-    // Mark vault as open
+    // Mark vault as open - sync both window and module state
     window.vaultOpen = true;
+
+    // Also set the module-level vault state in inventoryInteractions
+    // This ensures the left-click handler knows the vault is open
+    import('../systems/inventoryInteractions.js').then(module => {
+        if (module.setVaultOpen) {
+            module.setVaultOpen(true);
+        }
+    });
 
     // Force DOM to update before binding events
     requestAnimationFrame(() => {
@@ -1026,6 +1040,8 @@ export function showVaultUI(vaultData) {
             window.inventoryInteractions.bindInventoryEvents();
         }
     });
+
+    logger.debug('showVaultUI: Vault UI refreshed with', vaultData?.slots?.length || 0, 'slots');
 }
 
 /**
@@ -1088,8 +1104,15 @@ export function closeVaultUI() {
         vaultOverlay.style.display = 'none';
     }
 
-    // Mark vault as closed
+    // Mark vault as closed - sync both window and module state
     window.vaultOpen = false;
+
+    // Also set the module-level vault state in inventoryInteractions
+    import('../systems/inventoryInteractions.js').then(module => {
+        if (module.setVaultOpen) {
+            module.setVaultOpen(false);
+        }
+    });
 
     // Refresh inventory display
     // Import updateCharacterDisplay dynamically to avoid circular dependency
@@ -1178,9 +1201,39 @@ export async function sleepInRoom() {
         const result = await gameAPI.sendAction('sleep', {});
 
         if (result.success) {
+            // Apply delta for surgical updates (HP, mana, fatigue, hunger)
+            if (result.delta) {
+                const { deltaApplier } = await import('../systems/deltaApplier.js');
+                deltaApplier.applyDelta(result.delta);
+            }
+
+            // Force sync clock to new time (sleep is a major time jump)
+            if (result.data) {
+                const { smoothClock } = await import('../systems/smoothClock.js');
+                const timeOfDay = result.data.time_of_day;
+                const currentDay = result.data.current_day || 1;
+                if (timeOfDay !== undefined) {
+                    smoothClock.syncFromBackend(timeOfDay, currentDay, true); // Force sync
+                    logger.debug(`Clock synced after sleep: Day ${currentDay}, time ${timeOfDay}`);
+                }
+
+                // Update local state cache with rented_rooms so sleep button is removed
+                if (result.data.rented_rooms !== undefined) {
+                    const state = getGameStateSync();
+                    if (state) {
+                        state.rented_rooms = result.data.rented_rooms;
+                        if (state.character) {
+                            state.character.rented_rooms = result.data.rented_rooms;
+                        }
+                    }
+                    logger.debug('Updated rented_rooms after sleep:', result.data.rented_rooms);
+                }
+            }
+
             showMessage(result.message || 'You wake up refreshed!', 'success');
-            await refreshGameState();
-            await updateAllDisplays();
+
+            // Refresh location display to update buildings/NPCs after time change
+            await displayCurrentLocation();
         } else {
             showMessage(result.error || 'Failed to sleep', 'error');
         }
@@ -1304,5 +1357,10 @@ async function checkAndEjectFromClosedBuilding() {
         showMessage(`The ${currentBuilding.name} has closed for the day. You've been escorted out.`, 'warning');
     }
 }
+
+// Export functions to window for delta applier
+window.enterBuilding = enterBuilding;
+window.showBuildingClosedMessage = showBuildingClosedMessage;
+window.talkToNPC = talkToNPC;
 
 logger.debug('Location display module loaded');

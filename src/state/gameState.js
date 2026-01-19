@@ -221,17 +221,21 @@ export function getEmptyGameState() {
 
 /**
  * Refresh game state from backend and trigger UI updates
+ * @param {boolean} silent - If true, don't emit events (for surgical updates)
  * @returns {Promise<Object>} Updated game state
  */
-export async function refreshGameState() {
+export async function refreshGameState(silent = false) {
     // Fetch fresh state from Go
     const newState = await getGameState(true);
 
-    // Trigger UI updates via event bus
-    eventBus.emit('gameStateChange', newState);
+    // Only emit events if not in silent mode
+    if (!silent) {
+        // Trigger UI updates via event bus
+        eventBus.emit('gameStateChange', newState);
 
-    // Also dispatch DOM event for legacy compatibility
-    document.dispatchEvent(new CustomEvent('gameStateChange', { detail: newState }));
+        // Also dispatch DOM event for legacy compatibility
+        document.dispatchEvent(new CustomEvent('gameStateChange', { detail: newState }));
+    }
 
     return newState;
 }
@@ -478,6 +482,11 @@ export async function initializeGame() {
 
         await displayCurrentLocation();
         await updateAllDisplays();
+
+        // Emit event to notify systems that game state is loaded and UI is ready
+        // This allows time clock to sync to the correct time from save
+        eventBus.emit('gameStateLoaded', loadedState);
+        logger.info('📢 Emitted gameStateLoaded event');
 
         logger.info('✅ Game initialized and ready to play!');
 

@@ -17,26 +17,28 @@
             <div class="text-center mb-4">
                 <div class="text-gray-400" style="font-size: 8px;">Wait Duration</div>
                 <div class="text-white font-bold" style="font-size: 14px;">
-                    <span id="wait-hours-display">1</span> hour<span id="wait-hours-plural">s</span>
+                    <span id="wait-duration-display">15 minutes</span>
                 </div>
                 <div class="text-gray-400" style="font-size: 7px;">
                     (Until <span id="wait-target-time">1:00 PM</span>)
                 </div>
             </div>
 
-            <!-- Slider -->
+            <!-- Slider (15-360 minutes in 15 minute steps) -->
             <div class="mb-4">
                 <input
                     type="range"
                     id="wait-slider"
-                    min="1"
-                    max="6"
-                    value="1"
+                    min="15"
+                    max="360"
+                    step="15"
+                    value="15"
                     class="w-full"
                     style="accent-color: #3b82f6;"
                     oninput="window.updateWaitDisplay(this.value)"
                 >
                 <div class="flex justify-between text-gray-400" style="font-size: 6px;">
+                    <span>15m</span>
                     <span>1h</span>
                     <span>2h</span>
                     <span>3h</span>
@@ -50,12 +52,12 @@
             <div class="mb-4 p-2 bg-black bg-opacity-30 rounded" style="font-size: 7px;">
                 <div class="text-gray-400 mb-1">Expected effects:</div>
                 <div class="flex justify-between text-white">
-                    <span>Fatigue:</span>
-                    <span id="wait-fatigue-change" class="text-yellow-400">+1</span>
+                    <span>💤 Fatigue:</span>
+                    <span id="wait-fatigue-change" class="text-yellow-400">0 → 0</span>
                 </div>
                 <div class="flex justify-between text-white">
-                    <span>Hunger:</span>
-                    <span id="wait-hunger-change" class="text-yellow-400">+0</span>
+                    <span>🍽️ Hunger:</span>
+                    <span id="wait-hunger-change" class="text-orange-400">Full → Full</span>
                 </div>
             </div>
 

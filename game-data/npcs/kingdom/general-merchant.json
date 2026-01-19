@@ -70,7 +70,7 @@
     },
     "main_menu": {
       "text": "What brings you to my shop today?",
-      "options": ["browse_shop", "sell_items", "ask_about_stock", "goodbye"]
+      "options": ["browse_shop", "ask_about_stock", "goodbye"]
     },
     "browse_shop": {
       "text": "Have a look around! All my prices are fair—you won't find better deals in the kingdom.",

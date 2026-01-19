@@ -15,18 +15,40 @@ import { getGameStateSync } from '../state/gameState.js';
  */
 export function updateTimeDisplay() {
     const state = getGameStateSync();
+
+    // Check if timeClock is available and has synced to real data
+    let clockData = null;
+    if (window.timeClock && window.timeClock.getCurrentTime) {
+        clockData = window.timeClock.getCurrentTime();
+    }
+
+    // If clock hasn't synced yet and we don't have state data, keep showing placeholder
+    const hasTimeData = state.character?.time_of_day !== undefined && state.character?.time_of_day !== null;
+    const clockSynced = clockData?.synced === true;
+    if (!hasTimeData && !clockSynced) {
+        return; // Keep showing "--:-- --" until real data is available
+    }
+
     const currentDay = state.character?.current_day || 1;
 
-    // Get current time including minutes from time clock
+    // Get current time including minutes from time clock (only if synced)
     let hour, minute;
-    if (window.timeClock && window.timeClock.getCurrentTime) {
-        const currentTime = window.timeClock.getCurrentTime();
-        hour = currentTime.hour;
-        minute = currentTime.minute;
+    if (clockSynced) {
+        hour = clockData.hour;
+        minute = clockData.minute;
+    } else if (hasTimeData) {
+        // Fallback to state data if clock not synced
+        const timeOfDay = state.character.time_of_day;
+        // Handle both minute format (0-1439) and hour format (0-23)
+        if (timeOfDay >= 24) {
+            hour = Math.floor(timeOfDay / 60);
+            minute = timeOfDay % 60;
+        } else {
+            hour = timeOfDay;
+            minute = 0;
+        }
     } else {
-        // Fallback if timeClock not available
-        hour = state.character?.time_of_day !== undefined ? state.character.time_of_day : 12;
-        minute = 0;
+        return; // No valid time source
     }
 
     // Map time (0-23) to 12 PNG filenames (each image covers 2 hours)

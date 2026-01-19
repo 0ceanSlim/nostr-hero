@@ -54,7 +54,12 @@
     },
     "main_menu": {
       "text": "What brings you to the Griffin today?",
-      "options": ["buy_drink", "ask_about_entertainment", "ask_about_lodging", "goodbye"]
+      "options": [
+        "buy_drink",
+        "ask_about_entertainment",
+        "ask_about_lodging",
+        "goodbye"
+      ]
     },
     "ask_about_lodging": {
       "text": "Looking for a place to stay? We don't rent rooms here at the Griffin—we're a tavern, not an inn! But I can point you to the Wayward Traveler Inn in the southern district. Mara runs a fine establishment there, perfect for weary travelers.",

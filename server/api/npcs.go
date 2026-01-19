@@ -54,6 +54,7 @@ func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 
 	visibleNPCs := []NPCLocationResponse{}
 
+	// Note: districtID is already the full district ID (e.g., "kingdom-center") from frontend
 	for rows.Next() {
 		var npcID, propertiesJSON string
 		if err := rows.Scan(&npcID, &propertiesJSON); err != nil {
@@ -94,4 +95,57 @@ func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(visibleNPCs)
+}
+
+// GetNPCIDsAtLocation returns a list of NPC IDs visible at the given location
+// Used by the delta system to track NPC changes
+func GetNPCIDsAtLocation(locationID, districtID, buildingID string, timeOfDay int) []string {
+	database := db.GetDB()
+	if database == nil {
+		return []string{}
+	}
+
+	// Get all NPCs for this location
+	rows, err := database.Query("SELECT id, properties FROM npcs WHERE location = ?", locationID)
+	if err != nil {
+		return []string{}
+	}
+	defer rows.Close()
+
+	visibleNPCs := []string{}
+
+	// Construct full district ID (e.g., "kingdom" + "center" = "kingdom-center")
+	fullDistrictID := locationID + "-" + districtID
+
+	for rows.Next() {
+		var npcID, propertiesJSON string
+		if err := rows.Scan(&npcID, &propertiesJSON); err != nil {
+			continue
+		}
+
+		var npcData types.NPCData
+		if err := json.Unmarshal([]byte(propertiesJSON), &npcData); err != nil {
+			continue
+		}
+
+		// Resolve schedule
+		scheduleInfo := utils.ResolveNPCSchedule(&npcData, timeOfDay)
+
+		// Determine location type from location ID
+		locationType := utils.DetermineLocationType(scheduleInfo.Location)
+
+		// Check if NPC is at player's current location
+		isVisible := false
+		if buildingID != "" && locationType == "building" && scheduleInfo.Location == buildingID {
+			isVisible = true
+		} else if buildingID == "" && locationType == "district" && scheduleInfo.Location == fullDistrictID {
+			isVisible = true
+		}
+
+		if isVisible {
+			visibleNPCs = append(visibleNPCs, npcID)
+		}
+	}
+
+	return visibleNPCs
 }

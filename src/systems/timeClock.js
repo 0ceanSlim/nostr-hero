@@ -1,9 +1,13 @@
 /**
- * 144x Real-Time Clock System
+ * 144x Real-Time Clock System (Delta Architecture)
  *
- * Ticks game time at 144x real-time speed.
- * Processes every 1 second: time advances 2.4 game minutes per real second.
- * Tracks time in minutes (0-1439 per day) for smooth updates.
+ * This is a compatibility layer that integrates the new delta-based systems:
+ * - smoothClock.js: 60fps interpolated clock display
+ * - tickManager.js: 417ms tick backend sync
+ * - deltaApplier.js: Surgical DOM updates
+ *
+ * The old 5-second full-state sync is replaced with 417ms delta updates.
+ * Time display runs at 60fps for smooth visuals.
  */
 
 import { logger } from '../lib/logger.js';
@@ -13,24 +17,27 @@ import { updateCharacterDisplay } from '../ui/characterDisplay.js';
 import { gameAPI } from '../lib/api.js';
 import { eventBus } from '../lib/events.js';
 
-// Constants
-const TICK_INTERVAL_MS = 1000; // Process every 1 real second
+// Import new delta architecture systems
+import { smoothClock } from './smoothClock.js';
+import { tickManager } from './tickManager.js';
+import { deltaApplier } from './deltaApplier.js';
+
+// Constants (kept for backwards compatibility)
+const TICK_INTERVAL_MS = 417; // Now using 417ms ticks (1 in-game minute)
 const TIME_MULTIPLIER = 144.0;  // 144x real-time speed
-const GAME_MINUTES_PER_TICK = (TICK_INTERVAL_MS / 1000) * TIME_MULTIPLIER / 60; // = 2.4 minutes
+const GAME_MINUTES_PER_TICK = 1; // 1 in-game minute per tick at 417ms
 const MINUTES_PER_DAY = 1440; // 24 hours * 60 minutes
 
-// Thresholds in minutes
-const FATIGUE_THRESHOLD_MINUTES = 240; // 4 hours
-const HUNGER_THRESHOLD_NORMAL_MINUTES = 360; // 6 hours
-const HUNGER_THRESHOLD_HUNGRY_MINUTES = 720; // 12 hours
+// Use new delta system
+const USE_DELTA_SYSTEM = true; // Set to false to revert to old behavior
 
-// State
+// Legacy state (for backwards compatibility)
 let tickIntervalId = null;
-let displayIntervalId = null; // Separate interval for smooth display updates
-let isPaused = true; // Start paused
-let accumulatedMinutes = 0; // Fractional minutes not yet applied (for actual game time)
-let displayAccumulatedMinutes = 0; // Fractional minutes for smooth display
-let backendSyncCounter = 0; // Count seconds until next backend sync (every 5 seconds)
+let displayIntervalId = null;
+let isPaused = true;
+let accumulatedMinutes = 0;
+let displayAccumulatedMinutes = 0;
+let backendSyncCounter = 0;
 
 /**
  * Initialize the clock system
@@ -38,16 +45,100 @@ let backendSyncCounter = 0; // Count seconds until next backend sync (every 5 se
 export function initTimeClock() {
     logger.info('Initializing 144x time clock');
 
-    // Start the tick loop
-    startTicking();
-
-    // Start the display update loop (updates UI smoothly)
-    startDisplayUpdates();
+    if (USE_DELTA_SYSTEM) {
+        // Initialize new delta-based systems
+        initDeltaSystem();
+    } else {
+        // Legacy initialization
+        startTicking();
+        startDisplayUpdates();
+    }
 
     // Update button state
     updatePlayPauseButton();
 
     logger.debug('Time clock initialized (paused)');
+}
+
+/**
+ * Initialize the new delta-based clock system
+ */
+function initDeltaSystem() {
+    logger.info('Using delta architecture for time updates');
+
+    // Get initial time from game state (may not be loaded yet)
+    syncClockToGameState();
+
+    // Start smooth clock animation (60fps) - starts paused
+    smoothClock.start();
+
+    // Start tick manager (417ms ticks) - respects pause state
+    tickManager.start();
+
+    // Listen for character stat updates - update cache only, NO full re-renders
+    eventBus.on('character:statsUpdated', (data) => {
+        // Update cached game state silently (delta applier handles DOM)
+        const state = getGameStateSync();
+        if (state.character) {
+            if (data.fatigue !== undefined) state.character.fatigue = data.fatigue;
+            if (data.hunger !== undefined) state.character.hunger = data.hunger;
+            if (data.hp !== undefined) state.character.hp = data.hp;
+            if (data.active_effects) state.character.active_effects = data.active_effects;
+        }
+        // DO NOT emit gameStateChange - delta applier already updated DOM surgically
+    });
+
+    // Listen for game state loaded event to re-sync clock with correct time
+    eventBus.on('gameStateLoaded', (loadedState) => {
+        logger.info('📥 Game state loaded, re-syncing clock');
+        // Pass the loaded state directly to avoid any timing issues
+        syncClockToGameState(loadedState);
+        // Clear smoothClock's DOM cache in case elements were recreated
+        smoothClock.clearCache();
+    });
+
+    logger.info('Delta architecture initialized');
+}
+
+/**
+ * Sync the clock to the current game state
+ * @param {Object} stateOverride - Optional state to use instead of calling getGameStateSync
+ */
+function syncClockToGameState(stateOverride = null) {
+    const state = stateOverride || getGameStateSync();
+    logger.debug('syncClockToGameState called with state:', state ? 'exists' : 'null');
+
+    // Check if we have actual time data - don't sync with defaults
+    const hasCharacterTime = state?.character?.time_of_day !== undefined && state?.character?.time_of_day !== null;
+    const hasTopLevelTime = state?.time_of_day !== undefined && state?.time_of_day !== null;
+
+    if (hasCharacterTime) {
+        let timeOfDay = state.character.time_of_day;
+        logger.debug('Raw time_of_day from state:', timeOfDay);
+
+        // Convert old hour format if needed
+        if (timeOfDay < 24) {
+            timeOfDay = timeOfDay * 60;
+        }
+        const currentDay = state.character.current_day || 1;
+
+        // Sync smooth clock to state (force sync on initial load)
+        smoothClock.syncFromBackend(timeOfDay, currentDay, true);
+        logger.info(`Clock synced to game state: Day ${currentDay}, time ${timeOfDay} mins`);
+    } else if (hasTopLevelTime) {
+        // Alternative: state might have time_of_day at top level
+        let timeOfDay = state.time_of_day;
+        if (timeOfDay < 24) {
+            timeOfDay = timeOfDay * 60;
+        }
+        const currentDay = state.current_day || 1;
+        smoothClock.syncFromBackend(timeOfDay, currentDay, true);
+        logger.info(`Clock synced from top-level state: Day ${currentDay}, time ${timeOfDay} mins`);
+    } else {
+        // No state available yet - DON'T sync with default values
+        // This keeps hasInitialSync = false so clock displays "--:-- --" until real data
+        logger.debug('No game state available yet, waiting for real data before clock sync');
+    }
 }
 
 /**
@@ -161,11 +252,17 @@ function advanceGameTime(character, minutes) {
 }
 
 /**
- * Send time update to backend
+ * Send time update to backend (LEGACY - only used when USE_DELTA_SYSTEM is false)
  * Syncs the frontend time state to backend Go memory
  * Backend processes effects and returns updated state
  */
 async function sendTimeUpdateToBackend(character) {
+    // Don't run legacy sync if delta system is active
+    if (USE_DELTA_SYSTEM) {
+        logger.debug('Skipping legacy sendTimeUpdateToBackend - delta system active');
+        return;
+    }
+
     if (!gameAPI.initialized) {
         return;
     }
@@ -223,19 +320,22 @@ async function sendTimeUpdateToBackend(character) {
  * Toggle play/pause
  */
 export function togglePause() {
-    isPaused = !isPaused;
+    if (USE_DELTA_SYSTEM) {
+        isPaused = smoothClock.togglePause();
+    } else {
+        isPaused = !isPaused;
 
-    if (!isPaused) {
-        // Reset accumulators when resuming
-        accumulatedMinutes = 0;
-        backendSyncCounter = 0;
+        if (!isPaused) {
+            // Reset accumulators when resuming
+            accumulatedMinutes = 0;
+            backendSyncCounter = 0;
+        }
+
+        // Reset display accumulator when toggling
+        displayAccumulatedMinutes = 0;
     }
 
-    // Reset display accumulator when toggling
-    displayAccumulatedMinutes = 0;
-
     updatePlayPauseButton();
-
     logger.info(isPaused ? 'Time paused' : 'Time playing');
 }
 
@@ -243,14 +343,22 @@ export function togglePause() {
  * Get current pause state
  */
 export function isPausedState() {
+    if (USE_DELTA_SYSTEM) {
+        return smoothClock.isPausedState();
+    }
     return isPaused;
 }
 
 /**
  * Get current time including minutes (uses interpolated display time for smooth UI)
- * @returns {{hour: number, minute: number}} Current game time
+ * @returns {{hour: number, minute: number, synced: boolean}} Current game time
  */
 export function getCurrentTime() {
+    if (USE_DELTA_SYSTEM) {
+        const time = smoothClock.getCurrentTime();
+        return { hour: time.hours, minute: time.minutes, synced: time.synced };
+    }
+
     const state = getGameStateSync();
 
     // Get actual time in minutes
@@ -280,27 +388,36 @@ export function getCurrentTime() {
  * Force pause (called when loading game, etc.)
  */
 export function pause() {
-    if (!isPaused) {
+    if (USE_DELTA_SYSTEM) {
+        smoothClock.pause();
         isPaused = true;
-        // Reset display accumulator when pausing
-        displayAccumulatedMinutes = 0;
-        updatePlayPauseButton();
-        logger.info('Time force-paused');
+    } else {
+        if (!isPaused) {
+            isPaused = true;
+            displayAccumulatedMinutes = 0;
+        }
     }
+    updatePlayPauseButton();
+    logger.info('Time force-paused');
 }
 
 /**
  * Force play (optional - for auto-play on actions)
  */
 export function play() {
-    if (isPaused) {
+    if (USE_DELTA_SYSTEM) {
+        smoothClock.unpause();
         isPaused = false;
-        accumulatedMinutes = 0;
-        backendSyncCounter = 0;
-        displayAccumulatedMinutes = 0;
-        updatePlayPauseButton();
-        logger.info('Time force-played');
+    } else {
+        if (isPaused) {
+            isPaused = false;
+            accumulatedMinutes = 0;
+            backendSyncCounter = 0;
+            displayAccumulatedMinutes = 0;
+        }
     }
+    updatePlayPauseButton();
+    logger.info('Time force-played');
 }
 
 /**
@@ -327,15 +444,22 @@ function updatePlayPauseButton() {
  * Cleanup on page unload
  */
 export function cleanupTimeClock() {
-    if (tickIntervalId) {
-        clearInterval(tickIntervalId);
-        tickIntervalId = null;
+    if (USE_DELTA_SYSTEM) {
+        smoothClock.stop();
+        tickManager.stop();
+        deltaApplier.clearCache();
+        logger.debug('Delta time systems stopped');
+    } else {
+        if (tickIntervalId) {
+            clearInterval(tickIntervalId);
+            tickIntervalId = null;
+        }
+        if (displayIntervalId) {
+            clearInterval(displayIntervalId);
+            displayIntervalId = null;
+        }
+        logger.debug('Legacy time clock stopped');
     }
-    if (displayIntervalId) {
-        clearInterval(displayIntervalId);
-        displayIntervalId = null;
-    }
-    logger.debug('Time clock stopped');
 }
 
 // Export for global access (onclick in HTML)

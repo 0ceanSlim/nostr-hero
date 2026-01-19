@@ -109,3 +109,97 @@ func IsBuildingOpen(db *sql.DB, locationID, buildingID string, timeOfDay int) (b
 
 	return false, 0, 0, fmt.Errorf("building not found: %s", buildingID)
 }
+
+// GetAllBuildingStatesForDistrict returns the open/closed state of all buildings in a district
+// Returns map[buildingID]isOpen
+func GetAllBuildingStatesForDistrict(db *sql.DB, locationID, districtID string, timeOfDay int) (map[string]bool, error) {
+	result := make(map[string]bool)
+
+	// Get location data from database
+	var propertiesJSON string
+	err := db.QueryRow("SELECT properties FROM locations WHERE id = ?", locationID).Scan(&propertiesJSON)
+	if err != nil {
+		return result, fmt.Errorf("location not found: %s", locationID)
+	}
+
+	var locationData map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &locationData); err != nil {
+		return result, fmt.Errorf("failed to parse location data: %v", err)
+	}
+
+	// Navigate to the specific district
+	districts, ok := locationData["districts"].(map[string]interface{})
+	if !ok {
+		return result, nil // No districts, return empty map
+	}
+
+	// Extract district key from districtID (e.g., "kingdom-center" -> "center")
+	districtKey := districtID
+	if idx := len(locationID) + 1; idx < len(districtID) {
+		districtKey = districtID[idx:]
+	}
+
+	districtData, ok := districts[districtKey].(map[string]interface{})
+	if !ok {
+		return result, nil // District not found
+	}
+
+	buildings, ok := districtData["buildings"].([]interface{})
+	if !ok {
+		return result, nil // No buildings
+	}
+
+	// Check each building
+	for _, buildingData := range buildings {
+		building, ok := buildingData.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		buildingID, ok := building["id"].(string)
+		if !ok {
+			continue
+		}
+
+		hours := BuildingHours{
+			Open:  building["open"],
+			Close: building["close"],
+		}
+
+		// Check if always open
+		if openStr, ok := hours.Open.(string); ok && openStr == "always" {
+			result[buildingID] = true
+			continue
+		}
+
+		// Check if private/never accessible (open: -1)
+		if openFloat, ok := hours.Open.(float64); ok && openFloat < 0 {
+			result[buildingID] = false
+			continue
+		}
+
+		// Get numeric minutes (0-1439)
+		openMinutes, ok := hours.Open.(float64)
+		if !ok {
+			result[buildingID] = false
+			continue
+		}
+
+		closeMinutes := 1440.0
+		if hours.Close != nil {
+			closeMinutes, _ = hours.Close.(float64)
+		}
+
+		open := int(openMinutes)
+		close := int(closeMinutes)
+
+		// Handle wrapping (overnight hours)
+		if close < open {
+			result[buildingID] = timeOfDay >= open || timeOfDay < close
+		} else {
+			result[buildingID] = timeOfDay >= open && timeOfDay < close
+		}
+	}
+
+	return result, nil
+}

@@ -87,9 +87,24 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("✅ Action processed: %s for %s", request.Action.Type, request.SaveID)
+	// Calculate delta from previous snapshot
+	delta := session.UpdateSnapshotAndCalculateDelta()
+	if delta != nil && !delta.IsEmpty() {
+		calculatedDelta := delta.ToMap()
 
-	// Return updated state
+		// Merge calculated delta with any handler-specific delta (like vault_data)
+		// This preserves special data added by handlers while also including state changes
+		if response.Delta != nil {
+			// Handler already set some delta data - merge with calculated
+			for key, value := range calculatedDelta {
+				response.Delta[key] = value
+			}
+		} else {
+			response.Delta = calculatedDelta
+		}
+	}
+
+	// Return updated state (and delta if available)
 	response.State = &session.SaveData
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
@@ -155,7 +170,7 @@ func processGameAction(session *GameSession, action GameAction) (*GameActionResp
 	case "sleep":
 		return handleSleepAction(session, action.Params)
 	case "wait":
-		return handleWaitAction(state, action.Params)
+		return handleWaitAction(session, action.Params)
 	case "book_show":
 		return handleBookShowAction(session, action.Params)
 	case "play_show":
@@ -168,6 +183,14 @@ func processGameAction(session *GameSession, action GameAction) (*GameActionResp
 // ============================================================================
 // ACTION HANDLERS
 // ============================================================================
+
+// pluralize returns "s" if count != 1, empty string otherwise
+func pluralize(count int) string {
+	if count == 1 {
+		return ""
+	}
+	return "s"
+}
 
 // handleMoveAction moves the player to a new location
 func handleMoveAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
@@ -664,6 +687,7 @@ func handleAdvanceTimeAction(state *SaveFile, params map[string]any) (*GameActio
 }
 
 // handleUpdateTimeAction syncs time from frontend clock to backend state
+// This is the main tick handler that updates buildings, NPCs, and effects
 func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
 	// Get the new time from frontend
 	newTimeOfDay, timeOk := params["time_of_day"].(float64)
@@ -676,39 +700,94 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 		}, nil
 	}
 
+	// Get session for delta tracking
+	npub := state.InternalNpub
+	saveID := state.InternalID
+	session, err := sessionManager.GetSession(npub, saveID)
+	if err != nil {
+		// Session not found - still process time but skip delta
+		log.Printf("⚠️ Session not found for delta: %s:%s", npub, saveID)
+	}
+
 	// Calculate time delta
 	oldTime := state.TimeOfDay
 	oldDay := state.CurrentDay
+	newTime := int(newTimeOfDay)
+	newDay := int(newCurrentDay)
 
 	// Calculate total minutes elapsed
 	var minutesElapsed int
-	if int(newCurrentDay) == oldDay {
+	if newDay == oldDay {
 		// Same day
-		minutesElapsed = int(newTimeOfDay) - oldTime
+		minutesElapsed = newTime - oldTime
 	} else {
 		// Day(s) advanced
-		minutesElapsed = (1440 - oldTime) + int(newTimeOfDay) + ((int(newCurrentDay) - oldDay - 1) * 1440)
+		minutesElapsed = (1440 - oldTime) + newTime + ((newDay - oldDay - 1) * 1440)
 	}
-
-	log.Printf("⏰ Frontend time sync: oldTime=%d newTime=%d delta=%d minutes", oldTime, int(newTimeOfDay), minutesElapsed)
 
 	// Only process if time actually advanced
 	if minutesElapsed > 0 {
 		// Use advanceTime to properly process effects
 		advanceTime(state, minutesElapsed)
+	}
 
-		// Log tick accumulators after processing
-		for _, effect := range state.ActiveEffects {
-			if effect.EffectID == "fatigue-accumulation" ||
-			   effect.EffectID == "hunger-accumulation-satisfied" ||
-			   effect.EffectID == "hunger-accumulation-hungry" ||
-			   effect.EffectID == "hunger-accumulation-full" {
-				log.Printf("  Effect %s: tick_accumulator=%.2f", effect.EffectID, effect.TickAccumulator)
+	// Update buildings and NPCs if we have a session
+	if session != nil {
+		database := db.GetDB()
+
+		// Update building states if needed (every 5 in-game minutes or first call)
+		if session.ShouldRefreshBuildings(newTime) {
+			buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+				database,
+				state.Location,
+				state.District,
+				newTime,
+			)
+			if err == nil && len(buildingStates) > 0 {
+				session.UpdateBuildingStates(buildingStates, newTime)
 			}
+		}
+
+		// Update NPCs if hour changed
+		currentHour := newTime / 60
+		if session.ShouldRefreshNPCs(currentHour) {
+			npcIDs := GetNPCIDsAtLocation(
+				state.Location,
+				state.District,
+				state.Building,
+				newTime,
+			)
+			// Only log when NPCs actually change (reduces spam)
+			if len(npcIDs) > 0 || len(session.NPCsAtLocation) > 0 {
+				log.Printf("🧑 NPCs updated: hour=%d, %s/%s/%s, was=%v, now=%v",
+					currentHour, state.Location, state.District, state.Building, session.NPCsAtLocation, npcIDs)
+			}
+			session.UpdateNPCsAtLocation(npcIDs, currentHour)
+		}
+
+		// Calculate delta
+		delta := session.UpdateSnapshotAndCalculateDelta()
+		if delta != nil && delta.NPCs != nil {
+			log.Printf("🧑 NPC delta: added=%v, removed=%v", delta.NPCs.Added, delta.NPCs.Removed)
+		}
+		if delta != nil && !delta.IsEmpty() {
+			return &GameActionResponse{
+				Success: true,
+				Message: "Time updated",
+				Delta:   delta.ToMap(),
+				Data: map[string]interface{}{
+					"time_of_day":     state.TimeOfDay,
+					"current_day":     state.CurrentDay,
+					"fatigue":         state.Fatigue,
+					"hunger":          state.Hunger,
+					"hp":              state.HP,
+					"active_effects":  state.ActiveEffects,
+				},
+			}, nil
 		}
 	}
 
-	// Return updated state so frontend can sync
+	// Return updated state so frontend can sync (fallback if no session/delta)
 	return &GameActionResponse{
 		Success: true,
 		Message: "Time updated",
@@ -750,8 +829,6 @@ func handleMoveItemAction(state *SaveFile, params map[string]any) (*GameActionRe
 	toSlot := int(params["to_slot"].(float64))
 	fromSlotType, _ := params["from_slot_type"].(string)
 	toSlotType, _ := params["to_slot_type"].(string)
-
-	log.Printf("🔀 Moving %s from %s[%d] to %s[%d]", itemID, fromSlotType, fromSlot, toSlotType, toSlot)
 
 	// Get the appropriate slot arrays
 	var fromSlots, toSlots []any
@@ -951,10 +1028,13 @@ func handleMoveItemAction(state *SaveFile, params map[string]any) (*GameActionRe
 	// If vault was involved, return updated vault data
 	delta := map[string]any{}
 	if fromSlotType == "vault" || toSlotType == "vault" {
+		log.Printf("🏦 Vault involved: from=%s, to=%s, building=%s", fromSlotType, toSlotType, vaultBuilding)
 		vault := getVaultForLocation(state, vaultBuilding)
 		if vault != nil {
 			delta["vault_data"] = vault
-			log.Printf("✅ Returning updated vault data in response")
+			log.Printf("✅ Returning updated vault data with %d slots", len(vault["slots"].([]any)))
+		} else {
+			log.Printf("⚠️ Vault not found for building: %s", vaultBuilding)
 		}
 	}
 
@@ -976,8 +1056,6 @@ func handleStackItemAction(state *SaveFile, params map[string]any) (*GameActionR
 	toSlot := int(params["to_slot"].(float64))
 	fromSlotType, _ := params["from_slot_type"].(string)
 	toSlotType, _ := params["to_slot_type"].(string)
-
-	log.Printf("📦 Stacking %s from %s[%d] to %s[%d]", itemID, fromSlotType, fromSlot, toSlotType, toSlot)
 
 	// Get source slots
 	var fromSlots []any
@@ -1899,30 +1977,21 @@ func handleNPCDialogueChoiceAction(session *GameSession, params map[string]any) 
 // Helper: Check if vault is registered at location
 func isVaultRegistered(state *SaveFile, buildingID string) bool {
 	if state.Vaults == nil {
-		log.Printf("🔍 isVaultRegistered: No vaults array found")
 		return false
 	}
-	log.Printf("🔍 isVaultRegistered: Checking building '%s' (location: '%s') against %d vaults", buildingID, state.Location, len(state.Vaults))
-	for i, vault := range state.Vaults {
+	for _, vault := range state.Vaults {
 		// Check new format (building field)
 		if building, ok := vault["building"].(string); ok {
-			log.Printf("  - Vault %d: building = '%s' (new format)", i, building)
 			if building == buildingID {
-				log.Printf("  ✅ Match found (by building)!")
 				return true
 			}
 		} else if location, ok := vault["location"].(string); ok {
 			// Check old format (location field) - match if we're at that location
-			log.Printf("  - Vault %d: location = '%s' (old format)", i, location)
 			if location == state.Location {
-				log.Printf("  ✅ Match found (by location - old format)!")
 				return true
 			}
-		} else {
-			log.Printf("  - Vault %d: no building or location field", i)
 		}
 	}
-	log.Printf("  ❌ No match found for building '%s'", buildingID)
 	return false
 }
 
@@ -2462,36 +2531,87 @@ func handleSleepAction(session *GameSession, _ map[string]any) (*GameActionRespo
 		sleepMessage = "You wake up at 6 AM, but didn't sleep well due to going to bed late."
 	}
 
-	log.Printf("🛏️ Slept at %s - HP/Mana restored, fatigue=%d, hunger=%d", buildingID, state.Fatigue, state.Hunger)
+	// Update building states and NPCs after sleep (time jump)
+	database := db.GetDB()
+	if database != nil {
+		newTime := state.TimeOfDay
+		currentHour := newTime / 60
+
+		// Refresh building states
+		buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			database,
+			state.Location,
+			state.District,
+			newTime,
+		)
+		if err == nil && len(buildingStates) > 0 {
+			session.UpdateBuildingStates(buildingStates, newTime)
+		}
+
+		// Refresh NPCs
+		npcIDs := GetNPCIDsAtLocation(
+			state.Location,
+			state.District,
+			state.Building,
+			newTime,
+		)
+		session.UpdateNPCsAtLocation(npcIDs, currentHour)
+	}
+
+	// Calculate delta for frontend updates
+	delta := session.UpdateSnapshotAndCalculateDelta()
 
 	return &GameActionResponse{
 		Success: true,
 		Message: sleepMessage,
 		Color:   "green",
+		Delta:   delta.ToMap(),
+		Data: map[string]interface{}{
+			"time_of_day":   state.TimeOfDay,
+			"current_day":   state.CurrentDay,
+			"fatigue":       state.Fatigue,
+			"hunger":        state.Hunger,
+			"hp":            state.HP,
+			"max_hp":        state.MaxHP,
+			"mana":          state.Mana,
+			"max_mana":      state.MaxMana,
+			"rented_rooms":  session.RentedRooms, // Send updated rooms so frontend knows room was used
+		},
 	}, nil
 }
 
-// handleWaitAction waits for a specified number of hours
-func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionResponse, error) {
-	// Get hours from params
-	hoursFloat, ok := params["hours"].(float64)
-	if !ok {
-		return nil, fmt.Errorf("hours parameter is required")
+// handleWaitAction waits for a specified amount of time
+// Accepts either "minutes" (15-360) or "hours" (1-6) for backwards compatibility
+func handleWaitAction(session *GameSession, params map[string]any) (*GameActionResponse, error) {
+	state := &session.SaveData
+
+	var minutesToAdvance int
+
+	// Check for minutes first (more granular), fall back to hours
+	if minutesFloat, ok := params["minutes"].(float64); ok {
+		minutesToAdvance = int(minutesFloat)
+		// Validate minutes (15-360 in 15 minute increments, 6 hours max)
+		if minutesToAdvance < 15 || minutesToAdvance > 360 {
+			return &GameActionResponse{
+				Success: false,
+				Message: "You can only wait between 15 minutes and 6 hours",
+				Color:   "red",
+			}, nil
+		}
+	} else if hoursFloat, ok := params["hours"].(float64); ok {
+		hours := int(hoursFloat)
+		// Validate hours (1-6 hours max)
+		if hours < 1 || hours > 6 {
+			return &GameActionResponse{
+				Success: false,
+				Message: "You can only wait between 1 and 6 hours",
+				Color:   "red",
+			}, nil
+		}
+		minutesToAdvance = hours * 60
+	} else {
+		return nil, fmt.Errorf("hours or minutes parameter is required")
 	}
-
-	hours := int(hoursFloat)
-
-	// Validate hours (1-6 hours max)
-	if hours < 1 || hours > 6 {
-		return &GameActionResponse{
-			Success: false,
-			Message: "You can only wait between 1 and 6 hours",
-			Color:   "red",
-		}, nil
-	}
-
-	// Calculate time advancement in minutes
-	minutesToAdvance := hours * 60
 
 	// Track fatigue/hunger before wait
 	oldFatigue := state.Fatigue
@@ -2500,13 +2620,45 @@ func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionRespon
 	// Advance time and process all effects (effects system handles fatigue/hunger)
 	timeMessages := advanceTime(state, minutesToAdvance)
 
-	// Format message
-	hourText := "hour"
-	if hours > 1 {
-		hourText = "hours"
+	// Update building states and NPCs after time jump
+	database := db.GetDB()
+	if database != nil {
+		newTime := state.TimeOfDay
+		currentHour := newTime / 60
+
+		// Refresh building states
+		buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			database,
+			state.Location,
+			state.District,
+			newTime,
+		)
+		if err == nil && len(buildingStates) > 0 {
+			session.UpdateBuildingStates(buildingStates, newTime)
+		}
+
+		// Refresh NPCs
+		npcIDs := GetNPCIDsAtLocation(
+			state.Location,
+			state.District,
+			state.Building,
+			newTime,
+		)
+		session.UpdateNPCsAtLocation(npcIDs, currentHour)
 	}
 
-	message := fmt.Sprintf("You waited %d %s.", hours, hourText)
+	// Format message based on wait duration
+	var message string
+	hours := minutesToAdvance / 60
+	mins := minutesToAdvance % 60
+	if hours > 0 && mins > 0 {
+		message = fmt.Sprintf("You waited %d hour%s and %d minute%s.",
+			hours, pluralize(hours), mins, pluralize(mins))
+	} else if hours > 0 {
+		message = fmt.Sprintf("You waited %d hour%s.", hours, pluralize(hours))
+	} else {
+		message = fmt.Sprintf("You waited %d minute%s.", mins, pluralize(mins))
+	}
 
 	// Add explicit fatigue/hunger change messages
 	if state.Fatigue != oldFatigue {
@@ -2535,12 +2687,23 @@ func handleWaitAction(state *SaveFile, params map[string]any) (*GameActionRespon
 		}
 	}
 
-	log.Printf("⏱️ Waited %d hours - Time: %d, Fatigue: %d→%d, Hunger: %d→%d", hours, state.TimeOfDay, oldFatigue, state.Fatigue, oldHunger, state.Hunger)
+	log.Printf("⏱️ Waited %d minutes - Time: %d, Fatigue: %d→%d, Hunger: %d→%d", minutesToAdvance, state.TimeOfDay, oldFatigue, state.Fatigue, oldHunger, state.Hunger)
+
+	// Calculate delta for UI updates
+	delta := session.UpdateSnapshotAndCalculateDelta()
 
 	return &GameActionResponse{
 		Success: true,
 		Message: message,
 		Color:   "yellow",
+		Delta:   delta.ToMap(),
+		Data: map[string]interface{}{
+			"time_of_day": state.TimeOfDay,
+			"current_day": state.CurrentDay,
+			"fatigue":     state.Fatigue,
+			"hunger":      state.Hunger,
+			"hp":          state.HP,
+		},
 	}, nil
 }
 
@@ -2965,7 +3128,7 @@ func applyEffectWithMessage(state *SaveFile, effectID string) (*EffectMessage, e
 
 	// Get effect details
 	effects, _ := effectData["effects"].([]interface{})
-	name, _ := effectData["name"].(string)
+	_, _ = effectData["name"].(string) // name unused but kept for documentation
 	message, _ := effectData["message"].(string)
 	color, _ := effectData["color"].(string)
 	category, _ := effectData["category"].(string)
@@ -3013,8 +3176,6 @@ func applyEffectWithMessage(state *SaveFile, effectID string) (*EffectMessage, e
 			state.ActiveEffects = append(state.ActiveEffects, activeEffect)
 		}
 	}
-
-	log.Printf("✅ Applied effect '%s' to character", name)
 
 	// Return effect message
 	effectMsg := &EffectMessage{
@@ -3482,7 +3643,13 @@ func advanceTime(state *SaveFile, minutes int) []EffectMessage {
 	if state.CurrentDay != oldDay {
 		log.Printf("📅 Day advanced from %d to %d", oldDay, state.CurrentDay)
 	}
-	log.Printf("⏰ Time advanced: %d -> %d (%d minutes)", oldTime, state.TimeOfDay, minutes)
+
+	// Only log time changes when hour changes (reduces log spam)
+	oldHour := oldTime / 60
+	newHour := state.TimeOfDay / 60
+	if newHour != oldHour || state.CurrentDay != oldDay {
+		log.Printf("⏰ Hour changed: %02d:00 -> %02d:00 (Day %d)", oldHour, newHour, state.CurrentDay)
+	}
 
 	return messages
 }
