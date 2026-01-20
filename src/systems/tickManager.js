@@ -121,6 +121,9 @@ class TickManager {
                 if (response.delta.npcs) {
                     logger.debug('NPC delta received:', response.delta.npcs);
                 }
+                if (response.delta.show_ready) {
+                    logger.info('Show ready delta received:', response.delta.show_ready);
+                }
                 deltaApplier.applyDelta(response.delta);
             }
 

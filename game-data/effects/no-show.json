@@ -1,0 +1,17 @@
+{
+  "id": "no-show",
+  "name": "No-Show",
+  "description": "Your reputation suffers after failing to show up for a booked performance",
+  "message": "You missed your booked performance! Word spreads quickly about unreliable performers.",
+  "category": "debuff",
+  "effects": [
+    {
+      "type": "charisma",
+      "value": -2,
+      "duration": 1440,
+      "delay": 0
+    }
+  ],
+  "icon": "broken_lute",
+  "color": "red"
+}

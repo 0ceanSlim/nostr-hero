@@ -941,6 +941,15 @@ async function bookShow(showId, npcId) {
 
         if (result.success) {
             showMessage(result.message, 'success');
+
+            // Update cached state with booked_shows from response if available
+            if (result.data?.booked_shows) {
+                const state = getGameStateSync();
+                state.booked_shows = result.data.booked_shows;
+                state.character.booked_shows = result.data.booked_shows;
+                logger.debug('Updated booked_shows in state:', result.data.booked_shows);
+            }
+
             // Refresh state to get updated game time, gold, etc.
             await refreshGameState();
             updateAllDisplays();
@@ -1179,8 +1188,8 @@ export function checkIfShowReady(buildingId, timeInMinutes) {
 
             logger.debug('Found booked show:', { show, showTime, timeDiff });
 
-            // Show is ready if it's between show time and 30 minutes after
-            if (timeDiff >= 0 && timeDiff <= 30) {
+            // Show is ready if it's between show time and 60 minutes after (9-10pm window)
+            if (timeDiff >= 0 && timeDiff <= 60) {
                 logger.debug('Show is ready to perform!');
                 return true;
             }

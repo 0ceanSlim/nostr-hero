@@ -12,6 +12,13 @@ type Delta struct {
 	Equipment  *EquipmentDelta  `json:"equipment,omitempty"`
 	Location   *LocationDelta   `json:"location,omitempty"`
 	Effects    *EffectsDelta    `json:"effects,omitempty"`
+	ShowReady  *ShowReadyDelta  `json:"show_ready,omitempty"`
+}
+
+// ShowReadyDelta holds changes to show readiness state
+type ShowReadyDelta struct {
+	IsReady    bool   `json:"is_ready"`              // Whether a show is ready to perform
+	BuildingID string `json:"building_id,omitempty"` // Building where the show is (if ready)
 }
 
 // CharacterDelta holds changes to character stats
@@ -105,6 +112,10 @@ type SessionSnapshot struct {
 
 	// Active effects
 	ActiveEffects []string // Effect IDs
+
+	// Show readiness (for Play Show button)
+	ShowReady         bool   // Whether a show is currently ready to perform
+	ShowReadyBuilding string // Building ID where the show is ready
 }
 
 // InventorySlotSnapshot captures state of a single inventory slot
@@ -380,6 +391,14 @@ func CalculateDelta(old, new *SessionSnapshot) *Delta {
 		}
 	}
 
+	// Show ready delta (for Play Show button visibility)
+	if old.ShowReady != new.ShowReady || old.ShowReadyBuilding != new.ShowReadyBuilding {
+		delta.ShowReady = &ShowReadyDelta{
+			IsReady:    new.ShowReady,
+			BuildingID: new.ShowReadyBuilding,
+		}
+	}
+
 	return delta
 }
 
@@ -421,7 +440,8 @@ func (d *Delta) IsEmpty() bool {
 		d.Inventory == nil &&
 		d.Equipment == nil &&
 		d.Location == nil &&
-		d.Effects == nil
+		d.Effects == nil &&
+		d.ShowReady == nil
 }
 
 // ToMap converts a Delta to a map[string]any for JSON serialization
@@ -568,6 +588,16 @@ func (d *Delta) ToMap() map[string]any {
 		result["equipment"] = map[string]any{
 			"changed": d.Equipment.Changed,
 		}
+	}
+
+	if d.ShowReady != nil {
+		showReady := map[string]any{
+			"is_ready": d.ShowReady.IsReady,
+		}
+		if d.ShowReady.BuildingID != "" {
+			showReady["building_id"] = d.ShowReady.BuildingID
+		}
+		result["show_ready"] = showReady
 	}
 
 	return result

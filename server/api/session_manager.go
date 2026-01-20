@@ -565,6 +565,17 @@ func (s *GameSession) UpdateSnapshotAndCalculateDelta() *Delta {
 	// Create new snapshot from current state
 	newSnapshot := CreateSnapshot(&s.SaveData, s.NPCsAtLocation, s.BuildingStates)
 
+	// Calculate show readiness based on booked shows and current time
+	newSnapshot.ShowReady, newSnapshot.ShowReadyBuilding = s.calculateShowReadiness()
+
+	// Log show_ready changes
+	if s.LastSnapshot != nil && (s.LastSnapshot.ShowReady != newSnapshot.ShowReady || s.LastSnapshot.ShowReadyBuilding != newSnapshot.ShowReadyBuilding) {
+		log.Printf("🎭 ShowReady changed: %v@%s -> %v@%s (time: %d, building: %s)",
+			s.LastSnapshot.ShowReady, s.LastSnapshot.ShowReadyBuilding,
+			newSnapshot.ShowReady, newSnapshot.ShowReadyBuilding,
+			s.SaveData.TimeOfDay, s.SaveData.Building)
+	}
+
 	// Calculate delta from old to new
 	var delta *Delta
 	if s.LastSnapshot != nil {
@@ -577,12 +588,61 @@ func (s *GameSession) UpdateSnapshotAndCalculateDelta() *Delta {
 	return delta
 }
 
+// calculateShowReadiness checks if a booked show is ready to perform
+func (s *GameSession) calculateShowReadiness() (bool, string) {
+	if s.BookedShows == nil || len(s.BookedShows) == 0 {
+		return false, ""
+	}
+
+	currentTime := s.SaveData.TimeOfDay
+	currentDay := s.SaveData.CurrentDay
+
+	for _, booking := range s.BookedShows {
+		// Skip already performed shows
+		performed, _ := booking["performed"].(bool)
+		if performed {
+			continue
+		}
+
+		bookingDay := 0
+		if day, ok := booking["day"].(float64); ok {
+			bookingDay = int(day)
+		} else if day, ok := booking["day"].(int); ok {
+			bookingDay = day
+		}
+
+		showTime := 1260 // Default 9 PM
+		if st, ok := booking["show_time"].(float64); ok {
+			showTime = int(st)
+		} else if st, ok := booking["show_time"].(int); ok {
+			showTime = st
+		}
+
+		venueID := ""
+		if vid, ok := booking["venue_id"].(string); ok {
+			venueID = vid
+		}
+
+		// Check if within the 60-minute show window (same day, show_time to show_time+60)
+		if bookingDay == currentDay {
+			timeDiff := currentTime - showTime
+			if timeDiff >= 0 && timeDiff <= 60 {
+				return true, venueID
+			}
+		}
+	}
+
+	return false, ""
+}
+
 // InitializeSnapshot creates the initial snapshot (called when session is first loaded)
 func (s *GameSession) InitializeSnapshot() {
 	if s.BuildingStates == nil {
 		s.BuildingStates = make(map[string]bool)
 	}
 	s.LastSnapshot = CreateSnapshot(&s.SaveData, s.NPCsAtLocation, s.BuildingStates)
+	// Calculate initial show readiness
+	s.LastSnapshot.ShowReady, s.LastSnapshot.ShowReadyBuilding = s.calculateShowReadiness()
 }
 
 // UpdateNPCsAtLocation updates the cached NPC list (called when hour changes)

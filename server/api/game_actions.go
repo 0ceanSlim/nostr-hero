@@ -731,6 +731,13 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 		advanceTime(state, minutesElapsed)
 	}
 
+	// Check for missed shows (session-only data) and apply penalty
+	if session != nil {
+		if len(session.BookedShows) > 0 {
+			checkMissedShows(state, session, newTime, newDay)
+		}
+	}
+
 	// Update buildings and NPCs if we have a session
 	if session != nil {
 		database := db.GetDB()
@@ -2842,6 +2849,9 @@ func handleBookShowAction(session *GameSession, params map[string]any) (*GameAct
 		Success: true,
 		Message: fmt.Sprintf("Booked '%s' for tonight at 9 PM!", showName),
 		Color:   "green",
+		Data: map[string]interface{}{
+			"booked_shows": session.BookedShows,
+		},
 	}, nil
 }
 
@@ -3033,6 +3043,51 @@ func handlePlayShowAction(session *GameSession, _ map[string]any) (*GameActionRe
 		Message: resultMessage,
 		Color:   resultColor,
 	}, nil
+}
+
+// checkMissedShows checks for any booked shows that the player missed and applies a penalty
+func checkMissedShows(state *SaveFile, session *GameSession, currentTime int, currentDay int) {
+	if session.BookedShows == nil {
+		return
+	}
+
+	for i, booking := range session.BookedShows {
+		// Skip already performed or already penalized shows
+		performed, _ := booking["performed"].(bool)
+		penalized, _ := booking["penalized"].(bool)
+		if performed || penalized {
+			continue
+		}
+
+		bookingDay := getIntValue(booking, "day", -1)
+		showTime := getIntValue(booking, "show_time", 0)
+		showEndTime := showTime + 60 // 1-hour show window (9-10pm)
+
+		// Check if we've passed the show window
+		// Case 1: Same day, past the show end time
+		// Case 2: Day has advanced (definitely missed)
+		showMissed := false
+		if bookingDay == currentDay && currentTime > showEndTime {
+			showMissed = true
+		} else if currentDay > bookingDay {
+			showMissed = true
+		}
+
+		if showMissed {
+			log.Printf("🎭 Player missed booked show! Day %d, show was at %d, current time is day %d at %d",
+				bookingDay, showTime, currentDay, currentTime)
+
+			// Apply no-show penalty effect (-2 charisma for 24 hours)
+			if err := applyEffect(state, "no-show"); err != nil {
+				log.Printf("⚠️ Failed to apply no-show effect: %v", err)
+			} else {
+				log.Printf("😔 Applied no-show penalty: -2 Charisma for 24 hours")
+			}
+
+			// Mark as penalized so we don't keep applying the penalty
+			session.BookedShows[i]["penalized"] = true
+		}
+	}
 }
 
 // loadInstrumentData loads instrument difficulty data from database

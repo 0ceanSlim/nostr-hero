@@ -20,6 +20,7 @@
 import { logger } from '../lib/logger.js';
 import { smoothClock } from './smoothClock.js';
 import { eventBus } from '../lib/events.js';
+import { getGameStateSync } from '../state/gameState.js';
 
 class DeltaApplier {
     constructor() {
@@ -94,6 +95,14 @@ class DeltaApplier {
             }
         } catch (e) {
             logger.error('Error applying effects delta:', e);
+        }
+
+        try {
+            if (delta.show_ready) {
+                this.applyShowReadyDelta(delta.show_ready);
+            }
+        } catch (e) {
+            logger.error('Error applying show_ready delta:', e);
         }
     }
 
@@ -411,6 +420,113 @@ class DeltaApplier {
     applyEffectsDelta(effectsDelta) {
         // Effects changes affect the effects display
         eventBus.emit('effects:changed', effectsDelta);
+    }
+
+    /**
+     * Apply show ready changes (show/hide Play Show button)
+     * @param {object} showReadyDelta - { is_ready: boolean, building_id: string }
+     */
+    applyShowReadyDelta(showReadyDelta) {
+        const isReady = showReadyDelta.is_ready;
+        const buildingId = showReadyDelta.building_id;
+
+        logger.info('Applying show_ready delta:', { isReady, buildingId });
+
+        // Find existing Play Show button (look for button with "Play Show" text)
+        const existingButton = document.querySelector('[data-action="play-show"]') ||
+                               Array.from(document.querySelectorAll('button')).find(b => b.textContent === 'Play Show');
+
+        logger.debug('Existing Play Show button:', { exists: !!existingButton });
+
+        if (isReady) {
+            // Need to show the button - only if player is in the correct building
+            // Get current building from game state
+            const state = getGameStateSync();
+            let currentBuilding = state.location?.building || '';
+
+            // Find the Exit Building button - used both to check if in building and to find container
+            const exitBtn = Array.from(document.querySelectorAll('button')).find(b =>
+                b.textContent === 'Exit Building');
+            const isInAnyBuilding = !!exitBtn;
+
+            logger.info('Show ready check:', {
+                currentBuilding,
+                buildingId,
+                isInBuilding: currentBuilding === buildingId,
+                exitButtonFound: isInAnyBuilding,
+                fullLocation: state.location
+            });
+
+            // If we're in a building (Exit button exists) but game state doesn't have it, use the buildingId
+            // This handles cases where the state might be stale
+            if (isInAnyBuilding && !currentBuilding && buildingId) {
+                logger.info('Using buildingId from delta as current building (state was stale)');
+                currentBuilding = buildingId;
+            }
+
+            if (currentBuilding !== buildingId) {
+                logger.debug('Player not in show building:', { currentBuilding, buildingId });
+                // If there's an existing button but we're not in the right building, remove it
+                if (existingButton) {
+                    existingButton.remove();
+                }
+                return;
+            }
+
+            // Only add button if it doesn't exist
+            if (!existingButton) {
+                logger.debug('Adding Play Show button to building');
+
+                // Use the exit button we already found
+                const container = exitBtn?.parentElement;
+
+                logger.debug('Exit button search:', { found: !!exitBtn, exitText: exitBtn?.textContent, containerFound: !!container });
+
+                if (container) {
+                    const button = document.createElement('button');
+                    // Match Win95-style from createLocationButton with 'action' type
+                    button.className = 'text-white transition-all leading-tight text-center overflow-hidden';
+                    button.style.fontSize = '7px';
+                    button.style.background = '#9e8b6b'; // Muted gold for action buttons
+                    button.style.color = '#ffffff';
+                    button.style.cursor = 'pointer';
+                    button.style.padding = '2px 4px';
+                    button.style.borderTop = '1px solid #ffffff';
+                    button.style.borderLeft = '1px solid #ffffff';
+                    button.style.borderRight = '1px solid #000000';
+                    button.style.borderBottom = '1px solid #000000';
+                    button.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 rgba(255, 255, 255, 0.3)';
+                    button.style.overflowWrap = 'break-word';
+                    button.style.hyphens = 'none';
+                    button.style.display = 'flex';
+                    button.style.alignItems = 'center';
+                    button.style.justifyContent = 'center';
+                    button.textContent = 'Play Show';
+                    button.dataset.action = 'play-show';
+                    button.addEventListener('click', async () => {
+                        // Auto-play time when taking action
+                        if (window.timeClock && window.timeClock.play) {
+                            window.timeClock.play();
+                        }
+                        // Import and call performShow
+                        const { performShow } = await import('../ui/locationDisplay.js');
+                        performShow();
+                    });
+                    container.appendChild(button);
+                    logger.info('Play Show button added via delta');
+                } else {
+                    logger.warn('Could not find container for Play Show button (no Exit button found)');
+                }
+            } else {
+                logger.debug('Play Show button already exists');
+            }
+        } else {
+            // Need to hide the button
+            if (existingButton) {
+                logger.info('Removing Play Show button via delta');
+                existingButton.remove();
+            }
+        }
     }
 
     // --- Helper Methods ---
