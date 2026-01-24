@@ -1,7 +1,7 @@
 {
-  "id": "famished",
+  "id": "starving",
   "name": "Starving",
-  "description": "Starving to death. Losing 1 HP every 12 hours.",
+  "description": "Starving to death. Losing 1 HP every 4 hours.",
   "message": "You are starving! Find food immediately or you will die!",
   "category": "debuff",
   "effects": [
@@ -10,9 +10,9 @@
       "value": -1,
       "duration": 0,
       "delay": 0,
-      "tick_interval": 720
+      "tick_interval": 240
     }
   ],
-  "icon": "skull",
+  "icon": "starving",
   "color": "red"
 }

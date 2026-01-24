@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"slices"
+	"time"
 
 	"nostr-hero/db"
 	"nostr-hero/types"
@@ -65,6 +66,12 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Session not found", http.StatusNotFound)
 			return
 		}
+	}
+
+	// Track last action time for player actions (not update_time ticks)
+	if request.Action.Type != "update_time" {
+		session.LastActionTime = time.Now().Unix()
+		session.LastActionGameTime = session.SaveData.TimeOfDay
 	}
 
 	// Process the action based on type
@@ -175,6 +182,8 @@ func processGameAction(session *GameSession, action GameAction) (*GameActionResp
 		return handleBookShowAction(session, action.Params)
 	case "play_show":
 		return handlePlayShowAction(session, action.Params)
+	case "reset_idle_timer":
+		return handleResetIdleTimerAction(session)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
 	}
@@ -709,6 +718,29 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 		log.Printf("⚠️ Session not found for delta: %s:%s", npub, saveID)
 	}
 
+	// Check for auto-pause: if 6+ in-game hours have passed since last player action
+	autoPause := false
+	if session != nil && session.LastActionGameTime > 0 {
+		// Calculate in-game minutes since last action
+		newTime := int(newTimeOfDay)
+		newDay := int(newCurrentDay)
+
+		// Calculate total minutes elapsed since last action
+		var minutesSinceAction int
+		if newDay == state.CurrentDay {
+			minutesSinceAction = newTime - session.LastActionGameTime
+		} else {
+			// Handle day wrap
+			minutesSinceAction = (1440 - session.LastActionGameTime) + newTime + ((newDay - state.CurrentDay - 1) * 1440)
+		}
+
+		// Auto-pause after 6 in-game hours (360 minutes) of idle
+		if minutesSinceAction >= 360 {
+			autoPause = true
+			log.Printf("⏸️ Auto-pause triggered: %d in-game minutes since last action", minutesSinceAction)
+		}
+	}
+
 	// Calculate time delta
 	oldTime := state.TimeOfDay
 	oldDay := state.CurrentDay
@@ -789,6 +821,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 					"hunger":          state.Hunger,
 					"hp":              state.HP,
 					"active_effects":  state.ActiveEffects,
+					"auto_pause":      autoPause,
 				},
 			}, nil
 		}
@@ -805,6 +838,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 			"hunger":          state.Hunger,
 			"hp":              state.HP,
 			"active_effects":  state.ActiveEffects,
+			"auto_pause":      autoPause,
 		},
 	}, nil
 }
@@ -2498,13 +2532,23 @@ func handleSleepAction(session *GameSession, _ map[string]any) (*GameActionRespo
 		poorSleep = true
 	}
 
-	// Advance time to 6 AM (360 minutes)
-	targetTime := 360
-	if state.TimeOfDay >= targetTime {
-		// Already past 6 AM, sleep until 6 AM next day
+	// Calculate how many minutes will be slept
+	oldTime := state.TimeOfDay
+	targetTime := 360 // 6 AM
+	var minutesSlept int
+	if oldTime >= targetTime {
+		// Already past 6 AM, sleep until 6 AM next day (e.g., 10 PM = 1320 mins, sleep 8h40m)
+		minutesSlept = (1440 - oldTime) + targetTime
 		state.CurrentDay++
+	} else {
+		// Before 6 AM, sleep until 6 AM same day
+		minutesSlept = targetTime - oldTime
 	}
 	state.TimeOfDay = targetTime
+
+	// Tick down duration-based effects for the time slept
+	// This handles buffs/debuffs like performance-high that expire over time
+	tickDownEffectDurations(state, minutesSlept)
 
 	// Reset fatigue based on sleep quality
 	if poorSleep {
@@ -2517,8 +2561,8 @@ func handleSleepAction(session *GameSession, _ map[string]any) (*GameActionRespo
 	resetFatigueAccumulator(state)
 	_, _ = updateFatiguePenaltyEffects(state)
 
-	// Reset hunger (hungry after waking up)
-	state.Hunger = 1
+	// Reset hunger (well fed after waking up)
+	state.Hunger = 2
 	resetHungerAccumulator(state)
 	_, _ = updateHungerPenaltyEffects(state)
 	ensureHungerAccumulation(state)
@@ -2711,6 +2755,21 @@ func handleWaitAction(session *GameSession, params map[string]any) (*GameActionR
 			"hunger":      state.Hunger,
 			"hp":          state.HP,
 		},
+	}, nil
+}
+
+// handleResetIdleTimerAction resets the auto-pause idle timer
+// Called when the play button is pressed to prevent immediate re-triggering of auto-pause
+func handleResetIdleTimerAction(session *GameSession) (*GameActionResponse, error) {
+	// Reset the idle tracking to current time
+	session.LastActionTime = time.Now().Unix()
+	session.LastActionGameTime = session.SaveData.TimeOfDay
+
+	log.Printf("⏱️ Idle timer reset - LastActionGameTime: %d", session.LastActionGameTime)
+
+	return &GameActionResponse{
+		Success: true,
+		Message: "Idle timer reset",
 	}, nil
 }
 
@@ -3224,6 +3283,7 @@ func applyEffectWithMessage(state *SaveFile, effectID string) (*EffectMessage, e
 				EffectID:          effectID,
 				EffectIndex:       idx,
 				DurationRemaining: duration,
+				TotalDuration:     duration, // Store original duration for progress calculation
 				DelayRemaining:    delay,
 				TickAccumulator:   0.0,
 				AppliedAt:         state.TimeOfDay,
@@ -3297,9 +3357,41 @@ func applyImmediateEffect(state *SaveFile, effectType string, value int) {
 
 // Fatigue and Hunger System Initialization
 
+// normalizeEffectID converts old effect IDs to new ones for backward compatibility
+func normalizeEffectID(effectID string) string {
+	oldToNew := map[string]string{
+		"hunger-accumulation-well-fed":  "hunger-accumulation-wellfed",
+		"hunger-accumulation-full":      "hunger-accumulation-stuffed",
+		"hunger-accumulation-satisfied": "hunger-accumulation-wellfed",
+		"famished":                      "starving",
+	}
+	if newID, exists := oldToNew[effectID]; exists {
+		return newID
+	}
+	return effectID
+}
+
+// migrateOldEffectIDs updates all effect IDs in ActiveEffects to use new naming conventions
+func migrateOldEffectIDs(state *SaveFile) {
+	if state.ActiveEffects == nil {
+		return
+	}
+	for i := range state.ActiveEffects {
+		oldID := state.ActiveEffects[i].EffectID
+		newID := normalizeEffectID(oldID)
+		if newID != oldID {
+			log.Printf("🔄 Migrating effect ID: %s -> %s", oldID, newID)
+			state.ActiveEffects[i].EffectID = newID
+		}
+	}
+}
+
 // initializeFatigueHungerEffects ensures all accumulation and penalty effects are properly set
 // This should be called when loading a save or after modifying fatigue/hunger values
 func initializeFatigueHungerEffects(state *SaveFile) error {
+	// Migrate old effect IDs to new ones for backward compatibility
+	migrateOldEffectIDs(state)
+
 	// Ensure fatigue accumulation effect is present
 	if err := ensureFatigueAccumulation(state); err != nil {
 		return fmt.Errorf("failed to ensure fatigue accumulation: %w", err)
@@ -3325,6 +3417,7 @@ func initializeFatigueHungerEffects(state *SaveFile) error {
 // Fatigue management functions (penalty effects applied based on numeric fatigue level)
 
 // updateFatiguePenaltyEffects applies appropriate penalty effects based on fatigue level
+// New thresholds: 0-5 (no penalty), 6 (tired), 8 (very tired), 9 (fatigued), 10 (exhaustion)
 func updateFatiguePenaltyEffects(state *SaveFile) (*EffectMessage, error) {
 	// Remove all existing fatigue penalty effects
 	removeFatiguePenaltyEffects(state)
@@ -3333,14 +3426,14 @@ func updateFatiguePenaltyEffects(state *SaveFile) (*EffectMessage, error) {
 	switch {
 	case state.Fatigue >= 10:
 		return applyEffectWithMessage(state, "exhaustion")
-	case state.Fatigue >= 7:
+	case state.Fatigue == 9:
 		return applyEffectWithMessage(state, "fatigued")
-	case state.Fatigue >= 4:
+	case state.Fatigue == 8:
 		return applyEffectWithMessage(state, "very-tired")
-	case state.Fatigue >= 1:
+	case state.Fatigue >= 6:
 		return applyEffectWithMessage(state, "tired")
 	default:
-		// No fatigue penalty
+		// Fatigue 0-5: No fatigue penalty (fresh)
 		return nil, nil
 	}
 }
@@ -3404,6 +3497,10 @@ func resetFatigueAccumulator(state *SaveFile) {
 // Hunger management functions (penalty effects applied based on numeric hunger level)
 
 // updateHungerPenaltyEffects applies appropriate penalty effects based on hunger level
+// 3/3 "Stuffed": +1 CON, -1 STR, -1 DEX
+// 2/3 "Well Fed": No effect (baseline)
+// 1/3 "Hungry": -1 DEX only
+// 0/3 "Famished": -1 HP every 4 hours
 func updateHungerPenaltyEffects(state *SaveFile) (*EffectMessage, error) {
 	// Remove all existing hunger penalty effects
 	removeHungerPenaltyEffects(state)
@@ -3411,22 +3508,22 @@ func updateHungerPenaltyEffects(state *SaveFile) (*EffectMessage, error) {
 	// Apply penalty/bonus effect based on current hunger level
 	switch state.Hunger {
 	case 0:
-		return applyEffectWithMessage(state, "famished")
+		return applyEffectWithMessage(state, "starving")
 	case 1:
 		return applyEffectWithMessage(state, "hungry")
 	case 2:
-		// Satisfied - no effect (baseline)
+		// Well fed - no effect (baseline)
 		return nil, nil
 	case 3:
-		return applyEffectWithMessage(state, "well-fed")
+		return applyEffectWithMessage(state, "stuffed")
 	default:
 		// Clamp to valid range
 		if state.Hunger < 0 {
 			state.Hunger = 0
-			return applyEffectWithMessage(state, "famished")
+			return applyEffectWithMessage(state, "starving")
 		}
 		state.Hunger = 3
-		return applyEffectWithMessage(state, "well-fed")
+		return applyEffectWithMessage(state, "stuffed")
 	}
 }
 
@@ -3435,9 +3532,9 @@ func removeHungerPenaltyEffects(state *SaveFile) {
 	var remainingEffects []ActiveEffect
 	for _, activeEffect := range state.ActiveEffects {
 		// Keep non-hunger-penalty effects
-		if activeEffect.EffectID != "famished" &&
+		if activeEffect.EffectID != "starving" &&
 			activeEffect.EffectID != "hungry" &&
-			activeEffect.EffectID != "well-fed" {
+			activeEffect.EffectID != "stuffed" {
 			remainingEffects = append(remainingEffects, activeEffect)
 		}
 	}
@@ -3448,8 +3545,8 @@ func removeHungerPenaltyEffects(state *SaveFile) {
 func ensureHungerAccumulation(state *SaveFile) error {
 	// Check if hunger accumulation effect already exists
 	for _, activeEffect := range state.ActiveEffects {
-		if activeEffect.EffectID == "hunger-accumulation-full" ||
-			activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+		if activeEffect.EffectID == "hunger-accumulation-stuffed" ||
+			activeEffect.EffectID == "hunger-accumulation-wellfed" ||
 			activeEffect.EffectID == "hunger-accumulation-hungry" {
 			// Already present - don't remove/re-add (preserves tick_accumulator)
 			return nil
@@ -3460,9 +3557,9 @@ func ensureHungerAccumulation(state *SaveFile) error {
 	var effectID string
 	switch state.Hunger {
 	case 3:
-		effectID = "hunger-accumulation-full"
+		effectID = "hunger-accumulation-stuffed"
 	case 2:
-		effectID = "hunger-accumulation-satisfied"
+		effectID = "hunger-accumulation-wellfed"
 	case 1:
 		effectID = "hunger-accumulation-hungry"
 	case 0:
@@ -3480,8 +3577,8 @@ func removeHungerAccumulation(state *SaveFile) {
 	var remainingEffects []ActiveEffect
 	for _, activeEffect := range state.ActiveEffects {
 		// Keep non-hunger-accumulation effects
-		if activeEffect.EffectID != "hunger-accumulation-full" &&
-			activeEffect.EffectID != "hunger-accumulation-satisfied" &&
+		if activeEffect.EffectID != "hunger-accumulation-stuffed" &&
+			activeEffect.EffectID != "hunger-accumulation-wellfed" &&
 			activeEffect.EffectID != "hunger-accumulation-hungry" {
 			remainingEffects = append(remainingEffects, activeEffect)
 		}
@@ -3492,8 +3589,8 @@ func removeHungerAccumulation(state *SaveFile) {
 // resetHungerAccumulator resets the tick accumulator for hunger accumulation effects
 func resetHungerAccumulator(state *SaveFile) {
 	for i, activeEffect := range state.ActiveEffects {
-		if activeEffect.EffectID == "hunger-accumulation-full" ||
-			activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+		if activeEffect.EffectID == "hunger-accumulation-stuffed" ||
+			activeEffect.EffectID == "hunger-accumulation-wellfed" ||
 			activeEffect.EffectID == "hunger-accumulation-hungry" {
 			state.ActiveEffects[i].TickAccumulator = 0
 			return
@@ -3557,18 +3654,18 @@ func tickEffects(state *SaveFile, minutesElapsed int) []EffectMessage {
 		// Process tick-based effects (damage/healing over time)
 		if tickInterval > 0 {
 			// For hunger accumulation, use dynamic tick interval based on current hunger level
-			if activeEffect.EffectID == "hunger-accumulation-full" ||
-				activeEffect.EffectID == "hunger-accumulation-satisfied" ||
+			if activeEffect.EffectID == "hunger-accumulation-stuffed" ||
+				activeEffect.EffectID == "hunger-accumulation-wellfed" ||
 				activeEffect.EffectID == "hunger-accumulation-hungry" {
 				// Override tick interval based on current hunger level
 				switch state.Hunger {
-				case 3: // Full
-					tickInterval = 720 // 12 hours
-				case 2: // Satisfied
-					tickInterval = 480 // 8 hours
-				case 1: // Hungry
+				case 3: // Stuffed
 					tickInterval = 360 // 6 hours
-				case 0: // Famished - no accumulation (handled by famished penalty effect)
+				case 2: // Well fed
+					tickInterval = 240 // 4 hours
+				case 1: // Hungry
+					tickInterval = 240 // 4 hours
+				case 0: // Starving - no accumulation (handled by starving penalty effect)
 					tickInterval = 0
 				}
 			}
@@ -3580,7 +3677,7 @@ func tickEffects(state *SaveFile, minutesElapsed int) []EffectMessage {
 					activeEffect.TickAccumulator -= tickInterval
 
 					// For starvation damage, show message
-					if activeEffect.EffectID == "famished" && effectType == "hp" {
+					if activeEffect.EffectID == "starving" && effectType == "hp" {
 						messages = append(messages, EffectMessage{
 							Message:  "You're starving! You lose 1 HP from lack of food.",
 							Color:    "red",
@@ -3599,15 +3696,62 @@ func tickEffects(state *SaveFile, minutesElapsed int) []EffectMessage {
 		}
 
 		// Keep effect if duration remains or is permanent (0)
-		if activeEffect.DurationRemaining > 0 || activeEffect.DurationRemaining == 0 {
+		// BUT skip accumulation effects if we've hit the cap
+		shouldKeep := activeEffect.DurationRemaining > 0 || activeEffect.DurationRemaining == 0
+
+		// Don't keep fatigue-accumulation if fatigue is maxed
+		if activeEffect.EffectID == "fatigue-accumulation" && state.Fatigue >= 10 {
+			shouldKeep = false
+			log.Printf("🛑 Removing fatigue-accumulation: fatigue at max (10)")
+		}
+
+		// Don't keep hunger-accumulation effects if starving
+		if (activeEffect.EffectID == "hunger-accumulation-stuffed" ||
+			activeEffect.EffectID == "hunger-accumulation-wellfed" ||
+			activeEffect.EffectID == "hunger-accumulation-hungry") && state.Hunger <= 0 {
+			shouldKeep = false
+			log.Printf("🛑 Removing hunger-accumulation: hunger at min (0)")
+		}
+
+		if shouldKeep {
 			remainingEffects = append(remainingEffects, activeEffect)
-		} else {
+		} else if activeEffect.DurationRemaining < 0 {
 			log.Printf("⏱️ Effect '%s' expired", name)
 		}
 	}
 
 	state.ActiveEffects = remainingEffects
 	return messages
+}
+
+// tickDownEffectDurations reduces duration_remaining for all timed effects
+// Used during sleep and other time jumps to properly expire buffs/debuffs
+func tickDownEffectDurations(state *SaveFile, minutes int) {
+	if state.ActiveEffects == nil || minutes <= 0 {
+		return
+	}
+
+	var remainingEffects []ActiveEffect
+	for _, effect := range state.ActiveEffects {
+		// Skip permanent effects (duration == 0) and system effects
+		if effect.DurationRemaining == 0 {
+			remainingEffects = append(remainingEffects, effect)
+			continue
+		}
+
+		// Tick down the duration
+		effect.DurationRemaining -= float64(minutes)
+
+		if effect.DurationRemaining > 0 {
+			// Effect still active
+			remainingEffects = append(remainingEffects, effect)
+		} else {
+			// Effect expired
+			log.Printf("⏱️ Effect '%s' expired during time skip (%d minutes)", effect.EffectID, minutes)
+		}
+	}
+
+	state.ActiveEffects = remainingEffects
 }
 
 // getActiveStatModifiers calculates total stat modifiers from all active effects
@@ -3643,6 +3787,9 @@ func getActiveStatModifiers(state *SaveFile) map[string]int {
 
 // loadEffectData loads effect data from database
 func loadEffectData(effectID string) (map[string]interface{}, error) {
+	// Normalize old effect IDs for backward compatibility
+	effectID = normalizeEffectID(effectID)
+
 	database := db.GetDB()
 	if database == nil {
 		return nil, fmt.Errorf("database not available")

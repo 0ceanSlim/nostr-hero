@@ -1,7 +1,7 @@
 {
-  "id": "hunger-accumulation-full",
-  "name": "Hunger (Full)",
-  "description": "Hunger decreases slowly when full. Decreases hunger level every 12 hours.",
+  "id": "hunger-accumulation-stuffed",
+  "name": "Hunger (Stuffed)",
+  "description": "Hunger decreases slowly when stuffed. Decreases hunger level every 6 hours.",
   "category": "system",
   "silent": true,
   "effects": [
@@ -10,7 +10,7 @@
       "value": -1,
       "duration": 0,
       "delay": 0,
-      "tick_interval": 720
+      "tick_interval": 360
     }
   ],
   "icon": "clock",

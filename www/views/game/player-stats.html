@@ -1,6 +1,6 @@
 {{define "game/player-stats.html"}}
 <!-- Player Stats Area - Dark Win95 Style -->
-<div class="p-1 space-y-1" style="flex-shrink: 0; font-size: 7px;">
+<div class="p-1 space-y-1" style="flex-shrink: 0; font-size: 7px; overflow: visible;">
     <!-- Character Name, Level, and Time Controls -->
     <div class="flex flex-col gap-0.5">
         <div class="flex items-center justify-between font-bold text-white" style="font-size: 8px;">
@@ -49,67 +49,56 @@
     </div>
 
     <!-- HP Bar -->
-    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a;">
+    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a; overflow: hidden; z-index: 1;">
         <div id="hp-bar" class="absolute inset-0 transition-all bg-red-700" style="width: 100%; height: 14px;"></div>
         <span class="relative z-10 text-[8px] font-bold text-white">HP</span>
         <span class="relative z-10 text-[8px] font-bold text-white"><span id="current-hp">0</span>/<span id="max-hp">0</span></span>
     </div>
 
     <!-- Mana Bar -->
-    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a;">
+    <div class="relative w-full flex items-center justify-between px-1" style="height: 14px; background: #1a1a1a; overflow: hidden; z-index: 1;">
         <div id="mana-bar" class="absolute inset-0 transition-all bg-blue-600" style="width: 100%; height: 14px;"></div>
         <span class="relative z-10 text-[8px] font-bold text-white">MP</span>
         <span class="relative z-10 text-[8px] font-bold text-white"><span id="current-mana">0</span>/<span id="max-mana">0</span></span>
     </div>
 
-    <!-- Quick Status Row (numbers + emojis) -->
-    <div class="flex gap-1 justify-around items-center px-1" style="height: 14px;">
-        <!-- Fatigue -->
-        <div class="flex items-center gap-0.5">
-            <span class="text-white" style="font-size: 7px;">💪</span>
-            <span class="text-white" style="font-size: 6px;"><span id="fatigue-level">0</span>/10</span>
-            <span id="fatigue-emoji" class="text-white" style="font-size: 9px;" title="Fatigue">😊</span>
+    <!-- Quick Status Row (icons with radial progress) -->
+    <div class="flex gap-3 justify-center items-center px-1 py-1" style="overflow: visible;">
+        <!-- Fatigue with radial progress -->
+        <div class="inline-flex items-center gap-1" style="line-height: 1; overflow: visible;">
+            <div class="radial-icon-container" id="fatigue-icon-container" title="Fatigue: Fresh (0/10)" style="position: relative; width: 16px; height: 16px; display: inline-block;">
+                <img id="fatigue-icon" src="/res/img/systems/fatigue/fatigue-00.png" alt="Fatigue" class="radial-icon-img" style="image-rendering: pixelated; width: 16px; height: 16px; position: relative; z-index: 2;">
+                <svg class="radial-progress" viewBox="0 0 36 36" style="position: absolute; top: -4px; left: -4px; width: 24px; height: 24px; transform: rotate(-90deg); pointer-events: none; z-index: 1;">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3" />
+                    <circle cx="18" cy="18" r="15" id="fatigue-progress" fill="none" stroke="#00ddff" stroke-width="3"
+                            stroke-dasharray="94.25" stroke-dashoffset="94.25" />
+                </svg>
+            </div>
+            <span class="text-white" style="font-size: 8px; line-height: 12px;"><span id="fatigue-level">0</span>/10</span>
         </div>
-        <!-- Hunger -->
-        <div class="flex items-center gap-0.5">
-            <span class="text-white" style="font-size: 7px;">🍖</span>
-            <span class="text-white" style="font-size: 6px;"><span id="hunger-level">1</span>/3</span>
-            <span id="hunger-emoji" class="text-white" style="font-size: 9px;" title="Hunger">😋</span>
+        <!-- Hunger with radial progress -->
+        <div class="inline-flex items-center gap-1" style="line-height: 1; overflow: visible;">
+            <div class="radial-icon-container" id="hunger-icon-container" title="Hunger: Well Fed (2/3)" style="position: relative; width: 16px; height: 16px; display: inline-block;">
+                <img id="hunger-icon" src="/res/img/systems/hunger/hunger-02.png" alt="Hunger" class="radial-icon-img" style="image-rendering: pixelated; width: 16px; height: 16px; position: relative; z-index: 2;">
+                <svg class="radial-progress" viewBox="0 0 36 36" style="position: absolute; top: -4px; left: -4px; width: 24px; height: 24px; transform: rotate(-90deg); pointer-events: none; z-index: 1;">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3" />
+                    <circle cx="18" cy="18" r="15" id="hunger-progress" fill="none" stroke="#00ddff" stroke-width="3"
+                            stroke-dasharray="94.25" stroke-dashoffset="94.25" />
+                </svg>
+            </div>
+            <span class="text-white" style="font-size: 8px; line-height: 12px;"><span id="hunger-level">2</span>/3</span>
         </div>
         <!-- Weight -->
-        <div class="flex items-center gap-0.5">
-            <span class="text-white" style="font-size: 7px;">⚖️</span>
-            <span class="text-white" style="font-size: 6px;"><span id="char-weight">0</span>/<span id="max-weight">0</span></span>
-            <span id="weight-emoji" class="text-white" style="font-size: 9px;" title="Weight">🪶</span>
+        <div class="inline-flex items-center gap-1" style="line-height: 1;">
+            <span style="font-size: 10px; line-height: 12px;">⚖️</span>
+            <span class="text-white" style="font-size: 8px; line-height: 12px;"><span id="char-weight">0</span>/<span id="max-weight">0</span></span>
         </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-6 gap-0.5 text-center text-[8px]">
-        <div>
-            <div class="text-gray-400">STR</div>
-            <div id="stat-str" class="font-bold text-white">10</div>
-        </div>
-        <div>
-            <div class="text-gray-400">DEX</div>
-            <div id="stat-dex" class="font-bold text-white">10</div>
-        </div>
-        <div>
-            <div class="text-gray-400">CON</div>
-            <div id="stat-con" class="font-bold text-white">10</div>
-        </div>
-        <div>
-            <div class="text-gray-400">INT</div>
-            <div id="stat-int" class="font-bold text-white">10</div>
-        </div>
-        <div>
-            <div class="text-gray-400">WIS</div>
-            <div id="stat-wis" class="font-bold text-white">10</div>
-        </div>
-        <div>
-            <div class="text-gray-400">CHA</div>
-            <div id="stat-cha" class="font-bold text-white">10</div>
-        </div>
+    <!-- Active Effects Display (replaces stats grid) -->
+    <div id="active-effects-display" class="flex flex-wrap gap-2 px-1 items-center justify-start" style="font-size: 6px; height: 24px; overflow: visible;">
+        <!-- Effects will be rendered here by effectsDisplay.js -->
+        <span class="text-gray-500 italic" id="no-effects-msg">No active effects</span>
     </div>
 </div>
 {{end}}

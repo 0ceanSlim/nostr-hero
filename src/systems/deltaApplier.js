@@ -21,6 +21,7 @@ import { logger } from '../lib/logger.js';
 import { smoothClock } from './smoothClock.js';
 import { eventBus } from '../lib/events.js';
 import { getGameStateSync } from '../state/gameState.js';
+import { effectsDisplay } from '../ui/effectsDisplay.js';
 
 class DeltaApplier {
     constructor() {
@@ -131,13 +132,19 @@ class DeltaApplier {
         // Fatigue
         if (charDelta.fatigue !== undefined) {
             this.updateElement('fatigue-level', charDelta.fatigue);
-            this.updateFatigueEmoji(charDelta.fatigue);
+            // Get accumulator from state for radial progress
+            const state = getGameStateSync();
+            const accumulators = effectsDisplay.getAccumulatorValues(state?.character?.active_effects);
+            effectsDisplay.updateFatigueIcon(charDelta.fatigue, accumulators.fatigueAccumulator, accumulators.fatigueInterval);
         }
 
         // Hunger
         if (charDelta.hunger !== undefined) {
             this.updateElement('hunger-level', charDelta.hunger);
-            this.updateHungerEmoji(charDelta.hunger);
+            // Get accumulator from state for radial progress
+            const state = getGameStateSync();
+            const accumulators = effectsDisplay.getAccumulatorValues(state?.character?.active_effects);
+            effectsDisplay.updateHungerIcon(charDelta.hunger, accumulators.hungerAccumulator, accumulators.hungerInterval);
         }
 
         // Gold
@@ -578,29 +585,23 @@ class DeltaApplier {
     }
 
     /**
-     * Update fatigue emoji based on level
+     * Update fatigue icon and radial progress
      * @param {number} fatigue
+     * @param {Array} activeEffects - Active effects for accumulator lookup
      */
-    updateFatigueEmoji(fatigue) {
-        const emojiEl = document.getElementById('fatigue-emoji');
-        if (!emojiEl) return;
-
-        // Fatigue 0 = well rested, higher = more tired
-        const emojis = ['😊', '😐', '😑', '😪', '😴', '🥱', '😵', '💀', '⚰️', '👻', '☠️'];
-        emojiEl.textContent = emojis[Math.min(fatigue, emojis.length - 1)];
+    updateFatigueDisplay(fatigue, activeEffects) {
+        const accumulators = effectsDisplay.getAccumulatorValues(activeEffects);
+        effectsDisplay.updateFatigueIcon(fatigue, accumulators.fatigueAccumulator, accumulators.fatigueInterval);
     }
 
     /**
-     * Update hunger emoji based on level
+     * Update hunger icon and radial progress
      * @param {number} hunger
+     * @param {Array} activeEffects - Active effects for accumulator lookup
      */
-    updateHungerEmoji(hunger) {
-        const emojiEl = document.getElementById('hunger-emoji');
-        if (!emojiEl) return;
-
-        // Hunger: 0=Famished, 1=Hungry, 2=Satisfied, 3=Full
-        const emojis = ['☠️', '🥺', '😋', '😊'];
-        emojiEl.textContent = emojis[Math.min(hunger, emojis.length - 1)];
+    updateHungerDisplay(hunger, activeEffects) {
+        const accumulators = effectsDisplay.getAccumulatorValues(activeEffects);
+        effectsDisplay.updateHungerIcon(hunger, accumulators.hungerAccumulator, accumulators.hungerInterval);
     }
 
     /**

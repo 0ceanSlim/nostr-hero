@@ -26,6 +26,10 @@ type GameSession struct {
 	PerformedShows []string                 `json:"performed_shows,omitempty"` // Shows performed today (to prevent re-booking)
 	RentedRooms    []map[string]interface{} `json:"rented_rooms,omitempty"`    // Current room rentals
 
+	// Auto-pause tracking: tracks time since last player action
+	LastActionTime     int64 `json:"-"` // Real-time timestamp of last player action
+	LastActionGameTime int   `json:"-"` // In-game time (TimeOfDay) of last player action
+
 	// Delta system: cached state for surgical updates
 	LastSnapshot   *SessionSnapshot `json:"-"` // Previous state for delta calculation
 	NPCsAtLocation []string         `json:"-"` // Cached NPCs at current location
@@ -80,12 +84,14 @@ func (sm *SessionManager) LoadSession(npub, saveID string) (*GameSession, error)
 
 	// Create new session in memory
 	session := &GameSession{
-		Npub:           npub,
-		SaveID:         saveID,
-		SaveData:       *saveData,
-		LoadedAt:       currentTimestamp(),
-		UpdatedAt:      currentTimestamp(),
-		BuildingStates: make(map[string]bool),
+		Npub:               npub,
+		SaveID:             saveID,
+		SaveData:           *saveData,
+		LoadedAt:           currentTimestamp(),
+		UpdatedAt:          currentTimestamp(),
+		LastActionTime:     currentTimestamp(),
+		LastActionGameTime: saveData.TimeOfDay,
+		BuildingStates:     make(map[string]bool),
 	}
 
 	// Initialize building states and NPCs for current location
@@ -145,12 +151,14 @@ func (sm *SessionManager) ReloadSession(npub, saveID string) (*GameSession, erro
 
 	// Create/overwrite session in memory
 	session := &GameSession{
-		Npub:           npub,
-		SaveID:         saveID,
-		SaveData:       *saveData,
-		LoadedAt:       currentTimestamp(),
-		UpdatedAt:      currentTimestamp(),
-		BuildingStates: make(map[string]bool),
+		Npub:               npub,
+		SaveID:             saveID,
+		SaveData:           *saveData,
+		LoadedAt:           currentTimestamp(),
+		UpdatedAt:          currentTimestamp(),
+		LastActionTime:     currentTimestamp(),
+		LastActionGameTime: saveData.TimeOfDay,
+		BuildingStates:     make(map[string]bool),
 	}
 
 	// Initialize building states and NPCs for current location

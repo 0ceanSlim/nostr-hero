@@ -1,12 +1,12 @@
 {
   "id": "hungry",
   "name": "Hungry",
-  "description": "Feeling hungry. Minor penalty to strength.",
+  "description": "Feeling hungry. Minor penalty to dexterity.",
   "message": "Your stomach rumbles. You should find something to eat soon.",
   "category": "debuff",
   "effects": [
     {
-      "type": "strength",
+      "type": "dexterity",
       "value": -1,
       "duration": 0,
       "delay": 0

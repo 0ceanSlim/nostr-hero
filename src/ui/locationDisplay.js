@@ -1241,6 +1241,11 @@ export async function sleepInRoom() {
 
             showMessage(result.message || 'You wake up refreshed!', 'success');
 
+            // Refresh game state and all displays after sleep
+            await refreshGameState();
+            const { updateAllDisplays } = await import('./displayCoordinator.js');
+            await updateAllDisplays();
+
             // Refresh location display to update buildings/NPCs after time change
             await displayCurrentLocation();
         } else {

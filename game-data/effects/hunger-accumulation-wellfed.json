@@ -1,7 +1,7 @@
 {
-  "id": "hunger-accumulation-hungry",
-  "name": "Hunger (Hungry)",
-  "description": "Hunger decreases when hungry. Decreases hunger level every 4 hours.",
+  "id": "hunger-accumulation-wellfed",
+  "name": "Hunger (Well Fed)",
+  "description": "Hunger decreases at normal rate when well fed. Decreases hunger level every 4 hours.",
   "category": "system",
   "silent": true,
   "effects": [

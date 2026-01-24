@@ -18,6 +18,7 @@ import { smoothClock } from './smoothClock.js';
 import { deltaApplier } from './deltaApplier.js';
 import { gameAPI } from '../lib/api.js';
 import { eventBus } from '../lib/events.js';
+import { effectsDisplay } from '../ui/effectsDisplay.js';
 
 // Constants
 const TICK_INTERVAL_MS = 417; // 1 in-game minute at 144x speed
@@ -114,6 +115,14 @@ class TickManager {
                 return;
             }
 
+            // Update local state cache from response data BEFORE applying delta
+            // This ensures effectsDisplay can read updated effects when delta is applied
+            // Note: Clock sync is handled by deltaApplier, not here (avoid double sync)
+            const data = response.data || response;
+            if (data) {
+                this.updateLocalState(data);
+            }
+
             // Apply delta if present (optimized path)
             // Delta applier handles clock sync via charDelta.time_of_day
             if (response.delta) {
@@ -127,11 +136,20 @@ class TickManager {
                 deltaApplier.applyDelta(response.delta);
             }
 
-            // Update local state cache from response data
-            // Note: Clock sync is handled by deltaApplier, not here (avoid double sync)
-            const data = response.data || response;
             if (data) {
-                this.updateLocalState(data);
+
+                // Check for auto-pause (6+ in-game hours of idle)
+                if (data.auto_pause) {
+                    logger.info('Auto-pause triggered by backend');
+                    smoothClock.pause();
+
+                    // Show notification to user
+                    eventBus.emit('notification:show', {
+                        message: 'Game auto-paused after 6 hours of idle time.',
+                        color: 'yellow',
+                        duration: 5000
+                    });
+                }
             }
 
             // Emit tick completed event
@@ -162,6 +180,18 @@ class TickManager {
                 hp: data.hp,
                 active_effects: data.active_effects
             });
+        }
+
+        // Always update radial progress indicators on every tick
+        // This ensures the accumulator progress is shown even when levels don't change
+        if (data.active_effects) {
+            // Render active effects display (shows/hides effects like performance-high, tired, etc.)
+            effectsDisplay.renderEffects(data.active_effects);
+
+            // Update fatigue/hunger radial progress
+            const accumulators = effectsDisplay.getAccumulatorValues(data.active_effects);
+            effectsDisplay.updateFatigueIcon(data.fatigue, accumulators.fatigueAccumulator, accumulators.fatigueInterval);
+            effectsDisplay.updateHungerIcon(data.hunger, accumulators.hungerAccumulator, accumulators.hungerInterval);
         }
     }
 

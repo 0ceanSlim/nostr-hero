@@ -17,6 +17,7 @@ type ActiveEffect struct {
 	EffectID          string  `json:"effect_id"`          // ID of effect template (e.g., "performance-high")
 	EffectIndex       int     `json:"effect_index"`       // Index in effect's effects array (0 for single-effect templates)
 	DurationRemaining float64 `json:"duration_remaining"` // Minutes remaining until effect expires
+	TotalDuration     float64 `json:"total_duration"`     // Original duration when effect was applied (for progress calculation)
 	DelayRemaining    float64 `json:"delay_remaining"`    // Minutes remaining before effect starts
 	TickAccumulator   float64 `json:"tick_accumulator"`   // Time accumulated since last tick (for periodic effects)
 	AppliedAt         int     `json:"applied_at"`         // Time of day (minutes) when effect was applied

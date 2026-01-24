@@ -1,0 +1,29 @@
+{
+  "id": "stuffed",
+  "name": "Stuffed",
+  "description": "Overly full from eating. Bonus to constitution but penalty to strength and dexterity.",
+  "message": "You feel stuffed. Maybe you ate a bit too much...",
+  "category": "buff",
+  "effects": [
+    {
+      "type": "constitution",
+      "value": 1,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "strength",
+      "value": -1,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "dexterity",
+      "value": -1,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "stuffed",
+  "color": "green"
+}

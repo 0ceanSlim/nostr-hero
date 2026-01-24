@@ -1,7 +1,7 @@
 {
   "id": "fatigue-accumulation",
   "name": "Fatigue Accumulation",
-  "description": "Fatigue builds up over time from activity. Increases fatigue level every 4 hours.",
+  "description": "Fatigue builds up over time from activity. Increases fatigue level every hour.",
   "category": "system",
   "silent": true,
   "effects": [
@@ -10,7 +10,7 @@
       "value": 1,
       "duration": 0,
       "delay": 0,
-      "tick_interval": 240
+      "tick_interval": 60
     }
   ],
   "icon": "clock",

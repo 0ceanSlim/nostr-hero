@@ -404,7 +404,7 @@ export function pause() {
 /**
  * Force play (optional - for auto-play on actions)
  */
-export function play() {
+export async function play() {
     if (USE_DELTA_SYSTEM) {
         smoothClock.unpause();
         isPaused = false;
@@ -417,6 +417,17 @@ export function play() {
         }
     }
     updatePlayPauseButton();
+
+    // Reset the auto-pause idle timer when play is pressed
+    try {
+        if (gameAPI.initialized) {
+            await gameAPI.sendAction('reset_idle_timer', {});
+            logger.debug('Idle timer reset on play');
+        }
+    } catch (error) {
+        logger.warn('Failed to reset idle timer:', error);
+    }
+
     logger.info('Time force-played');
 }
 

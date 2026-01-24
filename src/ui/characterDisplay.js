@@ -250,70 +250,42 @@ export async function updateCharacterDisplay() {
         manaBarEl.style.width = manaPercentage + '%';
     }
 
-    // Update quick status (main bar - numbers + emojis)
+    // Update quick status (main bar - icons with radial progress)
     const fatigue = Math.min(character.fatigue || 0, 10);
-    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 2, 3));
 
-    // Fatigue number and emoji
+    // Fatigue number
     const fatigueLevelEl = document.getElementById('fatigue-level');
-    const fatigueEmojiEl = document.getElementById('fatigue-emoji');
-
     if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
-    if (fatigueEmojiEl) {
-        if (fatigue <= 2) {
-            fatigueEmojiEl.textContent = '😊'; // Fresh
-        } else if (fatigue <= 5) {
-            fatigueEmojiEl.textContent = '😐'; // Tired
-        } else if (fatigue <= 8) {
-            fatigueEmojiEl.textContent = '😓'; // Weary
-        } else {
-            fatigueEmojiEl.textContent = '😵'; // Exhausted
-        }
+
+    // Update fatigue icon via effectsDisplay
+    try {
+        const { effectsDisplay } = await import('./effectsDisplay.js');
+        const accumulators = effectsDisplay.getAccumulatorValues(character.active_effects);
+        effectsDisplay.updateFatigueIcon(fatigue, accumulators.fatigueAccumulator, accumulators.fatigueInterval);
+        effectsDisplay.updateHungerIcon(hunger, accumulators.hungerAccumulator, accumulators.hungerInterval);
+
+        // Render active effects in the effects display area
+        effectsDisplay.renderEffects(character.active_effects);
+    } catch (e) {
+        logger.debug('EffectsDisplay not yet available:', e);
     }
 
-    // Hunger number and emoji
+    // Hunger number
     const hungerLevelEl = document.getElementById('hunger-level');
-    const hungerEmojiEl = document.getElementById('hunger-emoji');
-
     if (hungerLevelEl) hungerLevelEl.textContent = hunger;
-    if (hungerEmojiEl) {
-        if (hunger === 0) {
-            hungerEmojiEl.textContent = '😵'; // Famished
-        } else if (hunger === 1) {
-            hungerEmojiEl.textContent = '😋'; // Hungry
-        } else if (hunger === 2) {
-            hungerEmojiEl.textContent = '🙂'; // Satisfied
-        } else {
-            hungerEmojiEl.textContent = '😊'; // Full
-        }
-    }
 
-    // Weight numbers and emoji
+    // Weight numbers (integers only, no decimals)
     const weightEl = document.getElementById('char-weight');
     const maxWeightEl = document.getElementById('max-weight');
-    const weightEmojiEl = document.getElementById('weight-emoji');
 
-    if (weightEl || maxWeightEl || weightEmojiEl) {
+    if (weightEl || maxWeightEl) {
         Promise.all([
             calculateAndDisplayWeight(character),
             calculateMaxCapacity(character)
         ]).then(([weight, maxCapacity]) => {
-            if (weightEl) weightEl.textContent = weight;
-            if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
-
-            const weightPercentage = (weight / maxCapacity) * 100;
-
-            if (weightEmojiEl) {
-                if (weightPercentage <= 50) {
-                    weightEmojiEl.textContent = '🪶'; // Light
-                } else if (weightPercentage <= 100) {
-                    weightEmojiEl.textContent = '✓'; // OK
-                } else if (weightPercentage <= 150) {
-                    weightEmojiEl.textContent = '📦'; // Heavy
-                } else {
-                    weightEmojiEl.textContent = '🐌'; // Overloaded
-                }
-            }
+            if (weightEl) weightEl.textContent = Math.round(weight);
+            if (maxWeightEl) maxWeightEl.textContent = Math.round(maxCapacity);
         });
     }
 
@@ -627,7 +599,7 @@ async function updateStatsTab(character) {
         });
     }
 
-    // Fatigue details
+    // Fatigue details - New thresholds: 0-5 fresh, 6-7 tired, 8 very tired, 9 fatigued, 10 exhausted
     const fatigue = Math.min(character.fatigue || 0, 10);
     const fatigueLevelEl = document.getElementById('stats-fatigue-level');
     const fatigueStatusEl = document.getElementById('stats-fatigue-status');
@@ -637,21 +609,26 @@ async function updateStatsTab(character) {
     if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
 
     let fatigueStatus, fatigueEmoji, fatigueDesc, fatigueColor;
-    if (fatigue <= 2) {
+    if (fatigue <= 5) {
         fatigueStatus = 'FRESH';
         fatigueEmoji = '😊';
         fatigueDesc = 'You feel energetic and ready for adventure';
         fatigueColor = 'text-green-400';
-    } else if (fatigue <= 5) {
+    } else if (fatigue <= 7) {
         fatigueStatus = 'TIRED';
         fatigueEmoji = '😐';
         fatigueDesc = "You're starting to feel the strain of travel";
         fatigueColor = 'text-yellow-400';
-    } else if (fatigue <= 8) {
-        fatigueStatus = 'WEARY';
+    } else if (fatigue === 8) {
+        fatigueStatus = 'VERY TIRED';
         fatigueEmoji = '😓';
         fatigueDesc = 'Your steps are heavy and reactions slower';
         fatigueColor = 'text-orange-400';
+    } else if (fatigue === 9) {
+        fatigueStatus = 'FATIGUED';
+        fatigueEmoji = '😴';
+        fatigueDesc = 'You are struggling to stay awake';
+        fatigueColor = 'text-orange-500';
     } else {
         fatigueStatus = 'EXHAUSTED';
         fatigueEmoji = '😵';
@@ -666,8 +643,8 @@ async function updateStatsTab(character) {
     if (fatigueEmojiEl) fatigueEmojiEl.textContent = fatigueEmoji;
     if (fatigueDescEl) fatigueDescEl.textContent = fatigueDesc;
 
-    // Hunger details
-    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 1, 3));
+    // Hunger details - New terminology: stuffed, well fed, hungry, starving
+    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 2, 3));
     const hungerLevelEl = document.getElementById('stats-hunger-level');
     const hungerStatusEl = document.getElementById('stats-hunger-status');
     const hungerEmojiEl = document.getElementById('stats-hunger-emoji');
@@ -677,25 +654,25 @@ async function updateStatsTab(character) {
 
     let hungerStatus, hungerEmoji, hungerDesc, hungerColor;
     if (hunger === 0) {
-        hungerStatus = 'FAMISHED';
+        hungerStatus = 'STARVING';
         hungerEmoji = '😵';
-        hungerDesc = 'You are starving and weak';
+        hungerDesc = 'You are starving and losing health!';
         hungerColor = 'text-red-400';
     } else if (hunger === 1) {
         hungerStatus = 'HUNGRY';
         hungerEmoji = '😋';
-        hungerDesc = 'You could use a meal';
+        hungerDesc = 'You could use a meal (-1 DEX)';
         hungerColor = 'text-yellow-400';
     } else if (hunger === 2) {
-        hungerStatus = 'SATISFIED';
+        hungerStatus = 'WELL FED';
         hungerEmoji = '🙂';
         hungerDesc = 'Your belly is content';
         hungerColor = 'text-green-400';
     } else {
-        hungerStatus = 'FULL';
+        hungerStatus = 'STUFFED';
         hungerEmoji = '😊';
-        hungerDesc = "You're well-fed and energized";
-        hungerColor = 'text-green-400';
+        hungerDesc = "You're overly full (+1 CON, -1 STR, -1 DEX)";
+        hungerColor = 'text-blue-400';
     }
 
     if (hungerStatusEl) {
