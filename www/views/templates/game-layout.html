@@ -44,27 +44,23 @@
         display: none !important;
       }
 
-      /* Fix inventory slots from being squished - only when visible */
+      /* Fix inventory slots - fill available space evenly, all slots same size */
       #inventory-panel:not(.hidden) {
-        display: block !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-rows: repeat(6, 1fr) !important;
+        gap: 2px !important;
+        padding: 4px !important;
         height: 100% !important;
-        overflow: hidden !important;
-        padding: 0 4px !important;
+        box-sizing: border-box !important;
       }
 
       #general-slots {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        grid-template-rows: 1fr !important;
-        gap: 2px !important;
-        margin-bottom: 2px !important;
+        display: contents !important;
       }
 
       #backpack-slots {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        grid-template-rows: repeat(5, 1fr) !important;
-        gap: 2px !important;
+        display: contents !important;
       }
     </style>
     <title>{{template "title"}} - {{.Title}}</title>

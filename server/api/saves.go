@@ -23,6 +23,15 @@ type ActiveEffect struct {
 	AppliedAt         int     `json:"applied_at"`         // Time of day (minutes) when effect was applied
 }
 
+// EnrichedEffect combines runtime state with template data for API responses
+type EnrichedEffect struct {
+	ActiveEffect
+	Name          string         `json:"name"`           // Display name from template
+	Category      string         `json:"category"`       // buff, debuff, modifier, system
+	StatModifiers map[string]int `json:"stat_modifiers"` // Map of stat name to modifier value
+	TickInterval  float64        `json:"tick_interval"`  // Minutes between ticks (for periodic effects)
+}
+
 type SaveFile struct {
 	D                   string                 `json:"d"`
 	CreatedAt           string                 `json:"created_at"`

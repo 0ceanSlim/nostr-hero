@@ -1,13 +1,13 @@
 {{define "game/tabs/inventory.html"}}
 <!-- Inventory Tab -->
-<div id="inventory-panel" class="tab-panel hidden">
-    <!-- General Slots -->
-    <div id="general-slots">
+<div id="inventory-panel" class="tab-panel hidden" style="display: flex; flex-direction: column; gap: 2px; height: 100%;">
+    <!-- General Slots (4x1 grid) -->
+    <div id="general-slots" style="display: grid; grid-template-columns: repeat(4, 30px); grid-template-rows: 30px; gap: 2px; justify-content: center;">
         <!-- General slots populated by JS -->
     </div>
 
-    <!-- Backpack Slots -->
-    <div id="backpack-slots">
+    <!-- Backpack Slots (4x5 grid) -->
+    <div id="backpack-slots" style="display: grid; grid-template-columns: repeat(4, 30px); grid-template-rows: repeat(5, 30px); gap: 2px; justify-content: center;">
         <!-- Backpack slots populated by JS -->
     </div>
 </div>

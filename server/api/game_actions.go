@@ -820,7 +820,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 					"fatigue":         state.Fatigue,
 					"hunger":          state.Hunger,
 					"hp":              state.HP,
-					"active_effects":  state.ActiveEffects,
+					"active_effects":  enrichActiveEffects(state.ActiveEffects),
 					"auto_pause":      autoPause,
 				},
 			}, nil
@@ -837,7 +837,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 			"fatigue":         state.Fatigue,
 			"hunger":          state.Hunger,
 			"hp":              state.HP,
-			"active_effects":  state.ActiveEffects,
+			"active_effects":  enrichActiveEffects(state.ActiveEffects),
 			"auto_pause":      autoPause,
 		},
 	}, nil
@@ -3809,6 +3809,62 @@ func loadEffectData(effectID string) (map[string]interface{}, error) {
 	}
 
 	return effectData, nil
+}
+
+// enrichActiveEffects adds template data (name, category, stat_modifiers) to active effects
+// Used when sending active_effects to the frontend for display
+func enrichActiveEffects(activeEffects []ActiveEffect) []EnrichedEffect {
+	enriched := make([]EnrichedEffect, 0, len(activeEffects))
+
+	for _, ae := range activeEffects {
+		ee := EnrichedEffect{
+			ActiveEffect:  ae,
+			Name:          ae.EffectID, // Default to ID
+			Category:      "modifier",
+			StatModifiers: make(map[string]int),
+			TickInterval:  0,
+		}
+
+		// Load template data
+		effectData, err := loadEffectData(ae.EffectID)
+		if err == nil {
+			// Get name
+			if name, ok := effectData["name"].(string); ok {
+				ee.Name = name
+			}
+
+			// Get category
+			if category, ok := effectData["category"].(string); ok {
+				ee.Category = category
+			}
+
+			// Get effects array to extract stat modifiers and tick interval
+			if effects, ok := effectData["effects"].([]interface{}); ok {
+				for _, effectRaw := range effects {
+					if effect, ok := effectRaw.(map[string]interface{}); ok {
+						effectType, _ := effect["type"].(string)
+						value, _ := effect["value"].(float64)
+						tickInterval, _ := effect["tick_interval"].(float64)
+
+						// Check if this is a stat modifier
+						switch effectType {
+						case "strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma":
+							ee.StatModifiers[effectType] = int(value)
+						}
+
+						// Get tick interval if present
+						if tickInterval > 0 {
+							ee.TickInterval = tickInterval
+						}
+					}
+				}
+			}
+		}
+
+		enriched = append(enriched, ee)
+	}
+
+	return enriched
 }
 
 // advanceTime advances the game time by the specified minutes and ticks all time-based systems

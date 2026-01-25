@@ -314,46 +314,99 @@ class EffectsDisplay {
             wrapper.appendChild(svg);
         }
 
-        // Add tooltip with effect details
-        const tooltipText = this.buildTooltipText(effect);
-        wrapper.title = tooltipText;
+        // Add custom tooltip on hover
+        wrapper.addEventListener('mouseenter', (e) => this.showTooltip(e, effect));
+        wrapper.addEventListener('mouseleave', () => this.hideTooltip());
 
         return wrapper;
     }
 
     /**
-     * Build tooltip text for an effect
+     * Show custom tooltip for an effect
+     * @param {MouseEvent} event - Mouse event
      * @param {object} effect - Active effect object
-     * @returns {string}
      */
-    buildTooltipText(effect) {
-        let text = effect.name || effect.effect_id;
+    showTooltip(event, effect) {
+        // Create or get tooltip element
+        let tooltip = document.getElementById('effect-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'effect-tooltip';
+            tooltip.style.cssText = `
+                position: fixed;
+                background: #1a1a2e;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 6px 10px;
+                font-size: 10px;
+                color: #fff;
+                z-index: 9999;
+                pointer-events: none;
+                box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+                min-width: 80px;
+            `;
+            document.body.appendChild(tooltip);
+        }
 
-        // Add stat modifiers if available
-        if (effect.stat_modifiers) {
+        // Build tooltip content
+        const effectName = effect.name || effect.effect_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        let html = `<div style="font-weight: bold; margin-bottom: 4px; color: #ddd;">${effectName}</div>`;
+
+        // Add stat modifiers with color coding
+        if (effect.stat_modifiers && Object.keys(effect.stat_modifiers).length > 0) {
             const mods = [];
             for (const [stat, value] of Object.entries(effect.stat_modifiers)) {
+                const statName = stat.substring(0, 3).toUpperCase();
                 const sign = value >= 0 ? '+' : '';
-                const statName = stat.charAt(0).toUpperCase() + stat.slice(1, 3).toUpperCase();
-                mods.push(`${sign}${value} ${statName}`);
+                const color = value >= 0 ? '#4ade80' : '#f87171'; // green for positive, red for negative
+                mods.push(`<span style="color: ${color}">${sign}${value} ${statName}</span>`);
             }
-            if (mods.length > 0) {
-                text += `\n${mods.join(', ')}`;
-            }
+            html += `<div style="display: flex; gap: 8px; flex-wrap: wrap;">${mods.join(' ')}</div>`;
         }
 
         // Add duration if not permanent
         if (effect.duration_remaining > 0) {
             const hours = Math.floor(effect.duration_remaining / 60);
-            const mins = effect.duration_remaining % 60;
+            const mins = Math.round(effect.duration_remaining % 60);
+            let timeStr = '';
             if (hours > 0) {
-                text += `\n${hours}h ${mins}m remaining`;
+                timeStr = `${hours}h ${mins}m`;
             } else {
-                text += `\n${mins}m remaining`;
+                timeStr = `${mins}m`;
             }
+            html += `<div style="color: #888; margin-top: 4px; font-size: 9px;">${timeStr} remaining</div>`;
         }
 
-        return text;
+        tooltip.innerHTML = html;
+        tooltip.style.display = 'block';
+
+        // Position tooltip above the icon
+        const rect = event.target.closest('.effect-icon-wrapper').getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
+
+        // Keep tooltip in viewport
+        const tooltipRect = tooltip.getBoundingClientRect();
+        if (tooltipRect.left < 5) {
+            tooltip.style.left = '5px';
+        }
+        if (tooltipRect.right > window.innerWidth - 5) {
+            tooltip.style.left = `${window.innerWidth - tooltip.offsetWidth - 5}px`;
+        }
+        if (tooltipRect.top < 5) {
+            // Show below instead
+            tooltip.style.top = `${rect.bottom + 8}px`;
+        }
+    }
+
+    /**
+     * Hide the effect tooltip
+     */
+    hideTooltip() {
+        const tooltip = document.getElementById('effect-tooltip');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
     }
 
     /**

@@ -402,6 +402,8 @@ export async function updateCharacterDisplay() {
     const generalSlotsDiv = document.getElementById('general-slots');
     if (generalSlotsDiv) {
         generalSlotsDiv.innerHTML = '';
+        // Set grid styles directly
+        generalSlotsDiv.style.cssText = 'display: grid; grid-template-columns: repeat(4, 28px); grid-template-rows: 28px; gap: 2px; justify-content: center;';
 
         // Ensure inventory structure exists
         if (!character.inventory) {
@@ -428,7 +430,7 @@ export async function updateCharacterDisplay() {
             const slot = slotMap[i];
             const slotDiv = document.createElement('div');
             slotDiv.className = 'relative cursor-pointer hover:bg-gray-600 flex items-center justify-center';
-            slotDiv.style.cssText = `aspect-ratio: 1; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+            slotDiv.style.cssText = `width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: #2a2a2a; border-top: 2px solid #1a1a1a; border-left: 2px solid #1a1a1a; border-right: 2px solid #4a4a4a; border-bottom: 2px solid #4a4a4a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
 
             // Add data attributes for interaction system
             slotDiv.setAttribute('data-item-slot', i);
@@ -471,6 +473,8 @@ export async function updateCharacterDisplay() {
     const backpackDiv = document.getElementById('backpack-slots');
     if (backpackDiv) {
         backpackDiv.innerHTML = '';
+        // Set grid styles directly
+        backpackDiv.style.cssText = 'display: grid; grid-template-columns: repeat(4, 28px); grid-template-rows: repeat(5, 28px); gap: 2px; justify-content: center;';
 
         // Check if a bag is actually equipped
         const bagEquipped = character.inventory?.gear_slots?.bag?.item;
@@ -513,7 +517,7 @@ export async function updateCharacterDisplay() {
                 const slot = bagSlotMap[i];
                 const slotDiv = document.createElement('div');
                 slotDiv.className = 'relative cursor-pointer hover:bg-gray-800 flex items-center justify-center';
-                slotDiv.style.cssText = `aspect-ratio: 1; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
+                slotDiv.style.cssText = `width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);`;
 
                 // Add data attributes for interaction system
                 slotDiv.setAttribute('data-item-slot', i);
