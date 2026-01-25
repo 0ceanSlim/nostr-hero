@@ -517,6 +517,9 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update encumbrance effects after buying items
+	updateEncumbrancePenaltyEffects(save)
+
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
@@ -708,6 +711,9 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	playerGold := getGoldQuantity(save)
+
+	// Update encumbrance effects after selling items
+	updateEncumbrancePenaltyEffects(save)
 
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {

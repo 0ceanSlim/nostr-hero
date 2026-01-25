@@ -1,0 +1,24 @@
+{
+  "id": "encumbrance-encumbered",
+  "name": "Encumbered",
+  "description": "You are heavily burdened. Every step is laborious and dangerous.",
+  "message": "You're heavily encumbered! Movement is severely restricted.",
+  "category": "debuff",
+  "silent": false,
+  "effects": [
+    {
+      "type": "dexterity",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "strength",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "weight",
+  "color": "orange"
+}

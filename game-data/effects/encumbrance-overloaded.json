@@ -1,0 +1,30 @@
+{
+  "id": "encumbrance-overloaded",
+  "name": "Overloaded",
+  "description": "You cannot carry any more weight. You must drop items to continue.",
+  "message": "You're overloaded! Drop items to move!",
+  "category": "debuff",
+  "silent": false,
+  "effects": [
+    {
+      "type": "dexterity",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "strength",
+      "value": -3,
+      "duration": 0,
+      "delay": 0
+    },
+    {
+      "type": "constitution",
+      "value": -2,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "weight",
+  "color": "red"
+}

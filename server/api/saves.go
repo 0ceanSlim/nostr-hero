@@ -27,6 +27,7 @@ type ActiveEffect struct {
 type EnrichedEffect struct {
 	ActiveEffect
 	Name          string         `json:"name"`           // Display name from template
+	Description   string         `json:"description"`    // Effect description from template
 	Category      string         `json:"category"`       // buff, debuff, modifier, system
 	StatModifiers map[string]int `json:"stat_modifiers"` // Map of stat name to modifier value
 	TickInterval  float64        `json:"tick_interval"`  // Minutes between ticks (for periodic effects)

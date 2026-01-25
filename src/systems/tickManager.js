@@ -172,24 +172,28 @@ class TickManager {
      * @param {object} data - Backend response data
      */
     updateLocalState(data) {
+        // Use enriched_effects if available (has name, category, stat_modifiers)
+        // Falls back to active_effects for backward compatibility
+        const effects = data.enriched_effects || data.active_effects;
+
         // Emit state update event for any system that caches state
         if (data.fatigue !== undefined || data.hunger !== undefined || data.hp !== undefined) {
             eventBus.emit('character:statsUpdated', {
                 fatigue: data.fatigue,
                 hunger: data.hunger,
                 hp: data.hp,
-                active_effects: data.active_effects
+                active_effects: effects
             });
         }
 
         // Always update radial progress indicators on every tick
         // This ensures the accumulator progress is shown even when levels don't change
-        if (data.active_effects) {
+        if (effects) {
             // Render active effects display (shows/hides effects like performance-high, tired, etc.)
-            effectsDisplay.renderEffects(data.active_effects);
+            effectsDisplay.renderEffects(effects);
 
             // Update fatigue/hunger radial progress
-            const accumulators = effectsDisplay.getAccumulatorValues(data.active_effects);
+            const accumulators = effectsDisplay.getAccumulatorValues(effects);
             effectsDisplay.updateFatigueIcon(data.fatigue, accumulators.fatigueAccumulator, accumulators.fatigueInterval);
             effectsDisplay.updateHungerIcon(data.hunger, accumulators.hungerAccumulator, accumulators.hungerInterval);
         }

@@ -1,0 +1,18 @@
+{
+  "id": "encumbrance-light",
+  "name": "Light Load",
+  "description": "Traveling light gives you extra agility and speed.",
+  "message": "You feel nimble and quick, unencumbered by excess weight.",
+  "category": "buff",
+  "silent": true,
+  "effects": [
+    {
+      "type": "dexterity",
+      "value": 1,
+      "duration": 0,
+      "delay": 0
+    }
+  ],
+  "icon": "feather",
+  "color": "green"
+}

@@ -1,116 +1,61 @@
 {{define "game/tabs/stats.html"}}
 <!-- Stats Tab -->
-<div id="stats-panel" class="tab-panel hidden space-y-2" style="font-size: 9px;">
-    <!-- Character Info Section -->
-    <h3 class="font-bold text-yellow-400 mb-1" style="font-size: 10px;">CHARACTER INFO</h3>
-    <div class="space-y-0.5" style="font-size: 8px;">
-        <div class="flex justify-between">
-            <span class="text-gray-400">Race:</span>
-            <span id="stats-char-race" class="font-bold">-</span>
+<div id="stats-panel" class="tab-panel hidden" style="font-size: 8px; padding: 2px; overflow-y: auto; height: 100%;">
+    <!-- Character Info - Single Column -->
+    <div class="mb-1" style="background: #1a1a1a; padding: 3px; border: 1px solid #333; font-size: 7px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
+            <span class="text-gray-500">Race</span>
+            <span id="stats-char-race" class="text-white">-</span>
         </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">Class:</span>
-            <span id="stats-char-class" class="font-bold">-</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
+            <span class="text-gray-500">Class</span>
+            <span id="stats-char-class" class="text-white">-</span>
         </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">Background:</span>
-            <span id="stats-char-background" class="font-bold">-</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
+            <span class="text-gray-500">Background</span>
+            <span id="stats-char-background" class="text-white">-</span>
         </div>
-        <div class="flex justify-between">
-            <span class="text-gray-400">Alignment:</span>
-            <span id="stats-char-alignment" class="font-bold">-</span>
-        </div>
-    </div>
-
-    <!-- Ability Scores Section -->
-    <h3 class="font-bold text-yellow-400 mb-1 mt-2" style="font-size: 10px;">ABILITY SCORES</h3>
-    <div class="grid grid-cols-3 gap-1 text-center" style="font-size: 7px;">
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">STR</div>
-            <div id="stats-str" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-str-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
-        </div>
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">DEX</div>
-            <div id="stats-dex" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-dex-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
-        </div>
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">CON</div>
-            <div id="stats-con" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-con-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
-        </div>
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">INT</div>
-            <div id="stats-int" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-int-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
-        </div>
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">WIS</div>
-            <div id="stats-wis" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-wis-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
-        </div>
-        <div class="bg-gray-800 p-1 rounded">
-            <div class="text-gray-400">CHA</div>
-            <div id="stats-cha" class="font-bold text-white" style="font-size: 11px;">10</div>
-            <div id="stats-cha-mod" class="text-gray-400" style="font-size: 7px;">+0</div>
+        <div style="display: flex; justify-content: space-between;">
+            <span class="text-gray-500">Alignment</span>
+            <span id="stats-char-alignment" class="text-white">-</span>
         </div>
     </div>
 
-    <!-- Condition Section -->
-    <h3 class="font-bold text-yellow-400 mb-1 mt-2" style="font-size: 10px;">CONDITION</h3>
-
-    <!-- Fatigue -->
-    <div class="bg-gray-800 p-1 rounded" style="font-size: 8px;">
-        <div class="flex justify-between items-center mb-0.5">
-            <span class="text-gray-400 flex items-center gap-0.5">
-                <span style="font-size: 10px;">💪</span>
-                <span>Fatigue:</span>
-            </span>
-            <span class="font-bold"><span id="stats-fatigue-level">0</span>/10</span>
-        </div>
-        <div class="flex justify-between items-center">
-            <span id="stats-fatigue-status" class="text-green-400 font-bold" style="font-size: 7px;">FRESH</span>
-            <span id="stats-fatigue-emoji" style="font-size: 12px;">😊</span>
-        </div>
-        <div id="stats-fatigue-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
-            You feel energetic and ready for adventure
-        </div>
-    </div>
-
-    <!-- Hunger -->
-    <div class="bg-gray-800 p-1 rounded mt-1" style="font-size: 8px;">
-        <div class="flex justify-between items-center mb-0.5">
-            <span class="text-gray-400 flex items-center gap-0.5">
-                <span style="font-size: 10px;">🍖</span>
-                <span>Hunger:</span>
-            </span>
-            <span class="font-bold"><span id="stats-hunger-level">1</span>/3</span>
-        </div>
-        <div class="flex justify-between items-center">
-            <span id="stats-hunger-status" class="text-yellow-400 font-bold" style="font-size: 7px;">HUNGRY</span>
-            <span id="stats-hunger-emoji" style="font-size: 12px;">😋</span>
-        </div>
-        <div id="stats-hunger-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
-            You could use a meal
+    <!-- Ability Scores - 6 columns -->
+    <div class="mb-1" style="background: #1a1a1a; padding: 3px; border: 1px solid #333;">
+        <div style="display: flex; justify-content: space-between; text-align: center; font-size: 6px;">
+            <div style="flex: 1;">
+                <div class="text-gray-500">STR</div>
+                <div id="stats-str" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
+            <div style="flex: 1;">
+                <div class="text-gray-500">DEX</div>
+                <div id="stats-dex" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
+            <div style="flex: 1;">
+                <div class="text-gray-500">CON</div>
+                <div id="stats-con" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
+            <div style="flex: 1;">
+                <div class="text-gray-500">INT</div>
+                <div id="stats-int" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
+            <div style="flex: 1;">
+                <div class="text-gray-500">WIS</div>
+                <div id="stats-wis" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
+            <div style="flex: 1;">
+                <div class="text-gray-500">CHA</div>
+                <div id="stats-cha" class="text-white font-bold" style="font-size: 9px;">10</div>
+            </div>
         </div>
     </div>
 
-    <!-- Weight & Encumbrance -->
-    <div class="bg-gray-800 p-1 rounded mt-1" style="font-size: 8px;">
-        <div class="flex justify-between items-center mb-0.5">
-            <span class="text-gray-400 flex items-center gap-0.5">
-                <span style="font-size: 10px;">⚖️</span>
-                <span>Weight:</span>
-            </span>
-            <span class="font-bold"><span id="stats-weight">0</span>/<span id="stats-max-weight">0</span> lbs</span>
-        </div>
-        <div class="flex justify-between items-center">
-            <span id="stats-weight-status" class="text-green-400 font-bold" style="font-size: 7px;">LIGHT</span>
-            <span id="stats-weight-emoji" style="font-size: 12px;">🪶</span>
-        </div>
-        <div id="stats-weight-desc" class="text-gray-400 mt-0.5" style="font-size: 7px;">
-            You move at full speed
+    <!-- Active Effects List -->
+    <div style="background: #1a1a1a; padding: 3px; border: 1px solid #333;">
+        <div class="text-gray-400 mb-1" style="font-size: 7px; border-bottom: 1px solid #333; padding-bottom: 2px;">ACTIVE EFFECTS</div>
+        <div id="stats-effects-list" style="font-size: 7px; max-height: 180px; overflow-y: auto;">
+            <div class="text-gray-500 italic" id="stats-no-effects">No active effects</div>
         </div>
     </div>
 </div>

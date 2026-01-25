@@ -385,8 +385,38 @@ func GetSessionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Create response with enriched active effects
+	response := map[string]interface{}{
+		"d":                     session.SaveData.D,
+		"created_at":            session.SaveData.CreatedAt,
+		"race":                  session.SaveData.Race,
+		"class":                 session.SaveData.Class,
+		"background":            session.SaveData.Background,
+		"alignment":             session.SaveData.Alignment,
+		"experience":            session.SaveData.Experience,
+		"hp":                    session.SaveData.HP,
+		"max_hp":                session.SaveData.MaxHP,
+		"mana":                  session.SaveData.Mana,
+		"max_mana":              session.SaveData.MaxMana,
+		"fatigue":               session.SaveData.Fatigue,
+		"hunger":                session.SaveData.Hunger,
+		"stats":                 session.SaveData.Stats,
+		"location":              session.SaveData.Location,
+		"district":              session.SaveData.District,
+		"building":              session.SaveData.Building,
+		"current_day":           session.SaveData.CurrentDay,
+		"time_of_day":           session.SaveData.TimeOfDay,
+		"inventory":             session.SaveData.Inventory,
+		"vaults":                session.SaveData.Vaults,
+		"known_spells":          session.SaveData.KnownSpells,
+		"spell_slots":           session.SaveData.SpellSlots,
+		"locations_discovered":  session.SaveData.LocationsDiscovered,
+		"music_tracks_unlocked": session.SaveData.MusicTracksUnlocked,
+		"active_effects":        enrichActiveEffects(session.SaveData.ActiveEffects),
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(session.SaveData)
+	json.NewEncoder(w).Encode(response)
 }
 
 // UpdateSessionHandler updates the in-memory game state

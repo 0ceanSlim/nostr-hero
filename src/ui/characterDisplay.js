@@ -599,148 +599,106 @@ async function updateStatsTab(character) {
             const modifier = Math.floor((value - 10) / 2);
 
             if (valueEl) valueEl.textContent = value;
-            if (modEl) modEl.textContent = modifier >= 0 ? `+${modifier}` : modifier;
+            if (modEl) modEl.textContent = modifier >= 0 ? `(+${modifier})` : `(${modifier})`;
         });
     }
 
-    // Fatigue details - New thresholds: 0-5 fresh, 6-7 tired, 8 very tired, 9 fatigued, 10 exhausted
-    const fatigue = Math.min(character.fatigue || 0, 10);
-    const fatigueLevelEl = document.getElementById('stats-fatigue-level');
-    const fatigueStatusEl = document.getElementById('stats-fatigue-status');
-    const fatigueEmojiEl = document.getElementById('stats-fatigue-emoji');
-    const fatigueDescEl = document.getElementById('stats-fatigue-desc');
+    // Render detailed effects list
+    renderStatsEffectsList(character.active_effects || []);
+}
 
-    if (fatigueLevelEl) fatigueLevelEl.textContent = fatigue;
+/**
+ * Render detailed effects list in stats tab
+ * @param {Array} activeEffects - Array of active effect objects
+ */
+function renderStatsEffectsList(activeEffects) {
+    const container = document.getElementById('stats-effects-list');
+    const noEffectsMsg = document.getElementById('stats-no-effects');
 
-    let fatigueStatus, fatigueEmoji, fatigueDesc, fatigueColor;
-    if (fatigue <= 5) {
-        fatigueStatus = 'FRESH';
-        fatigueEmoji = '😊';
-        fatigueDesc = 'You feel energetic and ready for adventure';
-        fatigueColor = 'text-green-400';
-    } else if (fatigue <= 7) {
-        fatigueStatus = 'TIRED';
-        fatigueEmoji = '😐';
-        fatigueDesc = "You're starting to feel the strain of travel";
-        fatigueColor = 'text-yellow-400';
-    } else if (fatigue === 8) {
-        fatigueStatus = 'VERY TIRED';
-        fatigueEmoji = '😓';
-        fatigueDesc = 'Your steps are heavy and reactions slower';
-        fatigueColor = 'text-orange-400';
-    } else if (fatigue === 9) {
-        fatigueStatus = 'FATIGUED';
-        fatigueEmoji = '😴';
-        fatigueDesc = 'You are struggling to stay awake';
-        fatigueColor = 'text-orange-500';
-    } else {
-        fatigueStatus = 'EXHAUSTED';
-        fatigueEmoji = '😵';
-        fatigueDesc = 'You can barely function - rest immediately!';
-        fatigueColor = 'text-red-400';
+    if (!container) return;
+
+    // Hidden system effects that shouldn't be displayed
+    const HIDDEN_EFFECTS = [
+        'fatigue-accumulation',
+        'hunger-accumulation-stuffed',
+        'hunger-accumulation-wellfed',
+        'hunger-accumulation-hungry'
+    ];
+
+    // Filter and deduplicate effects
+    const visibleEffects = (activeEffects || []).filter(e => !HIDDEN_EFFECTS.includes(e.effect_id));
+    const uniqueEffects = [];
+    const seenIds = new Set();
+    for (const effect of visibleEffects) {
+        if (!seenIds.has(effect.effect_id)) {
+            seenIds.add(effect.effect_id);
+            uniqueEffects.push(effect);
+        }
     }
 
-    if (fatigueStatusEl) {
-        fatigueStatusEl.textContent = fatigueStatus;
-        fatigueStatusEl.className = `${fatigueColor} font-bold text-xs`;
-    }
-    if (fatigueEmojiEl) fatigueEmojiEl.textContent = fatigueEmoji;
-    if (fatigueDescEl) fatigueDescEl.textContent = fatigueDesc;
+    // Clear container (keep noEffectsMsg element)
+    container.innerHTML = '';
 
-    // Hunger details - New terminology: stuffed, well fed, hungry, starving
-    const hunger = Math.max(0, Math.min(character.hunger !== undefined ? character.hunger : 2, 3));
-    const hungerLevelEl = document.getElementById('stats-hunger-level');
-    const hungerStatusEl = document.getElementById('stats-hunger-status');
-    const hungerEmojiEl = document.getElementById('stats-hunger-emoji');
-    const hungerDescEl = document.getElementById('stats-hunger-desc');
-
-    if (hungerLevelEl) hungerLevelEl.textContent = hunger;
-
-    let hungerStatus, hungerEmoji, hungerDesc, hungerColor;
-    if (hunger === 0) {
-        hungerStatus = 'STARVING';
-        hungerEmoji = '😵';
-        hungerDesc = 'You are starving and losing health!';
-        hungerColor = 'text-red-400';
-    } else if (hunger === 1) {
-        hungerStatus = 'HUNGRY';
-        hungerEmoji = '😋';
-        hungerDesc = 'You could use a meal (-1 DEX)';
-        hungerColor = 'text-yellow-400';
-    } else if (hunger === 2) {
-        hungerStatus = 'WELL FED';
-        hungerEmoji = '🙂';
-        hungerDesc = 'Your belly is content';
-        hungerColor = 'text-green-400';
-    } else {
-        hungerStatus = 'STUFFED';
-        hungerEmoji = '😊';
-        hungerDesc = "You're overly full (+1 CON, -1 STR, -1 DEX)";
-        hungerColor = 'text-blue-400';
+    if (uniqueEffects.length === 0) {
+        const noEffects = document.createElement('div');
+        noEffects.className = 'text-gray-500 italic';
+        noEffects.id = 'stats-no-effects';
+        noEffects.textContent = 'No active effects';
+        container.appendChild(noEffects);
+        return;
     }
 
-    if (hungerStatusEl) {
-        hungerStatusEl.textContent = hungerStatus;
-        hungerStatusEl.className = `${hungerColor} font-bold text-xs`;
-    }
-    if (hungerEmojiEl) hungerEmojiEl.textContent = hungerEmoji;
-    if (hungerDescEl) hungerDescEl.textContent = hungerDesc;
+    // Render each effect with details
+    uniqueEffects.forEach(effect => {
+        const effectEl = document.createElement('div');
+        effectEl.className = 'mb-2 pb-1';
+        effectEl.style.borderBottom = '1px solid #2a2a2a';
 
-    // Weight details
-    const weightEl = document.getElementById('stats-weight');
-    const maxWeightEl = document.getElementById('stats-max-weight');
-    const weightStatusEl = document.getElementById('stats-weight-status');
-    const weightEmojiEl = document.getElementById('stats-weight-emoji');
-    const weightDescEl = document.getElementById('stats-weight-desc');
+        // Effect name and category color
+        const categoryColors = {
+            buff: '#4ade80',     // green
+            debuff: '#f87171',  // red
+            modifier: '#60a5fa', // blue
+            system: '#a78bfa'   // purple
+        };
+        const color = categoryColors[effect.category] || '#888';
+        const effectName = effect.name || effect.effect_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-    try {
-        const [weight, maxCapacity] = await Promise.all([
-            calculateAndDisplayWeight(character),
-            calculateMaxCapacity(character)
-        ]);
+        let html = `<div style="color: ${color}; font-weight: bold; font-size: 8px;">${effectName}</div>`;
 
-        if (weightEl) weightEl.textContent = weight;
-        if (maxWeightEl) maxWeightEl.textContent = maxCapacity;
-
-        const weightPercentage = (weight / maxCapacity) * 100;
-        let weightStatus, weightEmoji, weightDesc, weightColor;
-
-        if (weightPercentage <= 50) {
-            weightStatus = 'LIGHT';
-            weightEmoji = '🪶';
-            weightDesc = 'You move at full speed';
-            weightColor = 'text-green-400';
-        } else if (weightPercentage <= 100) {
-            weightStatus = 'NORMAL';
-            weightEmoji = '✓';
-            weightDesc = 'Carrying a comfortable load';
-            weightColor = 'text-green-400';
-        } else if (weightPercentage <= 150) {
-            weightStatus = 'HEAVY';
-            weightEmoji = '📦';
-            weightDesc = 'Movement slightly hindered';
-            weightColor = 'text-yellow-400';
-        } else if (weightPercentage <= 200) {
-            weightStatus = 'OVERLOADED';
-            weightEmoji = '🐌';
-            weightDesc = 'Severely slowed, drop items!';
-            weightColor = 'text-orange-400';
-        } else {
-            weightStatus = 'IMMOBILE';
-            weightEmoji = '🛑';
-            weightDesc = 'Cannot move! Drop items immediately!';
-            weightColor = 'text-red-400';
+        // Stat modifiers
+        if (effect.stat_modifiers && Object.keys(effect.stat_modifiers).length > 0) {
+            const mods = [];
+            for (const [stat, value] of Object.entries(effect.stat_modifiers)) {
+                const statAbbr = stat.substring(0, 3).toUpperCase();
+                const sign = value >= 0 ? '+' : '';
+                const modColor = value >= 0 ? '#4ade80' : '#f87171';
+                mods.push(`<span style="color: ${modColor}">${sign}${value} ${statAbbr}</span>`);
+            }
+            html += `<div style="font-size: 7px; margin-top: 1px;">${mods.join(' ')}</div>`;
         }
 
-        if (weightStatusEl) {
-            weightStatusEl.textContent = weightStatus;
-            weightStatusEl.className = `${weightColor} font-bold text-xs`;
+        // Show description from effect data
+        if (effect.description) {
+            html += `<div style="color: #888; font-size: 6px; margin-top: 1px;">${effect.description}</div>`;
         }
-        if (weightEmojiEl) weightEmojiEl.textContent = weightEmoji;
-        if (weightDescEl) weightDescEl.textContent = weightDesc;
-    } catch (error) {
-        logger.error('Error calculating weight:', error);
-    }
+
+        // Duration info if applicable
+        if (effect.duration_remaining > 0) {
+            const hours = Math.floor(effect.duration_remaining / 60);
+            const mins = Math.round(effect.duration_remaining % 60);
+            let timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+            html += `<div style="color: #f59e0b; font-size: 6px;">${timeStr} remaining</div>`;
+        } else if (effect.delay_remaining > 0) {
+            const hours = Math.floor(effect.delay_remaining / 60);
+            const mins = Math.round(effect.delay_remaining % 60);
+            let timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+            html += `<div style="color: #f59e0b; font-size: 6px;">Starts in ${timeStr}</div>`;
+        }
+
+        effectEl.innerHTML = html;
+        container.appendChild(effectEl);
+    });
 }
 
 // Listen for game state changes and auto-update display
@@ -748,6 +706,16 @@ eventBus.on('gameStateChange', (data) => {
     logger.info('🔔 gameStateChange event received!', data);
     logger.info('🎨 Updating character display from event...');
     updateCharacterDisplay();
+});
+
+// Listen for character stats updates (from tick responses) to update stats tab
+// This provides enriched effect data (name, description, stat_modifiers) from the backend
+eventBus.on('character:statsUpdated', (data) => {
+    logger.debug('📊 character:statsUpdated received for stats tab');
+    if (data.active_effects) {
+        // Update stats tab with enriched effects data
+        renderStatsEffectsList(data.active_effects);
+    }
 });
 
 logger.debug('Character display module loaded');

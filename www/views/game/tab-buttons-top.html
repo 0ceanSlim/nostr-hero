@@ -1,0 +1,12 @@
+{{define "game/tab-buttons-top.html"}}
+<!-- Top Tab Row (above content): QUESTS | STATS | INV | GEAR | SPELLS -->
+<div style="background: #2a2a2a; flex-shrink: 0; width: 100%; overflow: hidden;">
+    <div class="grid grid-cols-5" style="width: 100%;">
+        <button id="tab-questlog" onclick="switchTab('questlog')" class="py-3 font-bold text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; font-size: 10px;" title="Quest Log">📜</button>
+        <button id="tab-stats" onclick="switchTab('stats')" class="py-3 font-bold text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; font-size: 10px;" title="Stats">📊</button>
+        <button id="tab-inventory" onclick="switchTab('inventory')" class="py-3 font-bold text-white" style="background: #1a1a1a; border-top: 2px solid #000000; border-left: 2px solid #000000; border-right: 2px solid #3a3a3a; border-bottom: 2px solid #3a3a3a; font-size: 10px;" title="Inventory">🎒</button>
+        <button id="tab-equipment" onclick="switchTab('equipment')" class="py-3 font-bold text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; font-size: 10px;" title="Equipment">⚔️</button>
+        <button id="tab-spells" onclick="switchTab('spells')" class="py-3 font-bold text-white" style="background: #2a2a2a; border-top: 2px solid #4a4a4a; border-left: 2px solid #4a4a4a; border-right: 2px solid #1a1a1a; border-bottom: 2px solid #1a1a1a; font-size: 10px;" title="Spells">✨</button>
+    </div>
+</div>
+{{end}}

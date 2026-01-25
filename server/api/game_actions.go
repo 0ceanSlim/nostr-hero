@@ -87,6 +87,9 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update encumbrance effects if this action modified inventory
+	updateEncumbranceIfNeeded(&session.SaveData, request.Action.Type, response)
+
 	// Update session in memory
 	if err := sessionManager.UpdateSession(request.Npub, request.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
@@ -113,6 +116,13 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return updated state (and delta if available)
 	response.State = &session.SaveData
+
+	// Always include enriched effects in Data for frontend display
+	if response.Data == nil {
+		response.Data = make(map[string]interface{})
+	}
+	response.Data["enriched_effects"] = enrichActiveEffects(session.SaveData.ActiveEffects)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -186,6 +196,44 @@ func processGameAction(session *GameSession, action GameAction) (*GameActionResp
 		return handleResetIdleTimerAction(session)
 	default:
 		return nil, fmt.Errorf("unknown action type: %s", action.Type)
+	}
+}
+
+// updateEncumbranceIfNeeded updates encumbrance effects if the action modifies inventory
+func updateEncumbranceIfNeeded(state *SaveFile, actionType string, response *GameActionResponse) {
+	// Only update encumbrance for inventory-modifying actions that succeeded
+	if response == nil || !response.Success {
+		return
+	}
+
+	inventoryActions := map[string]bool{
+		"equip_item":            true,
+		"unequip_item":          true,
+		"drop_item":             true,
+		"remove_from_inventory": true,
+		"pickup_item":           true,
+		"vault_deposit":         true,
+		"vault_withdraw":        true,
+		"move_item":             true,
+		"stack_item":            true,
+		"split_item":            true,
+		"add_item":              true,
+		"add_to_container":      true,
+		"remove_from_container": true,
+		"use_item":              true, // Consumables affect weight too
+	}
+
+	if inventoryActions[actionType] {
+		if encMsg, err := updateEncumbrancePenaltyEffects(state); err != nil {
+			log.Printf("⚠️ Failed to update encumbrance effects: %v", err)
+		} else if encMsg != nil && !encMsg.Silent {
+			// Append encumbrance message to response if there was a change
+			if response.Message != "" {
+				response.Message += " " + encMsg.Message
+			} else {
+				response.Message = encMsg.Message
+			}
+		}
 	}
 }
 
@@ -1473,7 +1521,7 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 			"spell_slots":          session.SaveData.SpellSlots,
 			"locations_discovered": session.SaveData.LocationsDiscovered,
 			"music_tracks_unlocked": session.SaveData.MusicTracksUnlocked,
-			"active_effects":       session.SaveData.ActiveEffects,
+			"active_effects":       enrichActiveEffects(session.SaveData.ActiveEffects),
 
 			// Add session-specific data
 			"rented_rooms":    session.RentedRooms,
@@ -3411,6 +3459,11 @@ func initializeFatigueHungerEffects(state *SaveFile) error {
 		return fmt.Errorf("failed to update hunger penalty effects: %w", err)
 	}
 
+	// Apply encumbrance effects based on current weight
+	if _, err := updateEncumbrancePenaltyEffects(state); err != nil {
+		return fmt.Errorf("failed to update encumbrance penalty effects: %w", err)
+	}
+
 	return nil
 }
 
@@ -3596,6 +3649,197 @@ func resetHungerAccumulator(state *SaveFile) {
 			return
 		}
 	}
+}
+
+// Encumbrance management functions (penalty effects applied based on carried weight)
+
+// calculateTotalWeight calculates the total weight of all items in inventory
+func calculateTotalWeight(state *SaveFile) float64 {
+	totalWeight := 0.0
+
+	if state.Inventory == nil {
+		return 0
+	}
+
+	gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{})
+	if !ok {
+		return 0
+	}
+
+	// Calculate weight from equipped items
+	for slotName, slotData := range gearSlots {
+		if slotName == "bag" {
+			// Handle bag contents separately
+			if bagData, ok := slotData.(map[string]interface{}); ok {
+				if contents, ok := bagData["contents"].([]interface{}); ok {
+					for _, contentItem := range contents {
+						if item, ok := contentItem.(map[string]interface{}); ok {
+							itemID, _ := item["item"].(string)
+							quantity, _ := item["quantity"].(float64)
+							if itemID != "" && quantity > 0 {
+								totalWeight += getItemWeight(itemID) * quantity
+							}
+						}
+					}
+				}
+				// Add the bag's own weight
+				if bagItemID, ok := bagData["item"].(string); ok && bagItemID != "" {
+					totalWeight += getItemWeight(bagItemID)
+				}
+			}
+		} else {
+			// Regular equipment slot
+			if slotData, ok := slotData.(map[string]interface{}); ok {
+				itemID, _ := slotData["item"].(string)
+				quantity, _ := slotData["quantity"].(float64)
+				if itemID != "" && quantity > 0 {
+					totalWeight += getItemWeight(itemID) * quantity
+				}
+			}
+		}
+	}
+
+	// Calculate weight from general slots
+	if generalSlots, ok := state.Inventory["general_slots"].([]interface{}); ok {
+		for _, slotData := range generalSlots {
+			if slot, ok := slotData.(map[string]interface{}); ok {
+				itemID, _ := slot["item"].(string)
+				quantity, _ := slot["quantity"].(float64)
+				if itemID != "" && quantity > 0 {
+					totalWeight += getItemWeight(itemID) * quantity
+				}
+			}
+		}
+	}
+
+	return totalWeight
+}
+
+// getItemWeight retrieves weight from an item's properties
+func getItemWeight(itemID string) float64 {
+	item, err := db.GetItemByID(itemID)
+	if err != nil {
+		return 0
+	}
+
+	// Parse properties JSON to get weight
+	var properties map[string]interface{}
+	if err := json.Unmarshal([]byte(item.Properties), &properties); err != nil {
+		return 0
+	}
+
+	if weight, ok := properties["weight"].(float64); ok {
+		return weight
+	}
+
+	return 0
+}
+
+// calculateWeightCapacity calculates max carrying capacity based on STR and equipment
+func calculateWeightCapacity(state *SaveFile) float64 {
+	// Base capacity = 5 * STR (as per encumbrance.json formula)
+	strength := 10.0 // Default
+	if state.Stats != nil {
+		if str, ok := state.Stats["Strength"].(float64); ok {
+			strength = str
+		} else if str, ok := state.Stats["strength"].(float64); ok {
+			strength = str
+		}
+	}
+
+	baseCapacity := 5.0 * strength
+
+	// Add weight_increase from equipped containers (like backpack)
+	if state.Inventory != nil {
+		if gearSlots, ok := state.Inventory["gear_slots"].(map[string]interface{}); ok {
+			if bagData, ok := gearSlots["bag"].(map[string]interface{}); ok {
+				if bagItemID, ok := bagData["item"].(string); ok && bagItemID != "" {
+					item, err := db.GetItemByID(bagItemID)
+					if err == nil {
+						var properties map[string]interface{}
+						if err := json.Unmarshal([]byte(item.Properties), &properties); err == nil {
+							if weightIncrease, ok := properties["weight_increase"].(float64); ok {
+								baseCapacity += weightIncrease
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return baseCapacity
+}
+
+// getEncumbranceLevel returns the encumbrance category based on weight percentage
+// Categories: "light" (0-50%), "normal" (51-100%), "overweight" (101-150%), "encumbered" (151-200%), "overloaded" (201%+)
+func getEncumbranceLevel(state *SaveFile) string {
+	totalWeight := calculateTotalWeight(state)
+	capacity := calculateWeightCapacity(state)
+
+	if capacity <= 0 {
+		return "normal"
+	}
+
+	percentage := (totalWeight / capacity) * 100
+
+	switch {
+	case percentage <= 50:
+		return "light"
+	case percentage <= 100:
+		return "normal"
+	case percentage <= 150:
+		return "overweight"
+	case percentage <= 200:
+		return "encumbered"
+	default:
+		return "overloaded"
+	}
+}
+
+// updateEncumbrancePenaltyEffects applies appropriate penalty effects based on encumbrance level
+// light (0-50%): +1 DEX bonus
+// normal (51-100%): No effect (baseline)
+// overweight (101-150%): -1 DEX, -1 STR
+// encumbered (151-200%): -2 DEX, -2 STR
+// overloaded (201%+): -3 DEX, -3 STR, -2 CON
+func updateEncumbrancePenaltyEffects(state *SaveFile) (*EffectMessage, error) {
+	// Remove all existing encumbrance penalty effects
+	removeEncumbrancePenaltyEffects(state)
+
+	// Apply penalty/bonus effect based on encumbrance level
+	level := getEncumbranceLevel(state)
+
+	switch level {
+	case "light":
+		return applyEffectWithMessage(state, "encumbrance-light")
+	case "normal":
+		// Normal - no effect (baseline)
+		return nil, nil
+	case "overweight":
+		return applyEffectWithMessage(state, "encumbrance-overweight")
+	case "encumbered":
+		return applyEffectWithMessage(state, "encumbrance-encumbered")
+	case "overloaded":
+		return applyEffectWithMessage(state, "encumbrance-overloaded")
+	default:
+		return nil, nil
+	}
+}
+
+// removeEncumbrancePenaltyEffects removes all encumbrance penalty effects
+func removeEncumbrancePenaltyEffects(state *SaveFile) {
+	var remainingEffects []ActiveEffect
+	for _, activeEffect := range state.ActiveEffects {
+		// Keep non-encumbrance-penalty effects
+		if activeEffect.EffectID != "encumbrance-light" &&
+			activeEffect.EffectID != "encumbrance-overweight" &&
+			activeEffect.EffectID != "encumbrance-encumbered" &&
+			activeEffect.EffectID != "encumbrance-overloaded" {
+			remainingEffects = append(remainingEffects, activeEffect)
+		}
+	}
+	state.ActiveEffects = remainingEffects
 }
 
 // getEffectTemplate loads effect template data and returns the specific effect at index
@@ -3820,6 +4064,7 @@ func enrichActiveEffects(activeEffects []ActiveEffect) []EnrichedEffect {
 		ee := EnrichedEffect{
 			ActiveEffect:  ae,
 			Name:          ae.EffectID, // Default to ID
+			Description:   "",
 			Category:      "modifier",
 			StatModifiers: make(map[string]int),
 			TickInterval:  0,
@@ -3831,6 +4076,11 @@ func enrichActiveEffects(activeEffects []ActiveEffect) []EnrichedEffect {
 			// Get name
 			if name, ok := effectData["name"].(string); ok {
 				ee.Name = name
+			}
+
+			// Get description
+			if desc, ok := effectData["description"].(string); ok {
+				ee.Description = desc
 			}
 
 			// Get category

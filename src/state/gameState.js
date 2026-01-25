@@ -183,7 +183,8 @@ export function transformSaveDataToUIState(saveData) {
             time_of_day: saveData.time_of_day !== undefined ? saveData.time_of_day : 12,
             rented_rooms: saveData.rented_rooms || [],
             booked_shows: saveData.booked_shows || [],
-            performed_shows: saveData.performed_shows || []
+            performed_shows: saveData.performed_shows || [],
+            active_effects: saveData.active_effects || []
         },
         location: {
             current: locationId,
