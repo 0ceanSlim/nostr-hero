@@ -312,7 +312,7 @@ export async function updateCharacterDisplay() {
     // Update equipment slots
     if (character.inventory && character.inventory.gear_slots) {
         const gear = character.inventory.gear_slots;
-        const slots = ['left_arm', 'right_arm', 'armor', 'bag', 'necklace', 'ring', 'ammunition', 'clothes'];
+        const slots = ['neck', 'head', 'ammo', 'mainhand', 'chest', 'offhand', 'ring1', 'legs', 'ring2', 'gloves', 'boots', 'bag'];
 
         // Use for...of instead of forEach to properly handle async
         for (const slotName of slots) {

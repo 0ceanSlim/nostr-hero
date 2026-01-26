@@ -1,0 +1,24 @@
+{
+  "id": "chainmail-chausses",
+  "name": "Chain Mail Chausses",
+  "description": "Leg armor made of interlocking metal rings protecting the thighs and shins.",
+  "ai_description": "chain mail leg armor, interlocked iron rings covering thighs and shins with leather straps",
+  "rarity": "uncommon",
+  "price": 4800,
+  "weight": 22,
+  "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "legs",
+  "ac": "6",
+  "tags": [
+    "equipment",
+    "heavy"
+  ],
+  "set": "chainmail-set",
+  "notes": [
+    "Part of the Chain Mail Set",
+    "Requires Strength 13 to wear effectively",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/chainmail-chausses.png"
+}

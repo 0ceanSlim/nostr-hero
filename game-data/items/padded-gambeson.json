@@ -1,0 +1,24 @@
+{
+  "id": "padded-gambeson",
+  "name": "Padded Gambeson",
+  "description": "A quilted cloth jacket with thick padding for basic chest protection.",
+  "ai_description": "quilted cloth jacket with thick cotton padding, soft fabric chest armor",
+  "rarity": "common",
+  "price": 300,
+  "weight": 5,
+  "stack": 1,
+  "type": "Light Armor",
+  "gear_slot": "chest",
+  "ac": "7 + Dex",
+  "tags": [
+    "equipment",
+    "light"
+  ],
+  "set": "padded-set",
+  "notes": [
+    "Part of the Padded Armor Set",
+    "Light armor allows full dexterity bonus",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/padded-gambeson.png"
+}

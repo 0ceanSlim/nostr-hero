@@ -1,0 +1,23 @@
+{
+  "id": "scalemail-greaves",
+  "name": "Scale Mail Greaves",
+  "description": "Leg armor made from overlapping metal scales sewn to a leather backing.",
+  "ai_description": "leg armor of overlapping metal scales on leather backing, dragon-scale pattern greaves",
+  "rarity": "uncommon",
+  "price": 2000,
+  "weight": 18,
+  "stack": 1,
+  "type": "Medium Armor",
+  "gear_slot": "legs",
+  "ac": "6",
+  "tags": [
+    "equipment",
+    "medium"
+  ],
+  "set": "scalemail-set",
+  "notes": [
+    "Part of the Scale Mail Set",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/scalemail-greaves.png"
+}

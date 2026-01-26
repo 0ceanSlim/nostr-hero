@@ -1,0 +1,22 @@
+{
+  "id": "leather-leggings",
+  "name": "Leather Leggings",
+  "description": "Supple leather pants that provide basic leg protection while maintaining flexibility.",
+  "ai_description": "brown boiled leather pants with knee guards, flexible leg armor with straps",
+  "rarity": "common",
+  "price": 400,
+  "weight": 4,
+  "stack": 1,
+  "type": "Light Armor",
+  "gear_slot": "legs",
+  "ac": "4",
+  "tags": [
+    "equipment",
+    "light"
+  ],
+  "set": "leather-set",
+  "notes": [
+    "Part of the Leather Armor Set"
+  ],
+  "image": "/res/img/items/leather-leggings.png"
+}

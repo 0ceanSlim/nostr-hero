@@ -619,6 +619,75 @@
     font-family: 'Courier New', monospace;
   }
 
+  /* Modal styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+  }
+
+  .modal-content {
+    position: relative;
+    background: var(--codex-bg-secondary);
+    border: 2px solid var(--codex-bg-tertiary);
+    border-radius: 8px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1001;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--codex-bg-tertiary);
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 2px solid var(--codex-bg-tertiary);
+  }
+
+  .btn-close {
+    background: transparent;
+    border: none;
+    color: var(--codex-text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .btn-close:hover {
+    color: var(--codex-red);
+  }
+
   /* Home page panels */
   .codex-panel {
     padding: 1.5rem;

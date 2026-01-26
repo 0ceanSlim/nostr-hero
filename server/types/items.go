@@ -21,16 +21,21 @@ type InventoryItem struct {
 	Slot     int    `json:"slot,omitempty"` // Position in inventory grid
 }
 
-// EquipmentSlots represents all equipment slots
+// EquipmentSlots represents all equipment slots (12 slots in 3x4 grid)
+// Layout: neck/head/ammo, mainhand/chest/offhand, ring1/legs/ring2, gloves/boots/bag
 type EquipmentSlots struct {
-	Neck      *InventoryItem `json:"neck"`
-	LeftHand  *InventoryItem `json:"left_hand"`
-	RightHand *InventoryItem `json:"right_hand"`
-	Armor     *InventoryItem `json:"armor"`
-	Ring      *InventoryItem `json:"ring"`
-	Clothes   *InventoryItem `json:"clothes"`
-	Ammo      *InventoryItem `json:"ammo"`
-	Bag       *InventoryItem `json:"bag"`
+	Neck     *InventoryItem `json:"neck"`
+	Head     *InventoryItem `json:"head"`
+	Ammo     *InventoryItem `json:"ammo"`
+	Mainhand *InventoryItem `json:"mainhand"`
+	Chest    *InventoryItem `json:"chest"`
+	Offhand  *InventoryItem `json:"offhand"`
+	Ring1    *InventoryItem `json:"ring1"`
+	Legs     *InventoryItem `json:"legs"`
+	Ring2    *InventoryItem `json:"ring2"`
+	Gloves   *InventoryItem `json:"gloves"`
+	Boots    *InventoryItem `json:"boots"`
+	Bag      *InventoryItem `json:"bag"`
 }
 
 // Inventory represents the complete inventory structure
@@ -72,13 +77,14 @@ type ItemActionResponse struct {
 	Error    string      `json:"error,omitempty"`
 }
 
-// GetItemActions returns available actions for an item based on its type
-func GetItemActions(itemType string, isEquipped bool) []ItemAction {
+// GetItemActions returns available actions for an item based on its tags and type
+// Equipment items (those with "equipment" tag) can be equipped/unequipped
+// Consumables can be used, other items default to examine
+func GetItemActions(itemType string, isEquipped bool, hasEquipmentTag bool) []ItemAction {
 	actions := []ItemAction{}
 
-	// Add actions based on item type
-	switch itemType {
-	case "Weapon", "Melee Weapon", "Ranged Weapon", "Simple Weapon", "Martial Weapon":
+	// Equipment items (determined by "equipment" tag, not type)
+	if hasEquipmentTag {
 		if !isEquipped {
 			actions = append(actions, ItemAction{
 				Action:      "equip",
@@ -92,54 +98,26 @@ func GetItemActions(itemType string, isEquipped bool) []ItemAction {
 				IsDefault:   true,
 			})
 		}
-
-	case "Armor", "Light Armor", "Medium Armor", "Heavy Armor", "Shield":
-		if !isEquipped {
+	} else {
+		// Non-equipment items - check for consumables
+		switch itemType {
+		case "Potion", "Consumable", "Food":
 			actions = append(actions, ItemAction{
-				Action:      "equip",
-				DisplayName: "Equip",
+				Action:      "use",
+				DisplayName: "Use",
 				IsDefault:   true,
 			})
-		} else {
+		default:
+			// Default action for other items is examine
 			actions = append(actions, ItemAction{
-				Action:      "unequip",
-				DisplayName: "Unequip",
-				IsDefault:   true,
-			})
-		}
-
-	case "Ring", "Necklace", "Amulet", "Cloak", "Boots", "Gloves", "Helmet", "Hat":
-		if !isEquipped {
-			actions = append(actions, ItemAction{
-				Action:      "equip",
-				DisplayName: "Equip",
-				IsDefault:   true,
-			})
-		} else {
-			actions = append(actions, ItemAction{
-				Action:      "unequip",
-				DisplayName: "Unequip",
+				Action:      "examine",
+				DisplayName: "Examine",
 				IsDefault:   true,
 			})
 		}
-
-	case "Potion", "Consumable", "Food":
-		actions = append(actions, ItemAction{
-			Action:      "use",
-			DisplayName: "Use",
-			IsDefault:   true,
-		})
-
-	default:
-		// Default action for other items is examine
-		actions = append(actions, ItemAction{
-			Action:      "examine",
-			DisplayName: "Examine",
-			IsDefault:   true,
-		})
 	}
 
-	// All items can be examined and dropped (unless equipped)
+	// All items can be dropped (unless equipped)
 	if !isEquipped {
 		actions = append(actions, ItemAction{
 			Action:      "drop",
@@ -148,8 +126,8 @@ func GetItemActions(itemType string, isEquipped bool) []ItemAction {
 		})
 	}
 
-	// Examine is always available
-	if itemType != "Potion" && itemType != "Consumable" && itemType != "Food" {
+	// Examine is always available (unless it's already the default action)
+	if hasEquipmentTag || (itemType != "Potion" && itemType != "Consumable" && itemType != "Food") {
 		actions = append(actions, ItemAction{
 			Action:      "examine",
 			DisplayName: "Examine",
@@ -160,27 +138,41 @@ func GetItemActions(itemType string, isEquipped bool) []ItemAction {
 	return actions
 }
 
-// DetermineEquipmentSlot determines which equipment slot an item should go into
-// Note: Items should have a gear_slot property that specifies the exact slot
-func DetermineEquipmentSlot(itemType string) string {
-	switch itemType {
-	case "Weapon", "Melee Weapon", "Ranged Weapon", "Simple Weapon", "Martial Weapon":
-		return "right_hand" // Default to right hand for weapons
-	case "Shield":
-		return "left_hand"
-	case "Armor", "Light Armor", "Medium Armor", "Heavy Armor":
-		return "armor"
-	case "Ring":
-		return "ring"
-	case "Necklace", "Amulet":
+// MapGearSlotToEquipmentSlot maps an item's gear_slot property to equipment slot(s)
+// Returns the primary slot name. For slots with alternatives (hands, ring),
+// the inventory handler determines the actual slot based on availability.
+// Items must have the "equipment" tag to be equippable.
+func MapGearSlotToEquipmentSlot(gearSlot string) string {
+	switch gearSlot {
+	// Hand slots
+	case "hands":
+		return "mainhand" // Primary slot, inventory handler tries offhand if full
+	case "mainhand":
+		return "mainhand"
+	case "offhand":
+		return "offhand"
+	// Body slots
+	case "chest", "armor", "body":
+		return "chest"
+	case "head", "helmet", "hat":
+		return "head"
+	case "legs", "leg", "greaves":
+		return "legs"
+	case "gloves", "glove", "gauntlets":
+		return "gloves"
+	case "boots", "boot", "feet":
+		return "boots"
+	// Accessory slots
+	case "neck", "necklace", "amulet":
 		return "neck"
-	case "Clothing", "Robe", "Outfit":
-		return "clothes"
-	case "Ammunition", "Arrows", "Bolts":
+	case "ring", "finger", "ring1", "ring2":
+		return "ring1" // Primary slot, inventory handler tries ring2 if full
+	// Other slots
+	case "ammo", "ammunition":
 		return "ammo"
-	case "Bag", "Backpack", "Pouch":
+	case "bag", "backpack":
 		return "bag"
 	default:
-		return "" // Not equippable
+		return "" // Not a valid equipment slot
 	}
 }

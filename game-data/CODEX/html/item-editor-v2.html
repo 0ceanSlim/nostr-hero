@@ -95,9 +95,10 @@
                                 <input type="text" id="itemImage" placeholder="/res/img/items/longsword.png" readonly style="opacity: 0.6;" />
                             </div>
                             <div class="actions">
-                                <button class="btn" onclick="generateImage()">🎨 Generate Image</button>
+                                <button class="btn" onclick="openImageGenerator()">🎨 Generate Image</button>
                                 <button class="btn" onclick="checkImage()">🖼️ Check Image</button>
                             </div>
+                            <div id="balanceDisplay" style="margin-top: 8px; font-size: 12px; color: #6272a4;"></div>
                         </div>
 
                         <div class="basic-info-section">
@@ -192,15 +193,20 @@
                         <h3>⚔️ Equipment Properties</h3>
                         <div class="form-group">
                             <label>Gear Slot *</label>
-                            <select id="gearSlot">
+                            <select id="gearSlot" required>
                                 <option value="">Select slot...</option>
-                                <option value="hands">Hands (weapons, tools)</option>
-                                <option value="armor">Armor (body armor)</option>
-                                <option value="necklace">Necklace (amulets)</option>
+                                <option value="hands">Hands (Any Hand)</option>
+                                <option value="mainhand">Main Hand Only</option>
+                                <option value="offhand">Off Hand Only</option>
+                                <option value="chest">Chest</option>
+                                <option value="head">Head</option>
+                                <option value="legs">Legs</option>
+                                <option value="gloves">Gloves</option>
+                                <option value="boots">Boots</option>
+                                <option value="neck">Neck</option>
                                 <option value="ring">Ring</option>
-                                <option value="clothes">Clothes (cloaks, robes)</option>
-                                <option value="bag">Bag (backpacks, pouches)</option>
-                                <option value="ammunition">Ammunition (arrows, bolts)</option>
+                                <option value="ammo">Ammo</option>
+                                <option value="bag">Bag</option>
                             </select>
                         </div>
                     </div>
@@ -352,6 +358,68 @@
             <div class="modal-footer">
                 <button onclick="closeChangesModal()" class="btn">Close</button>
                 <button onclick="confirmSubmitPR()" class="btn btn-success">Submit PR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Generation Modal -->
+    <div id="image-gen-modal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeImageGenModal()"></div>
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 style="color: var(--codex-purple);">🎨 Generate Item Image</h2>
+                <button class="btn btn-close" onclick="closeImageGenModal()">✕</button>
+            </div>
+
+            <div style="padding: 20px;">
+                <!-- Balance & Model Selection -->
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Model</label>
+                        <select id="imageGenModel">
+                            <option value="bitforge">Bitforge (~$0.03)</option>
+                            <option value="pixflux">Pixflux (~$0.05)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        <label>Account Balance</label>
+                        <div id="imageGenBalance" style="font-size: 18px; color: var(--codex-green);">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Prompt Preview -->
+                <div class="form-group">
+                    <label>Generated Prompt</label>
+                    <textarea id="imageGenPrompt" readonly style="height: 60px; opacity: 0.8;"></textarea>
+                </div>
+
+                <!-- Image Comparison -->
+                <div style="display: flex; gap: 20px; margin: 20px 0;">
+                    <!-- Current Image -->
+                    <div style="flex: 1; text-align: center;">
+                        <label style="display: block; margin-bottom: 8px;">Current Image</label>
+                        <div id="currentImagePreview" style="width: 128px; height: 128px; margin: 0 auto; background: #1a1a2e; border: 2px solid #44475a; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: #6272a4; font-size: 12px;">No image</span>
+                        </div>
+                    </div>
+
+                    <!-- Generated Image -->
+                    <div style="flex: 1; text-align: center;">
+                        <label style="display: block; margin-bottom: 8px;">Generated Image</label>
+                        <div id="generatedImagePreview" style="width: 128px; height: 128px; margin: 0 auto; background: #1a1a2e; border: 2px solid #44475a; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: #6272a4; font-size: 12px;">Click Generate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generation Status -->
+                <div id="imageGenStatus" style="text-align: center; margin: 15px 0; color: #6272a4;"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="closeImageGenModal()" class="btn">Cancel</button>
+                <button onclick="generateNewImage()" class="btn btn-primary" id="generateBtn">🎨 Generate ($0.03)</button>
+                <button onclick="acceptGeneratedImage()" class="btn btn-success" id="acceptBtn" style="display: none;">✅ Accept & Save</button>
             </div>
         </div>
     </div>

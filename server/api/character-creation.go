@@ -216,7 +216,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		District:            districtKey, // Use key, not display name
 		Building:            buildingID,  // Use ID, not display name
 		CurrentDay:          1,
-		TimeOfDay:           12, // Noon (12 PM)
+		TimeOfDay:           720, // Noon (12 PM) - stored in minutes (720 = 12*60)
 		Inventory:           inventory,
 		Vaults:              vaults,
 		KnownSpells:         knownSpells,
@@ -230,7 +230,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 				DurationRemaining: 0, // Permanent effect
 				DelayRemaining:    0,
 				TickAccumulator:   0,
-				AppliedAt:         12, // Noon
+				AppliedAt:         720, // Noon (720 minutes = 12:00 PM)
 			},
 			{
 				EffectID:          "hunger-accumulation-satisfied", // Start satisfied (Hunger=2)
@@ -238,7 +238,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 				DurationRemaining: 0, // Permanent effect
 				DelayRemaining:    0,
 				TickAccumulator:   0,
-				AppliedAt:         12, // Noon
+				AppliedAt:         720, // Noon (720 minutes = 12:00 PM)
 			},
 		},
 		InternalNpub: req.Npub,

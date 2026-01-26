@@ -1,7 +1,7 @@
 {
   "ai_description": "Thin sharp dart with feathered end and metal tip",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "ammunition",
+  "gear_slot": "ammo",
   "id": "blowgun-needle",
   "image": "/res/img/items/blowgun-needle.png",
   "img": "equipment/ammunition.jpg",

@@ -1,0 +1,23 @@
+{
+  "id": "leather-vest",
+  "name": "Leather Vest",
+  "description": "A supple leather vest that provides basic chest protection while maintaining flexibility.",
+  "ai_description": "brown boiled leather vest with shoulder guards, flexible chest armor with leather straps",
+  "rarity": "common",
+  "price": 600,
+  "weight": 6,
+  "stack": 1,
+  "type": "Light Armor",
+  "gear_slot": "chest",
+  "ac": "7 + Dex",
+  "tags": [
+    "equipment",
+    "light"
+  ],
+  "set": "leather-set",
+  "notes": [
+    "Part of the Leather Armor Set",
+    "Light armor allows full dexterity bonus"
+  ],
+  "image": "/res/img/items/leather-vest.png"
+}

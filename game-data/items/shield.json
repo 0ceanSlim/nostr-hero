@@ -2,7 +2,7 @@
   "ac": "+2",
   "ai_description": "round wooden shield with iron boss and leather straps, protective barrier with painted heraldic design and metal rim",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "hands",
+  "gear_slot": "offhand",
   "id": "shield",
   "image": "/res/img/items/shield.png",
   "img": "equipment/armor.jpg",

@@ -1,0 +1,23 @@
+{
+  "id": "padded-leggings",
+  "name": "Padded Leggings",
+  "description": "Quilted cloth pants with thick padding for basic leg protection.",
+  "ai_description": "quilted cloth pants with cotton padding, soft fabric leg armor",
+  "rarity": "common",
+  "price": 200,
+  "weight": 3,
+  "stack": 1,
+  "type": "Light Armor",
+  "gear_slot": "legs",
+  "ac": "4",
+  "tags": [
+    "equipment",
+    "light"
+  ],
+  "set": "padded-set",
+  "notes": [
+    "Part of the Padded Armor Set",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/padded-leggings.png"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "ringmail-hauberk",
+  "name": "Ring Mail Hauberk",
+  "description": "A leather chest piece with heavy metal rings sewn onto it for added protection.",
+  "ai_description": "leather vest with metal rings sewn onto surface, reinforced hide torso armor with iron rings",
+  "rarity": "common",
+  "price": 1800,
+  "weight": 24,
+  "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "chest",
+  "ac": "8",
+  "tags": [
+    "equipment",
+    "heavy"
+  ],
+  "set": "ringmail-set",
+  "notes": [
+    "Part of the Ring Mail Set",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/ringmail-hauberk.png"
+}

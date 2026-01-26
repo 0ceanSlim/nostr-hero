@@ -1,0 +1,37 @@
+{
+  "id": "ringmail-set",
+  "name": "Ring Mail Set",
+  "description": "A complete set of leather armor with heavy rings sewn onto it for reinforcement.",
+  "ai_description": "leather armor with metal rings sewn onto surface, reinforced hide with iron ring attachments",
+  "rarity": "common",
+  "price": 3000,
+  "weight": 0,
+  "stack": 1,
+  "type": "Armor Set",
+  "tags": [
+    "pack",
+    "armor-set"
+  ],
+  "contents": [
+    ["ringmail-hauberk", 1],
+    ["ringmail-chausses", 1]
+  ],
+  "set_bonus": {
+    "ac": 14,
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "ac",
+        "value": 14,
+        "description": "Full ring mail protection"
+      }
+    ],
+    "penalties": {
+      "stealth": "disadvantage"
+    }
+  },
+  "notes": [
+    "Disadvantage on Stealth when full set is worn"
+  ],
+  "image": "/res/img/items/ring-mail.png"
+}

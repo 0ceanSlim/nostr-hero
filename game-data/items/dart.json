@@ -8,7 +8,7 @@
   "weight": 0.25,
   "stack": 10,
   "type": "Simple Ranged Weapons",
-  "gear_slot": "ammunition",
+  "gear_slot": "ammo",
   "damage": "1d4",
   "damage-type": "piercing",
   "range": "1",

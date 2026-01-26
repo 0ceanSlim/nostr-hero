@@ -1,0 +1,24 @@
+{
+  "id": "plate-cuirass",
+  "name": "Plate Cuirass",
+  "description": "A heavy steel breastplate with pauldrons, the chest piece of a full plate armor set.",
+  "ai_description": "gleaming steel breastplate with shoulder pauldrons, heavy chest armor with articulated plates",
+  "rarity": "rare",
+  "price": 90000,
+  "weight": 40,
+  "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "chest",
+  "ac": "11",
+  "tags": [
+    "equipment",
+    "heavy"
+  ],
+  "set": "plate-set",
+  "notes": [
+    "Part of the Plate Armor Set",
+    "Requires Strength 15 to wear effectively",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/plate-cuirass.png"
+}

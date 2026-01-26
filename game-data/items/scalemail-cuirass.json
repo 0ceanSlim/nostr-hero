@@ -1,0 +1,24 @@
+{
+  "id": "scalemail-cuirass",
+  "name": "Scale Mail Cuirass",
+  "description": "A chest piece made from overlapping metal scales sewn to a leather backing.",
+  "ai_description": "chest armor of overlapping metal scales on leather backing, dragon-scale pattern torso piece",
+  "rarity": "uncommon",
+  "price": 3000,
+  "weight": 27,
+  "stack": 1,
+  "type": "Medium Armor",
+  "gear_slot": "chest",
+  "ac": "8 + Dex(max2)",
+  "tags": [
+    "equipment",
+    "medium"
+  ],
+  "set": "scalemail-set",
+  "notes": [
+    "Part of the Scale Mail Set",
+    "Disadvantage on Stealth",
+    "Maximum Dexterity bonus of +2"
+  ],
+  "image": "/res/img/items/scalemail-cuirass.png"
+}

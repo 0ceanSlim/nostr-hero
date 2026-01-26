@@ -1,7 +1,7 @@
 {
   "ai_description": "Smooth round stones and lead bullets in leather pouch",
   "description": "A pouch containing up to 8 sling bullets made of lead or stone.",
-  "gear_slot": "ammunition",
+  "gear_slot": "ammo",
   "id": "sling-bullet",
   "image": "/res/img/items/sling-bullet.png",
   "name": "Sling Bullets",

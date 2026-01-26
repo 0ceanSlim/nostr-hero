@@ -1,0 +1,23 @@
+{
+  "id": "hide-cuirass",
+  "name": "Hide Cuirass",
+  "description": "A primitive chest piece made from thick beast hides and furs.",
+  "ai_description": "rough animal leather vest with thick fur trim, primitive chest protection from beast hides",
+  "rarity": "common",
+  "price": 600,
+  "weight": 7,
+  "stack": 1,
+  "type": "Medium Armor",
+  "gear_slot": "chest",
+  "ac": "7 + Dex(max2)",
+  "tags": [
+    "equipment",
+    "medium"
+  ],
+  "set": "hide-set",
+  "notes": [
+    "Part of the Hide Armor Set",
+    "Maximum Dexterity bonus of +2"
+  ],
+  "image": "/res/img/items/hide-cuirass.png"
+}

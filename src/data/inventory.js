@@ -189,14 +189,18 @@ export async function createInventoryFromItems(allItems) {
             { slot: 3, item: null, quantity: 0 },
         ],
         gear_slots: {
+            neck: { item: null, quantity: 0 },
+            head: { item: null, quantity: 0 },
+            ammo: { item: null, quantity: 0 },
+            mainhand: { item: null, quantity: 0 },
+            chest: { item: null, quantity: 0 },
+            offhand: { item: null, quantity: 0 },
+            ring1: { item: null, quantity: 0 },
+            legs: { item: null, quantity: 0 },
+            ring2: { item: null, quantity: 0 },
+            gloves: { item: null, quantity: 0 },
+            boots: { item: null, quantity: 0 },
             bag: { item: null, quantity: 0 },
-            left_arm: { item: null, quantity: 0 },
-            right_arm: { item: null, quantity: 0 },
-            armor: { item: null, quantity: 0 },
-            necklace: { item: null, quantity: 0 },
-            ring: { item: null, quantity: 0 },
-            ammunition: { item: null, quantity: 0 },
-            clothes: { item: null, quantity: 0 },
         },
     };
 
@@ -247,90 +251,83 @@ export async function createInventoryFromItems(allItems) {
             const gearSlot = itemData.gear_slot;
             logger.debug(`Found equipment: ${item.item} → ${gearSlot}`);
 
-            // Handle different gear slots
-            if (gearSlot === "armor" && inventory.gear_slots.armor.item === null) {
-                logger.debug(`Equipping armor: ${item.item}`);
-                inventory.gear_slots.armor = {
-                    item: item.item,
-                    quantity: item.quantity,
-                };
-                remainingItems.splice(i, 1);
-            } else if (
-                gearSlot === "necklace" &&
-                inventory.gear_slots.necklace.item === null
-            ) {
-                logger.debug(`Equipping necklace: ${item.item}`);
-                inventory.gear_slots.necklace = {
-                    item: item.item,
-                    quantity: item.quantity,
-                };
-                remainingItems.splice(i, 1);
-            } else if (
-                gearSlot === "ring" &&
-                inventory.gear_slots.ring.item === null
-            ) {
-                logger.debug(`Equipping ring: ${item.item}`);
-                inventory.gear_slots.ring = {
-                    item: item.item,
-                    quantity: item.quantity,
-                };
-                remainingItems.splice(i, 1);
-            } else if (
-                gearSlot === "ammunition" &&
-                inventory.gear_slots.ammunition.item === null
-            ) {
-                logger.debug(`Equipping ammunition: ${item.item}`);
-                inventory.gear_slots.ammunition = {
-                    item: item.item,
-                    quantity: item.quantity,
-                };
-                remainingItems.splice(i, 1);
-            } else if (
-                gearSlot === "clothes" &&
-                inventory.gear_slots.clothes.item === null
-            ) {
-                logger.debug(`Equipping clothes: ${item.item}`);
-                inventory.gear_slots.clothes = {
-                    item: item.item,
-                    quantity: item.quantity,
-                };
-                remainingItems.splice(i, 1);
+            // Handle different gear slots (pure gear_slot routing)
+            let equipped = false;
+
+            if (gearSlot === "chest" && inventory.gear_slots.chest.item === null) {
+                logger.debug(`Equipping chest: ${item.item}`);
+                inventory.gear_slots.chest = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "neck" && inventory.gear_slots.neck.item === null) {
+                logger.debug(`Equipping neck: ${item.item}`);
+                inventory.gear_slots.neck = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "head" && inventory.gear_slots.head.item === null) {
+                logger.debug(`Equipping head: ${item.item}`);
+                inventory.gear_slots.head = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "legs" && inventory.gear_slots.legs.item === null) {
+                logger.debug(`Equipping legs: ${item.item}`);
+                inventory.gear_slots.legs = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "gloves" && inventory.gear_slots.gloves.item === null) {
+                logger.debug(`Equipping gloves: ${item.item}`);
+                inventory.gear_slots.gloves = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "boots" && inventory.gear_slots.boots.item === null) {
+                logger.debug(`Equipping boots: ${item.item}`);
+                inventory.gear_slots.boots = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "ammo" && inventory.gear_slots.ammo.item === null) {
+                logger.debug(`Equipping ammo: ${item.item}`);
+                inventory.gear_slots.ammo = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "ring") {
+                // Try ring1 first, then ring2
+                if (inventory.gear_slots.ring1.item === null) {
+                    logger.debug(`Equipping ring1: ${item.item}`);
+                    inventory.gear_slots.ring1 = { item: item.item, quantity: item.quantity };
+                    equipped = true;
+                } else if (inventory.gear_slots.ring2.item === null) {
+                    logger.debug(`Equipping ring2: ${item.item}`);
+                    inventory.gear_slots.ring2 = { item: item.item, quantity: item.quantity };
+                    equipped = true;
+                }
             } else if (gearSlot === "hands") {
                 // Handle weapons - check if two-handed
-                const isTwoHanded =
-                    itemData.tags && itemData.tags.includes("two-handed");
+                const isTwoHanded = itemData.tags && itemData.tags.includes("two-handed");
 
                 if (isTwoHanded) {
-                    if (inventory.gear_slots.right_arm.item === null) {
+                    if (inventory.gear_slots.mainhand.item === null) {
                         logger.debug(`Equipping two-handed weapon: ${item.item}`);
-                        inventory.gear_slots.right_arm = {
-                            item: item.item,
-                            quantity: item.quantity,
-                        };
+                        inventory.gear_slots.mainhand = { item: item.item, quantity: item.quantity };
                         twoHandedEquipped = true;
-                        remainingItems.splice(i, 1);
+                        equipped = true;
                     }
                 } else {
                     // One-handed weapon
-                    if (inventory.gear_slots.right_arm.item === null) {
-                        logger.debug(`Equipping weapon in right hand: ${item.item}`);
-                        inventory.gear_slots.right_arm = {
-                            item: item.item,
-                            quantity: item.quantity,
-                        };
-                        remainingItems.splice(i, 1);
-                    } else if (
-                        inventory.gear_slots.left_arm.item === null &&
-                        !twoHandedEquipped
-                    ) {
-                        logger.debug(`Equipping weapon in left hand: ${item.item}`);
-                        inventory.gear_slots.left_arm = {
-                            item: item.item,
-                            quantity: item.quantity,
-                        };
-                        remainingItems.splice(i, 1);
+                    if (inventory.gear_slots.mainhand.item === null) {
+                        logger.debug(`Equipping weapon in mainhand: ${item.item}`);
+                        inventory.gear_slots.mainhand = { item: item.item, quantity: item.quantity };
+                        equipped = true;
+                    } else if (inventory.gear_slots.offhand.item === null && !twoHandedEquipped) {
+                        logger.debug(`Equipping weapon in offhand: ${item.item}`);
+                        inventory.gear_slots.offhand = { item: item.item, quantity: item.quantity };
+                        equipped = true;
                     }
                 }
+            } else if (gearSlot === "mainhand" && inventory.gear_slots.mainhand.item === null) {
+                logger.debug(`Equipping mainhand: ${item.item}`);
+                inventory.gear_slots.mainhand = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            } else if (gearSlot === "offhand" && inventory.gear_slots.offhand.item === null && !twoHandedEquipped) {
+                logger.debug(`Equipping offhand: ${item.item}`);
+                inventory.gear_slots.offhand = { item: item.item, quantity: item.quantity };
+                equipped = true;
+            }
+
+            if (equipped) {
+                remainingItems.splice(i, 1);
             }
         }
     }

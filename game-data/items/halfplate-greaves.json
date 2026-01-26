@@ -1,0 +1,23 @@
+{
+  "id": "halfplate-greaves",
+  "name": "Half Plate Greaves",
+  "description": "Shaped metal leg guards with knee protection, the leg piece of a half plate set.",
+  "ai_description": "shaped steel leg armor with knee guards, articulated medium armor greaves",
+  "rarity": "rare",
+  "price": 30000,
+  "weight": 16,
+  "stack": 1,
+  "type": "Medium Armor",
+  "gear_slot": "legs",
+  "ac": "6",
+  "tags": [
+    "equipment",
+    "medium"
+  ],
+  "set": "halfplate-set",
+  "notes": [
+    "Part of the Half Plate Set",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/halfplate-greaves.png"
+}

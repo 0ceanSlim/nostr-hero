@@ -1,0 +1,24 @@
+{
+  "id": "halfplate-cuirass",
+  "name": "Half Plate Cuirass",
+  "description": "A shaped metal breastplate with arm guards, the chest piece of a half plate set.",
+  "ai_description": "shaped steel breastplate with pauldrons, articulated medium armor chest piece",
+  "rarity": "rare",
+  "price": 45000,
+  "weight": 24,
+  "stack": 1,
+  "type": "Medium Armor",
+  "gear_slot": "chest",
+  "ac": "9 + Dex(max2)",
+  "tags": [
+    "equipment",
+    "medium"
+  ],
+  "set": "halfplate-set",
+  "notes": [
+    "Part of the Half Plate Set",
+    "Disadvantage on Stealth",
+    "Maximum Dexterity bonus of +2"
+  ],
+  "image": "/res/img/items/halfplate-cuirass.png"
+}

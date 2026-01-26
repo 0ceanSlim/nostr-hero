@@ -1,0 +1,24 @@
+{
+  "id": "chainmail-hauberk",
+  "name": "Chain Mail Hauberk",
+  "description": "A long shirt of interlocking metal rings covering the torso and arms.",
+  "ai_description": "heavy chain mail shirt with long sleeves, interlocked iron rings covering torso and arms",
+  "rarity": "uncommon",
+  "price": 7200,
+  "weight": 33,
+  "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "chest",
+  "ac": "10",
+  "tags": [
+    "equipment",
+    "heavy"
+  ],
+  "set": "chainmail-set",
+  "notes": [
+    "Part of the Chain Mail Set",
+    "Requires Strength 13 to wear effectively",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/chainmail-hauberk.png"
+}

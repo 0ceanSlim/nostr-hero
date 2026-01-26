@@ -125,55 +125,76 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 		}
 
 		if gearSlotProp, ok := properties["gear_slot"].(string); ok {
-			// Map item gear_slot to actual save file slot names
+			// Map item gear_slot to equipment slot names (pure gear_slot routing, no type checks)
 			switch gearSlotProp {
 			case "hands":
-				// For weapons and shields, determine slot
-				if strings.Contains(strings.ToLower(itemType), "shield") || strings.Contains(strings.ToLower(itemType), "armor") {
-					equipSlot = "left_arm"
-				} else {
-					// Weapon logic: check slot availability
-					rightArm := gearSlots["right_arm"]
-					leftArm := gearSlots["left_arm"]
-
-					rightOccupied := false
-					leftOccupied := false
-
-					if rightMap, ok := rightArm.(map[string]interface{}); ok {
-						if rightMap["item"] != nil && rightMap["item"] != "" {
-							rightOccupied = true
-						}
-					}
-					if leftMap, ok := leftArm.(map[string]interface{}); ok {
-						if leftMap["item"] != nil && leftMap["item"] != "" {
-							leftOccupied = true
-						}
-					}
-
-					// Choose slot based on availability
-					if !rightOccupied {
-						equipSlot = "right_arm"
-					} else if !leftOccupied {
-						equipSlot = "left_arm"
-					} else {
-						// Both full, will swap with right_arm
-						equipSlot = "right_arm"
+				// Can go in either hand - try mainhand first, then offhand
+				mainhand := gearSlots["mainhand"]
+				offhand := gearSlots["offhand"]
+				mainhandOccupied := false
+				offhandOccupied := false
+				if m, ok := mainhand.(map[string]interface{}); ok {
+					if m["item"] != nil && m["item"] != "" {
+						mainhandOccupied = true
 					}
 				}
-			case "armor", "body":
-				equipSlot = "armor"
-			case "neck", "necklace":
-				equipSlot = "necklace"
-			case "finger", "ring":
-				equipSlot = "ring"
-			case "ammunition", "ammo":
-				equipSlot = "ammunition"
-			case "clothes", "clothing":
-				equipSlot = "clothes"
-			case "bag", "backpack":
+				if o, ok := offhand.(map[string]interface{}); ok {
+					if o["item"] != nil && o["item"] != "" {
+						offhandOccupied = true
+					}
+				}
+				if !mainhandOccupied {
+					equipSlot = "mainhand"
+				} else if !offhandOccupied && !isTwoHanded {
+					equipSlot = "offhand"
+				} else {
+					equipSlot = "mainhand" // Will swap
+				}
+			case "mainhand":
+				equipSlot = "mainhand"
+			case "offhand":
+				equipSlot = "offhand"
+			case "chest":
+				equipSlot = "chest"
+			case "head":
+				equipSlot = "head"
+			case "legs":
+				equipSlot = "legs"
+			case "gloves":
+				equipSlot = "gloves"
+			case "boots":
+				equipSlot = "boots"
+			case "neck":
+				equipSlot = "neck"
+			case "ring":
+				// Try ring1 first, then ring2
+				ring1 := gearSlots["ring1"]
+				ring2 := gearSlots["ring2"]
+				ring1Occupied := false
+				ring2Occupied := false
+				if r1, ok := ring1.(map[string]interface{}); ok {
+					if r1["item"] != nil && r1["item"] != "" {
+						ring1Occupied = true
+					}
+				}
+				if r2, ok := ring2.(map[string]interface{}); ok {
+					if r2["item"] != nil && r2["item"] != "" {
+						ring2Occupied = true
+					}
+				}
+				if !ring1Occupied {
+					equipSlot = "ring1"
+				} else if !ring2Occupied {
+					equipSlot = "ring2"
+				} else {
+					equipSlot = "ring1" // Will swap
+				}
+			case "ammo":
+				equipSlot = "ammo"
+			case "bag":
 				equipSlot = "bag"
 			default:
-				equipSlot = gearSlotProp // Use as-is if it matches
+				equipSlot = gearSlotProp // Use as-is if it matches a slot name
 			}
 		} else {
 			return &types.ItemActionResponse{Success: false, Error: "Item does not have a gear_slot property"}
@@ -185,23 +206,23 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 	// For two-handed weapons, unequip both hands first
 	var itemsToUnequip []map[string]interface{}
 	if isTwoHanded {
-		// Unequip right_arm if occupied
-		if rightMap, ok := gearSlots["right_arm"].(map[string]interface{}); ok {
-			if rightMap["item"] != nil && rightMap["item"] != "" {
+		// Unequip mainhand if occupied
+		if mainMap, ok := gearSlots["mainhand"].(map[string]interface{}); ok {
+			if mainMap["item"] != nil && mainMap["item"] != "" {
 				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
-					"item":     rightMap["item"],
-					"quantity": rightMap["quantity"],
-					"from":     "right_arm",
+					"item":     mainMap["item"],
+					"quantity": mainMap["quantity"],
+					"from":     "mainhand",
 				})
 			}
 		}
-		// Unequip left_arm if occupied
-		if leftMap, ok := gearSlots["left_arm"].(map[string]interface{}); ok {
-			if leftMap["item"] != nil && leftMap["item"] != "" {
+		// Unequip offhand if occupied
+		if offMap, ok := gearSlots["offhand"].(map[string]interface{}); ok {
+			if offMap["item"] != nil && offMap["item"] != "" {
 				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
-					"item":     leftMap["item"],
-					"quantity": leftMap["quantity"],
-					"from":     "left_arm",
+					"item":     offMap["item"],
+					"quantity": offMap["quantity"],
+					"from":     "offhand",
 				})
 			}
 		}
@@ -339,9 +360,9 @@ func handleEquipItem(save *SaveFile, req *types.ItemActionRequest) *types.ItemAc
 
 	gearSlots[equipSlot] = equippedItem
 
-	// For two-handed weapons, also clear left_arm
+	// For two-handed weapons, also clear offhand
 	if isTwoHanded {
-		gearSlots["left_arm"] = map[string]interface{}{
+		gearSlots["offhand"] = map[string]interface{}{
 			"item":     nil,
 			"quantity": 0,
 		}
@@ -2436,13 +2457,15 @@ func handleRemoveFromContainer(save *SaveFile, req *types.ItemActionRequest) *ty
 
 // ItemActionsHandler returns available actions for an item
 func ItemActionsHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract item type from query parameters
+	// Extract item type and tags from query parameters
 	itemType := r.URL.Query().Get("type")
 	isEquippedStr := r.URL.Query().Get("equipped")
+	hasEquipmentTagStr := r.URL.Query().Get("hasEquipmentTag")
 
 	isEquipped := strings.ToLower(isEquippedStr) == "true"
+	hasEquipmentTag := strings.ToLower(hasEquipmentTagStr) == "true"
 
-	actions := types.GetItemActions(itemType, isEquipped)
+	actions := types.GetItemActions(itemType, isEquipped, hasEquipmentTag)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{

@@ -1,7 +1,7 @@
 {
   "ai_description": "short heavy arrows with steel points and wooden shafts, thick crossbow ammunition with metal tips and fletching",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "ammunition",
+  "gear_slot": "ammo",
   "id": "crossbow-bolts",
   "image": "/res/img/items/crossbow-bolts.png",
   "img": "equipment/ammunition.jpg",

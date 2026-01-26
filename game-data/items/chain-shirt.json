@@ -2,7 +2,7 @@
   "ac": "13 + Dex(max2)",
   "ai_description": "lightweight armor of interlocked metal rings, flexible chainmail covering torso and shoulders",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "armor",
+  "gear_slot": "chest",
   "id": "chain-shirt",
   "image": "/res/img/items/chain-shirt.png",
   "img": "equipment/armor.jpg",

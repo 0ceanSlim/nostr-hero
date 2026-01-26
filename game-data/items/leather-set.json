@@ -1,0 +1,35 @@
+{
+  "id": "leather-set",
+  "name": "Leather Armor Set",
+  "description": "A complete set of supple leather armor providing basic protection while maintaining flexibility.",
+  "ai_description": "brown boiled leather armor set with vest and pants, flexible protection for rogues and rangers",
+  "rarity": "common",
+  "price": 1000,
+  "weight": 0,
+  "stack": 1,
+  "type": "Armor Set",
+  "tags": [
+    "pack",
+    "armor-set"
+  ],
+  "contents": [
+    ["leather-vest", 1],
+    ["leather-leggings", 1]
+  ],
+  "set_bonus": {
+    "ac": "11 + Dex",
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "ac",
+        "value": 11,
+        "dex_bonus": true,
+        "description": "Full leather protection"
+      }
+    ]
+  },
+  "notes": [
+    "Light armor allows full dexterity bonus"
+  ],
+  "image": "/res/img/items/leather.png"
+}

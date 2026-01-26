@@ -1,0 +1,24 @@
+{
+  "id": "plate-greaves",
+  "name": "Plate Greaves",
+  "description": "Heavy steel leg armor with articulated knee guards, the leg piece of a full plate armor set.",
+  "ai_description": "gleaming steel leg armor with knee guards and cuisses, heavy plate greaves with articulated joints",
+  "rarity": "rare",
+  "price": 60000,
+  "weight": 25,
+  "stack": 1,
+  "type": "Heavy Armor",
+  "gear_slot": "legs",
+  "ac": "7",
+  "tags": [
+    "equipment",
+    "heavy"
+  ],
+  "set": "plate-set",
+  "notes": [
+    "Part of the Plate Armor Set",
+    "Requires Strength 15 to wear effectively",
+    "Disadvantage on Stealth"
+  ],
+  "image": "/res/img/items/plate-greaves.png"
+}

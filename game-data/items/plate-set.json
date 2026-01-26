@@ -1,0 +1,41 @@
+{
+  "id": "plate-set",
+  "name": "Plate Armor Set",
+  "description": "A complete suit of articulated steel plates providing the ultimate in protection.",
+  "ai_description": "full suit of articulated steel plates, gleaming knight's armor with pauldrons, breastplate, and greaves",
+  "rarity": "rare",
+  "price": 150000,
+  "weight": 0,
+  "stack": 1,
+  "type": "Armor Set",
+  "tags": [
+    "pack",
+    "armor-set"
+  ],
+  "contents": [
+    ["plate-cuirass", 1],
+    ["plate-greaves", 1]
+  ],
+  "set_bonus": {
+    "ac": 18,
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "ac",
+        "value": 18,
+        "description": "Full plate protection"
+      }
+    ],
+    "requirements": {
+      "strength": 15
+    },
+    "penalties": {
+      "stealth": "disadvantage"
+    }
+  },
+  "notes": [
+    "Requires Strength 15 to wear effectively",
+    "Disadvantage on Stealth when full set is worn"
+  ],
+  "image": "/res/img/items/plate.png"
+}

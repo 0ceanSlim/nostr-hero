@@ -36,10 +36,6 @@
     [
       "waterskin",
       1
-    ],
-    [
-      "clothes-travelers",
-      1
     ]
   ],
   "description": "A specialized kit for underground exploration containing tools and supplies for dungeon delving. Unpacking equips a backpack and places all contents inside it.",

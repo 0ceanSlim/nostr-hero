@@ -411,7 +411,7 @@
       },
       "given_items": [
         {
-          "item": "leather",
+          "item": "leather-set",
           "quantity": 1
         },
         {
@@ -445,17 +445,17 @@
           "options": [
             {
               "type": "single",
-              "item": "scale-mail",
+              "item": "scalemail-set",
               "quantity": 1
             },
             {
               "type": "single",
-              "item": "leather",
+              "item": "leather-set",
               "quantity": 1
             },
             {
               "type": "single",
-              "item": "chain-mail",
+              "item": "chainmail-set",
               "quantity": 1
             }
           ]
@@ -867,7 +867,7 @@
       "pack_choice": null,
       "given_items": [
         {
-          "item": "leather",
+          "item": "leather-set",
           "quantity": 1
         },
         {
@@ -886,14 +886,14 @@
           "options": [
             {
               "type": "single",
-              "item": "chain-mail",
+              "item": "chainmail-set",
               "quantity": 1
             },
             {
               "type": "bundle",
               "items": [
                 {
-                  "item": "leather",
+                  "item": "leather-set",
                   "quantity": 1
                 },
                 {
@@ -1348,7 +1348,7 @@
       },
       "given_items": [
         {
-          "item": "chain-mail",
+          "item": "chainmail-set",
           "quantity": 1
         }
       ]
@@ -1363,12 +1363,12 @@
           "options": [
             {
               "type": "single",
-              "item": "scale-mail",
+              "item": "scalemail-set",
               "quantity": 1
             },
             {
               "type": "single",
-              "item": "leather",
+              "item": "leather-set",
               "quantity": 1
             }
           ]
@@ -1491,7 +1491,7 @@
       },
       "given_items": [
         {
-          "item": "leather",
+          "item": "leather-set",
           "quantity": 1
         },
         {
@@ -1960,7 +1960,7 @@
       },
       "given_items": [
         {
-          "item": "leather",
+          "item": "leather-set",
           "quantity": 1
         },
         {

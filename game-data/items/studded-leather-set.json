@@ -1,0 +1,35 @@
+{
+  "id": "studded-leather-set",
+  "name": "Studded Leather Set",
+  "description": "A complete set of leather armor reinforced with metal studs and rivets.",
+  "ai_description": "leather armor reinforced with metal studs, tough hide set with iron spikes for protection",
+  "rarity": "common",
+  "price": 4500,
+  "weight": 0,
+  "stack": 1,
+  "type": "Armor Set",
+  "tags": [
+    "pack",
+    "armor-set"
+  ],
+  "contents": [
+    ["studded-leather-vest", 1],
+    ["studded-leather-leggings", 1]
+  ],
+  "set_bonus": {
+    "ac": "12 + Dex",
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "ac",
+        "value": 12,
+        "dex_bonus": true,
+        "description": "Full studded leather protection"
+      }
+    ]
+  },
+  "notes": [
+    "Light armor allows full dexterity bonus"
+  ],
+  "image": "/res/img/items/studded-leather.png"
+}

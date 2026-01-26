@@ -1,7 +1,7 @@
 {
   "ai_description": "bundle of wooden arrows with steel points and feathered fletching, straight shafts for bow shooting with sharp tips",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "ammunition",
+  "gear_slot": "ammo",
   "id": "arrows",
   "image": "/res/img/items/arrows.png",
   "img": "equipment/ammunition.jpg",

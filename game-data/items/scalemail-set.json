@@ -1,0 +1,39 @@
+{
+  "id": "scalemail-set",
+  "name": "Scale Mail Set",
+  "description": "A complete set of armor made from overlapping metal scales sewn to a leather backing.",
+  "ai_description": "armor made of overlapping metal scales sewn to leather backing, dragon-like protective covering",
+  "rarity": "uncommon",
+  "price": 5000,
+  "weight": 0,
+  "stack": 1,
+  "type": "Armor Set",
+  "tags": [
+    "pack",
+    "armor-set"
+  ],
+  "contents": [
+    ["scalemail-cuirass", 1],
+    ["scalemail-greaves", 1]
+  ],
+  "set_bonus": {
+    "ac": "14 + Dex(max2)",
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "ac",
+        "value": 14,
+        "max_dex": 2,
+        "description": "Full scale mail protection"
+      }
+    ],
+    "penalties": {
+      "stealth": "disadvantage"
+    }
+  },
+  "notes": [
+    "Disadvantage on Stealth when full set is worn",
+    "Maximum Dexterity bonus of +2"
+  ],
+  "image": "/res/img/items/scale-mail.png"
+}

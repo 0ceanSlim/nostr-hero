@@ -191,14 +191,18 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 			map[string]any{"slot": 3, "item": nil, "quantity": 0},
 		},
 		"gear_slots": map[string]interface{}{
-			"bag":        map[string]interface{}{"item": nil, "quantity": 0},
-			"left_arm":   map[string]interface{}{"item": nil, "quantity": 0},
-			"right_arm":  map[string]interface{}{"item": nil, "quantity": 0},
-			"armor":      map[string]interface{}{"item": nil, "quantity": 0},
-			"necklace":   map[string]interface{}{"item": nil, "quantity": 0},
-			"ring":       map[string]interface{}{"item": nil, "quantity": 0},
-			"ammunition": map[string]interface{}{"item": nil, "quantity": 0},
-			"clothes":    map[string]interface{}{"item": nil, "quantity": 0},
+			"neck":     map[string]interface{}{"item": nil, "quantity": 0},
+			"head":     map[string]interface{}{"item": nil, "quantity": 0},
+			"ammo":     map[string]interface{}{"item": nil, "quantity": 0},
+			"mainhand": map[string]interface{}{"item": nil, "quantity": 0},
+			"chest":    map[string]interface{}{"item": nil, "quantity": 0},
+			"offhand":  map[string]interface{}{"item": nil, "quantity": 0},
+			"ring1":    map[string]interface{}{"item": nil, "quantity": 0},
+			"legs":     map[string]interface{}{"item": nil, "quantity": 0},
+			"ring2":    map[string]interface{}{"item": nil, "quantity": 0},
+			"gloves":   map[string]interface{}{"item": nil, "quantity": 0},
+			"boots":    map[string]interface{}{"item": nil, "quantity": 0},
+			"bag":      map[string]interface{}{"item": nil, "quantity": 0},
 		},
 	}
 
@@ -207,6 +211,23 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 
 	remainingItems := []ItemWithQty{}
 	twoHandedEquipped := false
+
+	// 0. Unpack armor sets into individual pieces first
+	expandedItems := []ItemWithQty{}
+	for _, item := range items {
+		if isArmorSet(database, item.Item) {
+			pieces, err := unpackArmorSet(database, item.Item)
+			if err != nil {
+				log.Printf("⚠️  Failed to unpack armor set %s: %v", item.Item, err)
+				expandedItems = append(expandedItems, item)
+			} else {
+				expandedItems = append(expandedItems, pieces...)
+			}
+		} else {
+			expandedItems = append(expandedItems, item)
+		}
+	}
+	items = expandedItems
 
 	// 1. Handle packs first (auto-unpack to bag slot)
 	for _, item := range items {
@@ -245,7 +266,7 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 		equipped := false
 
 		switch gearSlot {
-		case "armor", "necklace", "ring", "ammunition", "clothes":
+		case "chest", "neck", "head", "legs", "gloves", "boots", "ammo":
 			if gearSlots[gearSlot].(map[string]interface{})["item"] == nil {
 				gearSlots[gearSlot] = map[string]interface{}{
 					"item":     item.Item,
@@ -255,35 +276,73 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 				equipped = true
 			}
 
+		case "ring":
+			// Try ring1 first, then ring2
+			if gearSlots["ring1"].(map[string]interface{})["item"] == nil {
+				gearSlots["ring1"] = map[string]interface{}{
+					"item":     item.Item,
+					"quantity": item.Quantity,
+				}
+				log.Printf("✅ Equipped %s to ring1 slot", item.Item)
+				equipped = true
+			} else if gearSlots["ring2"].(map[string]interface{})["item"] == nil {
+				gearSlots["ring2"] = map[string]interface{}{
+					"item":     item.Item,
+					"quantity": item.Quantity,
+				}
+				log.Printf("✅ Equipped %s to ring2 slot", item.Item)
+				equipped = true
+			}
+
 		case "hands":
 			isTwoHanded := hasTags(itemData, []string{"two-handed"})
 
 			if isTwoHanded {
-				if gearSlots["right_arm"].(map[string]interface{})["item"] == nil {
-					gearSlots["right_arm"] = map[string]interface{}{
+				if gearSlots["mainhand"].(map[string]interface{})["item"] == nil {
+					gearSlots["mainhand"] = map[string]interface{}{
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
-					log.Printf("✅ Equipped two-handed %s to hands", item.Item)
+					log.Printf("✅ Equipped two-handed %s to mainhand", item.Item)
 					twoHandedEquipped = true
 					equipped = true
 				}
 			} else {
-				if gearSlots["right_arm"].(map[string]interface{})["item"] == nil {
-					gearSlots["right_arm"] = map[string]interface{}{
+				if gearSlots["mainhand"].(map[string]interface{})["item"] == nil {
+					gearSlots["mainhand"] = map[string]interface{}{
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
-					log.Printf("✅ Equipped %s to right hand", item.Item)
+					log.Printf("✅ Equipped %s to mainhand", item.Item)
 					equipped = true
-				} else if gearSlots["left_arm"].(map[string]interface{})["item"] == nil && !twoHandedEquipped {
-					gearSlots["left_arm"] = map[string]interface{}{
+				} else if gearSlots["offhand"].(map[string]interface{})["item"] == nil && !twoHandedEquipped {
+					gearSlots["offhand"] = map[string]interface{}{
 						"item":     item.Item,
 						"quantity": item.Quantity,
 					}
-					log.Printf("✅ Equipped %s to left hand", item.Item)
+					log.Printf("✅ Equipped %s to offhand", item.Item)
 					equipped = true
 				}
+			}
+
+		case "mainhand":
+			if gearSlots["mainhand"].(map[string]interface{})["item"] == nil {
+				gearSlots["mainhand"] = map[string]interface{}{
+					"item":     item.Item,
+					"quantity": item.Quantity,
+				}
+				log.Printf("✅ Equipped %s to mainhand slot", item.Item)
+				equipped = true
+			}
+
+		case "offhand":
+			if gearSlots["offhand"].(map[string]interface{})["item"] == nil && !twoHandedEquipped {
+				gearSlots["offhand"] = map[string]interface{}{
+					"item":     item.Item,
+					"quantity": item.Quantity,
+				}
+				log.Printf("✅ Equipped %s to offhand slot", item.Item)
+				equipped = true
 			}
 		}
 
@@ -390,6 +449,56 @@ func isPackItem(itemID string) bool {
 	       itemID == "scholars-pack" || itemID == "dungeoneers-pack" ||
 	       itemID == "diplomats-pack" || itemID == "entertainers-pack" ||
 	       itemID == "burglars-pack" || itemID == "druid-pack"
+}
+
+func isArmorSet(database *sql.DB, itemID string) bool {
+	itemData, err := getItemData(database, itemID)
+	if err != nil {
+		return false
+	}
+	return hasTags(itemData, []string{"armor-set"})
+}
+
+func unpackArmorSet(database *sql.DB, setID string) ([]ItemWithQty, error) {
+	var propertiesJSON string
+	err := database.QueryRow("SELECT properties FROM items WHERE id = ?", setID).Scan(&propertiesJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query armor set: %v", err)
+	}
+
+	var properties map[string]interface{}
+	if err := json.Unmarshal([]byte(propertiesJSON), &properties); err != nil {
+		return nil, fmt.Errorf("failed to parse properties: %v", err)
+	}
+
+	contentsRaw, ok := properties["contents"]
+	if !ok {
+		return nil, fmt.Errorf("armor set has no contents field")
+	}
+
+	contentsArray, ok := contentsRaw.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("contents is not an array")
+	}
+
+	items := []ItemWithQty{}
+	for _, itemRaw := range contentsArray {
+		itemArray, ok := itemRaw.([]interface{})
+		if !ok || len(itemArray) < 2 {
+			continue
+		}
+
+		itemID, ok1 := itemArray[0].(string)
+		qty, ok2 := itemArray[1].(float64)
+		if !ok1 || !ok2 {
+			continue
+		}
+
+		items = append(items, ItemWithQty{Item: itemID, Quantity: int(qty)})
+	}
+
+	log.Printf("📦 Unpacked armor set %s into %d pieces", setID, len(items))
+	return items, nil
 }
 
 func unpackItem(database *sql.DB, packID string) ([]map[string]interface{}, error) {

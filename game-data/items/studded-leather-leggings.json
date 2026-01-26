@@ -1,0 +1,22 @@
+{
+  "id": "studded-leather-leggings",
+  "name": "Studded Leather Leggings",
+  "description": "Leather pants reinforced with metal studs and rivets for extra protection.",
+  "ai_description": "leather pants reinforced with metal studs and rivets, tough leg armor with iron spikes",
+  "rarity": "common",
+  "price": 1800,
+  "weight": 5,
+  "stack": 1,
+  "type": "Light Armor",
+  "gear_slot": "legs",
+  "ac": "5",
+  "tags": [
+    "equipment",
+    "light"
+  ],
+  "set": "studded-leather-set",
+  "notes": [
+    "Part of the Studded Leather Set"
+  ],
+  "image": "/res/img/items/studded-leather-leggings.png"
+}
