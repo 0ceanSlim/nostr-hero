@@ -1,0 +1,38 @@
+{
+  "id": "savage-leap",
+  "name": "Savage Leap",
+  "class": "barbarian",
+  "unlock_level": 7,
+  "resource_cost": 25,
+  "resource_type": "rage",
+  "cooldown": "none",
+  "description": "Barbarian leaps across the battlefield, crashing down on enemies.",
+  "scaling_tiers": [
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["savage-leap-t1"],
+      "summary": "Leap to enemy, deal 100% weapon damage"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["savage-leap-t2"],
+      "summary": "Leap to enemy, 150% AoE damage"
+    },
+    {
+      "min_level": 17,
+      "max_level": 19,
+      "effects_applied": ["savage-leap-t3"],
+      "override_cost": 20,
+      "summary": "Leap, 200% AoE + knock prone (20 RG)"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["savage-leap-t4"],
+      "override_cost": 20,
+      "summary": "Leap, 250% AoE + prone + stun 1 turn (20 RG)"
+    }
+  ]
+}

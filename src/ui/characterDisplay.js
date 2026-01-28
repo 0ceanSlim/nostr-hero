@@ -11,6 +11,13 @@ import { logger } from '../lib/logger.js';
 import { getGameStateSync } from '../state/gameState.js';
 import { loadItemsFromDatabase } from '../data/items.js';
 import { eventBus } from '../lib/events.js';
+import {
+    getClassResource,
+    calculateMaxResource,
+    getCurrentResource,
+    getResourceGradient,
+    loadClassResources
+} from '../data/classResources.js';
 
 // Advancement data cache
 let advancementDataCache = null;
@@ -161,6 +168,41 @@ export async function calculateAndDisplayWeight(character) {
 }
 
 /**
+ * Update the resource bar (mana/stamina/rage/ki/cunning) based on character class
+ * @param {Object} character - Character data
+ */
+async function updateResourceBar(character) {
+    const resourceConfig = await getClassResource(character.class);
+
+    const currentResourceEl = document.getElementById('current-mana');
+    const maxResourceEl = document.getElementById('max-mana');
+    const resourceBarEl = document.getElementById('mana-bar');
+    const resourceLabelEl = document.getElementById('resource-label');
+
+    // Calculate values
+    const maxResource = calculateMaxResource(resourceConfig, character);
+    const currentResource = getCurrentResource(resourceConfig, character);
+    const percentage = maxResource > 0 ? (currentResource / maxResource * 100) : 0;
+
+    // Update values
+    if (currentResourceEl) currentResourceEl.textContent = currentResource;
+    if (maxResourceEl) maxResourceEl.textContent = maxResource;
+
+    // Update bar width and color
+    if (resourceBarEl) {
+        resourceBarEl.style.width = percentage + '%';
+        resourceBarEl.style.background = getResourceGradient(resourceConfig);
+    }
+
+    // Update label (if element exists)
+    if (resourceLabelEl) {
+        resourceLabelEl.textContent = resourceConfig.short_label || 'MP';
+    }
+
+    logger.debug(`Resource bar updated for ${character.class}: ${currentResource}/${maxResource} (${resourceConfig.type})`);
+}
+
+/**
  * Update full character display from save data
  */
 export async function updateCharacterDisplay() {
@@ -239,16 +281,8 @@ export async function updateCharacterDisplay() {
         hpBarEl.style.width = hpPercentage + '%';
     }
 
-    // Update mana display
-    const currentManaEl = document.getElementById('current-mana');
-    const maxManaEl = document.getElementById('max-mana');
-    const manaBarEl = document.getElementById('mana-bar');
-    if (currentManaEl) currentManaEl.textContent = character.mana || 0;
-    if (maxManaEl) maxManaEl.textContent = character.max_mana || 0;
-    if (manaBarEl) {
-        const manaPercentage = (character.max_mana > 0) ? (character.mana / character.max_mana * 100) : 0;
-        manaBarEl.style.width = manaPercentage + '%';
-    }
+    // Update resource display (mana for casters, stamina/rage/ki/cunning for martials)
+    await updateResourceBar(character);
 
     // Update quick status (main bar - icons with radial progress)
     const fatigue = Math.min(character.fatigue || 0, 10);

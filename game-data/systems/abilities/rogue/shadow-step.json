@@ -1,0 +1,30 @@
+{
+  "id": "shadow-step",
+  "name": "Shadow Step",
+  "class": "rogue",
+  "unlock_level": 15,
+  "resource_cost": 4,
+  "resource_type": "cunning",
+  "cooldown": "none",
+  "description": "Rogue steps through shadows to appear behind their target for a devastating strike.",
+  "scaling_tiers": [
+    {
+      "min_level": 15,
+      "max_level": 17,
+      "effects_applied": ["shadow-step-t1"],
+      "summary": "Teleport behind, auto-crit for 300% damage"
+    },
+    {
+      "min_level": 18,
+      "max_level": 19,
+      "effects_applied": ["shadow-step-t2"],
+      "summary": "Teleport behind, 2 auto-crits for 350%"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["shadow-step-t3"],
+      "summary": "Teleport, 3 auto-crits 400% + bleed 20/turn"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "disarming-blow",
+  "name": "Disarming Blow",
+  "class": "fighter",
+  "unlock_level": 7,
+  "resource_cost": 3,
+  "resource_type": "stamina",
+  "cooldown": "none",
+  "description": "Fighter strikes the enemy's weapon, forcing them to drop it.",
+  "scaling_tiers": [
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["disarming-blow-t1"],
+      "summary": "Disarm enemy for 2 turns, -50% damage"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["disarming-blow-t2"],
+      "summary": "Disarm enemy for 3 turns, -60% damage"
+    },
+    {
+      "min_level": 17,
+      "max_level": 99,
+      "effects_applied": ["disarming-blow-t3"],
+      "summary": "Disarm for 4 turns, -75% damage, steal weapon"
+    }
+  ]
+}

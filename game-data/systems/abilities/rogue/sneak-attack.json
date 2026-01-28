@@ -1,0 +1,36 @@
+{
+  "id": "sneak-attack",
+  "name": "Sneak Attack",
+  "class": "rogue",
+  "unlock_level": 1,
+  "resource_cost": 3,
+  "resource_type": "cunning",
+  "cooldown": "none",
+  "description": "Rogue strikes at a vulnerable point, dealing massive damage.",
+  "scaling_tiers": [
+    {
+      "min_level": 1,
+      "max_level": 4,
+      "effects_applied": ["sneak-attack-t1"],
+      "summary": "+2d6 damage, auto-crit from stealth"
+    },
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["sneak-attack-t2"],
+      "summary": "+4d6 damage, auto-crit from stealth"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["sneak-attack-t3"],
+      "summary": "+6d6, auto-crit stealth, 30% kill if HP <20%"
+    },
+    {
+      "min_level": 15,
+      "max_level": 99,
+      "effects_applied": ["sneak-attack-t4"],
+      "summary": "+10d6, auto-crit stealth, 50% kill if HP <30%"
+    }
+  ]
+}

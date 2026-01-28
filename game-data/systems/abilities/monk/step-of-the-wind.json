@@ -1,0 +1,36 @@
+{
+  "id": "step-of-the-wind",
+  "name": "Step of the Wind",
+  "class": "monk",
+  "unlock_level": 7,
+  "resource_cost": 1,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk moves with supernatural speed, appearing anywhere on the battlefield.",
+  "scaling_tiers": [
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["step-of-the-wind-t1"],
+      "summary": "Teleport anywhere on battlefield"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["step-of-the-wind-t2"],
+      "summary": "Teleport + next attack deals +50% damage"
+    },
+    {
+      "min_level": 17,
+      "max_level": 19,
+      "effects_applied": ["step-of-the-wind-t3"],
+      "summary": "Teleport + next attack +100% + auto-crit"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["step-of-the-wind-t4"],
+      "summary": "Teleport + next 2 attacks +150% + auto-crit"
+    }
+  ]
+}

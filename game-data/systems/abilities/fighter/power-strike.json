@@ -1,0 +1,36 @@
+{
+  "id": "power-strike",
+  "name": "Power Strike",
+  "class": "fighter",
+  "unlock_level": 3,
+  "resource_cost": 2,
+  "resource_type": "stamina",
+  "cooldown": "none",
+  "description": "Fighter puts extra force into their next strike.",
+  "scaling_tiers": [
+    {
+      "min_level": 3,
+      "max_level": 6,
+      "effects_applied": ["power-strike-t1"],
+      "summary": "Next attack deals 150% damage"
+    },
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["power-strike-t2"],
+      "summary": "Next attack deals 200% damage"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["power-strike-t3"],
+      "summary": "Next attack deals 250% damage + ignores armor"
+    },
+    {
+      "min_level": 17,
+      "max_level": 99,
+      "effects_applied": ["power-strike-t4"],
+      "summary": "Next attack deals 300% damage + ignores armor + cleaves"
+    }
+  ]
+}

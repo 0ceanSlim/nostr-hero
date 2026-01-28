@@ -1,0 +1,38 @@
+{
+  "id": "intimidating-roar",
+  "name": "Intimidating Roar",
+  "class": "barbarian",
+  "unlock_level": 5,
+  "resource_cost": 30,
+  "resource_type": "rage",
+  "cooldown": "none",
+  "description": "Barbarian unleashes a terrifying roar that shakes the resolve of all enemies.",
+  "scaling_tiers": [
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["intimidating-roar-t1"],
+      "summary": "Enemies deal -30% damage for 2 turns"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["intimidating-roar-t2"],
+      "summary": "Enemies -40% damage for 3 turns + 20% flee"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["intimidating-roar-t3"],
+      "override_cost": 25,
+      "summary": "Enemies -50% damage 4 turns + 35% flee (25 RG)"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["intimidating-roar-t4"],
+      "override_cost": 25,
+      "summary": "Enemies -60% for 5 turns + 50% flee + no heal"
+    }
+  ]
+}

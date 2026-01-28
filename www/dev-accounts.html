@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostr Hero - Test Accounts</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a1a;
+            color: #c0c0c0;
+            min-height: 100vh;
+        }
+        #gate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 16px;
+        }
+        #gate h1 {
+            color: #e2b340;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(226, 179, 64, 0.3);
+        }
+        #gate input {
+            background: #111;
+            border: 2px solid #333;
+            color: #fff;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            width: 280px;
+            text-align: center;
+            outline: none;
+        }
+        #gate input:focus { border-color: #e2b340; }
+        #gate button {
+            background: #e2b340;
+            color: #0a0a1a;
+            border: none;
+            padding: 10px 32px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #gate button:hover { background: #f0c860; }
+        #gate .error { color: #f44; font-size: 12px; min-height: 16px; }
+        #content { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+        #content.visible { display: block; }
+        .page-title {
+            text-align: center;
+            color: #e2b340;
+            font-size: 22px;
+            margin-bottom: 4px;
+            text-shadow: 0 0 10px rgba(226, 179, 64, 0.3);
+        }
+        .page-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 32px;
+        }
+        .city-header {
+            color: #e2b340;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 28px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e2b34040;
+            letter-spacing: 1px;
+        }
+        .city-header:first-of-type { margin-top: 0; }
+        .account-card {
+            background: #111122;
+            border: 1px solid #222;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: grid;
+            grid-template-columns: 36px 1fr;
+            gap: 0 12px;
+            transition: border-color 0.2s;
+        }
+        .account-card:hover { border-color: #444; }
+        .account-num {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            grid-row: span 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .account-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .race-name { color: #8cb4ff; }
+        .class-name { color: #fff; }
+        .account-details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px 10px;
+            font-size: 11px;
+        }
+        .label { color: #555; text-transform: uppercase; font-size: 10px; }
+        .key-value {
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            cursor: pointer;
+            padding: 1px 4px;
+            transition: background 0.15s;
+        }
+        .key-value:hover { background: #1a1a3a; }
+        .key-value.nsec-key { color: #f87171; }
+        .key-value.npub-key { color: #4ade80; }
+        .city-value { color: #d4a0ff; }
+        .copied-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4ade80;
+            color: #000;
+            padding: 8px 20px;
+            font-synthesis: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .copied-toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div id="gate">
+    <h1>NOSTR HERO</h1>
+    <div style="color: #666; font-size: 12px;">Test Account Access</div>
+    <input type="password" id="pw" placeholder="Enter password" autofocus>
+    <button onclick="unlock()">ENTER</button>
+    <div class="error" id="error"></div>
+</div>
+
+<div id="content">
+    <div class="page-title">NOSTR HERO - TEST ACCOUNTS</div>
+    <div class="page-subtitle">Import the nsec into your Nostr extension to log in. Click any key to copy.</div>
+    <div id="account-list"></div>
+</div>
+
+<div class="copied-toast" id="toast">Copied!</div>
+
+<script>
+    const CITY_HOMELANDS = {
+        marshlight: "MARSHLIGHT VILLAGE - Orc Homeland",
+        ironpeak: "IRONPEAK TOWN - Dwarf Homeland",
+        millhaven: "MILLHAVEN VILLAGE - Halfling & Gnome Homeland",
+        verdant: "VERDANT CITY - Elf Homeland",
+        goldenhaven: "GOLDENHAVEN CITY - Dragonborn Homeland",
+        kingdom: "KINGDOM - Human Homeland"
+    };
+
+    let PASS_HASH = '';
+
+    async function loadData() {
+        try {
+            const [accountsRes, secretsRes, passRes] = await Promise.all([
+                fetch('../dev-accounts.json'),
+                fetch('../dev-accounts-secrets.json'),
+                fetch('../password.json')
+            ]);
+
+            if (!accountsRes.ok || !secretsRes.ok || !passRes.ok) {
+                throw new Error('Failed to load account data.');
+            }
+
+            const accountsData = await accountsRes.json();
+            const secretsData = await secretsRes.json();
+            const passData = await passRes.json();
+            
+            PASS_HASH = passData.password_hash;
+
+            const secretsMap = secretsData.secrets || {};
+            let allAccounts = [];
+            let accountNum = 1;
+
+            for (const city in accountsData.accounts) {
+                const cityAccounts = accountsData.accounts[city].map(acc => ({
+                    ...acc,
+                    city: city,
+                    nsec: secretsMap[acc.npub] || 'NOT_FOUND'
+                }));
+                allAccounts.push(...cityAccounts);
+            }
+
+            renderAccounts(allAccounts);
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('account-list').innerHTML = '<div style="text-align: center; color: #f44;">Error loading account data. See console for details.</div>';
+        }
+    }
+
+    function renderAccounts(allAccounts) {
+        const container = document.getElementById('account-list');
+        container.innerHTML = '';
+        let currentCity = null;
+        let accountNum = 0;
+
+        const cityOrder = ['marshlight', 'ironpeak', 'millhaven', 'verdant', 'goldenhaven', 'kingdom'];
+
+        for (const city of cityOrder) {
+            const accountsInCity = allAccounts.filter(acc => acc.city === city);
+            if (accountsInCity.length === 0) continue;
+
+            const cityHeader = document.createElement('div');
+            cityHeader.className = 'city-header';
+            cityHeader.textContent = CITY_HOMELANDS[city] || city.toUpperCase();
+            container.appendChild(cityHeader);
+
+            for (const account of accountsInCity) {
+                accountNum++;
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.innerHTML = `
+                    <div class="account-num">${accountNum}</div>
+                    <div class="account-title">
+                        <span class="race-name">${account.race}</span>
+                        <span class="class-name">${account.class}</span>
+                    </div>
+                    <div class="account-details">
+                        <span class="label">City</span> <span class="city-value">${account.city}</span>
+                        <span class="label">nsec</span> <span class="key-value nsec-key" onclick="copyKey(this)">${account.nsec}</span>
+                        <span class="label">npub</span> <span class="key-value npub-key" onclick="copyKey(this)">${account.npub}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+    }
+
+    async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hash = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function unlock() {
+        if (!PASS_HASH) return;
+        const pw = document.getElementById('pw').value;
+        const hash = await sha256(pw);
+        if (hash === PASS_HASH) {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('content').classList.add('visible');
+        } else {
+            document.getElementById('error').textContent = 'Wrong password';
+            document.getElementById('pw').value = '';
+            document.getElementById('pw').focus();
+        }
+    }
+
+    function copyKey(el) {
+        navigator.clipboard.writeText(el.textContent.trim());
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1200);
+    }
+    
+    document.getElementById('pw').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') unlock();
+    });
+
+    loadData();
+</script>
+</body>
+</html>

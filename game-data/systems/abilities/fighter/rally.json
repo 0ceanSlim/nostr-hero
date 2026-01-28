@@ -1,0 +1,30 @@
+{
+  "id": "rally",
+  "name": "Rally",
+  "class": "fighter",
+  "unlock_level": 10,
+  "resource_cost": 4,
+  "resource_type": "stamina",
+  "cooldown": "none",
+  "description": "Fighter rallies themselves, recovering health over time while continuing to fight.",
+  "scaling_tiers": [
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["rally-t1"],
+      "summary": "Heal 10% max HP per turn for 3 turns"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["rally-t2"],
+      "summary": "Heal 15% max HP per turn for 4 turns"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["rally-t3"],
+      "summary": "Heal 20% per turn for 5 turns + 20% damage bonus"
+    }
+  ]
+}

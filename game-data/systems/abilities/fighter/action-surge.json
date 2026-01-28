@@ -1,0 +1,39 @@
+{
+  "id": "action-surge",
+  "name": "Action Surge",
+  "class": "fighter",
+  "unlock_level": 5,
+  "resource_cost": 5,
+  "resource_type": "stamina",
+  "cooldown": "once_per_combat",
+  "description": "Fighter pushes beyond normal limits to act multiple times in rapid succession.",
+  "scaling_tiers": [
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["action-surge-t1"],
+      "summary": "Take 2 actions this turn"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["action-surge-t2"],
+      "override_cost": 4,
+      "summary": "Take 2 actions this turn (costs 4 ST)"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["action-surge-t3"],
+      "summary": "Take 3 actions this turn"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["action-surge-t4"],
+      "override_cost": 4,
+      "override_cooldown": 2,
+      "summary": "Take 3 actions this turn (4 ST), usable twice"
+    }
+  ]
+}

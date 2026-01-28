@@ -1,0 +1,38 @@
+{
+  "id": "reckless-attack",
+  "name": "Reckless Attack",
+  "class": "barbarian",
+  "unlock_level": 3,
+  "resource_cost": 20,
+  "resource_type": "rage",
+  "cooldown": "none",
+  "description": "Barbarian attacks with reckless abandon, sacrificing defense for overwhelming offense.",
+  "scaling_tiers": [
+    {
+      "min_level": 3,
+      "max_level": 6,
+      "effects_applied": ["reckless-attack-t1"],
+      "summary": "Auto-crit, take +50% damage next turn (20 RG)"
+    },
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["reckless-attack-t2"],
+      "summary": "Auto-crit for 3x, take +30% damage next turn (20 RG)"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["reckless-attack-t3"],
+      "override_cost": 25,
+      "summary": "2 auto-crits for 3x, +20% damage taken (25 RG)"
+    },
+    {
+      "min_level": 17,
+      "max_level": 99,
+      "effects_applied": ["reckless-attack-t4"],
+      "override_cost": 30,
+      "summary": "3 auto-crits for 4x, no penalty (30 RG)"
+    }
+  ]
+}

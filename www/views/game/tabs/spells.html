@@ -1,14 +1,64 @@
 {{define "game/tabs/spells.html"}}
-<!-- Spells Tab -->
-<div id="spells-panel" class="tab-panel hidden space-y-3">
-    <h3 class="text-sm font-bold text-yellow-400 mb-2">SPELL SLOTS</h3>
-    <div id="spell-slots-container" class="space-y-2">
-        <!-- Spell slots populated by JS -->
+<!-- Spells & Abilities Tab - Dual view for casters and martials -->
+<div id="spells-panel" class="tab-panel hidden w-full" style="overflow-y: auto; overflow-x: hidden;">
+
+    <!-- CASTER VIEW (shown for caster classes) -->
+    <div id="caster-view" class="hidden space-y-2 p-1">
+        <!-- Spell Slots Section -->
+        <div class="text-xs font-bold text-yellow-400 mb-1" style="font-size: 8px;">SPELL SLOTS</div>
+        <div id="spell-slots-container" class="space-y-1" style="font-size: 7px;">
+            <!-- Rows: Cantrips, Level 1, Level 2, etc. - populated by JS -->
+        </div>
+
+        <!-- Known Spells List -->
+        <div class="text-xs font-bold text-yellow-400 mb-1 mt-2" style="font-size: 8px;">KNOWN SPELLS</div>
+        <div id="known-spells-list" style="font-size: 7px;">
+            <!-- Table rows: school icon | name | damage emoji + roll | component icons -->
+            <!-- Populated by spellsDisplay.js -->
+        </div>
     </div>
 
-    <h3 class="text-sm font-bold text-yellow-400 mb-2 mt-4">KNOWN SPELLS</h3>
-    <div id="known-spells" class="grid grid-cols-3 gap-2">
-        <!-- Spells populated by JS -->
+    <!-- MARTIAL VIEW (shown for martial classes) -->
+    <div id="martial-view" class="hidden p-1 w-full" style="box-sizing: border-box;">
+        <!-- Fighter: Battle Formation (2-col grid) -->
+        <div id="fighter-layout" class="hidden">
+            <div class="text-center font-bold text-yellow-400 mb-2" style="font-size: 9px;">
+                <span style="font-size: 11px;">&#x2694;</span> FIGHTER ABILITIES
+            </div>
+            <div id="fighter-abilities-grid" class="grid grid-cols-2 gap-2">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Barbarian: Rage Escalation (tiered sections, bottom to top) -->
+        <div id="barbarian-layout" class="hidden w-full">
+            <div class="text-center font-bold text-yellow-400 mb-2" style="font-size: 9px;">
+                <span style="font-size: 11px;">&#x1F525;</span> BARBARIAN ABILITIES
+            </div>
+            <div id="barbarian-abilities-tiers" class="w-full" style="display: flex; flex-direction: column-reverse; gap: 4px;">
+                <!-- Tiered sections populated by JS (reversed: RAGE at bottom, PRIMAL at top) -->
+            </div>
+        </div>
+
+        <!-- Monk: Chakra (diamond/centered pattern) -->
+        <div id="monk-layout" class="hidden">
+            <div class="text-center font-bold text-yellow-400 mb-2" style="font-size: 9px;">
+                <span style="font-size: 11px;">&#x2727;</span> MONK ABILITIES
+            </div>
+            <div id="monk-abilities-diamond" class="flex flex-col items-center gap-1">
+                <!-- Diamond pattern populated by JS -->
+            </div>
+        </div>
+
+        <!-- Rogue: Shadow Web (web/network pattern) -->
+        <div id="rogue-layout" class="hidden">
+            <div class="text-center font-bold text-yellow-400 mb-2" style="font-size: 9px;">
+                <span style="font-size: 11px;">&#x1F5E1;</span> ROGUE ABILITIES
+            </div>
+            <div id="rogue-abilities-web" class="flex flex-col items-center gap-1">
+                <!-- Web pattern populated by JS -->
+            </div>
+        </div>
     </div>
 </div>
 {{end}}

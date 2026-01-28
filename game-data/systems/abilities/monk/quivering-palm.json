@@ -1,0 +1,30 @@
+{
+  "id": "quivering-palm",
+  "name": "Quivering Palm",
+  "class": "monk",
+  "unlock_level": 15,
+  "resource_cost": 4,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk touches an enemy and sets vibrations in their body that cause delayed catastrophic damage.",
+  "scaling_tiers": [
+    {
+      "min_level": 15,
+      "max_level": 17,
+      "effects_applied": ["quivering-palm-t1"],
+      "summary": "Deal 300 damage after 3 turns (CON save)"
+    },
+    {
+      "min_level": 18,
+      "max_level": 19,
+      "effects_applied": ["quivering-palm-t2"],
+      "summary": "Deal 500 damage after 2 turns (CON save)"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["quivering-palm-t3"],
+      "summary": "Instant kill if HP <30%, else 800 damage (CON save)"
+    }
+  ]
+}

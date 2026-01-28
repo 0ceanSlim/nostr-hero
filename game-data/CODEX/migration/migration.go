@@ -177,6 +177,20 @@ func createTables() error {
 			properties TEXT,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// Abilities table (martial class abilities)
+		`CREATE TABLE IF NOT EXISTS abilities (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			class TEXT NOT NULL,
+			unlock_level INTEGER NOT NULL,
+			resource_cost INTEGER DEFAULT 0,
+			resource_type TEXT,
+			cooldown TEXT,
+			description TEXT,
+			properties TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, table := range tables {
@@ -231,6 +245,14 @@ func migrateFromJSON(callback StatusCallback) error {
 	}
 	if err := migrateEffects(callback); err != nil {
 		return fmt.Errorf("failed to migrate effects: %v", err)
+	}
+
+	// Migrate abilities
+	if callback != nil {
+		callback(Status{Step: "abilities", Message: "Migrating martial abilities"})
+	}
+	if err := migrateAbilities(callback); err != nil {
+		return fmt.Errorf("failed to migrate abilities: %v", err)
 	}
 
 	// Migrate system data (spell slots, music)
@@ -727,6 +749,76 @@ func migrateEffectFile(filePath string) error {
 
 	stmt := `INSERT INTO effects (id, name, description, properties) VALUES (?, ?, ?, ?)`
 	_, err = database.Exec(stmt, id, name, description, string(propertiesJSON))
+	return err
+}
+
+// migrateAbilities migrates all ability JSON files from class subdirectories
+func migrateAbilities(callback StatusCallback) error {
+	abilitiesPath := "game-data/systems/abilities"
+
+	// Clear existing abilities
+	if _, err := database.Exec("DELETE FROM abilities"); err != nil {
+		return fmt.Errorf("failed to clear abilities table: %v", err)
+	}
+
+	count := 0
+
+	// Walk through class subdirectories (fighter, barbarian, monk, rogue)
+	err := filepath.WalkDir(abilitiesPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(path, ".json") {
+			if err := migrateAbilityFile(path); err != nil {
+				log.Printf("Warning: failed to migrate ability file %s: %v", path, err)
+			} else {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk abilities directory: %v", err)
+	}
+
+	log.Printf("Migrated %d abilities", count)
+	return nil
+}
+
+// migrateAbilityFile migrates a single ability JSON file
+func migrateAbilityFile(filePath string) error {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	var ability map[string]interface{}
+	if err := json.Unmarshal(data, &ability); err != nil {
+		return err
+	}
+
+	// Extract base filename as ID
+	id := strings.TrimSuffix(filepath.Base(filePath), ".json")
+
+	// Convert ability data to required fields
+	name, _ := ability["name"].(string)
+	class, _ := ability["class"].(string)
+	unlockLevelFloat, _ := ability["unlock_level"].(float64)
+	unlockLevel := int(unlockLevelFloat)
+	resourceCostFloat, _ := ability["resource_cost"].(float64)
+	resourceCost := int(resourceCostFloat)
+	resourceType, _ := ability["resource_type"].(string)
+	cooldown, _ := ability["cooldown"].(string)
+	description, _ := ability["description"].(string)
+
+	// Serialize all properties as JSON (includes scaling_tiers, effects_applied, etc.)
+	propertiesJSON, _ := json.Marshal(ability)
+
+	stmt := `INSERT INTO abilities (id, name, class, unlock_level, resource_cost, resource_type, cooldown, description, properties)
+	         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	_, err = database.Exec(stmt, id, name, class, unlockLevel, resourceCost, resourceType, cooldown, description, string(propertiesJSON))
 	return err
 }
 

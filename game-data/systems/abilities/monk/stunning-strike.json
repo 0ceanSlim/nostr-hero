@@ -1,0 +1,36 @@
+{
+  "id": "stunning-strike",
+  "name": "Stunning Strike",
+  "class": "monk",
+  "unlock_level": 5,
+  "resource_cost": 2,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk strikes a pressure point, temporarily paralyzing the enemy.",
+  "scaling_tiers": [
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["stunning-strike-t1"],
+      "summary": "Stun enemy for 1 turn"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["stunning-strike-t2"],
+      "summary": "Stun enemy for 2 turns"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["stunning-strike-t3"],
+      "summary": "Stun 2 turns + double damage while stunned"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["stunning-strike-t4"],
+      "summary": "Stun 3 turns + triple damage + skip turn after"
+    }
+  ]
+}

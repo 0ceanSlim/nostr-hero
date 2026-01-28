@@ -1,0 +1,36 @@
+{
+  "id": "flurry-of-blows",
+  "name": "Flurry of Blows",
+  "class": "monk",
+  "unlock_level": 1,
+  "resource_cost": 1,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk unleashes a rapid series of strikes in a single moment.",
+  "scaling_tiers": [
+    {
+      "min_level": 1,
+      "max_level": 4,
+      "effects_applied": ["flurry-of-blows-t1"],
+      "summary": "Attack 2 times this turn"
+    },
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["flurry-of-blows-t2"],
+      "summary": "Attack 3 times this turn"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["flurry-of-blows-t3"],
+      "summary": "Attack 4 times this turn"
+    },
+    {
+      "min_level": 15,
+      "max_level": 99,
+      "effects_applied": ["flurry-of-blows-t4"],
+      "summary": "Attack 5 times this turn"
+    }
+  ]
+}

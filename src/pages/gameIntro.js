@@ -8,6 +8,7 @@
  */
 
 import { logger } from '../lib/logger.js';
+import { getDamageEmoji } from '../lib/damageTypes.js';
 import { getSpellById, getItemById } from '../state/staticData.js';
 import { getItemStats } from '../data/items.js';
 import {
@@ -942,23 +943,7 @@ async function createSpellCard(spellId) {
     card.appendChild(damageBadge);
 
     // Damage type emoji - position above spell name
-    const damageEmojis = {
-      fire: "🔥",
-      cold: "❄️",
-      lightning: "⚡",
-      thunder: "⚡",
-      acid: "🧪",
-      poison: "☠️",
-      necrotic: "☠️",
-      radiant: "✨",
-      psychic: "🧠",
-      force: "🌀",
-      slashing: "🗡️",
-      piercing: "🏹",
-      bludgeoning: "🔨",
-      healing: "💚",
-    };
-    const emoji = damageEmojis[damageType] || (isHealing ? "💚" : "⚔️");
+    const emoji = getDamageEmoji(damageType, isHealing);
 
     const emojiDiv = document.createElement("div");
     emojiDiv.className = "absolute right-1";

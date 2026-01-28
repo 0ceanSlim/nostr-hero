@@ -1,0 +1,91 @@
+{
+  "fighter": {
+    "type": "stamina",
+    "label": "Stamina",
+    "short_label": "ST",
+    "color": "#22c55e",
+    "color_gradient": {
+      "start": "#22c55e",
+      "mid": "#16a34a",
+      "end": "#15803d"
+    },
+    "max": 10,
+    "regen": {
+      "per_turn": 2
+    },
+    "combat_start": "max"
+  },
+  "barbarian": {
+    "type": "rage",
+    "label": "Rage",
+    "short_label": "RG",
+    "color": "#f97316",
+    "color_gradient": {
+      "start": "#f97316",
+      "mid": "#ea580c",
+      "end": "#c2410c"
+    },
+    "max": 100,
+    "regen": {
+      "per_hit_taken": 10
+    },
+    "combat_start": 0
+  },
+  "monk": {
+    "type": "ki",
+    "label": "Ki",
+    "short_label": "KI",
+    "color": "#eab308",
+    "color_gradient": {
+      "start": "#eab308",
+      "mid": "#ca8a04",
+      "end": "#a16207"
+    },
+    "max_formula": "wisdom_mod + level",
+    "regen": {
+      "per_turn": 1
+    },
+    "combat_start": "max"
+  },
+  "rogue": {
+    "type": "cunning",
+    "label": "Cunning",
+    "short_label": "CN",
+    "color": "#a855f7",
+    "color_gradient": {
+      "start": "#a855f7",
+      "mid": "#9333ea",
+      "end": "#7e22ce"
+    },
+    "max": 10,
+    "regen": {
+      "per_turn": 2,
+      "per_crit": 1
+    },
+    "combat_start": "max"
+  },
+  "wizard": {
+    "type": "mana"
+  },
+  "sorcerer": {
+    "type": "mana"
+  },
+  "warlock": {
+    "type": "mana"
+  },
+  "bard": {
+    "type": "mana"
+  },
+  "cleric": {
+    "type": "mana"
+  },
+  "druid": {
+    "type": "mana"
+  },
+  "paladin": {
+    "type": "mana"
+  },
+  "ranger": {
+    "type": "mana"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "deflect-missiles",
+  "name": "Deflect Missiles",
+  "class": "monk",
+  "unlock_level": 10,
+  "resource_cost": 2,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk's reflexes are so fast they can catch arrows and even deflect weapons mid-swing.",
+  "scaling_tiers": [
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["deflect-missiles-t1"],
+      "summary": "Catch projectile, throw back for 150% damage"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["deflect-missiles-t2"],
+      "summary": "Catch projectile, 200% damage to 2 enemies"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["deflect-missiles-t3"],
+      "summary": "Catch ANY attack, reflect 300% to all enemies"
+    }
+  ]
+}

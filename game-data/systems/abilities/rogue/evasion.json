@@ -1,0 +1,30 @@
+{
+  "id": "evasion",
+  "name": "Evasion",
+  "class": "rogue",
+  "unlock_level": 8,
+  "resource_cost": 0,
+  "resource_type": "cunning",
+  "cooldown": "passive",
+  "description": "Rogue's reflexes allow them to completely avoid area attacks.",
+  "scaling_tiers": [
+    {
+      "min_level": 8,
+      "max_level": 12,
+      "effects_applied": ["evasion-t1"],
+      "summary": "Take 0 damage from AoE attacks"
+    },
+    {
+      "min_level": 13,
+      "max_level": 17,
+      "effects_applied": ["evasion-t2"],
+      "summary": "AoE immune + gain 2 Cunning when evading"
+    },
+    {
+      "min_level": 18,
+      "max_level": 99,
+      "effects_applied": ["evasion-t3"],
+      "summary": "AoE immune + 3 Cunning + reflect 50% avoided damage"
+    }
+  ]
+}

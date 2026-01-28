@@ -58,6 +58,7 @@ func main() {
 	mux.HandleFunc("/api/locations", api.LocationsHandler)
 	mux.HandleFunc("/api/npcs", api.NPCsHandler)
 	mux.HandleFunc("/api/npcs/at-location", api.GetNPCsAtLocationHandler)
+	mux.HandleFunc("/api/abilities", api.AbilitiesHandler)
 
 	// Character generation API endpoints
 	mux.HandleFunc("/api/weights", api.WeightsHandler)

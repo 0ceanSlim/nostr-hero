@@ -1,0 +1,32 @@
+{
+  "id": "berserker-mode",
+  "name": "Berserker Mode",
+  "class": "barbarian",
+  "unlock_level": 12,
+  "resource_cost": 75,
+  "resource_type": "rage",
+  "cooldown": "once_per_combat",
+  "description": "Barbarian enters an unstoppable berserker state, becoming an immortal force of destruction.",
+  "scaling_tiers": [
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["berserker-mode-t1"],
+      "summary": "+100% damage, can't die for 4 turns"
+    },
+    {
+      "min_level": 17,
+      "max_level": 19,
+      "effects_applied": ["berserker-mode-t2"],
+      "summary": "+125% damage, can't die 5 turns, heal 10 per hit"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["berserker-mode-t3"],
+      "override_cost": 70,
+      "override_cooldown": 2,
+      "summary": "+150% damage, can't die 6 turns, 15 heal/hit, CC immune, twice"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "indomitable",
+  "name": "Indomitable",
+  "class": "fighter",
+  "unlock_level": 15,
+  "resource_cost": 7,
+  "resource_type": "stamina",
+  "cooldown": "once_per_day",
+  "description": "Fighter refuses to fall, their willpower keeping them alive against impossible odds.",
+  "scaling_tiers": [
+    {
+      "min_level": 15,
+      "max_level": 17,
+      "effects_applied": ["indomitable-t1"],
+      "summary": "Cannot die for 2 turns"
+    },
+    {
+      "min_level": 18,
+      "max_level": 19,
+      "effects_applied": ["indomitable-t2"],
+      "summary": "Cannot die for 3 turns + heal 5% per turn"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["indomitable-t3"],
+      "override_cost": 6,
+      "override_cooldown": 2,
+      "summary": "Cannot die for 4 turns + 10% heal + double damage, twice per day"
+    }
+  ]
+}

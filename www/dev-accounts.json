@@ -1,0 +1,77 @@
+{
+  "description": "Dev/test accounts for Nostr Hero. Public keys only - safe to commit.",
+  "accounts": {
+    "marshlight": [
+      {
+        "npub": "npub1684yedhej8dp9gfuzyn7a0trm6q06klxlemas0d4j473kpa5jevq0s87t8",
+        "class": "barbarian",
+        "race": "orc"
+      },
+      {
+        "npub": "npub16nuw7722q64xkxdup56vtjm5hddfr77du8dcgr88tgsgaszw9urqk6ry29",
+        "class": "sorcerer",
+        "race": "orc"
+      }
+    ],
+    "ironpeak": [
+      {
+        "npub": "npub1fq5q7uk83k095dz92cp5hmg8tuwn776edz86x0nddgtsazjhydqqq2sxqh",
+        "class": "monk",
+        "race": "dwarf"
+      },
+      {
+        "npub": "npub1q7eugt3vk2qwud6p8z2vqawghmm5msvunz4sk9zmfyzwthjyympqclq437",
+        "class": "bard",
+        "race": "dwarf"
+      }
+    ],
+    "millhaven": [
+      {
+        "npub": "npub1et45wpnmwnevmlhthle8mj0t5aeass8eqyqutv23adx4jm38lc3qp59fa5",
+        "class": "rogue",
+        "race": "gnome"
+      },
+      {
+        "npub": "npub122ea4aaxh27jcdagkex65gcz08us685rld5p39snztvxsnpn48yq8g62y2",
+        "class": "druid",
+        "race": "halfling"
+      }
+    ],
+    "verdant": [
+      {
+        "npub": "npub1q3f8p38s8e9mjfaw7njl8h3d44qt4mftz7kflajdp5e3hxexek8sh8tuuc",
+        "class": "fighter",
+        "race": "elf"
+      },
+      {
+        "npub": "npub1lfvc58ngqerrgrngdzza493d0dpeuvggx5spvw53qggees8reljqgykayl",
+        "class": "wizard",
+        "race": "elf"
+      }
+    ],
+    "goldenhaven": [
+      {
+        "npub": "npub1a72gegfhv98cwswlvaau3u3aa3nad4xd805xvt5md6ar7y0cusgq0ugh6w",
+        "class": "ranger",
+        "race": "dragonborn"
+      },
+      {
+        "npub": "npub1pccq6pegjvwgcnpnendc3snjckv2egexe84y99wvgrqwzwezaweq4jdsym",
+        "class": "warlock",
+        "race": "dragonborn"
+      }
+    ],
+    "kingdom": [
+      {
+        "npub": "npub1qp8yumlttcjtmspgyufdu2a8lkzjd9yu2j7h9k8q4zsf24frxsvsczqr86",
+        "class": "paladin",
+        "race": "human"
+      },
+      {
+        "npub": "npub1hqs05v2sw9rv6hsrnfnrk5qsqqdav2lenph7ljz2x90ze5fkgvus748gn3",
+        "class": "cleric",
+        "race": "human"
+      }
+    ]
+  }
+}

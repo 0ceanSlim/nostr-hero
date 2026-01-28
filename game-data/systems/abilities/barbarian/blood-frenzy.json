@@ -1,0 +1,36 @@
+{
+  "id": "blood-frenzy",
+  "name": "Blood Frenzy",
+  "class": "barbarian",
+  "unlock_level": 8,
+  "resource_cost": 0,
+  "resource_type": "rage",
+  "cooldown": "passive",
+  "description": "The sight of blood drives the Barbarian into deeper frenzy, healing their wounds.",
+  "scaling_tiers": [
+    {
+      "min_level": 8,
+      "max_level": 11,
+      "effects_applied": ["blood-frenzy-t1"],
+      "summary": "Killing enemy restores 20% HP"
+    },
+    {
+      "min_level": 12,
+      "max_level": 15,
+      "effects_applied": ["blood-frenzy-t2"],
+      "summary": "Kill restores 30% HP + extends Rage 2 turns"
+    },
+    {
+      "min_level": 16,
+      "max_level": 19,
+      "effects_applied": ["blood-frenzy-t3"],
+      "summary": "Kill restores 40% HP + 3 Rage turns + 20 Rage"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["blood-frenzy-t4"],
+      "summary": "Kill restores 50% HP + indefinite Rage + 30 Rage"
+    }
+  ]
+}

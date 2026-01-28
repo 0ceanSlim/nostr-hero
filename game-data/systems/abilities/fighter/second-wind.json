@@ -1,0 +1,37 @@
+{
+  "id": "second-wind",
+  "name": "Second Wind",
+  "class": "fighter",
+  "unlock_level": 1,
+  "resource_cost": 3,
+  "resource_type": "stamina",
+  "cooldown": "once_per_combat",
+  "description": "Fighter catches their breath and recovers from wounds mid-battle.",
+  "scaling_tiers": [
+    {
+      "min_level": 1,
+      "max_level": 4,
+      "effects_applied": ["second-wind-t1"],
+      "summary": "Heal 25% max HP"
+    },
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["second-wind-t2"],
+      "summary": "Heal 40% max HP"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["second-wind-t3"],
+      "summary": "Heal 60% max HP + remove 1 debuff"
+    },
+    {
+      "min_level": 15,
+      "max_level": 99,
+      "effects_applied": ["second-wind-t4"],
+      "summary": "Heal 80% max HP + remove all debuffs + 20 temp HP, usable twice",
+      "override_cooldown": 2
+    }
+  ]
+}

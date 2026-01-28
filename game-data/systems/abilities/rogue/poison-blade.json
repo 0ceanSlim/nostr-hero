@@ -1,0 +1,36 @@
+{
+  "id": "poison-blade",
+  "name": "Poison Blade",
+  "class": "rogue",
+  "unlock_level": 5,
+  "resource_cost": 3,
+  "resource_type": "cunning",
+  "cooldown": "none",
+  "description": "Rogue coats their weapon in deadly poison.",
+  "scaling_tiers": [
+    {
+      "min_level": 5,
+      "max_level": 9,
+      "effects_applied": ["poison-blade-t1"],
+      "summary": "Next 3 attacks deal +15 poison damage"
+    },
+    {
+      "min_level": 10,
+      "max_level": 14,
+      "effects_applied": ["poison-blade-t2"],
+      "summary": "5 attacks +25 poison + slow (-30% damage)"
+    },
+    {
+      "min_level": 15,
+      "max_level": 19,
+      "effects_applied": ["poison-blade-t3"],
+      "summary": "7 attacks +40 poison + slow + -50% healing"
+    },
+    {
+      "min_level": 20,
+      "max_level": 99,
+      "effects_applied": ["poison-blade-t4"],
+      "summary": "10 attacks +60 poison + slow + no heal + 5/turn DoT"
+    }
+  ]
+}

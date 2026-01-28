@@ -1,0 +1,36 @@
+{
+  "id": "patient-defense",
+  "name": "Patient Defense",
+  "class": "monk",
+  "unlock_level": 3,
+  "resource_cost": 1,
+  "resource_type": "ki",
+  "cooldown": "none",
+  "description": "Monk enters a defensive stance, evading attacks and redirecting force.",
+  "scaling_tiers": [
+    {
+      "min_level": 3,
+      "max_level": 6,
+      "effects_applied": ["patient-defense-t1"],
+      "summary": "Dodge all attacks for 1 turn"
+    },
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["patient-defense-t2"],
+      "summary": "Dodge 1 turn + reflect 25% damage"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["patient-defense-t3"],
+      "summary": "Dodge 2 turns + reflect 50% damage"
+    },
+    {
+      "min_level": 17,
+      "max_level": 99,
+      "effects_applied": ["patient-defense-t4"],
+      "summary": "Dodge 2 turns + reflect 100% + heal reflected"
+    }
+  ]
+}

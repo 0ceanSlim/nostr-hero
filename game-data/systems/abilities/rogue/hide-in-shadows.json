@@ -1,0 +1,36 @@
+{
+  "id": "hide-in-shadows",
+  "name": "Hide in Shadows",
+  "class": "rogue",
+  "unlock_level": 3,
+  "resource_cost": 2,
+  "resource_type": "cunning",
+  "cooldown": "none",
+  "description": "Rogue melts into the shadows, becoming invisible to enemies.",
+  "scaling_tiers": [
+    {
+      "min_level": 3,
+      "max_level": 6,
+      "effects_applied": ["hide-in-shadows-t1"],
+      "summary": "Invisible for 2 turns or until attack"
+    },
+    {
+      "min_level": 7,
+      "max_level": 11,
+      "effects_applied": ["hide-in-shadows-t2"],
+      "summary": "Invisible 3 turns, +25% crit while hidden"
+    },
+    {
+      "min_level": 12,
+      "max_level": 16,
+      "effects_applied": ["hide-in-shadows-t3"],
+      "summary": "Invisible 4 turns, +50% crit, 1st attack stays hidden"
+    },
+    {
+      "min_level": 17,
+      "max_level": 99,
+      "effects_applied": ["hide-in-shadows-t4"],
+      "summary": "Invisible 5 turns, +75% crit, 2 attacks stay hidden"
+    }
+  ]
+}
