@@ -29,7 +29,7 @@
       },
       "buildings": [
         {
-          "id": "stonevault",
+          "id": "stone_vault",
           "name": "The Stonevault",
           "description": "Ancient dwarven vaults carved deep into the mountain by the first settlers. Massive underground chambers where clan members store their wealth and heirlooms.",
           "open": "always",

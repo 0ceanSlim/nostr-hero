@@ -4,7 +4,7 @@
   "damage": "1d6",
   "damage-type": "piercing",
   "description": "A compact crossbow that can be operated with one hand.",
-  "gear_slot": "hands",
+  "gear_slot": "mainhand",
   "id": "crossbow-light",
   "image": "/res/img/items/crossbow-light.png",
   "img": "equipment/weapon.jpg",

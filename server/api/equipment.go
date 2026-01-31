@@ -85,21 +85,21 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 			case "hands":
 				// For weapons and shields
 				if itemType == "Shield" {
-					equipSlot = "left_arm"
+					equipSlot = "offhand"
 				} else {
 					// Weapon - check availability
-					rightArm := gearSlots["right_arm"]
-					leftArm := gearSlots["left_arm"]
+					mainhandSlot := gearSlots["mainhand"]
+					offhandSlot := gearSlots["offhand"]
 
 					rightOccupied := false
 					leftOccupied := false
 
-					if rightMap, ok := rightArm.(map[string]interface{}); ok {
+					if rightMap, ok := mainhandSlot.(map[string]interface{}); ok {
 						if rightMap["item"] != nil && rightMap["item"] != "" {
 							rightOccupied = true
 						}
 					}
-					if leftMap, ok := leftArm.(map[string]interface{}); ok {
+					if leftMap, ok := offhandSlot.(map[string]interface{}); ok {
 						if leftMap["item"] != nil && leftMap["item"] != "" {
 							leftOccupied = true
 						}
@@ -107,12 +107,12 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 
 					// Choose slot
 					if !rightOccupied {
-						equipSlot = "right_arm"
+						equipSlot = "mainhand"
 					} else if !leftOccupied {
-						equipSlot = "left_arm"
+						equipSlot = "offhand"
 					} else {
 						// Both full, swap with right
-						equipSlot = "right_arm"
+						equipSlot = "mainhand"
 					}
 				}
 			case "armor", "body":
@@ -127,6 +127,10 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 				equipSlot = "clothes"
 			case "bag", "backpack":
 				equipSlot = "bag"
+			case "mainhand":
+				equipSlot = "mainhand"
+			case "offhand":
+				equipSlot = "offhand"
 			default:
 				equipSlot = gearSlotProp
 			}
@@ -140,23 +144,23 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 	// Handle two-handed weapons - unequip both hands
 	var itemsToUnequip []map[string]interface{}
 	if isTwoHanded {
-		// Unequip right_arm if occupied
-		if rightMap, ok := gearSlots["right_arm"].(map[string]interface{}); ok {
+		// Unequip mainhand if occupied
+		if rightMap, ok := gearSlots["mainhand"].(map[string]interface{}); ok {
 			if rightMap["item"] != nil && rightMap["item"] != "" {
 				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
 					"item":     rightMap["item"],
 					"quantity": rightMap["quantity"],
-					"from":     "right_arm",
+					"from":     "mainhand",
 				})
 			}
 		}
-		// Unequip left_arm if occupied
-		if leftMap, ok := gearSlots["left_arm"].(map[string]interface{}); ok {
+		// Unequip offhand if occupied
+		if leftMap, ok := gearSlots["offhand"].(map[string]interface{}); ok {
 			if leftMap["item"] != nil && leftMap["item"] != "" {
 				itemsToUnequip = append(itemsToUnequip, map[string]interface{}{
 					"item":     leftMap["item"],
 					"quantity": leftMap["quantity"],
-					"from":     "left_arm",
+					"from":     "offhand",
 				})
 			}
 		}
@@ -193,10 +197,10 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 											// Existing item is two-handed - also clear the other hand
 											var otherSlot string
 											switch equipSlot {
-											case "right_arm":
-												otherSlot = "left_arm"
-											case "left_arm":
-												otherSlot = "right_arm"
+											case "mainhand":
+												otherSlot = "offhand"
+											case "offhand":
+												otherSlot = "mainhand"
 											}
 
 											if otherSlot != "" {
@@ -397,13 +401,13 @@ func handleEquipItemAction(state *SaveFile, params map[string]interface{}) (*Gam
 
 	// Move item to equipment slot
 	if isTwoHanded {
-		// Two-handed weapons always go to right_arm and occupy both hands
-		gearSlots["right_arm"] = map[string]interface{}{
+		// Two-handed weapons always go to mainhand and occupy both hands
+		gearSlots["mainhand"] = map[string]interface{}{
 			"item":     itemData["item"],
 			"quantity": itemData["quantity"],
 		}
-		// Set left_arm to same item to show it's occupied
-		gearSlots["left_arm"] = map[string]interface{}{
+		// Set offhand to same item to show it's occupied
+		gearSlots["offhand"] = map[string]interface{}{
 			"item":     itemData["item"],
 			"quantity": itemData["quantity"],
 		}
@@ -674,24 +678,24 @@ func handleUnequipItemAction(state *SaveFile, params map[string]interface{}) (*G
 	// Check if this is a two-handed weapon (item in both hands)
 	// If so, clear the other hand too
 	switch equipSlot {
-	case "right_arm":
-		if leftArm, ok := gearSlots["left_arm"].(map[string]interface{}); ok {
-			if leftArm["item"] == itemID {
-				gearSlots["left_arm"] = map[string]interface{}{
+	case "mainhand":
+		if offhandSlot, ok := gearSlots["offhand"].(map[string]interface{}); ok {
+			if offhandSlot["item"] == itemID {
+				gearSlots["offhand"] = map[string]interface{}{
 					"item":     nil,
 					"quantity": 0,
 				}
-				log.Printf("✅ Also cleared left_arm (two-handed weapon)")
+				log.Printf("✅ Also cleared offhand (two-handed weapon)")
 			}
 		}
-	case "left_arm":
-		if rightArm, ok := gearSlots["right_arm"].(map[string]interface{}); ok {
-			if rightArm["item"] == itemID {
-				gearSlots["right_arm"] = map[string]interface{}{
+	case "offhand":
+		if mainhandSlot, ok := gearSlots["mainhand"].(map[string]interface{}); ok {
+			if mainhandSlot["item"] == itemID {
+				gearSlots["mainhand"] = map[string]interface{}{
 					"item":     nil,
 					"quantity": 0,
 				}
-				log.Printf("✅ Also cleared right_arm (two-handed weapon)")
+				log.Printf("✅ Also cleared mainhand (two-handed weapon)")
 			}
 		}
 	}

@@ -409,9 +409,14 @@ async function loginWithPrivateKey() {
     }
     try {
         showMessage('🗝️ Logging in with private key...', 'info');
-        await window.sessionManager.loginWithPrivateKey(privateKey, { password });
-        // Success is handled by event listeners
+        console.log('🔑 About to call sessionManager.loginWithPrivateKey...');
+        const result = await window.sessionManager.loginWithPrivateKey(privateKey, { password });
+        console.log('🔑 loginWithPrivateKey returned:', result);
+        // Login successful - redirect to saves
+        console.log('🔑 Redirecting to /saves...');
+        window.location.href = '/saves';
     } catch (error) {
+        console.error('🔑 Private key login caught error:', error);
         logger.error('Private key login error:', error);
         // Don't show error message if it's a whitelist denial (popup already shown)
         if (!error.whitelistDenial) {

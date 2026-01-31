@@ -28,7 +28,7 @@
       },
       "buildings": [
         {
-          "id": "warhoard",
+          "id": "war_hoard",
           "name": "The Warhoard",
           "description": "Communal caches where orcs store spoils of war. Battle-scarred vaults in the lower levels, guarded fiercely by the clan's most trusted warriors.",
           "open": "always",
@@ -51,6 +51,13 @@
         {
           "id": "rokgar_quarters",
           "name": "Rokgar's Private Quarters",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
+        },
+        {
+          "id": "grokmar_hut",
+          "name": "Grokmar's Hut",
           "description": "Private quarters.",
           "open": -1,
           "close": null

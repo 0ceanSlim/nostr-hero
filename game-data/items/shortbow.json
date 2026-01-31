@@ -4,7 +4,7 @@
   "damage": "1d6",
   "damage-type": "piercing",
   "description": "A compact recurved bow made for mobility and quick shots in combat.",
-  "gear_slot": "hands",
+  "gear_slot": "mainhand",
   "id": "shortbow",
   "image": "/res/img/items/shortbow.png",
   "img": "equipment/weapon.jpg",

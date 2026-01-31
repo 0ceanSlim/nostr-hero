@@ -3,7 +3,7 @@
   "damage": "1d10",
   "damage-type": "piercing",
   "description": "NEEDS DESCRIPTION",
-  "gear_slot": "hands",
+  "gear_slot": "mainhand",
   "id": "pike",
   "image": "/res/img/items/pike.png",
   "img": "equipment/weapon.jpg",

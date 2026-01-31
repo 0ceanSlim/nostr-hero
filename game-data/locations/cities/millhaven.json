@@ -28,7 +28,7 @@
       },
       "buildings": [
         {
-          "id": "burrowlock",
+          "id": "burrow_lock",
           "name": "The Burrowlock",
           "description": "Each family in Millhaven maintains shared storage burrows beneath their villages. Cozy underground chambers lined with cedar, each secured with unique brass locks.",
           "open": "always",

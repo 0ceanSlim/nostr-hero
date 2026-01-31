@@ -16,7 +16,7 @@
     {
       "start": 360,
       "end": 420,
-      "location": "town-northeast",
+      "location": "ironpeak-center",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -32,7 +32,7 @@
     {
       "start": 1200,
       "end": 1260,
-      "location": "town-northeast",
+      "location": "ironpeak-center",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []

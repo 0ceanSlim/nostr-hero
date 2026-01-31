@@ -463,12 +463,15 @@ class SessionManager {
             throw new Error(result.error || result.message || 'Login failed');
         }
 
-        // Store session data
+        logger.debug('Login response:', result);
+
+        // Store session data - use top-level fields from backend response
+        // (result.session may have different field names from grain library)
         this.sessionData = {
-            publicKey: result.session.public_key,
+            publicKey: result.public_key || result.session?.public_key || result.session?.PublicKey,
             npub: result.npub,
-            signingMethod: result.session.signing_method,
-            mode: result.session.mode,
+            signingMethod: loginRequest.signing_method,
+            mode: loginRequest.mode || 'write',
             isActive: true,
             lastCheck: Date.now()
         };

@@ -8,7 +8,7 @@
     {
       "start": 0,
       "end": 1440,
-      "location": "burrowlock",
+      "location": "burrow_lock",
       "state": "working",
       "dialogue_options": ["about_service"],
       "available_actions": ["open_storage", "register_storage"]

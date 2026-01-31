@@ -16,7 +16,7 @@
     {
       "start": 420,
       "end": 480,
-      "location": "city-south",
+      "location": "verdant-center",
       "state": "traveling",
       "dialogue_options": ["traveling_to_work"],
       "available_actions": []
@@ -32,7 +32,7 @@
     {
       "start": 1200,
       "end": 1260,
-      "location": "city-south",
+      "location": "verdant-center",
       "state": "traveling",
       "dialogue_options": ["traveling_home"],
       "available_actions": []

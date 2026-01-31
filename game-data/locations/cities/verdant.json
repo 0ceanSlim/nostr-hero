@@ -76,6 +76,13 @@
           "description": "Private quarters.",
           "open": -1,
           "close": null
+        },
+        {
+          "id": "thalindra_grove",
+          "name": "Thalindra's Grove",
+          "description": "Private quarters.",
+          "open": -1,
+          "close": null
         }
       ]
     },

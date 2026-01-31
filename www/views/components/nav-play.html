@@ -957,7 +957,9 @@ async function loginWithPrivateKeyAndPassword() {
     document.getElementById('encryption-password-modal-input').value = '';
 
     hidePrivateKeyForm();
-    // Success handling is done by event listeners in auth.js
+
+    // Redirect to saves page on successful login
+    window.location.href = '/saves';
   } catch (error) {
     console.error('Private key login error:', error);
 
