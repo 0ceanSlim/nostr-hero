@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"nostr-hero/functions"
+	"nostr-hero/game/character"
 	"nostr-hero/types"
 	"nostr-hero/utils"
 )
@@ -44,7 +44,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate character using the loaded weight data
-	character := functions.GenerateCharacter(pubKey, &weightData)
+	generatedChar := character.GenerateCharacter(pubKey, &weightData)
 
 	registry, err := utils.ReadRegistry()
 	if err != nil {
@@ -56,7 +56,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 		newEntry := types.RegistryEntry{
 			Npub:      npub,
 			PubKey:    pubKey,
-			Character: character,
+			Character: generatedChar,
 		}
 		registry = append(registry, newEntry)
 		if err := utils.WriteRegistry(registry); err != nil {
@@ -69,6 +69,6 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"npub":      npub,
 		"pubkey":    pubKey,
-		"character": character,
+		"character": generatedChar,
 	})
 }

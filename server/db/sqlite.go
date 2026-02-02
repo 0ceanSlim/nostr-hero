@@ -249,3 +249,30 @@ type NPCData struct {
 	StorageConfig map[string]interface{} `json:"storage_config,omitempty"`
 	InnConfig     map[string]interface{} `json:"inn_config,omitempty"`
 }
+
+// GenerationWeights represents the character generation weight data
+type GenerationWeights struct {
+	Races                    []string                  `json:"Races"`
+	RaceWeights              []int                     `json:"RaceWeights"`
+	ClassWeightsByRace       map[string]map[string]int `json:"classWeightsByRace"`
+	BackgroundWeightsByClass map[string]map[string]int `json:"BackgroundWeightsByClass"`
+	Alignments               []string                  `json:"Alignments"`
+	AlignmentWeights         []int                     `json:"AlignmentWeights"`
+}
+
+// GetGenerationWeights retrieves character generation weights from the database
+func GetGenerationWeights() (*GenerationWeights, error) {
+	var dataJSON string
+
+	err := db.QueryRow(`SELECT data FROM generation_weights WHERE id = 'generation-weights' LIMIT 1`).Scan(&dataJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query generation weights: %v", err)
+	}
+
+	var weights GenerationWeights
+	if err := json.Unmarshal([]byte(dataJSON), &weights); err != nil {
+		return nil, fmt.Errorf("failed to parse generation weights JSON: %v", err)
+	}
+
+	return &weights, nil
+}

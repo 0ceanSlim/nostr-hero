@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"nostr-hero/db"
-	"nostr-hero/functions"
+	"nostr-hero/game/character"
 	"nostr-hero/types"
 	"nostr-hero/utils"
 )
@@ -112,7 +112,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	var weightDataStruct types.WeightData
 	json.Unmarshal(weightDataJSON, &weightDataStruct)
 
-	character := functions.GenerateCharacter(pubKey, &weightDataStruct)
+	generatedChar := character.GenerateCharacter(pubKey, &weightDataStruct)
 
 	// 2. Get database connection
 	database := db.GetDB()
@@ -122,14 +122,14 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 3. Load starting gear data
-	startingGear, err := loadStartingGearForClass(database, character.Class)
+	startingGear, err := loadStartingGearForClass(database, generatedChar.Class)
 	if err != nil {
 		respondWithError(w, "Failed to load starting gear: "+err.Error())
 		return
 	}
 
 	// 4. Get starting gold
-	startingGold, err := getStartingGold(database, character.Background)
+	startingGold, err := getStartingGold(database, generatedChar.Background)
 	if err != nil {
 		log.Printf("⚠️  Failed to get starting gold: %v", err)
 		startingGold = 1000 // Default
@@ -149,21 +149,21 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 7. Generate spell slots
-	spellSlots, err := generateSpellSlots(database, character.Class)
+	spellSlots, err := generateSpellSlots(database, generatedChar.Class)
 	if err != nil {
 		log.Printf("⚠️  Failed to generate spell slots: %v", err)
 		spellSlots = make(map[string]interface{})
 	}
 
 	// 8. Load known spells
-	knownSpells, err := loadKnownSpells(database, character.Class)
+	knownSpells, err := loadKnownSpells(database, generatedChar.Class)
 	if err != nil {
 		log.Printf("⚠️  Failed to load known spells: %v", err)
 		knownSpells = []string{}
 	}
 
 	// 9. Determine starting location based on race
-	startingCity, err := getStartingCityForRace(database, character.Race)
+	startingCity, err := getStartingCityForRace(database, generatedChar.Race)
 	if err != nil {
 		log.Printf("⚠️  Failed to get starting city: %v", err)
 		startingCity = "millhaven"
@@ -174,8 +174,8 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	vaults := []map[string]interface{}{startingVault}
 
 	// 11. Calculate HP and Mana
-	hp := calculateHP(character.Stats["Constitution"], character.Class)
-	mana := calculateMana(character.Stats, character.Class)
+	hp := calculateHP(generatedChar.Stats["Constitution"], generatedChar.Class)
+	mana := calculateMana(generatedChar.Stats, generatedChar.Class)
 
 	// 12. Use location IDs directly (not display names)
 	// startingCity is already an ID like "millhaven", "verdant", etc.
@@ -192,7 +192,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 14. Convert stats to interface{} map
 	statsInterface := make(map[string]interface{})
-	for k, v := range character.Stats {
+	for k, v := range generatedChar.Stats {
 		statsInterface[k] = v
 	}
 
@@ -200,10 +200,10 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	saveFile := SaveFile{
 		D:                   req.Name,
 		CreatedAt:           time.Now().UTC().Format(time.RFC3339),
-		Race:                character.Race,
-		Class:               character.Class,
-		Background:          character.Background,
-		Alignment:           character.Alignment,
+		Race:                generatedChar.Race,
+		Class:               generatedChar.Class,
+		Background:          generatedChar.Background,
+		Alignment:           generatedChar.Alignment,
 		Experience:          0,
 		HP:                  hp,
 		MaxHP:               hp,

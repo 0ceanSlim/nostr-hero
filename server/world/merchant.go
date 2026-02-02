@@ -1,4 +1,4 @@
-package merchant
+package world
 
 import (
 	"log"
@@ -15,17 +15,17 @@ type MerchantInventoryItem struct {
 
 // MerchantState represents the current state of a merchant for a specific player
 type MerchantState struct {
-	MerchantID            string                           `json:"merchant_id"`
-	CurrentGold           int                              `json:"current_gold"`
-	StartingGold          int                              `json:"starting_gold"` // For gold regen cap
-	GoldRegenRate         int                              `json:"gold_regen_rate"` // Gold restored per interval
-	Inventory             map[string]*MerchantInventoryItem `json:"inventory"` // item_id -> stock info
-	LastItemRestock       time.Time                        `json:"last_item_restock"`
-	LastGoldRestock       time.Time                        `json:"last_gold_restock"`
-	LastGoldRegen         time.Time                        `json:"last_gold_regen"` // Track gradual gold regen separately
-	ItemRestockInterval   int                              `json:"item_restock_interval"` // Minutes (default 10)
-	GoldRestockInterval   int                              `json:"gold_restock_interval"` // Minutes (default 30)
-	GoldRegenInterval     int                              `json:"gold_regen_interval"` // Minutes (default 10 for "daily")
+	MerchantID            string                            `json:"merchant_id"`
+	CurrentGold           int                               `json:"current_gold"`
+	StartingGold          int                               `json:"starting_gold"`  // For gold regen cap
+	GoldRegenRate         int                               `json:"gold_regen_rate"` // Gold restored per interval
+	Inventory             map[string]*MerchantInventoryItem `json:"inventory"`       // item_id -> stock info
+	LastItemRestock       time.Time                         `json:"last_item_restock"`
+	LastGoldRestock       time.Time                         `json:"last_gold_restock"`
+	LastGoldRegen         time.Time                         `json:"last_gold_regen"` // Track gradual gold regen separately
+	ItemRestockInterval   int                               `json:"item_restock_interval"` // Minutes (default 10)
+	GoldRestockInterval   int                               `json:"gold_restock_interval"` // Minutes (default 30)
+	GoldRegenInterval     int                               `json:"gold_regen_interval"`   // Minutes (default 10 for "daily")
 }
 
 // MerchantStateManager manages merchant states per player
@@ -38,18 +38,18 @@ type MerchantStateManager struct {
 	// globalItems map[string]int // item_id -> global_stock
 }
 
-var manager *MerchantStateManager
-var once sync.Once
+var merchantManager *MerchantStateManager
+var merchantOnce sync.Once
 
-// GetManager returns the singleton merchant state manager
-func GetManager() *MerchantStateManager {
-	once.Do(func() {
-		manager = &MerchantStateManager{
+// GetMerchantManager returns the singleton merchant state manager
+func GetMerchantManager() *MerchantStateManager {
+	merchantOnce.Do(func() {
+		merchantManager = &MerchantStateManager{
 			states: make(map[string]map[string]*MerchantState),
 		}
 		log.Println("🏪 Merchant State Manager initialized")
 	})
-	return manager
+	return merchantManager
 }
 
 // GetMerchantState gets or initializes merchant state for a player
@@ -247,9 +247,9 @@ func (m *MerchantStateManager) GetAllMerchantStatesForPlayer(npub string) map[st
 	}
 
 	// Return a copy to prevent external modification
-	copy := make(map[string]*MerchantState)
+	stateCopy := make(map[string]*MerchantState)
 	for k, v := range m.states[npub] {
-		copy[k] = v
+		stateCopy[k] = v
 	}
-	return copy
+	return stateCopy
 }

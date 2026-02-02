@@ -99,10 +99,6 @@ func main() {
 		})
 	}
 
-	// Inventory API endpoints
-	mux.HandleFunc("/api/inventory/action", api.InventoryHandler)
-	mux.HandleFunc("/api/inventory/actions", api.ItemActionsHandler)
-
 	// Shop API endpoints
 	mux.HandleFunc("/api/shop/", api.ShopHandler)
 

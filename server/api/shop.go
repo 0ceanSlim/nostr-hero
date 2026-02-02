@@ -5,31 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"nostr-hero/db"
-	"nostr-hero/merchant"
+	"nostr-hero/game/gameutil"
+	"nostr-hero/game/inventory"
+	"nostr-hero/game/shop"
+	"nostr-hero/game/status"
 	"nostr-hero/types"
+	"nostr-hero/world"
 )
 
-// Helper: Parse interval string to minutes
-// Supports named intervals ("daily", "hourly", "weekly") or direct numeric strings ("60")
+// parseIntervalToMinutes delegates to game/shop package
 func parseIntervalToMinutes(interval string) int {
-	switch interval {
-	case "daily":
-		return 10 // 10 minutes real-time = 1 game day
-	case "hourly":
-		return 1 // 1 minute real-time
-	case "weekly":
-		return 70 // 70 minutes real-time = 1 game week
-	default:
-		// Try parsing as direct minutes (e.g., "60" for 60 minutes)
-		if minutes, err := strconv.Atoi(interval); err == nil && minutes > 0 {
-			return minutes
-		}
-		return 10 // Default to daily if parsing fails
-	}
+	return shop.ParseIntervalToMinutes(interval)
 }
 
 // Helper: Get charisma stat from session state
@@ -55,131 +44,14 @@ func getCharismaFromSession(npub, saveID string) int {
 	return 10 // Default charisma if not found
 }
 
-// Helper: Calculate price player pays when buying from merchant
-// Uses pricing rules from database (shop-pricing.json)
+// calculateBuyPrice delegates to game/shop package
 func calculateBuyPrice(basePrice int, shopConfig types.ShopConfig, charisma int) int {
-	// Get pricing rules from database
-	rules, err := db.GetShopPricingRules()
-	if err != nil {
-		log.Printf("⚠️ Failed to load shop pricing rules, using defaults: %v", err)
-		// Fallback to hard-coded defaults if database fails
-		shopBaseMult := 1.625
-		charismaRate := 0.0625
-		if shopConfig.ShopType == "specialty" {
-			shopBaseMult = 1.675
-		}
-		charismaDiscount := float64(charisma-10) * charismaRate
-		finalMultiplier := shopBaseMult - charismaDiscount
-		if finalMultiplier < 0.5 {
-			finalMultiplier = 0.5
-		}
-		result := int(float64(basePrice)*finalMultiplier + 0.5)
-		if result < 1 {
-			result = 1
-		}
-		return result
-	}
-
-	// Get appropriate pricing based on shop type
-	var shopBaseMult float64
-	var charismaRate float64
-	charismaBase := rules.CharismaBase
-	if charismaBase == 0 {
-		charismaBase = 10 // Default if not set
-	}
-
-	if shopConfig.ShopType == "specialty" {
-		shopBaseMult = rules.BuyPricing.Specialty.BaseMultiplier
-		charismaRate = rules.BuyPricing.Specialty.CharismaRate
-	} else {
-		shopBaseMult = rules.BuyPricing.General.BaseMultiplier
-		charismaRate = rules.BuyPricing.General.CharismaRate
-	}
-
-	// Formula: base_value × (base_multiplier - (CHA - charisma_base) × charisma_rate)
-	charismaDiscount := float64(charisma-charismaBase) * charismaRate
-	finalMultiplier := shopBaseMult - charismaDiscount
-
-	// Ensure multiplier doesn't go below a minimum (prevent negative/zero prices)
-	if finalMultiplier < 0.5 {
-		finalMultiplier = 0.5
-	}
-
-	// Calculate final price
-	finalPrice := float64(basePrice) * finalMultiplier
-
-	// Round to nearest int, minimum 1 gold
-	result := int(finalPrice + 0.5)
-	if result < 1 {
-		result = 1
-	}
-
-	return result
+	return shop.CalculateBuyPrice(basePrice, shopConfig, charisma)
 }
 
-// Helper: Calculate price merchant pays when buying from player
-// Uses pricing rules from database (shop-pricing.json)
+// calculateSellPrice delegates to game/shop package
 func calculateSellPrice(basePrice int, shopConfig types.ShopConfig, charisma int) int {
-	// Get pricing rules from database
-	rules, err := db.GetShopPricingRules()
-	if err != nil {
-		log.Printf("⚠️ Failed to load shop pricing rules, using defaults: %v", err)
-		// Fallback to hard-coded defaults
-		var baseMult float64
-		var charismaRate float64
-		if shopConfig.ShopType == "specialty" {
-			baseMult = 0.5
-			charismaRate = 0.05
-		} else {
-			baseMult = 0.3875
-			charismaRate = 0.05625
-		}
-		finalMultiplier := baseMult + float64(charisma-10)*charismaRate
-		if finalMultiplier < 0 {
-			finalMultiplier = 0
-		}
-		result := int(float64(basePrice)*finalMultiplier + 0.5)
-		if result < 0 {
-			result = 0
-		}
-		return result
-	}
-
-	// Get appropriate pricing based on shop type
-	var baseMult float64
-	var charismaRate float64
-	charismaBase := rules.CharismaBase
-	if charismaBase == 0 {
-		charismaBase = 10 // Default if not set
-	}
-
-	if shopConfig.ShopType == "specialty" {
-		baseMult = rules.SellPricing.Specialty.BaseMultiplier
-		charismaRate = rules.SellPricing.Specialty.CharismaRate
-	} else {
-		baseMult = rules.SellPricing.General.BaseMultiplier
-		charismaRate = rules.SellPricing.General.CharismaRate
-	}
-
-	// Formula: base_value × (base_multiplier + (CHA - charisma_base) × charisma_rate)
-	charismaBonus := float64(charisma-charismaBase) * charismaRate
-	finalMultiplier := baseMult + charismaBonus
-
-	// Ensure multiplier doesn't go below zero
-	if finalMultiplier < 0 {
-		finalMultiplier = 0
-	}
-
-	// Calculate final price
-	finalPrice := float64(basePrice) * finalMultiplier
-
-	// Round to nearest int, minimum 0 gold
-	result := int(finalPrice + 0.5)
-	if result < 0 {
-		result = 0
-	}
-
-	return result
+	return shop.CalculateSellPrice(basePrice, shopConfig, charisma)
 }
 
 // ShopHandler handles shop-related operations
@@ -258,9 +130,9 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 	}
 
 	// Initialize merchant inventory items for state manager
-	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	initialInventory := make([]world.MerchantInventoryItem, 0)
 	for _, invItem := range shopConfig.Inventory {
-		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+		initialInventory = append(initialInventory, world.MerchantInventoryItem{
 			ItemID:       invItem.ItemID,
 			CurrentStock: invItem.Stock,
 			MaxStock:     invItem.MaxStock,
@@ -283,7 +155,7 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
-	merchantManager := merchant.GetManager()
+	merchantManager := world.GetMerchantManager()
 	merchantState, restocked := merchantManager.GetMerchantState(npub, merchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Get item prices and current stock from merchant state
@@ -413,9 +285,9 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get merchant state to check current stock
-	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	initialInventory := make([]world.MerchantInventoryItem, 0)
 	for _, invItem := range shopConfig.Inventory {
-		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+		initialInventory = append(initialInventory, world.MerchantInventoryItem{
 			ItemID:       invItem.ItemID,
 			CurrentStock: invItem.Stock,
 			MaxStock:     invItem.MaxStock,
@@ -437,7 +309,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
-	merchantManager := merchant.GetManager()
+	merchantManager := world.GetMerchantManager()
 	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Check current stock from merchant state
@@ -477,7 +349,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 		item.Value, shopConfig.ShopType, playerCharisma, buyPrice)
 
 	// Check player gold (using existing helper function)
-	playerGold := getGoldQuantity(save)
+	playerGold := gameutil.GetGoldQuantity(save)
 
 	if playerGold < totalCost {
 		w.Header().Set("Content-Type", "application/json")
@@ -507,7 +379,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	actualCost := buyPrice * itemsAdded
 
 	// Deduct gold for items that were added
-	if !deductGold(save, actualCost) {
+	if !gameutil.DeductGold(save, actualCost) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]any{
@@ -518,7 +390,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update encumbrance effects after buying items
-	updateEncumbrancePenaltyEffects(save)
+	status.UpdateEncumbrancePenaltyEffects(save)
 
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
@@ -655,9 +527,9 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		item.Value, shopConfig.ShopType, playerCharisma, sellPrice)
 
 	// Get merchant state to check current gold
-	initialInventory := make([]merchant.MerchantInventoryItem, 0)
+	initialInventory := make([]world.MerchantInventoryItem, 0)
 	for _, invItem := range shopConfig.Inventory {
-		initialInventory = append(initialInventory, merchant.MerchantInventoryItem{
+		initialInventory = append(initialInventory, world.MerchantInventoryItem{
 			ItemID:       invItem.ItemID,
 			CurrentStock: invItem.Stock,
 			MaxStock:     invItem.MaxStock,
@@ -679,7 +551,7 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		goldRegenInterval = parseIntervalToMinutes(shopConfig.GoldRegenInterval)
 	}
 
-	merchantManager := merchant.GetManager()
+	merchantManager := world.GetMerchantManager()
 	merchantState, _ := merchantManager.GetMerchantState(transaction.Npub, transaction.MerchantID, shopConfig.StartingGold, shopConfig.GoldRegenRate, initialInventory, itemRestockInterval, goldRestockInterval, goldRegenInterval)
 
 	// Check merchant gold from state
@@ -710,10 +582,10 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	playerGold := getGoldQuantity(save)
+	playerGold := gameutil.GetGoldQuantity(save)
 
 	// Update encumbrance effects after selling items
-	updateEncumbrancePenaltyEffects(save)
+	status.UpdateEncumbrancePenaltyEffects(save)
 
 	// Update session in memory (not disk!)
 	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
@@ -742,196 +614,7 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Helper: Add item to player inventory with intelligent stacking and slot priority
-// Returns: (itemsAdded int, error)
+// addItemToInventory delegates to game/inventory package
 func addItemToInventory(save *SaveFile, itemID string, quantity int) (int, error) {
-	log.Printf("🔧 addItemToInventory called: itemID=%s, quantity=%d", itemID, quantity)
-
-	inventory := save.Inventory
-
-	// Get item data to check max stack size
-	itemData, err := db.GetItemByID(itemID)
-	if err != nil {
-		return 0, fmt.Errorf("item not found: %s", itemID)
-	}
-
-	// Parse stack size from properties JSON
-	maxStack := 1 // Default to 1
-	if itemData.Properties != "" {
-		var properties map[string]any
-		if err := json.Unmarshal([]byte(itemData.Properties), &properties); err == nil {
-			if val, ok := properties["stack"].(float64); ok {
-				maxStack = int(val)
-			}
-		}
-	}
-
-	log.Printf("📦 Adding %dx %s to inventory (max stack: %d)", quantity, itemID, maxStack)
-
-	// Get inventory slots
-	generalSlots, ok := inventory["general_slots"].([]any)
-	if !ok {
-		return 0, fmt.Errorf("invalid inventory structure")
-	}
-
-	gearSlots, ok := inventory["gear_slots"].(map[string]any)
-	if !ok {
-		return 0, fmt.Errorf("invalid gear slots")
-	}
-
-	bag, _ := gearSlots["bag"].(map[string]any)
-	backpackSlots, _ := bag["contents"].([]any)
-
-	remaining := quantity
-	totalAdded := 0
-
-	log.Printf("🔍 Inventory state: %d general slots, %d backpack slots", len(generalSlots), len(backpackSlots))
-
-	// STEP 1: Try to stack with existing items in backpack first
-	if backpackSlots != nil {
-		log.Printf("🔍 Checking backpack for existing %s stacks...", itemID)
-		for i, slotData := range backpackSlots {
-			if remaining <= 0 {
-				break
-			}
-
-			slot, ok := slotData.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			if slot["item"] != itemID {
-				log.Printf("  🔍 backpack[%d]: %v (not a match)", i, slot["item"])
-				continue
-			}
-
-			log.Printf("  ✨ backpack[%d]: Found existing %s!", i, itemID)
-			currentQty := getSlotQuantity(slot)
-			if currentQty >= maxStack {
-				continue // Already at max stack
-			}
-
-			canAdd := maxStack - currentQty
-			if canAdd > remaining {
-				canAdd = remaining
-			}
-
-			slot["quantity"] = currentQty + canAdd
-			backpackSlots[i] = slot
-			remaining -= canAdd
-			totalAdded += canAdd
-			log.Printf("  ✅ Stacked %d in backpack[%d] (now %d)", canAdd, i, currentQty+canAdd)
-		}
-	}
-
-	// STEP 2: Try to stack with existing items in general slots
-	for i, slotData := range generalSlots {
-		if remaining <= 0 {
-			break
-		}
-
-		slot, ok := slotData.(map[string]any)
-		if !ok || slot["item"] != itemID {
-			continue
-		}
-
-		currentQty := getSlotQuantity(slot)
-		if currentQty >= maxStack {
-			continue // Already at max stack
-		}
-
-		canAdd := maxStack - currentQty
-		if canAdd > remaining {
-			canAdd = remaining
-		}
-
-		slot["quantity"] = currentQty + canAdd
-		generalSlots[i] = slot
-		remaining -= canAdd
-		totalAdded += canAdd
-		log.Printf("  ✅ Stacked %d in general[%d] (now %d)", canAdd, i, currentQty+canAdd)
-	}
-
-	// STEP 3: Fill empty backpack slots
-	for i, slotData := range backpackSlots {
-		if remaining <= 0 {
-			break
-		}
-
-		slot, ok := slotData.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		if slot["item"] == nil || slot["item"] == "" {
-			toAdd := remaining
-			if toAdd > maxStack {
-				toAdd = maxStack
-			}
-
-			slot["item"] = itemID
-			slot["quantity"] = toAdd
-			backpackSlots[i] = slot
-			remaining -= toAdd
-			totalAdded += toAdd
-			log.Printf("  ✅ Added %d to empty backpack[%d]", toAdd, i)
-		}
-	}
-
-	// STEP 4: Fill empty general slots
-	for i, slotData := range generalSlots {
-		if remaining <= 0 {
-			break
-		}
-
-		slot, ok := slotData.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		if slot["item"] == nil || slot["item"] == "" {
-			toAdd := remaining
-			if toAdd > maxStack {
-				toAdd = maxStack
-			}
-
-			slot["item"] = itemID
-			slot["quantity"] = toAdd
-			generalSlots[i] = slot
-			remaining -= toAdd
-			totalAdded += toAdd
-			log.Printf("  ✅ Added %d to empty general[%d]", toAdd, i)
-		}
-	}
-
-	// Update inventory
-	if backpackSlots != nil {
-		bag["contents"] = backpackSlots
-		gearSlots["bag"] = bag
-	}
-	inventory["general_slots"] = generalSlots
-	inventory["gear_slots"] = gearSlots
-
-	if remaining > 0 {
-		log.Printf("⚠️ Inventory full - added %d/%d items (%d couldn't fit)", totalAdded, quantity, remaining)
-		if totalAdded == 0 {
-			return 0, fmt.Errorf("no room in inventory")
-		}
-		return totalAdded, nil // Partial success
-	}
-
-	log.Printf("✅ Successfully added all %d items", totalAdded)
-	return totalAdded, nil
-}
-
-// Helper: Get quantity from slot (handles both int and float64)
-func getSlotQuantity(slot map[string]any) int {
-	switch v := slot["quantity"].(type) {
-	case float64:
-		return int(v)
-	case int:
-		return v
-	default:
-		return 0
-	}
+	return inventory.AddItemToInventory(save, itemID, quantity)
 }
