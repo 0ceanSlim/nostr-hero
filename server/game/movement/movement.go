@@ -6,8 +6,8 @@ import (
 	"slices"
 
 	"nostr-hero/db"
+	"nostr-hero/game/building"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // HandleMoveAction moves to a new location
@@ -49,7 +49,7 @@ func HandleEnterBuildingAction(state *types.SaveFile, params map[string]interfac
 		return nil, fmt.Errorf("database not available")
 	}
 
-	isOpen, openMinutes, closeMinutes, err := utils.IsBuildingOpen(database, state.Location, buildingID, state.TimeOfDay)
+	isOpen, openMinutes, closeMinutes, err := building.IsBuildingOpen(database, state.Location, buildingID, state.TimeOfDay)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check building hours: %v", err)
 	}

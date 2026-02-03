@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"nostr-hero/db"
+	"nostr-hero/game/npc"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // NPCLocationResponse represents NPC visibility at a location
@@ -67,10 +67,10 @@ func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Resolve schedule
-		scheduleInfo := utils.ResolveNPCSchedule(&npcData, timeOfDay)
+		scheduleInfo := npc.ResolveNPCSchedule(&npcData, timeOfDay)
 
 		// Determine location type from location ID
-		locationType := utils.DetermineLocationType(scheduleInfo.Location)
+		locationType := npc.DetermineLocationType(scheduleInfo.Location)
 
 		// Check if NPC is at player's current location
 		isVisible := false
@@ -129,10 +129,10 @@ func GetNPCIDsAtLocation(locationID, districtID, buildingID string, timeOfDay in
 		}
 
 		// Resolve schedule
-		scheduleInfo := utils.ResolveNPCSchedule(&npcData, timeOfDay)
+		scheduleInfo := npc.ResolveNPCSchedule(&npcData, timeOfDay)
 
 		// Determine location type from location ID
-		locationType := utils.DetermineLocationType(scheduleInfo.Location)
+		locationType := npc.DetermineLocationType(scheduleInfo.Location)
 
 		// Check if NPC is at player's current location
 		isVisible := false

@@ -10,7 +10,6 @@ import (
 	"nostr-hero/game/effects"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // HandleBookShowAction books a performance at a tavern
@@ -55,7 +54,7 @@ func HandleBookShowAction(state *types.SaveFile, session SessionProvider, params
 	}
 
 	// Get day of week
-	dayOfWeek := utils.GetDayOfWeek(state.CurrentDay)
+	dayOfWeek := GetDayOfWeek(state.CurrentDay)
 	dayStr := fmt.Sprintf("%d", dayOfWeek)
 
 	// Get available shows for this day

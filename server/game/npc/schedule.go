@@ -1,4 +1,4 @@
-package utils
+package npc
 
 import (
 	"nostr-hero/types"

@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"nostr-hero/db"
+	"nostr-hero/game/building"
 	"nostr-hero/game/effects"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/status"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // HandleRentRoomAction rents a room at an inn/tavern
@@ -211,7 +211,7 @@ func HandleSleepAction(state *types.SaveFile, session SleepSessionProvider, npcI
 		currentHour := newTime / 60
 
 		// Refresh building states
-		buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+		buildingStates, err := building.GetAllBuildingStatesForDistrict(
 			database,
 			state.Location,
 			state.District,

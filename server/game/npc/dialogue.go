@@ -9,7 +9,6 @@ import (
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/vault"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // HandleTalkToNPCAction initiates dialogue with an NPC
@@ -38,10 +37,10 @@ func HandleTalkToNPCAction(state *types.SaveFile, params map[string]interface{})
 	}
 
 	// Resolve NPC schedule based on current time
-	scheduleInfo := utils.ResolveNPCSchedule(&npcData, state.TimeOfDay)
+	scheduleInfo := ResolveNPCSchedule(&npcData, state.TimeOfDay)
 
 	// Determine location type from location ID
-	locationType := utils.DetermineLocationType(scheduleInfo.Location)
+	locationType := DetermineLocationType(scheduleInfo.Location)
 
 	// Check if player is at NPC's current location
 	playerAtLocation := false
@@ -365,7 +364,7 @@ func handleBookShowDialogue(state *types.SaveFile, session SessionProvider, npcI
 	}
 
 	// Get day of week
-	dayOfWeek := utils.GetDayOfWeek(state.CurrentDay)
+	dayOfWeek := GetDayOfWeek(state.CurrentDay)
 	dayStr := fmt.Sprintf("%d", dayOfWeek)
 
 	// Get available shows for this day

@@ -5,9 +5,9 @@ import (
 
 	"nostr-hero/api/data"
 	"nostr-hero/db"
+	"nostr-hero/game/building"
 	"nostr-hero/game/status"
 	"nostr-hero/session"
-	"nostr-hero/utils"
 )
 
 // Type alias for backward compatibility
@@ -58,5 +58,5 @@ func getBuildingStatesWrapper(location, district string, timeOfDay int) (map[str
 	if database == nil {
 		return nil, fmt.Errorf("database not available")
 	}
-	return utils.GetAllBuildingStatesForDistrict(database, location, district, timeOfDay)
+	return building.GetAllBuildingStatesForDistrict(database, location, district, timeOfDay)
 }

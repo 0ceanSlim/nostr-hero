@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"nostr-hero/db"
+	"nostr-hero/game/building"
 	"nostr-hero/game/effects"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/npc"
 	"nostr-hero/game/status"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // TimeSessionProvider defines the session interface needed for time operations
@@ -133,7 +133,7 @@ func HandleUpdateTimeAction(state *types.SaveFile, params map[string]interface{}
 
 		// Update building states if needed (every 5 in-game minutes or first call)
 		if session.ShouldRefreshBuildings(newTime) {
-			buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			buildingStates, err := building.GetAllBuildingStatesForDistrict(
 				database,
 				state.Location,
 				state.District,
@@ -246,7 +246,7 @@ func HandleWaitAction(state *types.SaveFile, params map[string]interface{}, sess
 			currentHour := newTime / 60
 
 			// Refresh building states
-			buildingStates, err := utils.GetAllBuildingStatesForDistrict(
+			buildingStates, err := building.GetAllBuildingStatesForDistrict(
 				database,
 				state.Location,
 				state.District,
