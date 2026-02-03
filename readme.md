@@ -1,5 +1,7 @@
 # ⚔️ Nostr Hero
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/0ceanslim/nostr-hero)
+
 A web-based D&D-style RPG that generates your unique character from your Nostr identity and lets you adventure through a persistent world stored on Nostr relays.
 
 ## Overview
@@ -110,6 +112,7 @@ The following systems are **designed/specified** but need initial implementation
 ### 📋 Development Roadmap
 
 #### Pre-Alpha → Alpha Goals
+
 Focus: **Core Gameplay Mechanics**
 
 - Implement inventory management logic
@@ -122,6 +125,7 @@ Focus: **Core Gameplay Mechanics**
 - Playtesting and balance adjustments
 
 #### Alpha → Beta Goals
+
 Focus: **Content & Nostr Integration**
 
 - **Quest System**:
@@ -151,6 +155,7 @@ Focus: **Content & Nostr Integration**
 ## Tech Stack
 
 ### Backend (Go)
+
 - **Web Server**: HTTP server with Go template rendering
 - **Character Generation**: Deterministic algorithm based on Nostr pubkey
 - **Authentication**: Grain client for Nostr auth (NIP-07, Amber)
@@ -158,12 +163,14 @@ Focus: **Content & Nostr Integration**
 - **Future**: DuckDB for analytics and event validation
 
 ### Frontend
+
 - **Vanilla JavaScript**: Pure JS for game logic and state management
 - **TailwindCSS**: Dark Win95-inspired retro theme
 - **Go Templates**: Server-side rendering
 - **Session Management**: Client-side Nostr session handling
 
 ### Data Format
+
 - **JSON-based**: All game content (items, spells, monsters, locations)
 - **Modular Structure**: Easy to extend with new content
 - **Save Format**: Flat JSON structure (will migrate to Nostr events)
@@ -227,13 +234,21 @@ All game content is stored as JSON in `docs/data/`:
   },
   "location": "kingdom",
   "inventory": {
-    "gear_slots": { /* equipment */ },
-    "general_slots": [ /* 4 general slots */ ]
+    "gear_slots": {
+      /* equipment */
+    },
+    "general_slots": [
+      /* 4 general slots */
+    ]
   },
-  "known_spells": [ /* spell IDs */ ],
-  "spell_slots": { /* prepared spells */ },
-  "locations_discovered": [ "kingdom" ],
-  "music_tracks_unlocked": [ "kingdom-theme" ]
+  "known_spells": [
+    /* spell IDs */
+  ],
+  "spell_slots": {
+    /* prepared spells */
+  },
+  "locations_discovered": ["kingdom"],
+  "music_tracks_unlocked": ["kingdom-theme"]
 }
 ```
 
