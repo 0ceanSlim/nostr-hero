@@ -1,4 +1,4 @@
-package api
+package game
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"nostr-hero/api"
+	"nostr-hero/api/data"
 	"nostr-hero/game/effects"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/gametime"
@@ -22,6 +24,8 @@ import (
 type GameAction = types.GameAction
 type GameActionResponse = types.GameActionResponse
 type EffectMessage = types.EffectMessage
+type SaveFile = types.SaveFile
+type GameSession = api.GameSession
 
 // GameActionHandler handles all game actions
 // POST /api/game/action
@@ -48,11 +52,13 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sessionMgr := api.GetSessionManager()
+
 	// Get session from memory
-	session, err := sessionManager.GetSession(request.Npub, request.SaveID)
+	session, err := sessionMgr.GetSession(request.Npub, request.SaveID)
 	if err != nil {
 		// Try to load it if not in memory
-		session, err = sessionManager.LoadSession(request.Npub, request.SaveID)
+		session, err = sessionMgr.LoadSession(request.Npub, request.SaveID)
 		if err != nil {
 			log.Printf("❌ Session not found: %v", err)
 			http.Error(w, "Session not found", http.StatusNotFound)
@@ -83,7 +89,7 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 	updateEncumbranceIfNeeded(&session.SaveData, request.Action.Type, response)
 
 	// Update session in memory
-	if err := sessionManager.UpdateSession(request.Npub, request.SaveID, session.SaveData); err != nil {
+	if err := sessionMgr.UpdateSession(request.Npub, request.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
 		http.Error(w, "Failed to update session", http.StatusInternalServerError)
 		return
@@ -367,12 +373,12 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 	// Get session for delta tracking
 	npub := state.InternalNpub
 	saveID := state.InternalID
-	session, err := sessionManager.GetSession(npub, saveID)
+	session, err := api.GetSessionManager().GetSession(npub, saveID)
 	if err != nil {
 		log.Printf("⚠️ Session not found for delta: %s:%s", npub, saveID)
 	}
 
-	resp, err := gametime.HandleUpdateTimeAction(state, paramsIface, session, GetNPCIDsAtLocation)
+	resp, err := gametime.HandleUpdateTimeAction(state, paramsIface, session, data.GetNPCIDsAtLocation)
 	if resp != nil {
 		return &GameActionResponse{
 			Success: resp.Success,
@@ -472,11 +478,13 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sessionMgr := api.GetSessionManager()
+
 	// Get session from memory
-	session, err := sessionManager.GetSession(npub, saveID)
+	session, err := sessionMgr.GetSession(npub, saveID)
 	if err != nil {
 		// Try to load it if not in memory
-		session, err = sessionManager.LoadSession(npub, saveID)
+		session, err = sessionMgr.LoadSession(npub, saveID)
 		if err != nil {
 			log.Printf("❌ Failed to get session: %v", err)
 			http.Error(w, "Session not found", http.StatusNotFound)
@@ -489,32 +497,32 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"state": map[string]any{
 			// Include all SaveData fields
-			"d":                    session.SaveData.D,
-			"created_at":           session.SaveData.CreatedAt,
-			"race":                 session.SaveData.Race,
-			"class":                session.SaveData.Class,
-			"background":           session.SaveData.Background,
-			"alignment":            session.SaveData.Alignment,
-			"experience":           session.SaveData.Experience,
-			"hp":                   session.SaveData.HP,
-			"max_hp":               session.SaveData.MaxHP,
-			"mana":                 session.SaveData.Mana,
-			"max_mana":             session.SaveData.MaxMana,
-			"fatigue":              session.SaveData.Fatigue,
-			"hunger":               session.SaveData.Hunger,
-			"stats":                session.SaveData.Stats,
-			"location":             session.SaveData.Location,
-			"district":             session.SaveData.District,
-			"building":             session.SaveData.Building,
-			"current_day":          session.SaveData.CurrentDay,
-			"time_of_day":          session.SaveData.TimeOfDay,
-			"inventory":            session.SaveData.Inventory,
-			"vaults":               session.SaveData.Vaults,
-			"known_spells":         session.SaveData.KnownSpells,
-			"spell_slots":          session.SaveData.SpellSlots,
-			"locations_discovered": session.SaveData.LocationsDiscovered,
+			"d":                     session.SaveData.D,
+			"created_at":            session.SaveData.CreatedAt,
+			"race":                  session.SaveData.Race,
+			"class":                 session.SaveData.Class,
+			"background":            session.SaveData.Background,
+			"alignment":             session.SaveData.Alignment,
+			"experience":            session.SaveData.Experience,
+			"hp":                    session.SaveData.HP,
+			"max_hp":                session.SaveData.MaxHP,
+			"mana":                  session.SaveData.Mana,
+			"max_mana":              session.SaveData.MaxMana,
+			"fatigue":               session.SaveData.Fatigue,
+			"hunger":                session.SaveData.Hunger,
+			"stats":                 session.SaveData.Stats,
+			"location":              session.SaveData.Location,
+			"district":              session.SaveData.District,
+			"building":              session.SaveData.Building,
+			"current_day":           session.SaveData.CurrentDay,
+			"time_of_day":           session.SaveData.TimeOfDay,
+			"inventory":             session.SaveData.Inventory,
+			"vaults":                session.SaveData.Vaults,
+			"known_spells":          session.SaveData.KnownSpells,
+			"spell_slots":           session.SaveData.SpellSlots,
+			"locations_discovered":  session.SaveData.LocationsDiscovered,
 			"music_tracks_unlocked": session.SaveData.MusicTracksUnlocked,
-			"active_effects":       effects.EnrichActiveEffects(session.SaveData.ActiveEffects),
+			"active_effects":        effects.EnrichActiveEffects(session.SaveData.ActiveEffects),
 
 			// Add session-specific data
 			"rented_rooms":    session.RentedRooms,
@@ -615,8 +623,8 @@ func handleOpenVaultAction(state *SaveFile, _ map[string]any) (*GameActionRespon
 		return nil, fmt.Errorf("not in a building")
 	}
 
-	vault := vault.GetVaultForLocation(state, buildingID)
-	if vault == nil {
+	vaultData := vault.GetVaultForLocation(state, buildingID)
+	if vaultData == nil {
 		return nil, fmt.Errorf("no vault registered at this location")
 	}
 
@@ -624,7 +632,7 @@ func handleOpenVaultAction(state *SaveFile, _ map[string]any) (*GameActionRespon
 		Success: true,
 		Message: "Vault opened",
 		Delta: map[string]any{
-			"vault": vault,
+			"vault": vaultData,
 		},
 	}, nil
 }
@@ -680,7 +688,7 @@ func handleRentRoomAction(session *GameSession, params map[string]any) (*GameAct
 
 // handleSleepAction sleeps in a rented room
 func handleSleepAction(session *GameSession, _ map[string]any) (*GameActionResponse, error) {
-	resp, err := npc.HandleSleepAction(&session.SaveData, session, GetNPCIDsAtLocation)
+	resp, err := npc.HandleSleepAction(&session.SaveData, session, data.GetNPCIDsAtLocation)
 	if resp != nil {
 		return &GameActionResponse{
 			Success: resp.Success,
@@ -700,7 +708,7 @@ func handleWaitAction(session *GameSession, params map[string]any) (*GameActionR
 	for k, v := range params {
 		paramsIface[k] = v
 	}
-	resp, err := gametime.HandleWaitAction(&session.SaveData, paramsIface, session, GetNPCIDsAtLocation)
+	resp, err := gametime.HandleWaitAction(&session.SaveData, paramsIface, session, data.GetNPCIDsAtLocation)
 	if resp != nil {
 		return &GameActionResponse{
 			Success: resp.Success,
@@ -753,5 +761,3 @@ func handlePlayShowAction(session *GameSession, _ map[string]any) (*GameActionRe
 	}
 	return nil, err
 }
-
-// Type conversion helpers have been moved to gameutil package

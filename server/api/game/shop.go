@@ -1,4 +1,4 @@
-package api
+package game
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"nostr-hero/api"
+	"nostr-hero/api/character"
 	"nostr-hero/db"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/inventory"
@@ -23,7 +25,7 @@ func parseIntervalToMinutes(interval string) int {
 
 // Helper: Get charisma stat from session state
 func getCharismaFromSession(npub, saveID string) int {
-	session, err := sessionManager.GetSession(npub, saveID)
+	session, err := api.GetSessionManager().GetSession(npub, saveID)
 	if err != nil {
 		log.Printf("⚠️ Failed to get session for charisma lookup: %v", err)
 		return 10 // Default charisma
@@ -184,8 +186,8 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 			"description": item.Description,
 			"type":        item.Type,
 			"value":       basePrice,
-			"buy_price":   buyPrice,   // What player pays to buy
-			"sell_price":  sellPrice,  // What player gets when selling
+			"buy_price":   buyPrice,     // What player pays to buy
+			"sell_price":  sellPrice,    // What player gets when selling
 			"stock":       currentStock, // Current stock from merchant state
 			"max_stock":   invItem.MaxStock,
 		})
@@ -196,20 +198,20 @@ func handleGetShop(w http.ResponseWriter, r *http.Request, merchantID string) {
 	timeUntilGoldRestock := merchantManager.GetTimeUntilGoldRestock(npub, merchantID)
 
 	response := map[string]any{
-		"merchant_id":              merchantID,
-		"merchant_name":            npcData.Name,
-		"shop_type":                shopConfig.ShopType,
-		"buys_items":               shopConfig.BuysItems,
-		"current_gold":             merchantState.CurrentGold, // Current gold from state
-		"max_gold":                 shopConfig.MaxGold,
-		"buy_price_multiplier":     shopConfig.BuyPriceMultiplier,
-		"sell_price_multiplier":    shopConfig.SellPriceMultiplier,
-		"inventory":                itemsWithPrices,
-		"item_restock_interval":    itemRestockInterval,      // Minutes between item restocks
-		"gold_restock_interval":    goldRestockInterval,      // Minutes between gold restocks
-		"time_until_item_restock":  int(timeUntilItemRestock), // Minutes until next item restock
-		"time_until_gold_restock":  int(timeUntilGoldRestock), // Minutes until next gold restock
-		"just_restocked":           restocked,                 // Whether merchant just restocked items
+		"merchant_id":             merchantID,
+		"merchant_name":           npcData.Name,
+		"shop_type":               shopConfig.ShopType,
+		"buys_items":              shopConfig.BuysItems,
+		"current_gold":            merchantState.CurrentGold, // Current gold from state
+		"max_gold":                shopConfig.MaxGold,
+		"buy_price_multiplier":    shopConfig.BuyPriceMultiplier,
+		"sell_price_multiplier":   shopConfig.SellPriceMultiplier,
+		"inventory":               itemsWithPrices,
+		"item_restock_interval":   itemRestockInterval,       // Minutes between item restocks
+		"gold_restock_interval":   goldRestockInterval,       // Minutes between gold restocks
+		"time_until_item_restock": int(timeUntilItemRestock), // Minutes until next item restock
+		"time_until_gold_restock": int(timeUntilGoldRestock), // Minutes until next gold restock
+		"just_restocked":          restocked,                 // Whether merchant just restocked items
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -232,8 +234,10 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🛒 Processing buy: %s buying %dx %s from %s", transaction.Npub, transaction.Quantity, transaction.ItemID, transaction.MerchantID)
 
+	sessionMgr := api.GetSessionManager()
+
 	// Get session from memory (not disk!)
-	session, err := sessionManager.GetSession(transaction.Npub, transaction.SaveID)
+	session, err := sessionMgr.GetSession(transaction.Npub, transaction.SaveID)
 	if err != nil {
 		log.Printf("❌ Session not found: %v", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -393,7 +397,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 	status.UpdateEncumbrancePenaltyEffects(save)
 
 	// Update session in memory (not disk!)
-	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
+	if err := sessionMgr.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -442,8 +446,10 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("💰 Processing sell: %s selling %dx %s to %s", transaction.Npub, transaction.Quantity, transaction.ItemID, transaction.MerchantID)
 
+	sessionMgr := api.GetSessionManager()
+
 	// Get session from memory (not disk!)
-	session, err := sessionManager.GetSession(transaction.Npub, transaction.SaveID)
+	session, err := sessionMgr.GetSession(transaction.Npub, transaction.SaveID)
 	if err != nil {
 		log.Printf("❌ Session not found: %v", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -571,7 +577,7 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	log.Printf("ℹ️ Items already removed from inventory during sell staging")
 
 	// Add gold to player (using existing helper function)
-	if err := addGoldToInventory(save.Inventory, totalValue); err != nil {
+	if err := character.AddGoldToInventory(save.Inventory, totalValue); err != nil {
 		log.Printf("❌ Error adding gold to inventory: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -588,7 +594,7 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 	status.UpdateEncumbrancePenaltyEffects(save)
 
 	// Update session in memory (not disk!)
-	if err := sessionManager.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
+	if err := sessionMgr.UpdateSession(transaction.Npub, transaction.SaveID, session.SaveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

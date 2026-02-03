@@ -1,13 +1,16 @@
-package api
+package character
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"nostr-hero/types"
 )
 
 // ============================================================================
@@ -446,9 +449,9 @@ func createInventoryStructure(database *sql.DB, items []ItemWithQty) (map[string
 
 func isPackItem(itemID string) bool {
 	return itemID == "explorers-pack" || itemID == "priests-pack" ||
-	       itemID == "scholars-pack" || itemID == "dungeoneers-pack" ||
-	       itemID == "diplomats-pack" || itemID == "entertainers-pack" ||
-	       itemID == "burglars-pack" || itemID == "druid-pack"
+		itemID == "scholars-pack" || itemID == "dungeoneers-pack" ||
+		itemID == "diplomats-pack" || itemID == "entertainers-pack" ||
+		itemID == "burglars-pack" || itemID == "druid-pack"
 }
 
 func isArmorSet(database *sql.DB, itemID string) bool {
@@ -589,13 +592,13 @@ func getItemData(database *sql.DB, itemID string) (map[string]interface{}, error
 	json.Unmarshal([]byte(tagsJSON), &tags)
 
 	return map[string]interface{}{
-		"id":         itemID,
-		"name":       name,
+		"id":          itemID,
+		"name":        name,
 		"description": description,
-		"item_type":  itemType,
-		"properties": properties,
-		"tags":       tags,
-		"rarity":     rarity,
+		"item_type":   itemType,
+		"properties":  properties,
+		"tags":        tags,
+		"rarity":      rarity,
 	}, nil
 }
 
@@ -848,7 +851,8 @@ func generateStartingVault(locationID string) map[string]interface{} {
 // STARTING GOLD
 // ============================================================================
 
-func addGoldToInventory(inventory map[string]interface{}, goldAmount int) error {
+// AddGoldToInventory adds gold to the first available slot in inventory
+func AddGoldToInventory(inventory map[string]interface{}, goldAmount int) error {
 	log.Printf("💰 Adding %dg to inventory", goldAmount)
 
 	// Try general_slots first (type is []any, not []map[string]interface{})
@@ -963,12 +967,17 @@ func getStartingGold(database *sql.DB, background string) (int, error) {
 // SAVE TO DISK
 // ============================================================================
 
-func saveToDisk(npub string, saveFile *SaveFile) error {
+func saveToDisk(npub string, saveFile *types.SaveFile) error {
 	savesDir := filepath.Join(SavesDirectory, npub)
 	if err := os.MkdirAll(savesDir, 0755); err != nil {
 		return fmt.Errorf("failed to create saves directory: %v", err)
 	}
 
 	savePath := filepath.Join(savesDir, saveFile.InternalID+".json")
-	return writeSaveFile(savePath, saveFile)
+	data, err := json.MarshalIndent(saveFile, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(savePath, data, 0644)
 }

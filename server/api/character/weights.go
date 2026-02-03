@@ -1,4 +1,4 @@
-package api
+package character
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ func WeightsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Get weights data from DuckDB
-	weightsData, err := getWeightsFromDB()
+	weightsData, err := GetWeightsFromDB()
 	if err != nil {
 		http.Error(w, "Failed to load weights data: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -22,8 +22,8 @@ func WeightsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(weightsData)
 }
 
-// getWeightsFromDB retrieves all character generation weights from database
-func getWeightsFromDB() (map[string]interface{}, error) {
+// GetWeightsFromDB retrieves all character generation weights from database
+func GetWeightsFromDB() (map[string]interface{}, error) {
 	weights, err := db.GetGenerationWeights()
 	if err != nil {
 		return nil, err

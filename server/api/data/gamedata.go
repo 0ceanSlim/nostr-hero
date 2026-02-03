@@ -1,4 +1,4 @@
-package api
+package data
 
 import (
 	"database/sql"
@@ -34,15 +34,15 @@ type Item struct {
 
 // Spell represents game spells
 type Spell struct {
-	ID         string                 `json:"id"`
-	Name       string                 `json:"name"`
-	Description string                `json:"description"`
-	Level      int                    `json:"level"`
-	School     string                 `json:"school"`
-	Damage     string                 `json:"damage"`
-	ManaCost   int                    `json:"mana_cost"`
-	Classes    []string               `json:"classes"`
-	Properties map[string]interface{} `json:"properties"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Level       int                    `json:"level"`
+	School      string                 `json:"school"`
+	Damage      string                 `json:"damage"`
+	ManaCost    int                    `json:"mana_cost"`
+	Classes     []string               `json:"classes"`
+	Properties  map[string]interface{} `json:"properties"`
 }
 
 // Monster represents game monsters

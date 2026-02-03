@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"nostr-hero/api"
+	"nostr-hero/api/character"
+	"nostr-hero/api/data"
+	"nostr-hero/api/game"
 	"nostr-hero/auth"
 	"nostr-hero/cache"
 	"nostr-hero/db"
@@ -51,19 +54,19 @@ func main() {
 	routes.InitializeRoutes(mux)
 
 	// Game data API endpoints
-	mux.HandleFunc("/api/game-data", api.GameDataHandler)
-	mux.HandleFunc("/api/items", api.ItemsHandler)
-	mux.HandleFunc("/api/spells/", api.SpellsHandler) // Note the trailing slash to match /api/spells/{id}
-	mux.HandleFunc("/api/monsters", api.MonstersHandler)
-	mux.HandleFunc("/api/locations", api.LocationsHandler)
-	mux.HandleFunc("/api/npcs", api.NPCsHandler)
-	mux.HandleFunc("/api/npcs/at-location", api.GetNPCsAtLocationHandler)
-	mux.HandleFunc("/api/abilities", api.AbilitiesHandler)
+	mux.HandleFunc("/api/game-data", data.GameDataHandler)
+	mux.HandleFunc("/api/items", data.ItemsHandler)
+	mux.HandleFunc("/api/spells/", data.SpellsHandler) // Note the trailing slash to match /api/spells/{id}
+	mux.HandleFunc("/api/monsters", data.MonstersHandler)
+	mux.HandleFunc("/api/locations", data.LocationsHandler)
+	mux.HandleFunc("/api/npcs", data.NPCsHandler)
+	mux.HandleFunc("/api/npcs/at-location", data.GetNPCsAtLocationHandler)
+	mux.HandleFunc("/api/abilities", data.AbilitiesHandler)
 
 	// Character generation API endpoints
-	mux.HandleFunc("/api/weights", api.WeightsHandler)
-	mux.HandleFunc("/api/introductions", api.IntroductionsHandler)
-	mux.HandleFunc("/api/starting-gear", api.StartingGearHandler)
+	mux.HandleFunc("/api/weights", character.WeightsHandler)
+	mux.HandleFunc("/api/introductions", character.IntroductionsHandler)
+	mux.HandleFunc("/api/starting-gear", character.StartingGearHandler)
 
 	// Authentication endpoints (using grain client)
 	authHandler := auth.NewAuthHandler(&utils.AppConfig)
@@ -77,34 +80,34 @@ func main() {
 	mux.HandleFunc("/api/saves/", api.SavesHandler)
 
 	// Session management API endpoints (in-memory state)
-	mux.HandleFunc("/api/session/init", api.InitSessionHandler)
-	mux.HandleFunc("/api/session/reload", api.ReloadSessionHandler)
-	mux.HandleFunc("/api/session/state", api.GetSessionHandler)
-	mux.HandleFunc("/api/session/update", api.UpdateSessionHandler)
-	mux.HandleFunc("/api/session/save", api.SaveSessionHandler)
-	mux.HandleFunc("/api/session/cleanup", api.CleanupSessionHandler)
+	mux.HandleFunc("/api/session/init", game.InitSessionHandler)
+	mux.HandleFunc("/api/session/reload", game.ReloadSessionHandler)
+	mux.HandleFunc("/api/session/state", game.GetSessionHandler)
+	mux.HandleFunc("/api/session/update", game.UpdateSessionHandler)
+	mux.HandleFunc("/api/session/save", game.SaveSessionHandler)
+	mux.HandleFunc("/api/session/cleanup", game.CleanupSessionHandler)
 
 	// Game action API endpoints (Go-first game logic)
-	mux.HandleFunc("/api/game/action", api.GameActionHandler)
-	mux.HandleFunc("/api/game/state", api.GetGameStateHandler)
+	mux.HandleFunc("/api/game/action", game.GameActionHandler)
+	mux.HandleFunc("/api/game/state", game.GetGameStateHandler)
 
 	// Debug endpoints (only enabled in debug mode)
 	if utils.AppConfig.Server.DebugMode {
 		log.Println("🐛 Debug mode enabled")
 		mux.HandleFunc("/api/debug/sessions", func(w http.ResponseWriter, r *http.Request) {
-			api.DebugSessionsHandler(w, r, true)
+			game.DebugSessionsHandler(w, r, true)
 		})
 		mux.HandleFunc("/api/debug/state", func(w http.ResponseWriter, r *http.Request) {
-			api.DebugStateHandler(w, r, true)
+			game.DebugStateHandler(w, r, true)
 		})
 	}
 
 	// Shop API endpoints
-	mux.HandleFunc("/api/shop/", api.ShopHandler)
+	mux.HandleFunc("/api/shop/", game.ShopHandler)
 
 	// Existing API endpoints
-	mux.HandleFunc("/api/character", api.CharacterHandler)
-	mux.HandleFunc("/api/character/create-save", api.CreateCharacterHandler)
+	mux.HandleFunc("/api/character", character.CharacterHandler)
+	mux.HandleFunc("/api/character/create-save", character.CreateCharacterHandler)
 	mux.HandleFunc("/api/profile", api.ProfileHandler)
 
 	port := utils.AppConfig.Server.Port

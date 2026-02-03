@@ -1,11 +1,11 @@
-package api
+package character
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"nostr-hero/game/character"
+	gamecharacter "nostr-hero/game/character"
 	"nostr-hero/types"
 	"nostr-hero/utils"
 )
@@ -24,7 +24,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Load weight data from DuckDB (same as weights API endpoint)
-	weightDataMap, err := getWeightsFromDB()
+	weightDataMap, err := GetWeightsFromDB()
 	if err != nil {
 		http.Error(w, "Error loading weight data: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -44,7 +44,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate character using the loaded weight data
-	generatedChar := character.GenerateCharacter(pubKey, &weightData)
+	generatedChar := gamecharacter.GenerateCharacter(pubKey, &weightData)
 
 	registry, err := utils.ReadRegistry()
 	if err != nil {

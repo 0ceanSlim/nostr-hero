@@ -1,4 +1,4 @@
-package api
+package character
 
 import (
 	"encoding/json"
@@ -8,10 +8,13 @@ import (
 	"time"
 
 	"nostr-hero/db"
-	"nostr-hero/game/character"
+	gamecharacter "nostr-hero/game/character"
 	"nostr-hero/types"
 	"nostr-hero/utils"
 )
+
+// SavesDirectory is the path to save files
+const SavesDirectory = "data/saves"
 
 // ============================================================================
 // REQUEST/RESPONSE TYPES
@@ -75,6 +78,12 @@ type StartingGearData struct {
 	} `json:"starting_gear"`
 }
 
+// SaveFile type alias for backward compatibility
+type SaveFile = types.SaveFile
+
+// ActiveEffect type alias for backward compatibility
+type ActiveEffect = types.ActiveEffect
+
 // ============================================================================
 // API HANDLER
 // ============================================================================
@@ -102,7 +111,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	weightData, err := getWeightsFromDB()
+	weightData, err := GetWeightsFromDB()
 	if err != nil {
 		respondWithError(w, "Failed to load weight data: "+err.Error())
 		return
@@ -112,7 +121,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	var weightDataStruct types.WeightData
 	json.Unmarshal(weightDataJSON, &weightDataStruct)
 
-	generatedChar := character.GenerateCharacter(pubKey, &weightDataStruct)
+	generatedChar := gamecharacter.GenerateCharacter(pubKey, &weightDataStruct)
 
 	// 2. Get database connection
 	database := db.GetDB()
@@ -143,7 +152,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 6. Add gold to inventory as an item
-	err = addGoldToInventory(inventory, startingGold)
+	err = AddGoldToInventory(inventory, startingGold)
 	if err != nil {
 		log.Printf("⚠️  Failed to add gold to inventory: %v", err)
 	}

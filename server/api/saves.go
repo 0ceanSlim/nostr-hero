@@ -175,7 +175,7 @@ func handleCreateSave(w http.ResponseWriter, r *http.Request, npub string) {
 
 	// Write save file
 	savePath := filepath.Join(userSavesDir, saveData.InternalID+".json")
-	if err := writeSaveFile(savePath, &saveData); err != nil {
+	if err := WriteSaveFile(savePath, &saveData); err != nil {
 		log.Printf("❌ Error writing save file: %v", err)
 		http.Error(w, "Failed to save file", http.StatusInternalServerError)
 		return
@@ -243,7 +243,8 @@ func loadSaveFile(path string) (*SaveFile, error) {
 	return &save, nil
 }
 
-func writeSaveFile(path string, save *SaveFile) error {
+// WriteSaveFile writes a save file to disk
+func WriteSaveFile(path string, save *SaveFile) error {
 	data, err := json.MarshalIndent(save, "", "  ")
 	if err != nil {
 		return err

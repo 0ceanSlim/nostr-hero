@@ -1,4 +1,4 @@
-package api
+package data
 
 import (
 	"encoding/json"
@@ -13,12 +13,12 @@ import (
 
 // AbilityTier represents a scaling tier for an ability
 type AbilityTier struct {
-	MinLevel       int      `json:"min_level"`
-	MaxLevel       int      `json:"max_level"`
-	EffectsApplied []string `json:"effects_applied"`
-	Summary        string   `json:"summary"`
-	OverrideCost   *int     `json:"override_cost,omitempty"`
-	OverrideCooldown *int   `json:"override_cooldown,omitempty"`
+	MinLevel         int      `json:"min_level"`
+	MaxLevel         int      `json:"max_level"`
+	EffectsApplied   []string `json:"effects_applied"`
+	Summary          string   `json:"summary"`
+	OverrideCost     *int     `json:"override_cost,omitempty"`
+	OverrideCooldown *int     `json:"override_cooldown,omitempty"`
 }
 
 // Ability represents a martial class ability definition
@@ -37,9 +37,9 @@ type Ability struct {
 // AbilityResponse represents an ability with computed tier info
 type AbilityResponse struct {
 	Ability
-	IsUnlocked  bool         `json:"is_unlocked"`
-	CurrentTier *AbilityTier `json:"current_tier"`
-	NextTier    *AbilityTier `json:"next_tier"`
+	IsUnlocked  bool          `json:"is_unlocked"`
+	CurrentTier *AbilityTier  `json:"current_tier"`
+	NextTier    *AbilityTier  `json:"next_tier"`
 	AllTiers    []AbilityTier `json:"all_tiers"`
 }
 
