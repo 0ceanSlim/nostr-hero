@@ -460,7 +460,7 @@ func normalizePubkey(pubkey string) (string, error) {
 
 	// If it's npub format, decode it
 	if strings.HasPrefix(pubkey, "npub") {
-		hexPubkey, err := utils.DecodeNpub(pubkey)
+		hexPubkey, err := tools.DecodeNpub(pubkey)
 		if err != nil {
 			return "", fmt.Errorf("failed to decode npub: %w", err)
 		}

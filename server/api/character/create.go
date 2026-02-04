@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/0ceanslim/grain/client/core/tools"
+
 	"nostr-hero/db"
 	gamecharacter "nostr-hero/game/character"
 	"nostr-hero/types"
-	"nostr-hero/utils"
 )
 
 // SavesDirectory is the path to save files
@@ -105,7 +106,7 @@ func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("🎮 Creating character for npub: %s, name: %s", req.Npub, req.Name)
 
 	// 1. Decode npub and generate character
-	pubKey, err := utils.DecodeNpub(req.Npub)
+	pubKey, err := tools.DecodeNpub(req.Npub)
 	if err != nil {
 		respondWithError(w, "Invalid npub")
 		return

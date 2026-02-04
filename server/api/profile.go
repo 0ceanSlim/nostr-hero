@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/0ceanslim/grain/client/core/tools"
+
 	"nostr-hero/cache"
 	"nostr-hero/utils"
 )
@@ -27,7 +29,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pubKey, err := utils.DecodeNpub(npub)
+	pubKey, err := tools.DecodeNpub(npub)
 	if err != nil {
 		http.Error(w, "Invalid npub", http.StatusBadRequest)
 		return

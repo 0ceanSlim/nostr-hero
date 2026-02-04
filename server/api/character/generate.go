@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/0ceanslim/grain/client/core/tools"
+
 	gamecharacter "nostr-hero/game/character"
 	"nostr-hero/types"
 	"nostr-hero/utils"
@@ -17,7 +19,7 @@ func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pubKey, err := utils.DecodeNpub(npub)
+	pubKey, err := tools.DecodeNpub(npub)
 	if err != nil {
 		http.Error(w, "Invalid npub", http.StatusBadRequest)
 		return
