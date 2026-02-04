@@ -38,18 +38,22 @@ The game is currently in **very early pre-alpha development**. Most systems are 
 
 - **Character Initialization**:
   - Starting HP calculated from class hit die + CON modifier
-  - Starting mana derived from spellcasting ability + level
   - Starting gold based on class and background
   - All stats properly initialized and balanced
 
-- **Game UI (Visual Only)**:
+- **Class Resource System**:
+  - Spellcasters use mana (derived from spellcasting ability + level)
+  - Non-spellcasters have unique class resources (rage, ki, cunninge, stamina)
+  - Class abilities that scale and grow more powerful with level
+
+- **Game UI**:
   - Dark Win95-themed retro interface with beveled edges
   - Tabbed panels: Equipment, Inventory, Spells, Quests, Stats, Music
-  - Character stat display (HP, mana, fatigue, encumbrance bars)
-  - Equipment slot visualization
-  - Backpack grid (20 slots)
-  - Spell slot interface
-  - **Note**: UI displays save data but lacks interactive functionality
+  - Character stat display (HP, resource, fatigue, encumbrance bars)
+  - Equipment slot visualization with drag-and-drop
+  - Backpack grid (20 slots) with item interactions
+  - Spell/Ability slot interface
+  - Mostly functional with minor edge case bugs
 
 - **Content Database**:
   - 200+ items from D&D 5e SRD (weapons, armor, gear, tools)
@@ -68,61 +72,94 @@ The game is currently in **very early pre-alpha development**. Most systems are 
   - Nostr login via NIP-07 browser extensions or Amber (Android)
   - Grain authentication client integration
 
-### 🚧 Not Yet Implemented (Pre-Alpha → Alpha Goals)
-
-The following systems are **designed/specified** but need initial implementation:
-
-- **Inventory System Logic**:
-  - Moving items between slots
-  - Equipping/unequipping gear
-  - Item stacking
-  - Weight/encumbrance calculations
-  - Dropping/destroying items
-
-- **Spell System Logic**:
-  - Casting spells
-  - Mana consumption
-  - Spell slot tracking
-  - Spell preparation mechanics
-
-- **Game UI Interactivity**:
-  - Clickable items
-  - Drag-and-drop
-  - Context menus
-  - Tooltips with item details
+- **Inventory System**:
+  - Drag-and-drop between slots
+  - Equipping/unequipping gear with validation
+  - Right-click context menus (RuneScape-style)
+  - Equipment slot system (10 slots)
+  - Backpack grid (20 slots)
+  - Item use actions (potions, food)
 
 - **Location System**:
-  - Scene rendering
-  - Location transitions
-  - Environment traversal
+  - Multi-city world with districts and buildings
+  - Location transitions and discovery
+  - Race-based starting locations
+  - Time-of-day system (day/night cycle)
+
+- **Shop System**:
+  - NPC shops with buy/sell functionality
+  - Location-based shop inventories
+
+- **Session Management**:
+  - Server-side game state (Go-first architecture)
+  - In-memory session with periodic saves
+  - Backend-authoritative validation
+
+- **Time & Tick System**:
+  - In-game time progression (day/night cycle)
+  - Tick-based game loop for scheduled events
+  - Time-of-day affects NPC availability and events
+
+- **Effects System**:
+  - Extensible status effects (buffs, debuffs, conditions)
+  - Duration tracking and automatic expiration
+  - Stacking and interaction rules
+
+- **Hunger & Fatigue**:
+  - Hunger accumulation over time
+  - Fatigue from actions and travel
+  - Consequences for neglecting needs
+  - Food consumption and rest mechanics
+
+- **NPC System**:
+  - NPCs with daily schedules
+  - Location-based NPC availability
+  - Time-aware interactions
+
+### 🚧 Not Yet Implemented (Alpha Goals)
+
+- **Exploration System**:
+  - Monster encounters during travel
+  - Random events while exploring
+  - Points of Interest (POI) discovery
+  - Linear and randomized dungeons
+  - Static and random dungeon encounters
+  - Discovered POIs can be revisited
 
 - **Combat System**:
-  - Turn-based combat
-  - Dice rolling mechanics
-  - Enemy AI
-  - Loot drops
+  - Turn-based combat encounters
+  - D&D 5e dice rolling mechanics
+  - Enemy AI and tactics
+  - Loot drops and rewards
 
-- **NPC Systems**:
-  - NPC interactions
-  - Dialogue system
-  - Shops (buy/sell)
-  - Storage systems
-  - Inn/rest mechanics
+- **Active Spell Casting**:
+  - Spell use in combat
+  - Mana consumption and recovery
+  - Spell effects and targeting
+
+- **Quest System**:
+  - Quest tracking and journal
+  - Completion and rewards
 
 ### 📋 Development Roadmap
 
-#### Pre-Alpha → Alpha Goals
+#### Current Phase: Pre-Alpha → Alpha
 
-Focus: **Core Gameplay Mechanics**
+Focus: **Combat System**
 
-- Implement inventory management logic
-- Implement spell casting and mana system
-- Build location/scene system with navigation
-- Create environment traversal mechanics
-- Implement combat encounters
-- Add basic NPC interactions (shop, storage, inn)
-- Complete save/load functionality
-- Playtesting and balance adjustments
+- ✅ Inventory management
+- ✅ Location/scene system
+- ✅ Vault System
+- ✅ Shop system
+- ✅ Save/load functionality
+- ✅ Time & tick system
+- ✅ Effects system
+- ✅ Hunger & fatigue
+- ✅ NPC schedules
+- 🚧 Exploration & POI discovery
+- 🚧 Turn-based combat
+- 🚧 Spell casting / Abilities in combat
+- ⬚ Playtesting and balance
 
 #### Alpha → Beta Goals
 
@@ -154,105 +191,37 @@ Focus: **Content & Nostr Integration**
 
 ## Tech Stack
 
-### Backend (Go)
+### Backend (Go) - Primary Logic Layer
 
-- **Web Server**: HTTP server with Go template rendering
-- **Character Generation**: Deterministic algorithm based on Nostr pubkey
+- **Architecture**: Go-first design - ALL game logic lives in Go
+- **Database**: SQLite for game data (migrated from JSON with CODEX)
 - **Authentication**: Grain client for Nostr auth (NIP-07, Amber)
-- **API Endpoints**: REST API for game data, saves, and character info
-- **Future**: DuckDB for analytics and event validation
+- **Session Management**: Server-side game state with in-memory sessions
+- **API**: REST endpoints for game actions, data, and saves
 
-### Frontend
+### Frontend (Minimal JS)
 
-- **Vanilla JavaScript**: Pure JS for game logic and state management
+- **Vanilla JavaScript**: DOM manipulation only (no game logic)
 - **TailwindCSS**: Dark Win95-inspired retro theme
-- **Go Templates**: Server-side rendering
-- **Session Management**: Client-side Nostr session handling
+- **Go Templates**: Server-side HTML rendering
+- **Philosophy**: Frontend cannot cheat - backend validates all actions
 
-### Data Format
+### Data
 
-- **JSON-based**: All game content (items, spells, monsters, locations)
-- **Modular Structure**: Easy to extend with new content
-- **Save Format**: Flat JSON structure (will migrate to Nostr events)
+- **Source of Truth**: JSON files in `game-data/`
+- **Runtime Cache**: SQLite database (built with CODEX)
+- **Saves**: JSON files in `data/saves/{npub}/` (future: Nostr events)
 
 ## Game Data
 
-All game content is stored as JSON in `docs/data/`:
+All game content is stored as JSON in `game-data/`:
 
-- **Items**: `docs/data/equipment/items/` - Weapons, armor, adventuring gear, tools
-  - 200+ items from D&D 5e SRD
-  - Pixel art sprites for each item
-  - Stats, costs, weights, and descriptions
-
-- **Spells**: `docs/data/content/spells/` - Full D&D 5e spell list
-  - Spell effects and mechanics
-  - Mana costs and casting requirements
-  - Class-specific spell access
-
-- **Monsters**: `docs/data/content/monsters/` - Creature database
-  - Stats and abilities
-  - Loot tables
-  - AI behaviors (planned)
-
-- **Locations**: `docs/data/content/locations/` - World map data
-  - Location descriptions
-  - Connected environments
-  - NPC spawn points
-
-- **Character Data**: `docs/data/character/` - Character generation tables
-  - Race/class/background definitions
-  - Starting equipment packs
-  - Ability score distributions
-
-## Save System
-
-**Current (Pre-Alpha)**: Local saves stored in `data/saves/{npub}/save_{timestamp}.json`
-
-```json
-{
-  "d": "character-name",
-  "created_at": "2025-10-08T23:09:49Z",
-  "race": "Human",
-  "class": "Bard",
-  "background": "Sage",
-  "alignment": "Neutral Evil",
-  "level": 1,
-  "experience": 0,
-  "hp": 7,
-  "max_hp": 7,
-  "mana": 3,
-  "max_mana": 3,
-  "fatigue": 0,
-  "gold": 1000,
-  "stats": {
-    "strength": 13,
-    "dexterity": 12,
-    "constitution": 8,
-    "intelligence": 9,
-    "wisdom": 12,
-    "charisma": 14
-  },
-  "location": "kingdom",
-  "inventory": {
-    "gear_slots": {
-      /* equipment */
-    },
-    "general_slots": [
-      /* 4 general slots */
-    ]
-  },
-  "known_spells": [
-    /* spell IDs */
-  ],
-  "spell_slots": {
-    /* prepared spells */
-  },
-  "locations_discovered": ["kingdom"],
-  "music_tracks_unlocked": ["kingdom-theme"]
-}
-```
-
-**Future (Beta)**: Nostr event-based saves with cross-client compatibility
+- **Items**: `game-data/items/` - 200+ individual item files (weapons, armor, gear, tools)
+- **Spells**: `game-data/magic/spells/` - Full D&D 5e spell database
+- **Monsters**: `game-data/monsters/` - Creature stat blocks
+- **Locations**: `game-data/locations/` - Cities and environments
+- **NPCs**: `game-data/npcs/` - NPC data organized by location
+- **Systems**: `game-data/systems/` - Character generation tables, music config
 
 ## Contributing
 
@@ -264,7 +233,7 @@ Contributions are welcome! Here's how you can help:
 4. **Improve Code**: Submit PRs for bug fixes or enhancements
 5. **Playtesting**: Try the game and provide feedback (when playable builds are available)
 
-**Content Creators**: Check out `docs/development/tools/` for the item editor and other content creation tools.
+**Content Creators**: Check out `game-data/CODEX/` for the item editor and other content creation tools.
 
 ## Getting Started
 
