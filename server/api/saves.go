@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"nostr-hero/session"
 	"nostr-hero/types"
 )
 
@@ -19,16 +20,73 @@ type SaveFile = types.SaveFile
 type ActiveEffect = types.ActiveEffect
 type EnrichedEffect = types.EnrichedEffect
 
-const SavesDirectory = "data/saves"
+// SavesDirectory re-exported from session package for backward compatibility
+var SavesDirectory = session.SavesDirectory
 
-// Initialize saves directory
-func init() {
-	if err := os.MkdirAll(SavesDirectory, 0755); err != nil {
-		log.Printf("Warning: Failed to create saves directory: %v", err)
-	}
+// SaveListItem represents a save file in list responses
+// swagger:model SaveListItem
+type SaveListItem struct {
+	ID                  string                 `json:"id" example:"save_1234567890"`
+	D                   string                 `json:"d" example:"Hero Name"`
+	CreatedAt           string                 `json:"created_at" example:"2025-01-15T12:00:00Z"`
+	Race                string                 `json:"race" example:"Human"`
+	Class               string                 `json:"class" example:"Fighter"`
+	Background          string                 `json:"background" example:"Soldier"`
+	Alignment           string                 `json:"alignment" example:"Neutral Good"`
+	Experience          int                    `json:"experience" example:"0"`
+	HP                  int                    `json:"hp" example:"12"`
+	MaxHP               int                    `json:"max_hp" example:"12"`
+	Mana                int                    `json:"mana" example:"0"`
+	MaxMana             int                    `json:"max_mana" example:"0"`
+	Fatigue             int                    `json:"fatigue" example:"0"`
+	Hunger              int                    `json:"hunger" example:"2"`
+	Stats               map[string]interface{} `json:"stats"`
+	Location            string                 `json:"location" example:"millhaven"`
+	District            string                 `json:"district" example:"center"`
+	Building            string                 `json:"building" example:""`
+	Inventory           map[string]interface{} `json:"inventory"`
+	Vaults              []interface{}          `json:"vaults"`
+	KnownSpells         []string               `json:"known_spells"`
+	SpellSlots          map[string]interface{} `json:"spell_slots"`
+	LocationsDiscovered []string               `json:"locations_discovered"`
+	MusicTracksUnlocked []string               `json:"music_tracks_unlocked"`
+	CurrentDay          int                    `json:"current_day" example:"1"`
+	TimeOfDay           int                    `json:"time_of_day" example:"720"`
 }
 
-// SavesHandler handles save file operations
+// SaveCreateResponse represents the response after creating/updating a save
+// swagger:model SaveCreateResponse
+type SaveCreateResponse struct {
+	Success bool   `json:"success" example:"true"`
+	SaveID  string `json:"save_id" example:"save_1234567890"`
+	Message string `json:"message" example:"Game saved successfully"`
+}
+
+// SaveDeleteResponse represents the response after deleting a save
+// swagger:model SaveDeleteResponse
+type SaveDeleteResponse struct {
+	Success bool   `json:"success" example:"true"`
+	Message string `json:"message" example:"Save deleted successfully"`
+}
+
+// SavesHandler godoc
+// @Summary      Manage save files
+// @Description  GET: List all saves for user, POST: Create/update save, DELETE: Delete save
+// @Tags         Saves
+// @Accept       json
+// @Produce      json
+// @Param        npub    path      string    true   "Nostr public key (npub format)"
+// @Param        saveID  path      string    false  "Save ID (required for DELETE)"
+// @Param        save    body      SaveFile  false  "Save data (for POST)"
+// @Success      200     {array}   SaveListItem      "List of saves (GET)"
+// @Success      200     {object}  SaveCreateResponse "Save created/updated (POST)"
+// @Success      200     {object}  SaveDeleteResponse "Save deleted (DELETE)"
+// @Failure      400     {string}  string  "Missing npub or invalid data"
+// @Failure      404     {string}  string  "Save not found"
+// @Failure      500     {string}  string  "Server error"
+// @Router       /saves/{npub} [get]
+// @Router       /saves/{npub} [post]
+// @Router       /saves/{npub}/{saveID} [delete]
 func SavesHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract npub from URL path: /api/saves/{npub}
 	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/saves/"), "/")
@@ -214,52 +272,22 @@ func handleDeleteSave(w http.ResponseWriter, _ *http.Request, npub string, saveI
 	})
 }
 
-// Load specific save by ID
+// LoadSaveByID re-exported from session package
 func LoadSaveByID(npub, saveID string) (*SaveFile, error) {
-	savePath := filepath.Join(SavesDirectory, npub, saveID+".json")
-	return loadSaveFile(savePath)
+	return session.LoadSaveByID(npub, saveID)
 }
 
-// Helper functions
-func loadSaveFile(path string) (*SaveFile, error) {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var save SaveFile
-	if err := json.Unmarshal(data, &save); err != nil {
-		return nil, err
-	}
-
-	// Extract internal ID from filename
-	filename := filepath.Base(path)
-	save.InternalID = strings.TrimSuffix(filename, ".json")
-
-	// Extract npub from directory path
-	dir := filepath.Dir(path)
-	save.InternalNpub = filepath.Base(dir)
-
-	return &save, nil
-}
-
-// WriteSaveFile writes a save file to disk
+// WriteSaveFile re-exported from session package
 func WriteSaveFile(path string, save *SaveFile) error {
-	data, err := json.MarshalIndent(save, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(path, data, 0644)
+	return session.WriteSaveFile(path, save)
 }
 
-// Get save file info without full game state (for listings)
+// GetSaveInfo returns save file info for listings
 func GetSaveInfo(npub, saveID string) (*SaveFile, error) {
-	save, err := LoadSaveByID(npub, saveID)
-	if err != nil {
-		return nil, err
-	}
+	return LoadSaveByID(npub, saveID)
+}
 
-	// Return save info for listings
-	return save, nil
+// loadSaveFile is a local helper for handlers in this file
+func loadSaveFile(path string) (*SaveFile, error) {
+	return session.LoadSaveFile(path)
 }

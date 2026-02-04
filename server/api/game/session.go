@@ -6,13 +6,42 @@ import (
 	"log"
 	"net/http"
 
-	"nostr-hero/api"
 	"nostr-hero/game/effects"
+	"nostr-hero/session"
 	"nostr-hero/types"
 )
 
-// InitSessionHandler initializes a game session from a save file
-// POST /api/session/init
+// SessionRequest represents a session identification request
+// swagger:model SessionRequest
+type SessionRequest struct {
+	Npub   string `json:"npub" example:"npub1..."`
+	SaveID string `json:"save_id" example:"save_1234567890"`
+}
+
+// SessionResponse represents a session operation response
+// swagger:model SessionResponse
+type SessionResponse struct {
+	Success bool   `json:"success" example:"true"`
+	Message string `json:"message" example:"Session initialized successfully"`
+	Session struct {
+		Npub     string `json:"npub" example:"npub1..."`
+		SaveID   string `json:"save_id" example:"save_1234567890"`
+		LoadedAt string `json:"loaded_at" example:"2025-01-15T12:00:00Z"`
+	} `json:"session,omitempty"`
+}
+
+// InitSessionHandler godoc
+// @Summary      Initialize session
+// @Description  Loads a save file into memory for gameplay
+// @Tags         Session
+// @Accept       json
+// @Produce      json
+// @Param        request  body      SessionRequest  true  "Session identification"
+// @Success      200      {object}  SessionResponse
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Failure      500      {string}  string  "Failed to initialize session"
+// @Router       /session/init [post]
 func InitSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -35,7 +64,7 @@ func InitSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Load session into memory
-	sess, err := api.GetSessionManager().LoadSession(request.Npub, request.SaveID)
+	sess, err := session.GetSessionManager().LoadSession(request.Npub, request.SaveID)
 	if err != nil {
 		log.Printf("❌ Failed to initialize session: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to initialize session: %v", err), http.StatusInternalServerError)
@@ -54,8 +83,18 @@ func InitSessionHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ReloadSessionHandler forces a reload from disk, discarding in-memory changes
-// POST /api/session/reload
+// ReloadSessionHandler godoc
+// @Summary      Reload session
+// @Description  Force reload from disk, discarding all in-memory changes
+// @Tags         Session
+// @Accept       json
+// @Produce      json
+// @Param        request  body      SessionRequest  true  "Session identification"
+// @Success      200      {object}  SessionResponse
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Failure      500      {string}  string  "Failed to reload session"
+// @Router       /session/reload [post]
 func ReloadSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -78,7 +117,7 @@ func ReloadSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Force reload session from disk
-	sess, err := api.GetSessionManager().ReloadSession(request.Npub, request.SaveID)
+	sess, err := session.GetSessionManager().ReloadSession(request.Npub, request.SaveID)
 	if err != nil {
 		log.Printf("❌ Failed to reload session: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to reload session: %v", err), http.StatusInternalServerError)
@@ -98,8 +137,18 @@ func ReloadSessionHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetSessionHandler retrieves the current in-memory session state
-// GET /api/session/state?npub={npub}&save_id={saveID}
+// GetSessionHandler godoc
+// @Summary      Get session state
+// @Description  Retrieve current in-memory session state including character data and active effects
+// @Tags         Session
+// @Produce      json
+// @Param        npub     query     string  true  "Nostr public key"
+// @Param        save_id  query     string  true  "Save file ID"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      404      {string}  string  "Session not found"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Router       /session/state [get]
 func GetSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -114,7 +163,7 @@ func GetSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// Get session from memory
 	sess, err := sessionMgr.GetSession(npub, saveID)
@@ -162,8 +211,26 @@ func GetSessionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// UpdateSessionHandler updates the in-memory game state
-// POST /api/session/update
+// UpdateSessionRequest represents a session update request
+// swagger:model UpdateSessionRequest
+type UpdateSessionRequest struct {
+	Npub     string                 `json:"npub" example:"npub1..."`
+	SaveID   string                 `json:"save_id" example:"save_1234567890"`
+	SaveData map[string]interface{} `json:"save_data"`
+}
+
+// UpdateSessionHandler godoc
+// @Summary      Update session
+// @Description  Update in-memory game state with new data
+// @Tags         Session
+// @Accept       json
+// @Produce      json
+// @Param        request  body      UpdateSessionRequest  true  "Session update data"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {string}  string  "Invalid request"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Failure      500      {string}  string  "Failed to update session"
+// @Router       /session/update [post]
 func UpdateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -204,7 +271,7 @@ func UpdateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	saveData.InternalID = request.SaveID
 
 	// Update session in memory
-	if err := api.GetSessionManager().UpdateSession(request.Npub, request.SaveID, saveData); err != nil {
+	if err := session.GetSessionManager().UpdateSession(request.Npub, request.SaveID, saveData); err != nil {
 		log.Printf("❌ Failed to update session: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to update session: %v", err), http.StatusInternalServerError)
 		return
@@ -217,8 +284,19 @@ func UpdateSessionHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// SaveSessionHandler writes the in-memory state to disk
-// POST /api/session/save
+// SaveSessionHandler godoc
+// @Summary      Save session
+// @Description  Write in-memory session state to disk
+// @Tags         Session
+// @Accept       json
+// @Produce      json
+// @Param        request  body      SessionRequest  true  "Session identification"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      404      {string}  string  "Session not found in memory"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Failure      500      {string}  string  "Failed to write save file"
+// @Router       /session/save [post]
 func SaveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -241,7 +319,7 @@ func SaveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get session from memory
-	sess, err := api.GetSessionManager().GetSession(request.Npub, request.SaveID)
+	sess, err := session.GetSessionManager().GetSession(request.Npub, request.SaveID)
 	if err != nil {
 		log.Printf("❌ Session not found in memory: %v", err)
 		http.Error(w, "Session not found in memory", http.StatusNotFound)
@@ -249,8 +327,8 @@ func SaveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write to disk using existing save logic
-	savePath := fmt.Sprintf("%s/%s/%s.json", api.SavesDirectory, request.Npub, request.SaveID)
-	if err := api.WriteSaveFile(savePath, &sess.SaveData); err != nil {
+	savePath := session.GetSavePath(request.Npub, request.SaveID)
+	if err := session.WriteSaveFile(savePath, &sess.SaveData); err != nil {
 		log.Printf("❌ Failed to write save file: %v", err)
 		http.Error(w, "Failed to write save file", http.StatusInternalServerError)
 		return
@@ -266,8 +344,15 @@ func SaveSessionHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// DebugSessionsHandler returns all active sessions (debug only)
-// GET /api/debug/sessions
+// DebugSessionsHandler godoc
+// @Summary      List all sessions
+// @Description  Returns all active sessions in memory (debug mode only)
+// @Tags         Debug
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      403  {string}  string  "Debug mode disabled"
+// @Failure      405  {string}  string  "Method not allowed"
+// @Router       /debug/sessions [get]
 func DebugSessionsHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	if !debugMode {
 		http.Error(w, "Debug mode disabled", http.StatusForbidden)
@@ -279,7 +364,7 @@ func DebugSessionsHandler(w http.ResponseWriter, r *http.Request, debugMode bool
 		return
 	}
 
-	sessions := api.GetSessionManager().GetAllSessions()
+	sessions := session.GetSessionManager().GetAllSessions()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
@@ -289,8 +374,18 @@ func DebugSessionsHandler(w http.ResponseWriter, r *http.Request, debugMode bool
 	})
 }
 
-// DebugStateHandler returns the current game state for a specific session (debug only)
-// GET /api/debug/state?npub={npub}&save_id={saveID}
+// DebugStateHandler godoc
+// @Summary      Get session state (debug)
+// @Description  Returns detailed session state for debugging (debug mode only)
+// @Tags         Debug
+// @Produce      json
+// @Param        npub     query     string  false  "Nostr public key"
+// @Param        save_id  query     string  false  "Save file ID"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      403      {string}  string  "Debug mode disabled"
+// @Failure      404      {string}  string  "Session not found"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Router       /debug/state [get]
 func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	if !debugMode {
 		http.Error(w, "Debug mode disabled", http.StatusForbidden)
@@ -306,7 +401,7 @@ func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	npub := r.URL.Query().Get("npub")
 	saveID := r.URL.Query().Get("save_id")
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// If no parameters, return all sessions
 	if npub == "" || saveID == "" {
@@ -338,8 +433,17 @@ func DebugStateHandler(w http.ResponseWriter, r *http.Request, debugMode bool) {
 	})
 }
 
-// CleanupSessionHandler removes a session from memory
-// DELETE /api/session/cleanup?npub={npub}&save_id={saveID}
+// CleanupSessionHandler godoc
+// @Summary      Cleanup session
+// @Description  Remove a session from memory without saving
+// @Tags         Session
+// @Produce      json
+// @Param        npub     query     string  true  "Nostr public key"
+// @Param        save_id  query     string  true  "Save file ID"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Router       /session/cleanup [delete]
 func CleanupSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "DELETE" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -354,7 +458,7 @@ func CleanupSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.GetSessionManager().UnloadSession(npub, saveID)
+	session.GetSessionManager().UnloadSession(npub, saveID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{

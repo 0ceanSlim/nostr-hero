@@ -12,6 +12,24 @@ import (
 	"nostr-hero/utils"
 )
 
+// CharacterResponse represents the generated character response
+// swagger:model CharacterResponse
+type CharacterResponse struct {
+	Npub      string                 `json:"npub" example:"npub1..."`
+	Pubkey    string                 `json:"pubkey" example:"abc123..."`
+	Character map[string]interface{} `json:"character"`
+}
+
+// CharacterHandler godoc
+// @Summary      Generate character
+// @Description  Generates a deterministic character based on Nostr npub. The same npub always produces the same character.
+// @Tags         Character
+// @Produce      json
+// @Param        npub  query     string  true  "Nostr public key (npub format)"
+// @Success      200   {object}  CharacterResponse
+// @Failure      400   {string}  string  "Missing or invalid npub"
+// @Failure      500   {string}  string  "Server error"
+// @Router       /character [get]
 func CharacterHandler(w http.ResponseWriter, r *http.Request) {
 	npub := r.URL.Query().Get("npub")
 	if npub == "" {

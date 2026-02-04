@@ -22,19 +22,21 @@ const SavesDirectory = "data/saves"
 // ============================================================================
 
 // CreateCharacterRequest represents the frontend's simple equipment choices
+// swagger:model CreateCharacterRequest
 type CreateCharacterRequest struct {
-	Npub             string            `json:"npub"`
-	Name             string            `json:"name"`
+	Npub             string            `json:"npub" example:"npub1..."`
+	Name             string            `json:"name" example:"Aragorn"`
 	EquipmentChoices map[string]string `json:"equipment_choices"` // e.g., {"choice-0": "scimitar", "choice-1": "shield"}
-	PackChoice       string            `json:"pack_choice"`       // e.g., "druid-pack"
+	PackChoice       string            `json:"pack_choice" example:"explorers-pack"`
 }
 
 // CreateCharacterResponse returns the save ID and full character data
+// swagger:model CreateCharacterResponse
 type CreateCharacterResponse struct {
-	Success   bool        `json:"success"`
-	SaveID    string      `json:"save_id"`
+	Success   bool        `json:"success" example:"true"`
+	SaveID    string      `json:"save_id" example:"save_1234567890"`
 	Character interface{} `json:"character,omitempty"`
-	Error     string      `json:"error,omitempty"`
+	Error     string      `json:"error,omitempty" example:""`
 }
 
 // EquipmentChoice represents a single choice from starting-gear.json
@@ -89,7 +91,17 @@ type ActiveEffect = types.ActiveEffect
 // API HANDLER
 // ============================================================================
 
-// CreateCharacterHandler creates a new character and save file
+// CreateCharacterHandler godoc
+// @Summary      Create character
+// @Description  Creates a new character with selected equipment and saves it to disk
+// @Tags         Character
+// @Accept       json
+// @Produce      json
+// @Param        request  body      CreateCharacterRequest  true  "Character creation data"
+// @Success      200      {object}  CreateCharacterResponse
+// @Failure      400      {object}  CreateCharacterResponse  "Invalid request"
+// @Failure      405      {string}  string                   "Method not allowed"
+// @Router       /character/create-save [post]
 func CreateCharacterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

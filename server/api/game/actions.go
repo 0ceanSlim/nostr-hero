@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"nostr-hero/api"
 	"nostr-hero/api/data"
 	"nostr-hero/game/effects"
 	"nostr-hero/game/gameutil"
@@ -17,6 +16,7 @@ import (
 	"nostr-hero/game/npc"
 	"nostr-hero/game/status"
 	"nostr-hero/game/vault"
+	"nostr-hero/session"
 	"nostr-hero/types"
 )
 
@@ -25,10 +25,28 @@ type GameAction = types.GameAction
 type GameActionResponse = types.GameActionResponse
 type EffectMessage = types.EffectMessage
 type SaveFile = types.SaveFile
-type GameSession = api.GameSession
+type GameSession = session.GameSession
 
-// GameActionHandler handles all game actions
-// POST /api/game/action
+// GameActionRequest represents a game action request
+// swagger:model GameActionRequest
+type GameActionRequest struct {
+	Npub   string     `json:"npub" example:"npub1..."`
+	SaveID string     `json:"save_id" example:"save_1234567890"`
+	Action GameAction `json:"action"`
+}
+
+// GameActionHandler godoc
+// @Summary      Execute game action
+// @Description  Process a game action (move, use_item, equip, cast_spell, rest, etc.)
+// @Tags         Game
+// @Accept       json
+// @Produce      json
+// @Param        request  body      GameActionRequest  true  "Action request"
+// @Success      200      {object}  types.GameActionResponse
+// @Failure      400      {string}  string  "Invalid request"
+// @Failure      404      {string}  string  "Session not found"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Router       /game/action [post]
 func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -52,7 +70,7 @@ func GameActionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// Get session from memory
 	session, err := sessionMgr.GetSession(request.Npub, request.SaveID)
@@ -373,7 +391,7 @@ func handleUpdateTimeAction(state *SaveFile, params map[string]any) (*GameAction
 	// Get session for delta tracking
 	npub := state.InternalNpub
 	saveID := state.InternalID
-	session, err := api.GetSessionManager().GetSession(npub, saveID)
+	session, err := session.GetSessionManager().GetSession(npub, saveID)
 	if err != nil {
 		log.Printf("⚠️ Session not found for delta: %s:%s", npub, saveID)
 	}
@@ -462,8 +480,18 @@ func handleAddItemAction(state *SaveFile, params map[string]any) (*GameActionRes
 	return nil, err
 }
 
-// GetGameStateHandler returns the current game state
-// GET /api/game/state?npub={npub}&save_id={saveID}
+// GetGameStateHandler godoc
+// @Summary      Get game state
+// @Description  Returns current game state for a session including character data, inventory, and session-specific data
+// @Tags         Game
+// @Produce      json
+// @Param        npub     query     string  true  "Nostr public key"
+// @Param        save_id  query     string  true  "Save file ID"
+// @Success      200      {object}  map[string]interface{}
+// @Failure      400      {string}  string  "Missing npub or save_id"
+// @Failure      404      {string}  string  "Session not found"
+// @Failure      405      {string}  string  "Method not allowed"
+// @Router       /game/state [get]
 func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -478,7 +506,7 @@ func GetGameStateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// Get session from memory
 	session, err := sessionMgr.GetSession(npub, saveID)

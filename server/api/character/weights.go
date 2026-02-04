@@ -8,7 +8,14 @@ import (
 	"nostr-hero/db"
 )
 
-// WeightsHandler serves character generation weights from DuckDB
+// WeightsHandler godoc
+// @Summary      Get generation weights
+// @Description  Returns character generation weight tables used for deterministic character creation
+// @Tags         Character
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      500  {string}  string  "Failed to load weights"
+// @Router       /weights [get]
 func WeightsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -40,7 +47,14 @@ func GetWeightsFromDB() (map[string]interface{}, error) {
 	}, nil
 }
 
-// IntroductionsHandler serves character introduction data from database
+// IntroductionsHandler godoc
+// @Summary      Get introductions
+// @Description  Returns character introduction/backstory templates by class and background
+// @Tags         Character
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      500  {string}  string  "Failed to load introductions"
+// @Router       /introductions [get]
 func IntroductionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -69,7 +83,14 @@ func getIntroductionsFromDB() (string, error) {
 	return dataJSON, nil
 }
 
-// StartingGearHandler serves starting equipment data from database
+// StartingGearHandler godoc
+// @Summary      Get starting gear
+// @Description  Returns starting equipment options by class
+// @Tags         Character
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      500  {string}  string  "Failed to load starting gear"
+// @Router       /starting-gear [get]
 func StartingGearHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

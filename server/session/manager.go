@@ -7,8 +7,68 @@ import (
 	"sync"
 	"time"
 
+	"nostr-hero/api/data"
+	"nostr-hero/db"
+	"nostr-hero/game/building"
+	"nostr-hero/game/status"
 	"nostr-hero/types"
 )
+
+// ============================================================================
+// Global Session Manager (with dependency injection)
+// ============================================================================
+
+// SessionManagerWrapper wraps SessionManager with app-specific dependencies
+type SessionManagerWrapper struct {
+	*SessionManager
+}
+
+// Global session manager instance
+var globalSessionManager = &SessionManagerWrapper{
+	SessionManager: NewSessionManager(),
+}
+
+// GetSessionManager returns the global session manager
+func GetSessionManager() *SessionManagerWrapper {
+	return globalSessionManager
+}
+
+// LoadSession loads a save file into memory with all dependencies injected
+func (sm *SessionManagerWrapper) LoadSession(npub, saveID string) (*GameSession, error) {
+	return sm.SessionManager.LoadSession(
+		npub,
+		saveID,
+		LoadSaveByID,
+		status.InitializeFatigueHungerEffects,
+		data.GetNPCIDsAtLocation,
+		getBuildingStatesWrapper,
+	)
+}
+
+// ReloadSession forces a reload from disk with all dependencies injected
+func (sm *SessionManagerWrapper) ReloadSession(npub, saveID string) (*GameSession, error) {
+	return sm.SessionManager.ReloadSession(
+		npub,
+		saveID,
+		LoadSaveByID,
+		status.InitializeFatigueHungerEffects,
+		data.GetNPCIDsAtLocation,
+		getBuildingStatesWrapper,
+	)
+}
+
+// getBuildingStatesWrapper wraps building.GetAllBuildingStatesForDistrict
+func getBuildingStatesWrapper(location, district string, timeOfDay int) (map[string]bool, error) {
+	database := db.GetDB()
+	if database == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+	return building.GetAllBuildingStatesForDistrict(database, location, district, timeOfDay)
+}
+
+// ============================================================================
+// Core Session Manager
+// ============================================================================
 
 // SessionManager manages all active game sessions in memory
 type SessionManager struct {

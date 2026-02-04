@@ -11,18 +11,30 @@ import (
 )
 
 // NPCLocationResponse represents NPC visibility at a location
+// swagger:model NPCLocationResponse
 type NPCLocationResponse struct {
-	NPCID          string `json:"npc_id"`
-	Name           string `json:"name"`
-	Title          string `json:"title"`
-	LocationType   string `json:"location_type"` // "building" or "district"
-	LocationID     string `json:"location_id"`
-	State          string `json:"state"`
-	IsInteractable bool   `json:"is_interactable"`
+	NPCID          string `json:"npc_id" example:"blacksmith-john"`
+	Name           string `json:"name" example:"John"`
+	Title          string `json:"title" example:"Blacksmith"`
+	LocationType   string `json:"location_type" example:"building"` // "building" or "district"
+	LocationID     string `json:"location_id" example:"forge"`
+	State          string `json:"state" example:"working"`
+	IsInteractable bool   `json:"is_interactable" example:"true"`
 }
 
-// GetNPCsAtLocationHandler returns NPCs visible at player's current location and time
-// GET /api/npcs/at-location?location={locationID}&district={districtID}&building={buildingID}&time={timeOfDay}
+// GetNPCsAtLocationHandler godoc
+// @Summary      Get NPCs at location
+// @Description  Returns NPCs visible at player's current location and time of day
+// @Tags         GameData
+// @Produce      json
+// @Param        location  query     string  true   "Location ID (e.g., kingdom)"
+// @Param        district  query     string  false  "District ID (e.g., kingdom-center)"
+// @Param        building  query     string  false  "Building ID (e.g., forge)"
+// @Param        time      query     int     false  "Time of day in minutes (0-1439, default 720 = noon)"
+// @Success      200       {array}   NPCLocationResponse
+// @Failure      405       {string}  string  "Method not allowed"
+// @Failure      500       {string}  string  "Database error"
+// @Router       /npcs/at-location [get]
 func GetNPCsAtLocationHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

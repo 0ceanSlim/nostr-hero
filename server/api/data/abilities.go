@@ -12,42 +12,46 @@ import (
 )
 
 // AbilityTier represents a scaling tier for an ability
+// swagger:model AbilityTier
 type AbilityTier struct {
-	MinLevel         int      `json:"min_level"`
-	MaxLevel         int      `json:"max_level"`
+	MinLevel         int      `json:"min_level" example:"1"`
+	MaxLevel         int      `json:"max_level" example:"4"`
 	EffectsApplied   []string `json:"effects_applied"`
-	Summary          string   `json:"summary"`
+	Summary          string   `json:"summary" example:"+2 damage on hit"`
 	OverrideCost     *int     `json:"override_cost,omitempty"`
 	OverrideCooldown *int     `json:"override_cooldown,omitempty"`
 }
 
 // Ability represents a martial class ability definition
+// swagger:model Ability
 type Ability struct {
-	ID           string        `json:"id"`
-	Name         string        `json:"name"`
-	Class        string        `json:"class"`
-	UnlockLevel  int           `json:"unlock_level"`
-	ResourceCost int           `json:"resource_cost"`
-	ResourceType string        `json:"resource_type"`
-	Cooldown     string        `json:"cooldown"`
-	Description  string        `json:"description"`
+	ID           string        `json:"id" example:"second-wind"`
+	Name         string        `json:"name" example:"Second Wind"`
+	Class        string        `json:"class" example:"fighter"`
+	UnlockLevel  int           `json:"unlock_level" example:"1"`
+	ResourceCost int           `json:"resource_cost" example:"1"`
+	ResourceType string        `json:"resource_type" example:"stamina"`
+	Cooldown     string        `json:"cooldown" example:"short_rest"`
+	Description  string        `json:"description" example:"Regain hit points equal to 1d10 + fighter level"`
 	ScalingTiers []AbilityTier `json:"scaling_tiers"`
 }
 
 // AbilityResponse represents an ability with computed tier info
+// swagger:model AbilityResponse
 type AbilityResponse struct {
 	Ability
-	IsUnlocked  bool          `json:"is_unlocked"`
+	IsUnlocked  bool          `json:"is_unlocked" example:"true"`
 	CurrentTier *AbilityTier  `json:"current_tier"`
 	NextTier    *AbilityTier  `json:"next_tier"`
 	AllTiers    []AbilityTier `json:"all_tiers"`
 }
 
 // AbilitiesListResponse is the API response for abilities list
+// swagger:model AbilitiesListResponse
 type AbilitiesListResponse struct {
-	Success   bool              `json:"success"`
-	Class     string            `json:"class"`
-	Level     int               `json:"level"`
+	Success   bool              `json:"success" example:"true"`
+	Class     string            `json:"class" example:"fighter"`
+	Level     int               `json:"level" example:"3"`
 	Abilities []AbilityResponse `json:"abilities"`
 }
 
@@ -59,8 +63,18 @@ var validMartialClasses = map[string]bool{
 	"rogue":     true,
 }
 
-// AbilitiesHandler serves ability data for martial classes
-// GET /api/abilities?class={class}&level={level}
+// AbilitiesHandler godoc
+// @Summary      Get abilities
+// @Description  Returns abilities for martial classes (fighter, barbarian, monk, rogue) with tier calculations
+// @Tags         GameData
+// @Produce      json
+// @Param        class  query     string  true   "Class name (fighter, barbarian, monk, rogue)"
+// @Param        level  query     int     false  "Character level (default 1)"
+// @Success      200    {object}  AbilitiesListResponse
+// @Failure      400    {object}  map[string]interface{}  "Invalid parameters"
+// @Failure      405    {string}  string                  "Method not allowed"
+// @Failure      500    {object}  map[string]interface{}  "Server error"
+// @Router       /abilities [get]
 func AbilitiesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

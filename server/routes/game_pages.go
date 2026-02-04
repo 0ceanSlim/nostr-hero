@@ -11,6 +11,40 @@ import (
 	"github.com/0ceanslim/grain/client/core/tools"
 )
 
+// GameHandler serves the main game interface
+func GameHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract query parameters
+	saveID := r.URL.Query().Get("save")
+	newGame := r.URL.Query().Get("new")
+
+	data := utils.PageData{
+		Title: "Nostr Hero - Game",
+		Theme: "dark",
+		CustomData: map[string]interface{}{
+			"GameMode":  true,
+			"SaveID":    saveID,
+			"NewGame":   newGame == "true",
+			"DebugMode": utils.AppConfig.Server.DebugMode,
+		},
+	}
+
+	utils.RenderTemplateWithLayout(w, data, "game.html", false, true)
+}
+
+// NewGameHandler serves the character generation page
+func NewGameHandler(w http.ResponseWriter, r *http.Request) {
+	data := utils.PageData{
+		Title: "Nostr Hero - New Adventure",
+		Theme: "dark",
+		CustomData: map[string]interface{}{
+			"NewGameMode": true,
+		},
+	}
+
+	utils.RenderTemplate(w, data, "game-intro.html", false)
+}
+
+// LoadSave serves the load save page
 func LoadSave(w http.ResponseWriter, r *http.Request) {
 	// Get current user session using grain
 	session := auth.GetCurrentUser(r)
@@ -66,7 +100,7 @@ func LoadSave(w http.ResponseWriter, r *http.Request) {
 		"profile":   content,
 		"character": characterData,
 		"saves":     saveData,
-		"npub":    npub,
+		"npub":      npub,
 	}
 
 	// Render the template
@@ -79,22 +113,34 @@ func LoadSave(w http.ResponseWriter, r *http.Request) {
 	utils.RenderTemplate(w, data, "load-save.html", false)
 }
 
-// Helper function to fetch character data from API
-func fetchCharacterData(npub string) (map[string]interface{}, error) {
+// SavesHandler serves the save selection interface
+func SavesHandler(w http.ResponseWriter, r *http.Request) {
+	data := utils.PageData{
+		Title: "Nostr Hero - Select Save",
+		Theme: "dark",
+		CustomData: map[string]interface{}{
+			"SavesMode": true,
+		},
+	}
 
+	utils.RenderTemplate(w, data, "saves.html", false)
+}
+
+// fetchCharacterData is a helper function to fetch character data from API
+func fetchCharacterData(npub string) (map[string]interface{}, error) {
 	// Create the full URL with protocol, host and port
 	port := utils.AppConfig.Server.Port
 	apiURL := fmt.Sprintf("http://localhost:%d/api/character?npub=%s", port, npub)
-	
+
 	log.Printf("🔍 Fetching character data from: %s", apiURL)
-	
+
 	// Make API call to character endpoint
 	resp, err := http.Get(apiURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to character API: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	// Check if response is successful
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned non-OK status: %d", resp.StatusCode)

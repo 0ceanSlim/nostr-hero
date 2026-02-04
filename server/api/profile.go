@@ -12,6 +12,7 @@ import (
 )
 
 // ProfileMetadata represents a Nostr user profile
+// swagger:model ProfileMetadata
 type ProfileMetadata struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
@@ -22,6 +23,27 @@ type ProfileMetadata struct {
 	Lud16       string `json:"lud16"`
 }
 
+// ProfileResponse represents the response from the profile endpoint
+// swagger:model ProfileResponse
+type ProfileResponse struct {
+	Npub    string          `json:"npub"`
+	Pubkey  string          `json:"pubkey"`
+	Profile ProfileMetadata `json:"profile"`
+	Cached  bool            `json:"cached"`
+}
+
+// ProfileHandler godoc
+// @Summary      Get Nostr profile
+// @Description  Fetch Nostr profile metadata for a given npub
+// @Tags         Profile
+// @Accept       json
+// @Produce      json
+// @Param        npub  query     string  true  "Nostr public key (npub format)"
+// @Success      200   {object}  ProfileResponse
+// @Failure      400   {string}  string  "Missing or invalid npub"
+// @Failure      404   {string}  string  "Profile not found"
+// @Failure      500   {string}  string  "Error fetching profile"
+// @Router       /profile [get]
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	npub := r.URL.Query().Get("npub")
 	if npub == "" {

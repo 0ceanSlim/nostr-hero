@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	"nostr-hero/api"
 	"nostr-hero/api/character"
 	"nostr-hero/db"
 	"nostr-hero/game/gameutil"
 	"nostr-hero/game/inventory"
 	"nostr-hero/game/shop"
 	"nostr-hero/game/status"
+	"nostr-hero/session"
 	"nostr-hero/types"
 	"nostr-hero/world"
 )
@@ -25,7 +25,7 @@ func parseIntervalToMinutes(interval string) int {
 
 // Helper: Get charisma stat from session state
 func getCharismaFromSession(npub, saveID string) int {
-	session, err := api.GetSessionManager().GetSession(npub, saveID)
+	session, err := session.GetSessionManager().GetSession(npub, saveID)
 	if err != nil {
 		log.Printf("⚠️ Failed to get session for charisma lookup: %v", err)
 		return 10 // Default charisma
@@ -56,11 +56,56 @@ func calculateSellPrice(basePrice int, shopConfig types.ShopConfig, charisma int
 	return shop.CalculateSellPrice(basePrice, shopConfig, charisma)
 }
 
-// ShopHandler handles shop-related operations
-// Routes:
-// GET /api/shop/{merchant_id} - Get shop data (config + inventory with prices)
-// POST /api/shop/buy - Buy items from shop
-// POST /api/shop/sell - Sell items to shop
+// ShopDataResponse represents the shop data returned by GET /api/shop/{merchant_id}
+// swagger:model ShopDataResponse
+type ShopDataResponse struct {
+	MerchantID           string                   `json:"merchant_id" example:"blacksmith-john"`
+	MerchantName         string                   `json:"merchant_name" example:"John"`
+	ShopType             string                   `json:"shop_type" example:"general"`
+	BuysItems            bool                     `json:"buys_items" example:"true"`
+	CurrentGold          int                      `json:"current_gold" example:"500"`
+	MaxGold              int                      `json:"max_gold" example:"1000"`
+	BuyPriceMultiplier   float64                  `json:"buy_price_multiplier" example:"1.2"`
+	SellPriceMultiplier  float64                  `json:"sell_price_multiplier" example:"0.5"`
+	Inventory            []map[string]interface{} `json:"inventory"`
+	ItemRestockInterval  int                      `json:"item_restock_interval" example:"10"`
+	GoldRestockInterval  int                      `json:"gold_restock_interval" example:"30"`
+	TimeUntilItemRestock int                      `json:"time_until_item_restock" example:"5"`
+	TimeUntilGoldRestock int                      `json:"time_until_gold_restock" example:"15"`
+	JustRestocked        bool                     `json:"just_restocked" example:"false"`
+}
+
+// ShopTransactionResponse represents the response from buy/sell operations
+// swagger:model ShopTransactionResponse
+type ShopTransactionResponse struct {
+	Success     bool   `json:"success" example:"true"`
+	Message     string `json:"message" example:"Bought 1x Longsword for 15g"`
+	GoldSpent   int    `json:"gold_spent,omitempty" example:"15"`
+	GoldEarned  int    `json:"gold_earned,omitempty" example:"7"`
+	NewGold     int    `json:"new_gold" example:"85"`
+	ItemsBought int    `json:"items_bought,omitempty" example:"1"`
+	ItemsSold   int    `json:"items_sold,omitempty" example:"1"`
+	Error       string `json:"error,omitempty"`
+}
+
+// ShopHandler godoc
+// @Summary      Shop operations
+// @Description  GET /{merchant_id}: Get shop data with inventory and prices. POST /buy: Buy items. POST /sell: Sell items.
+// @Tags         Shop
+// @Accept       json
+// @Produce      json
+// @Param        merchant_id  path      string                  false  "Merchant ID (for GET)"
+// @Param        npub         query     string                  false  "Nostr public key (for GET)"
+// @Param        save_id      query     string                  false  "Save file ID (for GET)"
+// @Param        transaction  body      types.ShopTransaction   false  "Transaction data (for POST)"
+// @Success      200          {object}  ShopDataResponse        "Shop data (GET)"
+// @Success      200          {object}  ShopTransactionResponse "Transaction result (POST)"
+// @Failure      400          {object}  map[string]interface{}  "Invalid request"
+// @Failure      404          {object}  map[string]interface{}  "Merchant or session not found"
+// @Failure      405          {string}  string                  "Method not allowed"
+// @Router       /shop/{merchant_id} [get]
+// @Router       /shop/buy [post]
+// @Router       /shop/sell [post]
 func ShopHandler(w http.ResponseWriter, r *http.Request) {
 	pathParts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/shop/"), "/")
 
@@ -234,7 +279,7 @@ func handleBuyFromShop(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🛒 Processing buy: %s buying %dx %s from %s", transaction.Npub, transaction.Quantity, transaction.ItemID, transaction.MerchantID)
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// Get session from memory (not disk!)
 	session, err := sessionMgr.GetSession(transaction.Npub, transaction.SaveID)
@@ -446,7 +491,7 @@ func handleSellToShop(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("💰 Processing sell: %s selling %dx %s to %s", transaction.Npub, transaction.Quantity, transaction.ItemID, transaction.MerchantID)
 
-	sessionMgr := api.GetSessionManager()
+	sessionMgr := session.GetSessionManager()
 
 	// Get session from memory (not disk!)
 	session, err := sessionMgr.GetSession(transaction.Npub, transaction.SaveID)

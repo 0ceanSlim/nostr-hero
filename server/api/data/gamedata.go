@@ -12,6 +12,7 @@ import (
 )
 
 // GameData represents the complete static game data bundle
+// swagger:model GameData
 type GameData struct {
 	Items       []Item       `json:"items"`
 	Spells      []Spell      `json:"spells"`
@@ -22,78 +23,92 @@ type GameData struct {
 }
 
 // Item represents game items
+// swagger:model Item
 type Item struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	ItemType    string                 `json:"item_type"`
+	ID          string                 `json:"id" example:"longsword"`
+	Name        string                 `json:"name" example:"Longsword"`
+	Description string                 `json:"description" example:"A versatile martial weapon"`
+	ItemType    string                 `json:"item_type" example:"weapon"`
 	Properties  map[string]interface{} `json:"properties"`
-	Tags        []string               `json:"tags"`
-	Rarity      string                 `json:"rarity"`
+	Tags        []string               `json:"tags" example:"martial,slashing"`
+	Rarity      string                 `json:"rarity" example:"common"`
 }
 
 // Spell represents game spells
+// swagger:model Spell
 type Spell struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Level       int                    `json:"level"`
-	School      string                 `json:"school"`
-	Damage      string                 `json:"damage"`
-	ManaCost    int                    `json:"mana_cost"`
-	Classes     []string               `json:"classes"`
+	ID          string                 `json:"id" example:"fire-bolt"`
+	Name        string                 `json:"name" example:"Fire Bolt"`
+	Description string                 `json:"description" example:"A mote of fire streaks toward a creature"`
+	Level       int                    `json:"level" example:"0"`
+	School      string                 `json:"school" example:"evocation"`
+	Damage      string                 `json:"damage" example:"1d10"`
+	ManaCost    int                    `json:"mana_cost" example:"0"`
+	Classes     []string               `json:"classes" example:"wizard,sorcerer"`
 	Properties  map[string]interface{} `json:"properties"`
 }
 
 // Monster represents game monsters
+// swagger:model Monster
 type Monster struct {
-	ID              string                 `json:"id"`
-	Name            string                 `json:"name"`
-	ChallengeRating float64                `json:"challenge_rating"`
+	ID              string                 `json:"id" example:"goblin"`
+	Name            string                 `json:"name" example:"Goblin"`
+	ChallengeRating float64                `json:"challenge_rating" example:"0.25"`
 	Stats           map[string]interface{} `json:"stats"`
 	Actions         map[string]interface{} `json:"actions"`
 }
 
 // Location represents game locations
+// swagger:model Location
 type Location struct {
-	ID           string                 `json:"id"`
-	Name         string                 `json:"name"`
-	LocationType string                 `json:"location_type"`
-	Description  string                 `json:"description"`
-	Image        string                 `json:"image,omitempty"`
-	Music        string                 `json:"music,omitempty"`
+	ID           string                 `json:"id" example:"millhaven"`
+	Name         string                 `json:"name" example:"Millhaven"`
+	LocationType string                 `json:"location_type" example:"city"`
+	Description  string                 `json:"description" example:"A bustling trade town"`
+	Image        string                 `json:"image,omitempty" example:"millhaven.png"`
+	Music        string                 `json:"music,omitempty" example:"town-theme"`
 	Properties   map[string]interface{} `json:"properties"`
-	Connections  []string               `json:"connections"`
+	Connections  []string               `json:"connections" example:"verdant,kingdom"`
 }
 
 // Pack represents equipment packs
+// swagger:model Pack
 type Pack struct {
-	ID    string        `json:"id"`
-	Name  string        `json:"name"`
+	ID    string        `json:"id" example:"explorers-pack"`
+	Name  string        `json:"name" example:"Explorer's Pack"`
 	Items []interface{} `json:"items"`
 }
 
 // MusicTrack represents music tracks in the game
+// swagger:model MusicTrack
 type MusicTrack struct {
-	Title      string `json:"title"`
-	File       string `json:"file"`
-	UnlocksAt  string `json:"unlocks_at,omitempty"`
-	AutoUnlock bool   `json:"auto_unlock,omitempty"`
+	Title      string `json:"title" example:"Town Theme"`
+	File       string `json:"file" example:"town-theme.mp3"`
+	UnlocksAt  string `json:"unlocks_at,omitempty" example:"millhaven"`
+	AutoUnlock bool   `json:"auto_unlock,omitempty" example:"false"`
 }
 
 // NPC represents non-player characters
+// swagger:model NPC
 type NPC struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Title       string                 `json:"title,omitempty"`
-	Race        string                 `json:"race,omitempty"`
-	Location    string                 `json:"location,omitempty"`
-	Building    string                 `json:"building,omitempty"`
-	Description string                 `json:"description,omitempty"`
+	ID          string                 `json:"id" example:"blacksmith-john"`
+	Name        string                 `json:"name" example:"John"`
+	Title       string                 `json:"title,omitempty" example:"Blacksmith"`
+	Race        string                 `json:"race,omitempty" example:"Human"`
+	Location    string                 `json:"location,omitempty" example:"millhaven"`
+	Building    string                 `json:"building,omitempty" example:"forge"`
+	Description string                 `json:"description,omitempty" example:"A skilled metalworker"`
 	Properties  map[string]interface{} `json:"properties"`
 }
 
-// GameDataHandler serves all game data in one request for efficient loading
+// GameDataHandler godoc
+// @Summary      Get all game data
+// @Description  Returns all static game data in one request (items, spells, monsters, locations, packs, music tracks)
+// @Tags         GameData
+// @Produce      json
+// @Success      200  {object}  GameData
+// @Failure      500  {string}  string  "Database not available"
+// @Router       /game-data [get]
 func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
@@ -164,7 +179,15 @@ func GameDataHandler(w http.ResponseWriter, r *http.Request) {
 		len(gameData.Items), len(gameData.Spells), len(gameData.Monsters), len(gameData.Locations), len(gameData.Packs), len(gameData.MusicTracks))
 }
 
-// Individual endpoints for specific data types
+// ItemsHandler godoc
+// @Summary      Get items
+// @Description  Returns all items, optionally filtered by item ID
+// @Tags         GameData
+// @Produce      json
+// @Param        name  query     string  false  "Filter by item ID"
+// @Success      200   {array}   Item
+// @Failure      500   {string}  string  "Database error"
+// @Router       /items [get]
 func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
@@ -205,6 +228,17 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(items)
 }
 
+// SpellsHandler godoc
+// @Summary      Get spells
+// @Description  Returns all spells, or a specific spell by ID if provided in path
+// @Tags         GameData
+// @Produce      json
+// @Param        id   path      string  false  "Spell ID (e.g., fire-bolt)"
+// @Success      200  {array}   Spell         "All spells or single spell"
+// @Failure      404  {string}  string        "Spell not found"
+// @Failure      500  {string}  string        "Database error"
+// @Router       /spells/ [get]
+// @Router       /spells/{id} [get]
 func SpellsHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
@@ -243,6 +277,14 @@ func SpellsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(spells)
 }
 
+// MonstersHandler godoc
+// @Summary      Get monsters
+// @Description  Returns all monsters in the game
+// @Tags         GameData
+// @Produce      json
+// @Success      200  {array}   Monster
+// @Failure      500  {string}  string  "Database error"
+// @Router       /monsters [get]
 func MonstersHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
@@ -261,6 +303,14 @@ func MonstersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(monsters)
 }
 
+// LocationsHandler godoc
+// @Summary      Get locations
+// @Description  Returns all locations in the game world
+// @Tags         GameData
+// @Produce      json
+// @Success      200  {array}   Location
+// @Failure      500  {string}  string  "Database error"
+// @Router       /locations [get]
 func LocationsHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
@@ -279,6 +329,14 @@ func LocationsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(locations)
 }
 
+// NPCsHandler godoc
+// @Summary      Get NPCs
+// @Description  Returns all non-player characters in the game
+// @Tags         GameData
+// @Produce      json
+// @Success      200  {array}   NPC
+// @Failure      500  {string}  string  "Database error"
+// @Router       /npcs [get]
 func NPCsHandler(w http.ResponseWriter, r *http.Request) {
 	database := db.GetDB()
 	if database == nil {
