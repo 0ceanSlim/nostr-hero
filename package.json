@@ -1,13 +1,13 @@
 {
-  "name": "nostr-hero",
+  "name": "pubkey-quest",
   "version": "1.0.0",
-  "description": "Nostr Hero - A D&D 5e-inspired RPG using Nostr for authentication",
+  "description": "Pubkey Quest - A D&D 5e-inspired RPG using Nostr for authentication",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "build:watch": "vite build --watch"
+    "dev": "vite --config src/vite.config.js",
+    "build": "vite build --config src/vite.config.js",
+    "preview": "vite preview --config src/vite.config.js",
+    "build:watch": "vite build --watch --config src/vite.config.js"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",

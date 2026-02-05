@@ -13,9 +13,9 @@ export NVM_DIR="$HOME/.nvm"
 # IMPORTANT: Add Go to PATH
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
 
-REPO_PATH="/path/to/nostr-hero"
+REPO_PATH="/path/to/pubkey-quest"
 SERVICE_NAME="your-service-name"
-LOG_FILE="/var/log/nostr-hero-deploy.log"
+LOG_FILE="/var/log/pubkey-quest-deploy.log"
 
 # GitHub status reporting function
 update_github_status() {
@@ -68,7 +68,6 @@ update_github_status() {
 
     # Install npm dependencies (if package.json changed)
     echo "📦 Installing npm dependencies..."
-    # Use full path to npm if not in PATH (adjust this path based on your server)
     NPM_CMD=$(command -v npm || echo "/usr/bin/npm")
     echo "  Using npm at: $NPM_CMD"
     $NPM_CMD install
@@ -89,15 +88,10 @@ update_github_status() {
     fi
     echo "✅ Frontend built successfully"
 
-    # Download Go dependencies
+    # Download Go dependencies (from root, go.mod is at root now)
     echo "📦 Installing Go dependencies..."
     echo "  Checking for Go: $(which go 2>&1 || echo 'go not found in PATH')"
     echo "  Go version: $(go version 2>&1 || echo 'go command failed')"
-    cd server || {
-      echo "❌ Failed to enter server directory!"
-      update_github_status "failure" "Server directory not found"
-      exit 1
-    }
     echo "  Working directory: $(pwd)"
     echo "  Running: go mod download"
     go mod download
@@ -108,61 +102,19 @@ update_github_status() {
     fi
     echo "✅ Go dependencies installed"
 
-    # Build Go binary
-    echo "🔨 Building Go binary..."
-    go build -o ../nostr-hero main.go
-    if [ $? -ne 0 ]; then
-      echo "❌ Go build failed!"
-      update_github_status "failure" "Go build failed"
-      exit 1
-    fi
-    cd ..
-    echo "✅ Go binary built successfully"
-
-    # Optional: Run tests before restarting
-    # echo "🧪 Running tests..."
-    # go test ./... || {
-    #   echo "❌ Tests failed, aborting deployment"
-    #   update_github_status "failure" "Tests failed"
-    #   exit 1
-    # }
-
-    # Restart nostr-hero service
-    echo "🔄 Restarting $SERVICE_NAME service..."
-    sudo systemctl restart "$SERVICE_NAME"
-
-    if [ $? -eq 0 ]; then
-      echo "✅ Nostr-hero service restarted successfully"
-    else
-      echo "❌ Nostr-hero service restart failed!"
-      update_github_status "failure" "Nostr-hero service restart failed"
-      exit 1
-    fi
-
-    # Build CODEX
+    # Build CODEX first (needed for migration)
     echo "========================================="
     echo "🎮 Building CODEX..."
     echo "========================================="
 
-    cd game-data/CODEX
-    if [ $? -ne 0 ]; then
-      echo "❌ Failed to navigate to CODEX directory"
-      update_github_status "failure" "Failed to access CODEX directory"
-      exit 1
-    fi
-
-    # Build CODEX using Makefile
-    echo "🔨 Building CODEX (frontend + backend)..."
-    make build
+    echo "🔨 Building CODEX binary..."
+    go build -o codex ./cmd/codex
     if [ $? -ne 0 ]; then
       echo "❌ CODEX build failed!"
       update_github_status "failure" "CODEX build failed"
       exit 1
     fi
     echo "✅ CODEX built successfully"
-
-    # Navigate back to repo root
-    cd ../..
 
     # Run CODEX database migration
     echo "🔄 Running CODEX database migration..."
@@ -174,7 +126,29 @@ update_github_status() {
     fi
     echo "✅ CODEX migration completed"
 
-    # Restart CODEX service
+    # Build server binary
+    echo "🔨 Building server binary..."
+    go build -o pubkey-quest ./cmd/server
+    if [ $? -ne 0 ]; then
+      echo "❌ Go build failed!"
+      update_github_status "failure" "Go build failed"
+      exit 1
+    fi
+    echo "✅ Server binary built successfully"
+
+    # Restart main service
+    echo "🔄 Restarting $SERVICE_NAME service..."
+    sudo systemctl restart "$SERVICE_NAME"
+
+    if [ $? -eq 0 ]; then
+      echo "✅ Main service restarted successfully"
+    else
+      echo "❌ Main service restart failed!"
+      update_github_status "failure" "Main service restart failed"
+      exit 1
+    fi
+
+    # Restart CODEX service (if running separately)
     echo "🔄 Restarting codex.service..."
     sudo systemctl restart codex
 

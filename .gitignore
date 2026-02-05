@@ -1,6 +1,6 @@
 /tmp
 config.yml
-codex-config.yml
+cmd/codex/config.yml
 alpha-registry.json
 legacy-registry.json
 
@@ -9,32 +9,36 @@ legacy-registry.json
 *.duckdb
 game.db
 
-!/www/static/js/
-!/www/static/img/
-!/www/static/style/readme.md
-!/www/static/style/input.css
-!/www/static/style/tailwind.config.js
-!/www/views/
-!/www/data/
-item-editor-gui.exe
+# Build outputs
+www/dist/
+
+# Binaries
 nostr-hero.exe
 nostr-hero
-pixellab-gen.exe
 codex.exe
-game-data/CODEX/codex.exe
-game-data/CODEX/codex
-
-# Development configs (examples in docs/development/)
-.air.toml
+item-editor-gui.exe
+pixellab-gen.exe
+/codex
+pubkey-quest
+pubkey-quest.exe
 
 # Node.js
 node_modules/
 
-# Build outputs
-www/dist/
+# IDE/Editor
+/.vscode
+/.gemini
 
+# Claude
 /.claude
+claude.md
+
+# Data directories
 /data
+
+# Generated assets
+/www/res/img/items/_history
+/www/res/style/output.css
 
 # Deployment secrets (server-specific, never commit)
 /docs/development/deployment/webhook-hooks.json
@@ -44,23 +48,10 @@ www/dist/
 /docs/development/deployment/*.local.sh
 deploy-config.env
 
-/www/res/style/output.css
-
-/.vscode
-claude.md
-/www/res/img/items/_history
-/.gemini
-nul
-codex-config.yml
-
-codex
-
-
-
-# Build configuration files are now committed to version control
-
-# (These files define how to build the project and should be tracked)
-
+# Secrets
 dev-accounts-secrets.json
-
 password.json
+
+# Windows artifacts
+nul
+NUL
