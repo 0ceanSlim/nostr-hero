@@ -1,6 +1,6 @@
 /tmp
 config.yml
-cmd/codex/config.yml
+codex-config.yml
 alpha-registry.json
 legacy-registry.json
 
