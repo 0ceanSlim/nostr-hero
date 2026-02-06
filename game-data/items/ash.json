@@ -2,7 +2,6 @@
   "id": "ash",
   "name": "Ash",
   "description": "Fine gray powder from burned magical creatures, still warm with destructive energy.",
-  "ai_description": "fine gray ash with glowing embers, warm powder from cremated creatures with orange sparks",
   "price": 15,
   "type": "Spell Component",
   "weight": 0.1,

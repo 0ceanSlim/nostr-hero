@@ -2,7 +2,6 @@
   "id": "scalemail-set",
   "name": "Scale Mail Set",
   "description": "A complete set of armor made from overlapping metal scales sewn to a leather backing.",
-  "ai_description": "armor made of overlapping metal scales sewn to leather backing, dragon-like protective covering",
   "rarity": "uncommon",
   "price": 5000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["scalemail-cuirass", 1],
-    ["scalemail-greaves", 1]
+    [
+      "scalemail-cuirass",
+      1
+    ],
+    [
+      "scalemail-greaves",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": "14 + Dex(max2)",

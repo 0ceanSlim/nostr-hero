@@ -2,7 +2,6 @@
   "id": "hide-chaps",
   "name": "Hide Chaps",
   "description": "Primitive leg armor made from thick beast hides and furs.",
-  "ai_description": "rough animal leather leg guards with fur trim, primitive leg protection from beast hides",
   "rarity": "common",
   "price": 400,
   "weight": 5,

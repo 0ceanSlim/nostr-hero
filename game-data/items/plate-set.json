@@ -2,7 +2,6 @@
   "id": "plate-set",
   "name": "Plate Armor Set",
   "description": "A complete suit of articulated steel plates providing the ultimate in protection.",
-  "ai_description": "full suit of articulated steel plates, gleaming knight's armor with pauldrons, breastplate, and greaves",
   "rarity": "rare",
   "price": 150000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["plate-cuirass", 1],
-    ["plate-greaves", 1]
+    [
+      "plate-cuirass",
+      1
+    ],
+    [
+      "plate-greaves",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": 18,

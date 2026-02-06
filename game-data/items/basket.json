@@ -1,19 +1,19 @@
 {
-  "id": "basket",
-  "name": "Basket",
-  "description": "NEEDS DESCRIPTION",
-  "ai_description": "woven wicker basket with handle, traditional storage container made from interlaced reeds and twigs",
-  "rarity": "common",
-  "price": 40,
-  "weight": 2,
-  "stack": 1,
-  "type": "Adventuring Gear",
-  "container_slots": 4,
   "allowed_types": [
     "Food"
   ],
+  "container_slots": 4,
+  "description": "NEEDS DESCRIPTION",
+  "id": "basket",
+  "image": "/res/img/items/basket.png",
+  "name": "Basket",
+  "notes": [],
+  "price": 40,
+  "rarity": "common",
+  "stack": 1,
   "tags": [
     "container"
   ],
-  "image": "/res/img/items/basket.png"
+  "type": "Adventuring Gear",
+  "weight": 2
 }

@@ -2,7 +2,6 @@
   "id": "padded-set",
   "name": "Padded Armor Set",
   "description": "A complete set of quilted cloth armor with thick padding for basic protection.",
-  "ai_description": "quilted cloth armor set with gambeson and padded leggings, soft fabric protection",
   "rarity": "common",
   "price": 500,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["padded-gambeson", 1],
-    ["padded-leggings", 1]
+    [
+      "padded-gambeson",
+      1
+    ],
+    [
+      "padded-leggings",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": "11 + Dex",

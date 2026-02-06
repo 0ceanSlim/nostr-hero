@@ -2,7 +2,6 @@
   "id": "component-pouch",
   "name": "Component Pouch",
   "description": "A small leather pouch containing various material components needed for spellcasting.",
-  "ai_description": "leather spellcaster's pouch with small compartments, magic component bag filled with crystals, herbs, and mystical materials",
   "rarity": "common",
   "price": 25,
   "weight": 2,

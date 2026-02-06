@@ -90,7 +90,6 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 		"id":             idFromFilename,
 		"name":           "NEEDS NAME",
 		"description":    "NEEDS DESCRIPTION",
-		"ai_description": "NEEDS AI DESCRIPTION",
 		"rarity":         "common",
 		"price":          0,
 		"weight":         1.0,
@@ -111,7 +110,7 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 				Message: fmt.Sprintf("Added missing required field '%s'", field),
 			})
 			modified = true
-		} else if field == "description" || field == "ai_description" {
+		} else if field == "description" {
 			// Check for empty strings
 			if val, ok := item[field].(string); ok && val == "" {
 				item[field] = defaultValue
@@ -160,13 +159,13 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 
 			// Don't remove if it's required for this item type
 			if shouldRemove {
-				if field == "ac" && strings.Contains(itemType, "armor") {
+				if field == "ac" && strings.Contains(itemType, "armor") && !contains(tags, "pack") {
 					shouldRemove = false // AC is required for armor
 				}
 				if field == "damage" && strings.Contains(itemType, "melee") {
 					shouldRemove = false // Damage is required for melee weapons
 				}
-				if (field == "ammunition" || field == "range" || field == "range-long") && strings.Contains(itemType, "ranged") {
+				if (field == "ammunition" || field == "range" || field == "range-long") && strings.Contains(itemType, "ranged") && !contains(tags, "thrown") {
 					shouldRemove = false // These are required for ranged weapons
 				}
 			}
@@ -203,8 +202,11 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 
 		// Validate gear_slot value
 		validGearSlots := map[string]bool{
-			"hands": true, "armor": true, "necklace": true, "ring": true,
-			"clothes": true, "bag": true, "ammunition": true,
+			"hands": true, "mainhand": true, "offhand": true,
+			"chest": true, "head": true, "legs": true,
+			"gloves": true, "boots": true,
+			"neck": true, "ring": true,
+			"ammo": true, "bag": true,
 		}
 		if gearSlotStr, ok := gearSlot.(string); ok {
 			if !validGearSlots[gearSlotStr] {
@@ -213,7 +215,7 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 					File:    filename,
 					Type:    "fixed",
 					Field:   "gear_slot",
-					Message: fmt.Sprintf("⚠️ MANUAL FIX REQUIRED: Invalid gear_slot '%s' (must be: hands, armor, necklace, ring, clothes, bag, ammunition)", gearSlotStr),
+					Message: fmt.Sprintf("⚠️ MANUAL FIX REQUIRED: Invalid gear_slot '%s' (must be: hands, mainhand, offhand, chest, head, legs, gloves, boots, neck, ring, ammo, bag)", gearSlotStr),
 				})
 			}
 		}
@@ -222,12 +224,12 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 	// If equipment tag exists, ensure gear_slot exists
 	if contains(tags, "equipment") {
 		if _, exists := item["gear_slot"]; !exists {
-			// Default to "hands" for weapons, "armor" for armor, "ammo" for ammunition
+			// Default to "hands" for weapons, "chest" for armor, "ammo" for ammunition
 			defaultSlot := "hands"
 			if strings.Contains(itemType, "armor") {
-				defaultSlot = "armor"
+				defaultSlot = "chest"
 			} else if contains(tags, "ammunition") || strings.Contains(itemType, "ammunition") {
-				defaultSlot = "ammunition"
+				defaultSlot = "ammo"
 			}
 
 			changes = append(changes, Change{
@@ -344,8 +346,8 @@ func cleanupItemFile(filePath string, dryRun bool) ([]Change, bool) {
 
 	// 5. ENSURE TYPE-SPECIFIC FIELDS EXIST
 
-	// Armor needs AC
-	if strings.Contains(itemType, "armor") {
+	// Armor needs AC (but not armor sets/packs)
+	if strings.Contains(itemType, "armor") && !contains(tags, "pack") {
 		if _, exists := item["ac"]; !exists {
 			item["ac"] = "10"
 			changes = append(changes, Change{
@@ -463,7 +465,6 @@ func orderItemProperties(item map[string]interface{}) map[string]interface{} {
 		"id",
 		"name",
 		"description",
-		"ai_description",
 		"rarity",
 		"price",
 		"weight",
@@ -528,10 +529,6 @@ func normalizePropertyNames(item map[string]interface{}, filename string) (map[s
 		"Name":           "name",
 		"DESCRIPTION":    "description",
 		"Description":    "description",
-		"AI_DESCRIPTION": "ai_description",
-		"Ai_Description": "ai_description",
-		"Ai_description": "ai_description",
-		"ai_Description": "ai_description",
 		"RARITY":         "rarity",
 		"Rarity":         "rarity",
 		"PRICE":          "price",

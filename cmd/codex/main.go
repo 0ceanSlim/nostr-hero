@@ -147,6 +147,10 @@ func main() {
 	r.HandleFunc("/api/items/{filename}/image", editor.HandleGetImage).Methods("GET")
 	r.HandleFunc("/api/items/{filename}/accept-image", editor.HandleAcceptImage).Methods("POST")
 
+	// Effects data routes
+	r.HandleFunc("/api/effects", editor.HandleGetEffects).Methods("GET")
+	r.HandleFunc("/api/effect-types", editor.HandleGetEffectTypes).Methods("GET")
+
 	// Database migration routes
 	r.HandleFunc("/tools/database-migration", handleDatabaseMigration).Methods("GET")
 	r.HandleFunc("/api/migrate/start", handleMigrateStart).Methods("POST")
@@ -156,6 +160,7 @@ func main() {
 	r.HandleFunc("/tools/validation", handleValidationTool).Methods("GET")
 	r.HandleFunc("/api/validation/run", handleValidationRun).Methods("POST")
 	r.HandleFunc("/api/validation/cleanup", handleCleanupRun).Methods("POST")
+	r.HandleFunc("/api/validation/item/{itemId}", handleValidateOneItem).Methods("GET")
 
 	// Staging routes
 	r.HandleFunc("/api/staging/init", staging.HandleStagingInit).Methods("POST")
@@ -263,6 +268,36 @@ func handleValidationRun(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func handleValidateOneItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	itemID := vars["itemId"]
+
+	issues, err := validation.ValidateOneItem(itemID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	// Calculate stats
+	errorCount := 0
+	warningCount := 0
+	for _, issue := range issues {
+		if issue.Type == "error" {
+			errorCount++
+		} else if issue.Type == "warning" {
+			warningCount++
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"issues":        issues,
+		"error_count":   errorCount,
+		"warning_count": warningCount,
+		"valid":         errorCount == 0,
+	})
 }
 
 func handleCleanupRun(w http.ResponseWriter, r *http.Request) {

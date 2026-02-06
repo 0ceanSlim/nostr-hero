@@ -1,5 +1,4 @@
 {
-  "ai_description": "small glass vial with cork stopper, filled with bright red glowing healing potion, magical liquid with swirling energy",
   "description": "A crimson liquid that glows faintly when agitated. Drinking it restores vitality and closes minor wounds.",
   "effects": [],
   "heal": "2d4 + 2",

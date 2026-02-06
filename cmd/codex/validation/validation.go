@@ -148,7 +148,7 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 	}
 
 	// Check ALL required fields
-	requiredFields := []string{"id", "name", "description", "ai_description", "rarity", "price", "weight", "stack", "type", "image", "tags", "notes"}
+	requiredFields := []string{"id", "name", "description", "rarity", "price", "weight", "stack", "type", "image", "tags", "notes"}
 	for _, field := range requiredFields {
 		if _, exists := item[field]; !exists {
 			issues = append(issues, Issue{
@@ -160,7 +160,7 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 			})
 		} else {
 			// Check for empty strings in string fields
-			if field == "description" || field == "ai_description" {
+			if field == "description" {
 				if val, ok := item[field].(string); ok && val == "" {
 					issues = append(issues, Issue{
 						Type:     "error",
@@ -267,8 +267,11 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 			})
 		} else if gearSlotStr, ok := gearSlot.(string); ok {
 			validGearSlots := map[string]bool{
-				"hands": true, "armor": true, "necklace": true, "ring": true,
-				"clothes": true, "bag": true, "ammunition": true,
+				"hands": true, "mainhand": true, "offhand": true,
+				"chest": true, "head": true, "legs": true,
+				"gloves": true, "boots": true,
+				"neck": true, "ring": true,
+				"ammo": true, "bag": true,
 			}
 			if !validGearSlots[gearSlotStr] {
 				issues = append(issues, Issue{
@@ -276,7 +279,7 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 					Category: "items",
 					File:     filename,
 					Field:    "gear_slot",
-					Message:  fmt.Sprintf("Invalid gear_slot '%s'. Must be one of: hands, armor, necklace, ring, clothes, bag, ammunition", gearSlotStr),
+					Message:  fmt.Sprintf("Invalid gear_slot '%s'. Must be one of: hands, mainhand, offhand, chest, head, legs, gloves, boots, neck, ring, ammo, bag", gearSlotStr),
 				})
 			}
 		}
@@ -402,8 +405,8 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 		itemType = t
 	}
 
-	// Armor must have AC
-	if strings.Contains(strings.ToLower(itemType), "armor") {
+	// Armor must have AC (but armor sets are packs containing pieces, not equippable themselves)
+	if strings.Contains(strings.ToLower(itemType), "armor") && !contains(tags, "pack") {
 		if ac, exists := item["ac"]; !exists || ac == nil || ac == "" {
 			issues = append(issues, Issue{
 				Type:     "error",
@@ -413,7 +416,7 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 				Message:  "Armor items must have 'ac' property",
 			})
 		}
-	} else {
+	} else if !strings.Contains(strings.ToLower(itemType), "armor") {
 		// Non-armor should not have AC
 		if ac, exists := item["ac"]; exists && ac != nil && ac != "" {
 			issues = append(issues, Issue{
@@ -439,16 +442,18 @@ func validateItemFile(filePath string, validItemIDs map[string]bool) []Issue {
 		}
 	}
 
-	// Ranged weapons need ammunition, range, and range-long
+	// Ranged weapons need ammunition (unless thrown - they are their own ammo), range, and range-long
 	if strings.Contains(strings.ToLower(itemType), "ranged") {
-		if ammunition, exists := item["ammunition"]; !exists || ammunition == nil || ammunition == "" {
-			issues = append(issues, Issue{
-				Type:     "error",
-				Category: "items",
-				File:     filename,
-				Field:    "ammunition",
-				Message:  "Ranged weapons must have 'ammunition' property",
-			})
+		if !contains(tags, "thrown") {
+			if ammunition, exists := item["ammunition"]; !exists || ammunition == nil || ammunition == "" {
+				issues = append(issues, Issue{
+					Type:     "error",
+					Category: "items",
+					File:     filename,
+					Field:    "ammunition",
+					Message:  "Ranged weapons must have 'ammunition' property (unless thrown)",
+				})
+			}
 		}
 		if rng, exists := item["range"]; !exists || rng == nil || rng == "" || rng == "null" {
 			issues = append(issues, Issue{
@@ -667,6 +672,30 @@ func checkUnnecessaryField(item map[string]interface{}, field, filename, context
 			})
 		}
 	}
+}
+
+// ValidateOneItem validates a single item by its ID (filename without .json)
+func ValidateOneItem(itemID string) ([]Issue, error) {
+	issues := []Issue{}
+	itemsPath := "game-data/items"
+
+	// Build valid item IDs set for reference checking
+	validItemIDs := make(map[string]bool)
+	filepath.WalkDir(itemsPath, func(path string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && strings.HasSuffix(path, ".json") {
+			filename := strings.TrimSuffix(filepath.Base(path), ".json")
+			validItemIDs[filename] = true
+		}
+		return nil
+	})
+
+	filePath := filepath.Join(itemsPath, itemID+".json")
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("item file not found: %s", itemID)
+	}
+
+	issues = validateItemFile(filePath, validItemIDs)
+	return issues, nil
 }
 
 // ValidateSpells validates all spell files

@@ -2,7 +2,6 @@
   "id": "hide-set",
   "name": "Hide Armor Set",
   "description": "A complete set of primitive armor made from thick beast hides and furs.",
-  "ai_description": "rough animal leather armor set with fur trim, primitive protection from beast hides",
   "rarity": "common",
   "price": 1000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["hide-cuirass", 1],
-    ["hide-chaps", 1]
+    [
+      "hide-cuirass",
+      1
+    ],
+    [
+      "hide-chaps",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": "12 + Dex(max2)",

@@ -2,7 +2,6 @@
   "id": "blessed-incense",
   "name": "Blessed Incense",
   "description": "Sacred incense blessed by divine rites, producing fragrant smoke that enhances holy magic.",
-  "ai_description": "ornate incense sticks with holy smoke, blessed aromatic incense with golden wisps and divine symbols",
   "price": 100,
   "type": "Spell Component",
   "weight": 0.1,

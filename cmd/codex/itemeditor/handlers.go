@@ -292,7 +292,7 @@ func (e *Editor) HandleGenerateImage(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🎨 Generating image for %s using %s...", item.Name, req.Model)
 
-	prompt := pixellab.GeneratePrompt(item.Name, item.Description, item.AIDescription, item.Rarity)
+	prompt := pixellab.GeneratePrompt(item.Name, item.Description, item.Rarity)
 	negativePrompt := pixellab.NegativePrompt()
 
 	result, err := e.PixelLabClient.GenerateImage(prompt, negativePrompt, req.Model)
@@ -372,6 +372,45 @@ func (e *Editor) HandleGetImage(w http.ResponseWriter, r *http.Request) {
 		"path":         imagePath,
 		"historyFiles": historyFiles,
 	})
+}
+
+// HandleGetEffects returns all named effects from game-data/effects/*.json
+func (e *Editor) HandleGetEffects(w http.ResponseWriter, r *http.Request) {
+	effectsDir := "game-data/effects"
+	effects := make(map[string]json.RawMessage)
+
+	entries, err := os.ReadDir(effectsDir)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read effects directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(effectsDir, entry.Name()))
+		if err != nil {
+			continue
+		}
+		id := strings.TrimSuffix(entry.Name(), ".json")
+		effects[id] = json.RawMessage(data)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(effects)
+}
+
+// HandleGetEffectTypes returns effect type definitions from game-data/systems/effects.json
+func (e *Editor) HandleGetEffectTypes(w http.ResponseWriter, r *http.Request) {
+	data, err := os.ReadFile("game-data/systems/effects.json")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read effects.json: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
 }
 
 // HandleAcceptImage accepts a generated image

@@ -1,15 +1,15 @@
 {
-  "id": "acid",
-  "name": "Acid",
   "description": "NEEDS DESCRIPTION",
-  "ai_description": "small glass vial with cork stopper, filled with bright green bubbling corrosive acid, viscous liquid with small bubbles, dangerous chemical",
-  "rarity": "common",
+  "id": "acid",
+  "image": "/res/img/items/acid.png",
+  "name": "Acid",
+  "notes": [],
   "price": 2500,
-  "weight": 1,
+  "rarity": "common",
   "stack": 1,
-  "type": "Adventuring Gear",
   "tags": [
     "thrown"
   ],
-  "image": "/res/img/items/acid.png"
+  "type": "Adventuring Gear",
+  "weight": 1
 }

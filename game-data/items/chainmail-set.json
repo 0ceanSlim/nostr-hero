@@ -2,7 +2,6 @@
   "id": "chainmail-set",
   "name": "Chain Mail Set",
   "description": "A complete suit of interlocking metal rings providing excellent protection at the cost of mobility.",
-  "ai_description": "heavy armor made of thousands of interlocked iron rings, medieval mail hauberk with chausses",
   "rarity": "uncommon",
   "price": 12000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["chainmail-hauberk", 1],
-    ["chainmail-chausses", 1]
+    [
+      "chainmail-hauberk",
+      1
+    ],
+    [
+      "chainmail-chausses",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": 16,

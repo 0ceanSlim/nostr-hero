@@ -1,22 +1,23 @@
 {
-  "id": "dart",
-  "name": "Dart",
-  "description": "NEEDS DESCRIPTION",
-  "ai_description": "small pointed throwing weapon with sharp metal tip, lightweight projectile with feathered tail for accuracy",
-  "rarity": "common",
-  "price": 0,
-  "weight": 0.25,
-  "stack": 10,
-  "type": "Simple Ranged Weapons",
-  "gear_slot": "ammo",
+  "ammunition": "arrows",
   "damage": "1d4",
   "damage-type": "piercing",
+  "description": "NEEDS DESCRIPTION",
+  "gear_slot": "ammo",
+  "id": "dart",
+  "image": "/res/img/items/dart.png",
+  "name": "Dart",
+  "notes": [],
+  "price": 0,
   "range": "1",
   "range-long": "2",
+  "rarity": "common",
+  "stack": 10,
   "tags": [
     "finesse",
     "thrown",
     "equipment"
   ],
-  "image": "/res/img/items/dart.png"
+  "type": "Simple Ranged Weapons",
+  "weight": 0.25
 }

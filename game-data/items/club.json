@@ -1,19 +1,19 @@
 {
-  "id": "club",
-  "name": "Club",
-  "description": "A simple wooden club, rough-hewn and heavy enough to deal damage in close combat.",
-  "ai_description": "crude wooden club with thick heavy end, rough-hewn branch or stick used as primitive bludgeoning weapon",
-  "rarity": "common",
-  "price": 0,
-  "weight": 2,
-  "stack": 1,
-  "type": "Simple Melee Weapons",
-  "gear_slot": "hands",
   "damage": "1d4",
   "damage-type": "bludgeoning",
+  "description": "A simple wooden club, rough-hewn and heavy enough to deal damage in close combat.",
+  "gear_slot": "hands",
+  "id": "club",
+  "image": "/res/img/items/club.png",
+  "name": "Club",
+  "notes": [],
+  "price": 0,
+  "rarity": "common",
+  "stack": 1,
   "tags": [
     "light",
     "equipment"
   ],
-  "image": "/res/img/items/club.png"
+  "type": "Simple Melee Weapons",
+  "weight": 2
 }

@@ -2,7 +2,6 @@
   "id": "halfplate-set",
   "name": "Half Plate Set",
   "description": "A complete set of shaped metal plates covering most of the body, with lighter protection on the limbs.",
-  "ai_description": "partial plate armor with breastplate and leg guards, medium protection with articulated steel pieces",
   "rarity": "rare",
   "price": 75000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["halfplate-cuirass", 1],
-    ["halfplate-greaves", 1]
+    [
+      "halfplate-cuirass",
+      1
+    ],
+    [
+      "halfplate-greaves",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": "15 + Dex(max2)",

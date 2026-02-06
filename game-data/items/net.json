@@ -1,23 +1,23 @@
 {
-  "id": "net",
-  "name": "Net",
-  "description": "NEEDS DESCRIPTION",
-  "ai_description": "large fishing net with weighted edges and hemp rope, gladiator's throwing weapon for capturing enemies",
-  "rarity": "common",
-  "price": 0,
-  "weight": 3,
-  "stack": 1,
-  "type": "Martial Ranged Weapons",
-  "damage": "0",
   "ammunition": "arrows",
+  "damage": "0",
+  "damage-type": "piercing",
+  "description": "NEEDS DESCRIPTION",
+  "id": "net",
+  "image": "/res/img/items/net.png",
+  "name": "Net",
+  "notes": [
+    "retrains target"
+  ],
+  "price": 0,
   "range": "1",
-  "range-long": "null",
+  "range-long": "320",
+  "rarity": "common",
+  "stack": 1,
   "tags": [
     "thrown",
     "restraint"
   ],
-  "notes": [
-    "retrains target"
-  ],
-  "image": "/res/img/items/net.png"
+  "type": "Martial Ranged Weapons",
+  "weight": 3
 }

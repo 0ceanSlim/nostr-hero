@@ -15,6 +15,9 @@ let currentPackContents = [];
 let allItemTypes = new Set();
 let spellComponents = [];
 let allItemIds = [];
+let currentEffects = [];
+let effectTypesData = {};  // from /api/effect-types
+let namedEffectsData = {}; // from /api/effects
 
 // ===== STAGING STATE =====
 let stagingSessionID = null;
@@ -55,6 +58,50 @@ async function loadItems() {
         console.error('Error loading items:', error);
         showStatus('Failed to load items', 'error');
     }
+}
+
+async function loadEffectsData() {
+    try {
+        const [typesRes, effectsRes] = await Promise.all([
+            fetch('/api/effect-types'),
+            fetch('/api/effects')
+        ]);
+        const typesJson = await typesRes.json();
+        effectTypesData = typesJson.effect_types || {};
+        namedEffectsData = await effectsRes.json();
+
+        populateEffectTypeDropdown();
+        populateNamedEffectDropdown();
+    } catch (error) {
+        console.error('Error loading effects data:', error);
+    }
+}
+
+function populateEffectTypeDropdown() {
+    const select = document.getElementById('newEffectType');
+    if (!select) return;
+    select.innerHTML = '<option value="">Inline effect type...</option>';
+
+    Object.keys(effectTypesData).sort().forEach(key => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = `${key} (${effectTypesData[key].description})`;
+        select.appendChild(option);
+    });
+}
+
+function populateNamedEffectDropdown() {
+    const select = document.getElementById('newNamedEffect');
+    if (!select) return;
+    select.innerHTML = '<option value="">Named effect...</option>';
+
+    Object.keys(namedEffectsData).sort().forEach(key => {
+        const effect = namedEffectsData[key];
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = effect.name || key;
+        select.appendChild(option);
+    });
 }
 
 function populateTypeFilter() {
@@ -209,11 +256,10 @@ function populateForm(item) {
     document.getElementById('itemNameInput').value = item.name || '';
     document.getElementById('itemType').value = item.type || '';
     document.getElementById('itemDescription').value = item.description || '';
-    document.getElementById('itemAiDescription').value = item.ai_description || '';
     document.getElementById('itemRarity').value = item.rarity || 'common';
     document.getElementById('itemPrice').value = item.price || 0;
     document.getElementById('itemWeight').value = item.weight || 1;
-    document.getElementById('itemStack').value = item.stack_size || 1;
+    document.getElementById('itemStack').value = item.stack || 1;
 
     // Tags
     currentTags = item.tags || [];
@@ -250,16 +296,24 @@ function populateForm(item) {
     document.getElementById('range').value = item.range || '';
     document.getElementById('rangeLong').value = item['range-long'] || item.range_long || '';
 
-    // Consumable
-    document.getElementById('itemHeal').value = item.heal || '';
-    document.getElementById('itemEffects').value =
-        Array.isArray(item.effects) ? JSON.stringify(item.effects) : '[]';
+    // Consumable effects
+    currentEffects = Array.isArray(item.effects) ? JSON.parse(JSON.stringify(item.effects)) : [];
+    // Migrate legacy heal field into effects
+    if (item.heal && !currentEffects.some(e => e.type === 'hp')) {
+        const healStr = String(item.heal);
+        if (healStr.includes('d')) {
+            currentEffects.unshift({ type: 'hp', dice: healStr, chance: 100 });
+        } else {
+            currentEffects.unshift({ type: 'hp', value: parseInt(healStr) || 0, chance: 100 });
+        }
+    }
+    renderEffects();
 
     // Focus
     document.getElementById('itemProvides').value = item.provides || '';
 
     // Pack contents
-    currentPackContents = item.pack_contents || item.contents || [];
+    currentPackContents = item.contents || [];
     renderPackContents();
 
     // Notes
@@ -304,7 +358,6 @@ function createNewItem() {
     document.getElementById('itemNameInput').value = '';
     document.getElementById('itemType').value = '';
     document.getElementById('itemDescription').value = '';
-    document.getElementById('itemAiDescription').value = '';
     document.getElementById('itemRarity').value = 'common';
     document.getElementById('itemPrice').value = 0;
     document.getElementById('itemWeight').value = 1;
@@ -319,14 +372,14 @@ function createNewItem() {
     document.getElementById('ammunition').value = '';
     document.getElementById('range').value = '';
     document.getElementById('rangeLong').value = '';
-    document.getElementById('itemHeal').value = '';
-    document.getElementById('itemEffects').value = '[]';
+    currentEffects = [];
     document.getElementById('itemProvides').value = '';
     document.getElementById('itemImage').value = '';
 
     renderTags();
     renderNotes();
     renderPackContents();
+    renderEffects();
     updateConditionalSections();
 
     // Clear selection
@@ -496,6 +549,191 @@ function removePackItem(index) {
     renderPackContents();
 }
 
+// ===== EFFECTS MANAGEMENT =====
+function renderEffects() {
+    const container = document.getElementById('effectsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (currentEffects.length === 0) {
+        container.innerHTML = '<span style="color: #6272a4; font-size: 12px;">No effects defined</span>';
+        return;
+    }
+
+    currentEffects.forEach((effect, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'tag';
+
+        let label;
+        if (effect.apply_effect) {
+            // Named status effect
+            const effectData = namedEffectsData[effect.apply_effect];
+            const name = effectData ? effectData.name : effect.apply_effect;
+            const chanceStr = (effect.chance || 100) < 100 ? ` ${effect.chance}%` : '';
+            // Build short summary of what it does
+            let summary = '';
+            if (effectData && effectData.effects) {
+                summary = effectData.effects.map(e => {
+                    const sign = e.value >= 0 ? '+' : '';
+                    return `${e.type} ${sign}${e.value}`;
+                }).join(', ');
+                const dur = effectData.effects[0]?.duration;
+                if (dur) summary += ` (${formatDuration(dur)})`;
+            }
+            label = `<b>${name}</b>${chanceStr}`;
+            if (summary) label += `<br><span style="font-size: 11px; color: #6272a4;">${summary}</span>`;
+        } else {
+            // Inline stat change
+            const chanceStr = (effect.chance || 100) < 100 ? ` (${effect.chance}%)` : '';
+            if (effect.dice) {
+                label = `<b>${effect.type}</b> ${effect.dice}${chanceStr}`;
+            } else {
+                const v = effect.value;
+                const display = typeof v === 'number' ? (v >= 0 ? `+${v}` : `${v}`) : v;
+                label = `<b>${effect.type}</b> ${display}${chanceStr}`;
+            }
+        }
+
+        chip.innerHTML = `
+            <span>${label}</span>
+            <button type="button" class="tag-remove" onclick="window.removeEffect(${index})">×</button>
+        `;
+        container.appendChild(chip);
+    });
+}
+
+function formatDuration(ticks) {
+    if (!ticks || ticks === 0) return 'permanent';
+    if (ticks < 60) return `${ticks} ticks`;
+    const mins = Math.round(ticks);
+    if (mins < 60) return `${mins}m`;
+    const hours = Math.floor(mins / 60);
+    const rem = mins % 60;
+    return rem > 0 ? `${hours}h ${rem}m` : `${hours}h`;
+}
+
+function setupEffectModeToggle() {
+    const modeSelect = document.getElementById('newEffectMode');
+    if (!modeSelect) return;
+    modeSelect.addEventListener('change', () => {
+        const flatInput = document.getElementById('newEffectValueFlat');
+        const diceInput = document.getElementById('newEffectValueDice');
+        if (modeSelect.value === 'dice') {
+            flatInput.style.display = 'none';
+            diceInput.style.display = '';
+        } else {
+            flatInput.style.display = '';
+            diceInput.style.display = 'none';
+        }
+    });
+}
+
+function addInlineEffect() {
+    const typeSelect = document.getElementById('newEffectType');
+    const mode = document.getElementById('newEffectMode').value;
+    const chanceInput = document.getElementById('newEffectChanceInline');
+
+    const type = typeSelect.value;
+    if (!type) {
+        showStatus('Please select a stat to modify', 'error');
+        return;
+    }
+
+    const chance = parseInt(chanceInput.value) || 100;
+    if (chance < 1 || chance > 100) {
+        showStatus('Chance must be between 1 and 100', 'error');
+        return;
+    }
+
+    const effect = { type, chance };
+
+    if (mode === 'dice') {
+        const diceVal = document.getElementById('newEffectValueDice').value.trim();
+        if (!diceVal) {
+            showStatus('Please enter a dice expression (e.g. 2d4+2)', 'error');
+            return;
+        }
+        effect.dice = diceVal;
+    } else {
+        const flatVal = parseInt(document.getElementById('newEffectValueFlat').value);
+        if (isNaN(flatVal) || flatVal === 0) {
+            showStatus('Please enter a non-zero value', 'error');
+            return;
+        }
+        effect.value = flatVal;
+    }
+
+    currentEffects.push(effect);
+    renderEffects();
+    typeSelect.value = '';
+    document.getElementById('newEffectValueFlat').value = '';
+    document.getElementById('newEffectValueDice').value = '';
+    chanceInput.value = 100;
+}
+
+function addNamedEffect() {
+    const effectSelect = document.getElementById('newNamedEffect');
+    const chanceInput = document.getElementById('newEffectChance');
+
+    const effectId = effectSelect.value;
+    const chance = parseInt(chanceInput.value) || 100;
+
+    if (!effectId) {
+        showStatus('Please select a status effect', 'error');
+        return;
+    }
+    if (chance < 1 || chance > 100) {
+        showStatus('Chance must be between 1 and 100', 'error');
+        return;
+    }
+
+    currentEffects.push({ apply_effect: effectId, chance });
+    renderEffects();
+    effectSelect.value = '';
+    chanceInput.value = 100;
+    // Clear preview
+    const preview = document.getElementById('namedEffectPreview');
+    if (preview) preview.style.display = 'none';
+}
+
+function previewNamedEffect() {
+    const effectId = document.getElementById('newNamedEffect').value;
+    const preview = document.getElementById('namedEffectPreview');
+    if (!preview) return;
+
+    if (!effectId || !namedEffectsData[effectId]) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const effect = namedEffectsData[effectId];
+    let html = `<div style="color: #f8f8f2; margin-bottom: 4px;"><b>${effect.name}</b>`;
+    if (effect.icon) html += ` <span style="color: #6272a4;">(${effect.icon})</span>`;
+    if (effect.color) html += ` <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${effect.color}; vertical-align: middle;"></span>`;
+    html += `</div>`;
+    html += `<div style="color: #6272a4; margin-bottom: 6px;">${effect.description || ''}</div>`;
+
+    if (effect.effects && effect.effects.length > 0) {
+        html += '<div style="font-family: monospace;">';
+        effect.effects.forEach(e => {
+            const sign = e.value >= 0 ? '+' : '';
+            let line = `${e.type} ${sign}${e.value}`;
+            if (e.duration) line += ` for ${formatDuration(e.duration)}`;
+            if (e.tick_interval) line += ` (every ${e.tick_interval} ticks)`;
+            html += `<div>${line}</div>`;
+        });
+        html += '</div>';
+    }
+
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+}
+
+function removeEffect(index) {
+    currentEffects.splice(index, 1);
+    renderEffects();
+}
+
 // ===== SAVE ITEM =====
 async function saveItem() {
     const itemId = document.getElementById('itemId').value.trim();
@@ -511,23 +749,37 @@ async function saveItem() {
         return;
     }
 
-    // Build item object
+    // Start with existing item data to preserve unedited fields (e.g. img)
+    const existingItem = (!isNewItem && currentItem && allItems[currentItem]) ? { ...allItems[currentItem] } : {};
+
+    // Build item object, overwriting with form values
     const item = {
+        ...existingItem,
         id: itemId,
         name: document.getElementById('itemNameInput').value.trim(),
         description: document.getElementById('itemDescription').value.trim(),
-        ai_description: document.getElementById('itemAiDescription').value.trim(),
         rarity: document.getElementById('itemRarity').value,
         price: parseInt(document.getElementById('itemPrice').value) || 0,
         weight: parseFloat(document.getElementById('itemWeight').value) || 1,
-        stack_size: parseInt(document.getElementById('itemStack').value) || 1,
+        stack: parseInt(document.getElementById('itemStack').value) || 1,
         type: document.getElementById('itemType').value.trim(),
         tags: currentTags,
         notes: currentNotes,
         image: document.getElementById('itemImage').value.trim() || `/res/img/items/${itemId}.png`
     };
 
-    // Add conditional fields
+    // Clean stale conditional fields inherited from existing item
+    // Only keep fields relevant to current tags/type
+    if (!currentTags.includes('equipment')) delete item.gear_slot;
+    if (!currentTags.includes('container')) {
+        delete item.container_slots;
+        delete item.allowed_types;
+    }
+    if (!currentTags.includes('consumable')) delete item.effects;
+    if (!currentTags.includes('focus')) delete item.provides;
+    if (!currentTags.includes('pack')) delete item.contents;
+
+    // Add conditional fields from form
     if (currentTags.includes('equipment')) {
         const gearSlot = document.getElementById('gearSlot').value;
         if (!gearSlot) {
@@ -550,7 +802,16 @@ async function saveItem() {
         }
     }
 
-    // Combat properties
+    // Combat properties - clear stale then set from form
+    const itemType = item.type.toLowerCase();
+    const isArmor = itemType.includes('armor');
+    const isWeapon = itemType.includes('melee') || itemType.includes('weapon') || itemType.includes('martial') || itemType.includes('simple');
+    const isRanged = itemType.includes('ranged') || currentTags.includes('thrown') || currentTags.includes('ranged');
+
+    if (!isArmor) delete item.ac;
+    if (!isWeapon && !isRanged) { delete item.damage; delete item['damage-type']; }
+    if (!isRanged) { delete item.ammunition; delete item.range; delete item['range-long']; }
+
     const ac = document.getElementById('itemAC').value.trim();
     if (ac) item.ac = ac;
 
@@ -558,7 +819,7 @@ async function saveItem() {
     if (damage) item.damage = damage;
 
     const damageType = document.getElementById('damageType').value;
-    if (damageType) item.damage_type = damageType;
+    if (damageType) item['damage-type'] = damageType;
 
     // Ranged properties
     const ammunition = document.getElementById('ammunition').value.trim();
@@ -568,19 +829,12 @@ async function saveItem() {
     if (range) item.range = range;
 
     const rangeLong = document.getElementById('rangeLong').value.trim();
-    if (rangeLong) item.range_long = rangeLong;
+    if (rangeLong) item['range-long'] = rangeLong;
 
-    // Consumable properties
-    const heal = document.getElementById('itemHeal').value.trim();
-    if (heal) item.heal = heal;
-
+    // Consumable properties - heal is now just an hp effect
+    delete item.heal;
     if (currentTags.includes('consumable')) {
-        try {
-            const effectsStr = document.getElementById('itemEffects').value.trim();
-            item.effects = effectsStr ? JSON.parse(effectsStr) : [];
-        } catch (e) {
-            item.effects = [];
-        }
+        item.effects = currentEffects.length > 0 ? currentEffects : [];
     }
 
     // Focus properties
@@ -591,7 +845,7 @@ async function saveItem() {
 
     // Pack contents
     if (currentTags.includes('pack')) {
-        item.pack_contents = currentPackContents;
+        item.contents = currentPackContents;
     }
 
     // Save to server
@@ -698,17 +952,52 @@ async function deleteItem() {
 
 // ===== VALIDATION =====
 async function validateItem() {
+    const itemId = document.getElementById('itemId').value.trim();
+    if (!itemId) {
+        showStatus('No item ID to validate', 'error');
+        return;
+    }
+
     showStatus('Validating item...', 'info');
 
-    setTimeout(() => {
-        showStatus('Validation complete - no issues found', 'success');
-    }, 500);
+    try {
+        const response = await fetch(`/api/validation/item/${itemId}`);
+        if (!response.ok) {
+            const error = await response.text();
+            showStatus(`Validation failed: ${error}`, 'error');
+            return;
+        }
+
+        const result = await response.json();
+
+        if (result.issues.length === 0) {
+            showStatus('Validation passed - no issues found', 'success');
+        } else {
+            const errors = result.issues.filter(i => i.type === 'error');
+            const warnings = result.issues.filter(i => i.type === 'warning');
+
+            let msg = `Validation: ${errors.length} error(s), ${warnings.length} warning(s)`;
+            if (errors.length > 0) {
+                msg += '\n\nErrors:\n' + errors.map(i => `  - [${i.field || 'general'}] ${i.message}`).join('\n');
+            }
+            if (warnings.length > 0) {
+                msg += '\n\nWarnings:\n' + warnings.map(i => `  - [${i.field || 'general'}] ${i.message}`).join('\n');
+            }
+
+            showStatus(msg, errors.length > 0 ? 'error' : 'warning');
+        }
+    } catch (error) {
+        showStatus('Error running validation: ' + error.message, 'error');
+    }
 }
 
 // ===== IMAGE HANDLING =====
 async function checkImage() {
     const imagePath = document.getElementById('itemImage').value;
     const container = document.getElementById('imageContainer');
+
+    // Clear immediately to prevent showing stale image from previous item
+    container.innerHTML = '<p style="color: #6272a4;">Loading...</p>';
 
     if (!imagePath) {
         container.innerHTML = '<p style="color: #6272a4;">No image path set</p>';
@@ -763,10 +1052,9 @@ async function openImageGenerator() {
         // Generate prompt preview
         const name = document.getElementById('itemNameInput').value || 'Unknown Item';
         const description = document.getElementById('itemDescription').value || '';
-        const aiDescription = document.getElementById('itemAiDescription').value || '';
         const rarity = document.getElementById('itemRarity').value || 'common';
 
-        const prompt = generatePromptPreview(name, description, aiDescription, rarity);
+        const prompt = generatePromptPreview(name, description, rarity);
         document.getElementById('imageGenPrompt').value = prompt;
         console.log('openImageGenerator: prompt generated');
 
@@ -849,9 +1137,9 @@ async function loadPixelLabBalance() {
     }
 }
 
-function generatePromptPreview(name, description, aiDescription, rarity) {
+function generatePromptPreview(name, description, rarity) {
     // Match the server-side prompt generation logic
-    let baseDescription = aiDescription || description || name;
+    let baseDescription = description || name;
 
     // Add rarity-based styling hints
     let rarityHint = '';
@@ -995,13 +1283,16 @@ async function acceptGeneratedImage() {
 // ===== UTILITY =====
 function showStatus(message, type = 'success') {
     const statusEl = document.getElementById('statusMessage');
+    statusEl.style.whiteSpace = 'pre-wrap';
     statusEl.textContent = message;
     statusEl.className = 'status-message ' + type;
     statusEl.style.display = 'block';
 
+    // Keep validation results visible longer
+    const duration = message.includes('\n') ? 15000 : 5000;
     setTimeout(() => {
         statusEl.style.display = 'none';
-    }, 5000);
+    }, duration);
 }
 
 function cancelEdit() {
@@ -1030,6 +1321,10 @@ window.deleteItem = deleteItem;
 window.validateItem = validateItem;
 window.cancelEdit = cancelEdit;
 window.checkImage = checkImage;
+window.addInlineEffect = addInlineEffect;
+window.addNamedEffect = addNamedEffect;
+window.removeEffect = removeEffect;
+window.previewNamedEffect = previewNamedEffect;
 window.generateImage = generateImage;
 window.openImageGenerator = openImageGenerator;
 window.closeImageGenModal = closeImageGenModal;
@@ -1039,6 +1334,7 @@ window.acceptGeneratedImage = acceptGeneratedImage;
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', () => {
     loadItems();
+    loadEffectsData();
     initStaging();
 
     // Add enter key support for tag/note input
@@ -1058,6 +1354,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Update conditional sections when type changes
     document.getElementById('itemType')?.addEventListener('input', updateConditionalSections);
+
+    // Setup effect mode toggle (flat/dice)
+    setupEffectModeToggle();
 
     // Update generate button cost when model changes
     document.getElementById('imageGenModel')?.addEventListener('change', updateGenerateButtonCost);

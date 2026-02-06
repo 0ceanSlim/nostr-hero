@@ -2,7 +2,6 @@
   "id": "ringmail-set",
   "name": "Ring Mail Set",
   "description": "A complete set of leather armor with heavy rings sewn onto it for reinforcement.",
-  "ai_description": "leather armor with metal rings sewn onto surface, reinforced hide with iron ring attachments",
   "rarity": "common",
   "price": 3000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["ringmail-hauberk", 1],
-    ["ringmail-chausses", 1]
+    [
+      "ringmail-hauberk",
+      1
+    ],
+    [
+      "ringmail-chausses",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": 14,

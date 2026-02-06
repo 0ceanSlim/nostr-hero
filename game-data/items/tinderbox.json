@@ -1,5 +1,4 @@
 {
-  "ai_description": "small metal box containing flint stone, steel striker, and dry tinder cloth, fire-starting kit with hinged lid",
   "description": "A small container holding flint, fire steel, and tinder (usually dry cloth soaked in oil) used to kindle fires. Lighting a torch with a tinderbox takes an action, and lighting any other fire takes 1 minute.",
   "id": "tinderbox",
   "image": "/res/img/items/tinderbox.png",

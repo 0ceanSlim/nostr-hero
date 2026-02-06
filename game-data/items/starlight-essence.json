@@ -2,7 +2,6 @@
   "id": "starlight-essence",
   "name": "Starlight Essence",
   "description": "Captured light from distant stars, contained in a crystal vial. Radiates pure divine energy and cosmic wisdom.",
-  "ai_description": "crystal vial filled with swirling starlight, captured celestial energy that sparkles with cosmic radiance",
   "price": 10000,
   "type": "Spell Component",
   "weight": 0.1,

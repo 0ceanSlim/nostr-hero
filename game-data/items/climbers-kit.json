@@ -2,7 +2,6 @@
   "id": "climbers-kit",
   "name": "Climber's kit",
   "description": "A collection of pitons, boot tips, gloves, and other gear needed for climbing.",
-  "ai_description": "bundle of iron pitons, coiled rope, leather gloves with grip, spiked boot attachments for mountain climbing",
   "rarity": "common",
   "price": 2500,
   "weight": 12,

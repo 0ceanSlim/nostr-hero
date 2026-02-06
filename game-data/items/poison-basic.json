@@ -1,5 +1,4 @@
 {
-  "ai_description": "Green liquid in small glass vial with skull warning label",
   "description": "A vial of basic poison that can coat weapons or be administered directly.",
   "id": "poison-basic",
   "image": "/res/img/items/poison-basic.png",

@@ -131,13 +131,8 @@ func (c *Client) GenerateImage(description, negativePrompt string, model string)
 }
 
 // GeneratePrompt creates a fantasy prompt from item properties
-func GeneratePrompt(name, description, aiDescription, rarity string) string {
-	// Priority 1: Use ai_description if available
-	if aiDescription != "" && len(aiDescription) > 10 {
-		return aiDescription
-	}
-
-	// Priority 2: Use regular description if available
+func GeneratePrompt(name, description, rarity string) string {
+	// Priority 1: Use regular description if available
 	if description != "" && len(description) > 10 {
 		return description
 	}

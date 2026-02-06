@@ -2,7 +2,6 @@
   "id": "splint-set",
   "name": "Splint Armor Set",
   "description": "A complete set of armor made from vertical metal strips riveted to a backing of leather over chain mail.",
-  "ai_description": "heavy armor with vertical metal strips over mail backing, plate segments connected by flexible chain",
   "rarity": "uncommon",
   "price": 20000,
   "weight": 0,
@@ -13,8 +12,14 @@
     "armor-set"
   ],
   "contents": [
-    ["splint-cuirass", 1],
-    ["splint-greaves", 1]
+    [
+      "splint-cuirass",
+      1
+    ],
+    [
+      "splint-greaves",
+      1
+    ]
   ],
   "set_bonus": {
     "ac": 17,

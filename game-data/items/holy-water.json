@@ -2,7 +2,6 @@
   "id": "holy-water",
   "name": "Holy Water",
   "description": "Water blessed by divine powers, harmful to undead and fiends.",
-  "ai_description": "crystal flask of glowing water, blessed holy water with divine light and purifying aura",
   "price": 150,
   "type": "Spell Component",
   "weight": 0.5,

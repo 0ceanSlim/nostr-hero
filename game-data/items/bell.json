@@ -1,5 +1,4 @@
 {
-  "ai_description": "small brass bell with wooden handle, warning device that rings when shaken or struck",
   "description": "NEEDS DESCRIPTION",
   "id": "bell",
   "image": "/res/img/items/bell.png",
@@ -7,7 +6,7 @@
   "name": "Bell",
   "notes": [],
   "price": 100,
-  "rarity": "",
+  "rarity": "uncommon",
   "stack": 1,
   "tags": [],
   "type": "Adventuring Gear",

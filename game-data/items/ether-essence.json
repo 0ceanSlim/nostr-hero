@@ -2,7 +2,6 @@
   "id": "ether-essence",
   "name": "Ether Essence",
   "description": "A shimmering substance that seems to exist between dimensions. Provided unlimited when using an Orb focus.",
-  "ai_description": "translucent swirling mist in glass vial, ethereal substance that phases between visible and invisible states",
   "rarity": "common",
   "price": 100,
   "weight": 0.1,
