@@ -32,7 +32,14 @@ jobs:
         run: npm run build
 
       - name: Build codex
-        run: go build -o codex ./cmd/codex
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "ci-$(git rev-parse --short HEAD)")
+          go build -ldflags "-X main.Version=${VERSION}" -o codex ./cmd/codex
+
+      - name: Verify codex binary
+        run: |
+          test -f ./codex || { echo "::error::codex binary not found"; exit 1; }
+          ./codex -version
 
       - name: Run database migration
         run: ./codex -migrate
@@ -50,6 +57,11 @@ jobs:
         run: |
           VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "ci-$(git rev-parse --short HEAD)")
           go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
+
+      - name: Verify server binary
+        run: |
+          test -f ./pubkey-quest || { echo "::error::pubkey-quest binary not found"; exit 1; }
+          ./pubkey-quest -version
 
       - name: Run API tests
         run: go test ./tests/...

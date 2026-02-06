@@ -12,7 +12,6 @@
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 //
-// @host
 // @BasePath  /api
 //
 // @securityDefinitions.apikey NostrAuth
