@@ -1,4 +1,4 @@
-package test
+package helpers
 
 import (
 	"bytes"
@@ -36,11 +36,11 @@ func SetupTestEnvironment(t *testing.T) {
 			t.Fatal("Failed to get caller information")
 		}
 
-		// helpers.go is at server/test/helpers.go
-		// Project root is two directories up from server/test
-		testDir := filepath.Dir(filename)
-		serverDir := filepath.Dir(testDir)
-		projectRoot := filepath.Dir(serverDir)
+		// helpers.go is at tests/helpers/helpers.go
+		// Project root is two directories up from tests/helpers
+		helpersDir := filepath.Dir(filename)
+		testsDir := filepath.Dir(helpersDir)
+		projectRoot := filepath.Dir(testsDir)
 
 		// Verify database exists
 		dbPath := filepath.Join(projectRoot, "www", "game.db")

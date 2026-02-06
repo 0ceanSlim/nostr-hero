@@ -6,21 +6,21 @@ import (
 
 	"pubkey-quest/cmd/server/api/data"
 	"pubkey-quest/cmd/server/db"
-	"pubkey-quest/cmd/server/test"
+	"pubkey-quest/tests/helpers"
 )
 
-func setupDataTestServer(t *testing.T) *test.TestServer {
+func setupDataTestServer(t *testing.T) *helpers.TestServer {
 	t.Helper()
 
 	// Set up test environment (changes to project root for database access)
-	test.SetupTestEnvironment(t)
+	helpers.SetupTestEnvironment(t)
 
 	// Initialize database for tests
 	if err := db.InitDatabase(); err != nil {
 		t.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	ts := test.NewTestServer()
+	ts := helpers.NewTestServer()
 	ts.Mux.HandleFunc("/api/game-data", data.GameDataHandler)
 	ts.Mux.HandleFunc("/api/items", data.ItemsHandler)
 	ts.Mux.HandleFunc("/api/spells/", data.SpellsHandler)
@@ -39,10 +39,10 @@ func TestGameDataHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/game-data")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
 	var result map[string]interface{}
-	test.ReadJSON(t, resp, &result)
+	helpers.ReadJSON(t, resp, &result)
 
 	// Check that all expected fields are present
 	requiredFields := []string{"items", "spells", "monsters", "locations", "packs", "music_tracks"}
@@ -69,9 +69,9 @@ func TestItemsHandler(t *testing.T) {
 
 	t.Run("get all items", func(t *testing.T) {
 		resp := ts.GET(t, "/api/items")
-		test.AssertStatus(t, resp, http.StatusOK)
+		helpers.AssertStatus(t, resp, http.StatusOK)
 
-		items := test.AssertJSONArray(t, resp)
+		items := helpers.AssertJSONArray(t, resp)
 		if len(items) == 0 {
 			t.Error("Expected items array to be non-empty")
 		}
@@ -79,9 +79,9 @@ func TestItemsHandler(t *testing.T) {
 
 	t.Run("filter by name", func(t *testing.T) {
 		resp := ts.GET(t, "/api/items?name=longsword")
-		test.AssertStatus(t, resp, http.StatusOK)
+		helpers.AssertStatus(t, resp, http.StatusOK)
 
-		items := test.AssertJSONArray(t, resp)
+		items := helpers.AssertJSONArray(t, resp)
 		// May be empty if longsword doesn't exist, but shouldn't error
 		if len(items) > 0 {
 			item := items[0].(map[string]interface{})
@@ -99,9 +99,9 @@ func TestSpellsHandler(t *testing.T) {
 
 	t.Run("get all spells", func(t *testing.T) {
 		resp := ts.GET(t, "/api/spells/")
-		test.AssertStatus(t, resp, http.StatusOK)
+		helpers.AssertStatus(t, resp, http.StatusOK)
 
-		spells := test.AssertJSONArray(t, resp)
+		spells := helpers.AssertJSONArray(t, resp)
 		if len(spells) == 0 {
 			t.Error("Expected spells array to be non-empty")
 		}
@@ -122,9 +122,9 @@ func TestMonstersHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/monsters")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
-	monsters := test.AssertJSONArray(t, resp)
+	monsters := helpers.AssertJSONArray(t, resp)
 	// May be empty if no monsters defined
 	_ = monsters
 }
@@ -135,9 +135,9 @@ func TestLocationsHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/locations")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
-	locations := test.AssertJSONArray(t, resp)
+	locations := helpers.AssertJSONArray(t, resp)
 	if len(locations) == 0 {
 		t.Error("Expected locations array to be non-empty")
 	}
@@ -149,9 +149,9 @@ func TestNPCsHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/npcs")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
-	npcs := test.AssertJSONArray(t, resp)
+	npcs := helpers.AssertJSONArray(t, resp)
 	// NPCs should exist
 	_ = npcs
 }
@@ -163,14 +163,14 @@ func TestGetNPCsAtLocationHandler(t *testing.T) {
 
 	t.Run("requires GET method", func(t *testing.T) {
 		resp := ts.POST(t, "/api/npcs/at-location", nil)
-		test.AssertStatus(t, resp, http.StatusMethodNotAllowed)
+		helpers.AssertStatus(t, resp, http.StatusMethodNotAllowed)
 	})
 
 	t.Run("with location parameters", func(t *testing.T) {
 		resp := ts.GET(t, "/api/npcs/at-location?location=kingdom&district=kingdom-center&time=720")
-		test.AssertStatus(t, resp, http.StatusOK)
+		helpers.AssertStatus(t, resp, http.StatusOK)
 
-		npcs := test.AssertJSONArray(t, resp)
+		npcs := helpers.AssertJSONArray(t, resp)
 		// May be empty depending on NPC schedules
 		_ = npcs
 	})
@@ -183,26 +183,26 @@ func TestAbilitiesHandler(t *testing.T) {
 
 	t.Run("requires class parameter", func(t *testing.T) {
 		resp := ts.GET(t, "/api/abilities")
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 
-		result := test.AssertJSON(t, resp)
-		test.AssertError(t, result)
+		result := helpers.AssertJSON(t, resp)
+		helpers.AssertError(t, result)
 	})
 
 	t.Run("rejects invalid class", func(t *testing.T) {
 		resp := ts.GET(t, "/api/abilities?class=wizard")
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 
-		result := test.AssertJSON(t, resp)
-		test.AssertError(t, result)
+		result := helpers.AssertJSON(t, resp)
+		helpers.AssertError(t, result)
 	})
 
 	t.Run("accepts valid martial class", func(t *testing.T) {
 		resp := ts.GET(t, "/api/abilities?class=fighter&level=5")
-		test.AssertStatus(t, resp, http.StatusOK)
+		helpers.AssertStatus(t, resp, http.StatusOK)
 
-		result := test.AssertJSON(t, resp)
-		test.AssertSuccess(t, result)
+		result := helpers.AssertJSON(t, resp)
+		helpers.AssertSuccess(t, result)
 
 		if result["class"] != "fighter" {
 			t.Errorf("Expected class 'fighter', got %v", result["class"])

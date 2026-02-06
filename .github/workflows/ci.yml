@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -52,4 +52,4 @@ jobs:
           go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
 
       - name: Run API tests
-        run: go test ./cmd/server/test/...
+        run: go test ./tests/...

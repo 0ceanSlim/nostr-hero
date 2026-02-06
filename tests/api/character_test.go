@@ -6,21 +6,21 @@ import (
 
 	"pubkey-quest/cmd/server/api/character"
 	"pubkey-quest/cmd/server/db"
-	"pubkey-quest/cmd/server/test"
+	"pubkey-quest/tests/helpers"
 )
 
-func setupCharacterTestServer(t *testing.T) *test.TestServer {
+func setupCharacterTestServer(t *testing.T) *helpers.TestServer {
 	t.Helper()
 
 	// Set up test environment (changes to project root for database access)
-	test.SetupTestEnvironment(t)
+	helpers.SetupTestEnvironment(t)
 
 	// Initialize database for tests
 	if err := db.InitDatabase(); err != nil {
 		t.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	ts := test.NewTestServer()
+	ts := helpers.NewTestServer()
 	ts.Mux.HandleFunc("/api/weights", character.WeightsHandler)
 	ts.Mux.HandleFunc("/api/introductions", character.IntroductionsHandler)
 	ts.Mux.HandleFunc("/api/starting-gear", character.StartingGearHandler)
@@ -36,9 +36,9 @@ func TestWeightsHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/weights")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
-	result := test.AssertJSON(t, resp)
+	result := helpers.AssertJSON(t, resp)
 
 	// Check expected weight fields
 	expectedFields := []string{"Races", "RaceWeights", "classWeightsByRace", "BackgroundWeightsByClass", "Alignments", "AlignmentWeights"}
@@ -55,11 +55,11 @@ func TestIntroductionsHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/introductions")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
 	// Response is raw JSON, should be parseable
 	var result interface{}
-	test.ReadJSON(t, resp, &result)
+	helpers.ReadJSON(t, resp, &result)
 	if result == nil {
 		t.Error("Expected non-nil introductions data")
 	}
@@ -71,11 +71,11 @@ func TestStartingGearHandler(t *testing.T) {
 	defer db.Close()
 
 	resp := ts.GET(t, "/api/starting-gear")
-	test.AssertStatus(t, resp, http.StatusOK)
+	helpers.AssertStatus(t, resp, http.StatusOK)
 
 	// Response is raw JSON array, should be parseable
 	var result []interface{}
-	test.ReadJSON(t, resp, &result)
+	helpers.ReadJSON(t, resp, &result)
 	if len(result) == 0 {
 		t.Error("Expected non-empty starting gear data")
 	}
@@ -88,12 +88,12 @@ func TestCharacterHandler(t *testing.T) {
 
 	t.Run("requires npub parameter", func(t *testing.T) {
 		resp := ts.GET(t, "/api/character")
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 	})
 
 	t.Run("rejects invalid npub", func(t *testing.T) {
 		resp := ts.GET(t, "/api/character?npub=invalid")
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 	})
 
 	t.Run("generates character for valid npub", func(t *testing.T) {
@@ -101,7 +101,7 @@ func TestCharacterHandler(t *testing.T) {
 		resp := ts.GET(t, "/api/character?npub=npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsff2l4")
 		// This may fail if the npub is invalid, which is expected
 		if resp.StatusCode == http.StatusOK {
-			result := test.AssertJSON(t, resp)
+			result := helpers.AssertJSON(t, resp)
 			if _, ok := result["character"]; !ok {
 				t.Error("Expected character field in response")
 			}
@@ -116,12 +116,12 @@ func TestCreateCharacterHandler(t *testing.T) {
 
 	t.Run("requires POST method", func(t *testing.T) {
 		resp := ts.GET(t, "/api/character/create-save")
-		test.AssertStatus(t, resp, http.StatusMethodNotAllowed)
+		helpers.AssertStatus(t, resp, http.StatusMethodNotAllowed)
 	})
 
 	t.Run("requires valid request body", func(t *testing.T) {
 		resp := ts.POST(t, "/api/character/create-save", "invalid")
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 	})
 
 	t.Run("requires npub in request", func(t *testing.T) {
@@ -131,9 +131,9 @@ func TestCreateCharacterHandler(t *testing.T) {
 			"pack_choice":       "",
 		}
 		resp := ts.POST(t, "/api/character/create-save", body)
-		test.AssertStatus(t, resp, http.StatusBadRequest)
+		helpers.AssertStatus(t, resp, http.StatusBadRequest)
 
-		result := test.AssertJSON(t, resp)
-		test.AssertError(t, result)
+		result := helpers.AssertJSON(t, resp)
+		helpers.AssertError(t, result)
 	})
 }

@@ -30,6 +30,7 @@ func main() {
 	migrateFlag := flag.Bool("migrate", false, "Run database migration and exit")
 	validateFlag := flag.Bool("validate", false, "Run game data validation and exit")
 	versionFlag := flag.Bool("version", false, "Print version and exit")
+	configFlag := flag.String("config", "", "Path to config file (default: ./codex-config.yml)")
 	flag.Parse()
 
 	if *versionFlag {
@@ -98,7 +99,7 @@ func main() {
 
 	// Load configuration (required for web server)
 	var err error
-	cfg, err = config.Load()
+	cfg, err = config.Load(*configFlag)
 	if err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}

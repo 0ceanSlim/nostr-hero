@@ -1,11 +1,11 @@
-name: Deploy Test Server
+name: "Deploy: test.pubkey.quest"
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy-test:
     runs-on: self-hosted
 
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Run API tests
         id: api_tests
         continue-on-error: true
-        run: go test -v ./cmd/server/test/... 2>&1 | tee test-results.txt
+        run: go test -v ./tests/... 2>&1 | tee test-results.txt
 
       - name: Validate game data
         id: validate
@@ -64,7 +64,7 @@ jobs:
       - name: Write job summary
         if: always()
         run: |
-          echo "## Deploy Test Server" >> $GITHUB_STEP_SUMMARY
+          echo "## Deploy: test.pubkey.quest" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`$(git rev-parse --short HEAD)\` — $(git log -1 --pretty=%s)" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** $(git describe --tags --always 2>/dev/null || git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY

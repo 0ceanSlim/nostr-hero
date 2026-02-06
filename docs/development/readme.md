@@ -129,7 +129,7 @@ Swagger annotations are written inline in `cmd/server/api/routes.go`. To regener
 swag init -g cmd/server/api/routes.go -o docs/api/swagger --parseDependency
 ```
 
-The generated files in `docs/api/` are gitignored and built during deployment. Swagger UI is served at `/swagger/` when the server is running.
+The generated files in `docs/api/` are gitignored and built during deployment. Swagger UI is served at `/api/docs/` when the server is running.
 
 ## Debug Mode
 

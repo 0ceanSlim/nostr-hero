@@ -12,7 +12,7 @@
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 //
-// @host      localhost:8080
+// @host
 // @BasePath  /api
 //
 // @securityDefinitions.apikey NostrAuth
@@ -60,7 +60,9 @@ func RegisterRoutes(mux *http.ServeMux) {
 		registerDebugRoutes(mux)
 	}
 
-	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("/api/docs/", httpSwagger.Handler(
+		httpSwagger.URL("/api/docs/doc.json"),
+	))
 }
 
 // ============================================================================

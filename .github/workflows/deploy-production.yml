@@ -1,4 +1,4 @@
-name: Deploy Production
+name: "Deploy: pubkey.quest"
 
 # Manual trigger only — will be fleshed out at alpha release
 on:
@@ -9,7 +9,7 @@ on:
         required: true
 
 jobs:
-  deploy:
+  deploy-prod:
     runs-on: self-hosted
 
     steps:

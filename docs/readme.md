@@ -4,9 +4,9 @@
 
 Interactive Swagger API docs are available at the live demo:
 
-**[pubkey.quest/swagger](https://pubkey.quest/swagger)**
+**[pubkey.quest/api/docs](https://pubkey.quest/api/docs/)**
 
-When running locally, Swagger UI is served at `/swagger/` on your configured port (e.g. `http://localhost:8584/swagger/`).
+When running locally, Swagger UI is served at `/api/docs/` on your configured port (e.g. `http://localhost:8584/api/docs/`).
 
 API annotations live in the Go source code (`cmd/server/api/routes.go`) and docs are generated at build time using [swag](https://github.com/swaggo/swag). See the development guide for regeneration instructions.
 

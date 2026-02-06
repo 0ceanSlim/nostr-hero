@@ -23,12 +23,14 @@ type Config struct {
 	} `yaml:"pixellab"`
 }
 
-// Load loads the application configuration from cmd/codex/config.yml
-func Load() (*Config, error) {
-	// Look for cmd/codex/config.yml (running from project root)
-	configPath := "./cmd/codex/config.yml"
+// Load loads the application configuration.
+// If configPath is empty, it defaults to ./codex-config.yml in the working directory.
+func Load(configPath string) (*Config, error) {
+	if configPath == "" {
+		configPath = "./codex-config.yml"
+	}
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Printf("⚠️ cmd/codex/config.yml not found - using defaults")
+		log.Printf("⚠️ %s not found - using defaults", configPath)
 		// Return default config
 		config := &Config{}
 		config.Server.Port = 8080

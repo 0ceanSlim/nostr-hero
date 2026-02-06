@@ -93,7 +93,7 @@ Runs on `ubuntu-latest` (GitHub-hosted runner):
 4. `./codex -validate` (game data validation)
 5. `swag init ...` (swagger generation)
 6. `go build -o pubkey-quest ./cmd/server` (server compiles)
-7. `go test ./cmd/server/test/...` (API tests)
+7. `go test ./tests/...` (API tests)
 
 **All steps must pass** — blocks PR merge on failure.
 
