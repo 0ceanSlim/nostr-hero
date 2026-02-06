@@ -184,6 +184,7 @@ func main() {
 // HomeData holds data for the home page template
 type HomeData struct {
 	IsStaging bool
+	Version   string
 }
 
 // Home page handler
@@ -199,6 +200,7 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 
 	data := HomeData{
 		IsStaging: mode == staging.ModeStaging,
+		Version:   Version,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {

@@ -26,6 +26,7 @@ func main() {
 	}
 
 	log.Printf("🎮 Pubkey Quest %s", Version)
+	utils.AppVersion = Version
 
 	if err := utils.LoadConfig("config.yml"); err != nil {
 		log.Fatalf("Failed to load config: %v", err)

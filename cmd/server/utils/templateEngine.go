@@ -7,9 +7,13 @@ import (
 	"path/filepath"
 )
 
+// AppVersion is set from main.go at startup
+var AppVersion = "dev"
+
 type PageData struct {
 	Title      string
 	Theme      string
+	Version    string
 	CustomData map[string]interface{}
 }
 
@@ -37,6 +41,9 @@ func RenderTemplate(w http.ResponseWriter, data PageData, view string, useLoginL
 }
 
 func RenderTemplateWithLayout(w http.ResponseWriter, data PageData, view string, useLoginLayout bool, useGameLayout bool) {
+	if data.Version == "" {
+		data.Version = AppVersion
+	}
 	viewTemplate := filepath.Join(viewsDir, view)
 	componentPattern := filepath.Join(viewsDir, "components", "*.html")
 	componentTemplates, err := filepath.Glob(componentPattern)
