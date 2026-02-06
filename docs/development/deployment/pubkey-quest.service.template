@@ -1,0 +1,16 @@
+[Unit]
+Description=Pubkey Quest Production Server
+After=network.target
+
+[Service]
+Type=simple
+User=USER
+WorkingDirectory=/home/pubkey-quest
+ExecStart=/home/pubkey-quest/pubkey-quest
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

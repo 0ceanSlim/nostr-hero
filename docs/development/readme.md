@@ -112,6 +112,15 @@ Run migration:
 - After pulling changes that include game data updates
 - If the database becomes corrupted — delete `www/game.db` and re-run migration
 
+### Validating Game Data
+
+```bash
+./codex -validate       # Linux/macOS
+codex.exe -validate     # Windows
+```
+
+Validates all JSON files in `game-data/` and exits with code 0 (pass) or 1 (errors). This runs automatically in CI.
+
 ## API Documentation
 
 Swagger annotations are written inline in `cmd/server/api/routes.go`. To regenerate the docs:
@@ -191,17 +200,28 @@ pubkey-quest/
 
 ## Deployment
 
-The test server auto-deploys on every push to main via a GitHub webhook. The deployment script handles the full build pipeline:
+The test server auto-deploys on every push to main via a **self-hosted GitHub Actions runner**. The `deploy-test.yml` workflow handles the full build pipeline:
 
-1. `git pull`
-2. `npm install` + `npm run build` (frontend)
-3. `go mod download` (Go dependencies)
-4. `swag init ...` (API docs)
-5. `go build -o codex ./cmd/codex` + `./codex -migrate` (database)
-6. `go build -o pubkey-quest ./cmd/server` (server binary)
-7. Service restart
+1. `npm install` + `npm run build` (frontend)
+2. `go build -o codex ./cmd/codex` + `./codex -migrate` (database)
+3. `swag init ...` (API docs)
+4. `go build -o pubkey-quest ./cmd/server` (server binary with version ldflags)
+5. `sudo systemctl restart pubkey-quest-test` + `sudo systemctl restart codex`
 
-See [deployment/](./deployment/) for the full auto-deploy setup, service templates, and webhook configuration.
+A separate `ci.yml` workflow runs on every push and PR (GitHub-hosted runner) to validate builds and run tests — PR merge is blocked on failure.
+
+See [deployment/](./deployment/) for the full CI/CD setup, service templates, and runner configuration.
+
+## Versioning
+
+Version is derived from git state and injected at build time via ldflags. Local dev builds (via `air`) just say `dev`. CI and deploy builds get the commit hash or tag:
+
+```bash
+VERSION=$(git describe --tags --always --dirty)
+go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
+```
+
+Check version: `./pubkey-quest -version` or `./codex -version`.
 
 ## Contributing
 

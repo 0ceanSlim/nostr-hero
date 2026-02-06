@@ -7,6 +7,8 @@ tmp_dir = "tmp"
   bin = "tmp/main.exe"
   # Run npm build (Vite + Tailwind) before Go build
   # Build server from root (go.mod is at root now)
+  # Run npm build (Vite + Tailwind) before Go build
+  # Build server from root (go.mod is at root now)
   cmd = "cmd /c \"npm run build && go build -o tmp/main.exe ./cmd/server\""
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "docs", "data", "node_modules", "game-data", "www", "src"]

@@ -22,22 +22,59 @@ import (
 var editor *itemeditor.Editor
 var cfg *config.Config
 
+// Version is set at build time via ldflags
+var Version = "dev"
+
 func main() {
 	// Command-line flags
 	migrateFlag := flag.Bool("migrate", false, "Run database migration and exit")
+	validateFlag := flag.Bool("validate", false, "Run game data validation and exit")
+	versionFlag := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
-	// Load configuration
-	var err error
-	cfg, err = config.Load()
-	if err != nil {
-		log.Fatalf("❌ Failed to load config: %v", err)
-	}
-	if cfg == nil {
-		log.Fatal("❌ codex-config.yml not found")
+	if *versionFlag {
+		fmt.Printf("codex %s\n", Version)
+		os.Exit(0)
 	}
 
-	// Handle migration flag
+	// Handle validate flag (no config required)
+	if *validateFlag {
+		fmt.Println("🔍 Running game data validation...")
+		result, err := validation.ValidateAll()
+		if err != nil {
+			fmt.Printf("❌ Validation failed to run: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Print results
+		fmt.Printf("\n📊 Validation Results:\n")
+		fmt.Printf("   Files scanned: %d\n", result.Stats.TotalFiles)
+		fmt.Printf("   Errors: %d\n", result.Stats.ErrorCount)
+		fmt.Printf("   Warnings: %d\n", result.Stats.WarningCount)
+
+		if len(result.Issues) > 0 {
+			fmt.Printf("\n📋 Issues:\n")
+			for _, issue := range result.Issues {
+				prefix := "⚠️"
+				if issue.Type == "error" {
+					prefix = "❌"
+				} else if issue.Type == "info" {
+					prefix = "ℹ️"
+				}
+				fmt.Printf("   %s [%s] %s: %s\n", prefix, issue.Category, issue.File, issue.Message)
+			}
+		}
+
+		if result.Stats.ErrorCount > 0 {
+			fmt.Printf("\n❌ Validation failed with %d error(s)\n", result.Stats.ErrorCount)
+			os.Exit(1)
+		}
+
+		fmt.Println("\n✅ Validation passed!")
+		os.Exit(0)
+	}
+
+	// Handle migration flag (no config required)
 	if *migrateFlag {
 		fmt.Println("🔄 Running database migration...")
 		dbPath := "./www/game.db"
@@ -57,6 +94,16 @@ func main() {
 
 		fmt.Println("✅ Migration completed successfully!")
 		os.Exit(0)
+	}
+
+	// Load configuration (required for web server)
+	var err error
+	cfg, err = config.Load()
+	if err != nil {
+		log.Fatalf("❌ Failed to load config: %v", err)
+	}
+	if cfg == nil {
+		log.Fatal("❌ codex-config.yml not found")
 	}
 
 	// Initialize item editor

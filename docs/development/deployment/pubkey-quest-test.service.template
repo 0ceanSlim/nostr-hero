@@ -1,0 +1,16 @@
+[Unit]
+Description=Pubkey Quest Test Server
+After=network.target
+
+[Service]
+Type=simple
+User=USER
+WorkingDirectory=/home/pubkey-test
+ExecStart=/home/pubkey-test/pubkey-quest
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

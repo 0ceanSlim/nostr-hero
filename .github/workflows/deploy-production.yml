@@ -1,0 +1,24 @@
+name: Deploy Production
+
+# Manual trigger only — will be fleshed out at alpha release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.1.0-alpha)"
+        required: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Placeholder
+        run: |
+          echo "Production deployment is not yet configured."
+          echo "This workflow will be implemented at alpha release."
+          echo "Requested version: ${{ github.event.inputs.version }}"
+          exit 1

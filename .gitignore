@@ -21,6 +21,8 @@ pixellab-gen.exe
 /codex
 pubkey-quest
 pubkey-quest.exe
+server.exe
+/server
 
 # Node.js
 node_modules/

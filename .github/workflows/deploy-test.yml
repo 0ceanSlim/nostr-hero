@@ -1,0 +1,109 @@
+name: Deploy Test Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Build (failure here stops the workflow, old binaries stay running) ──
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build codex
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "$(git rev-parse --short HEAD)")
+          go build -ldflags "-X main.Version=${VERSION}" -o codex ./cmd/codex
+
+      - name: Run database migration
+        run: ./codex -migrate
+
+      - name: Install swag
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate swagger docs
+        run: swag init -g cmd/server/api/routes.go -o docs/api/swagger --parseDependency
+
+      - name: Build server
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "$(git rev-parse --short HEAD)")
+          go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
+
+      # ── Tests (run but don't block deployment) ──
+
+      - name: Run API tests
+        id: api_tests
+        continue-on-error: true
+        run: go test -v ./cmd/server/test/... 2>&1 | tee test-results.txt
+
+      - name: Validate game data
+        id: validate
+        continue-on-error: true
+        run: ./codex -validate 2>&1 | tee validation-results.txt
+
+      # ── Deploy (only reached if build succeeded) ──
+
+      - name: Restart test server
+        run: sudo systemctl restart pubkey-quest-test
+
+      - name: Restart codex
+        run: sudo systemctl restart codex
+
+      # ── Report ──
+
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Deploy Test Server" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`$(git rev-parse --short HEAD)\` — $(git log -1 --pretty=%s)" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $(git describe --tags --always 2>/dev/null || git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Build" >> $GITHUB_STEP_SUMMARY
+          echo "All build steps passed — binaries deployed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Tests" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.api_tests.outcome }}" = "success" ]; then
+            echo "- API Tests: passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- API Tests: **FAILED** (non-blocking)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.validate.outcome }}" = "success" ]; then
+            echo "- Game Data Validation: passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Game Data Validation: **FAILED** (non-blocking)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Show test output if tests failed
+          if [ "${{ steps.api_tests.outcome }}" != "success" ] && [ -f test-results.txt ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Test output</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat test-results.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.validate.outcome }}" != "success" ] && [ -f validation-results.txt ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Validation output</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat validation-results.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi

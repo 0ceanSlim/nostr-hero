@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build codex
+        run: go build -o codex ./cmd/codex
+
+      - name: Run database migration
+        run: ./codex -migrate
+
+      - name: Validate game data
+        run: ./codex -validate
+
+      - name: Install swag
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate swagger docs
+        run: swag init -g cmd/server/api/routes.go -o docs/api/swagger --parseDependency
+
+      - name: Build server
+        run: |
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "ci-$(git rev-parse --short HEAD)")
+          go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
+
+      - name: Run API tests
+        run: go test ./cmd/server/test/...

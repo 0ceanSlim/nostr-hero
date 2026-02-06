@@ -1,20 +1,20 @@
-# Nostr Hero - Deployment & Versioning Strategy
+# Pubkey Quest - Deployment & Versioning Strategy
 
-This document outlines the multi-server deployment architecture, versioning strategy, and build automation plans for Nostr Hero.
+This document outlines the multi-server deployment architecture, versioning strategy, and CI/CD pipeline for Pubkey Quest.
 
 ## Server Environments
 
-Nostr Hero runs three separate server environments with different purposes, access controls, and save systems.
+Pubkey Quest runs three separate server environments with different purposes, access controls, and save systems.
 
-### 1. Test Server (`test.nostrhero.quest`)
+### 1. Test Server (`test.pubkey.quest`)
 
 **Purpose**: Development and testing environment
 
 **Configuration**:
 
-- Runs in **dev mode** (Air live-reload)
+- Runs compiled binaries (built by CI/CD)
 - Debug logging **always enabled**
-- Direct deployment from git pushes
+- Auto-deployed on every push to main
 
 **Save System**:
 
@@ -29,11 +29,10 @@ Nostr Hero runs three separate server environments with different purposes, acce
 
 **Deployment**:
 
-- **Auto-deploy on every push** to main/test branch
-- Service automatically restarts after deployment
-- No version tracking required
-- See `SETUP-AUTO-DEPLOY.md` for setup instructions
-- **Privacy**: Server details never committed to repo (webhook or self-hosted runner)
+- **Auto-deploy on every push** to main via self-hosted GitHub Actions runner
+- Build failure stops deployment — old binaries keep running
+- Test failures are reported but don't block deployment
+- See `setup-runner.md` for self-hosted runner setup
 
 **Timeline**: Active now
 
@@ -63,58 +62,131 @@ Nostr Hero runs three separate server environments with different purposes, acce
 
 **Deployment**:
 
-- Deploy on **versioned releases only** (semver: v0.1.0-alpha, v0.2.0-beta, v1.0.0, etc.)
-- Manual promotion from test server after QA
-- Service restart on new version deployment
+- Deploy on **manual trigger only** via `deploy-production.yml` workflow
+- Requires version input (e.g. `0.1.0-alpha`)
+- All tests must pass before deploy
+- Tags the commit with the version
 
 **Timeline**: Launches with 1st alpha release
 
 ---
 
-### 3. Modded Server
+### 3. Modded Server (deferred)
 
 **Purpose**: Community server with relaxed save restrictions
-
-**Configuration**:
-
-- Runs **same version as official server**
-- May allow modified game rules/content in future
-
-**Save System**:
-
-- Fetches **any game save event** from Nostr
-- Allows loading saves from any relay
-- No official version restrictions
-- Players can load community/modified saves
-
-**Access Control**:
-
-- **Beta+**: HappyTavern members only (exclusive feature)
-
-**Deployment**:
-
-- Deploys **when official server gets new version**
-- Mirrors official release schedule
-- Separate service instance
 
 **Timeline**: Launches with beta release
 
 ---
 
+## CI/CD Pipeline
+
+All CI/CD is handled by **GitHub Actions**. Three workflows:
+
+### `ci.yml` — Every push and PR
+
+Runs on `ubuntu-latest` (GitHub-hosted runner):
+
+1. Checkout, setup Go 1.24, setup Node 18
+2. `npm install` + `npm run build` (frontend)
+3. `go build -o codex ./cmd/codex` + `./codex -migrate` (database)
+4. `./codex -validate` (game data validation)
+5. `swag init ...` (swagger generation)
+6. `go build -o pubkey-quest ./cmd/server` (server compiles)
+7. `go test ./cmd/server/test/...` (API tests)
+
+**All steps must pass** — blocks PR merge on failure.
+
+### `deploy-test.yml` — Push to main
+
+Runs on `self-hosted` runner (the Ubuntu server):
+
+1. **Build steps** (failure = workflow fails, old binaries stay running):
+   - `npm install` + `npm run build`
+   - Build codex + migrate database
+   - `swag init` (swagger docs)
+   - Build server binary with version ldflags
+2. **Tests** (continue-on-error, don't block deploy):
+   - API tests
+   - Game data validation
+3. **Deploy** (only reached if build succeeded):
+   - `sudo systemctl restart pubkey-quest-test`
+   - `sudo systemctl restart codex`
+4. **Report**: Write test results to job summary
+
+### `deploy-production.yml` — Manual trigger only
+
+Stub workflow — will be fleshed out at alpha release. Requires version input.
+
+---
+
+## Versioning
+
+Version is derived entirely from **git state** — no version files to maintain.
+
+### How It Works
+
+`git describe --tags --always --dirty` produces the version string at build time:
+
+| Git state | Example output |
+|-----------|---------------|
+| No tags yet | `abc1234` |
+| No tags, dirty tree | `abc1234-dirty` |
+| On a tag | `v0.1.0-alpha` |
+| 3 commits after tag | `v0.1.0-alpha-3-gabc1234` |
+| After tag, dirty | `v0.1.0-alpha-3-gabc1234-dirty` |
+
+### Build-Time Injection
+
+Version injected at compile time via Go ldflags:
+
+```bash
+VERSION=$(git describe --tags --always --dirty)
+go build -ldflags "-X main.Version=${VERSION}" -o pubkey-quest ./cmd/server
+```
+
+Both binaries support `-version` flag:
+
+```bash
+./pubkey-quest -version   # pubkey-quest abc1234
+./codex -version          # codex abc1234
+```
+
+### Build Contexts
+
+| Context | Version string | How |
+|---------|---------------|-----|
+| `air` (dev) | `dev` | No ldflags, uses default |
+| CI (`ci.yml`) | `ci-abc1234` | ldflags with fallback prefix |
+| Deploy (`deploy-test.yml`) | `abc1234` or tag | ldflags from `git describe` |
+| Production (future) | `v0.1.0-alpha` | ldflags from git tag |
+
+### Tagging Releases
+
+When ready for alpha, tag the commit:
+
+```bash
+git tag v0.1.0-alpha
+git push origin v0.1.0-alpha
+```
+
+All subsequent builds automatically pick up the tag via `git describe`.
+
+---
+
 ## Deployment Infrastructure
 
-All servers run on **Cloudflare Argo Tunnel** as Linux services.
+All servers run on **Cloudflare Argo Tunnel** as Linux systemd services.
 
 ### Service Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Linux Server (Local Machine)                                │
+│ Linux Server                                                │
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Test Service │  │ Official Svc │  │ Modded Svc   │      │
-│  │ (Air/Dev)    │  │ (Binary)     │  │ (Binary)     │      │
-│  │ Port: TBD    │  │ Port: TBD    │  │ Port: TBD    │      │
+│  │ Test Service │  │ Codex Svc    │  │ Official Svc │      │
+│  │ (Binary)     │  │ (Binary)     │  │ (Binary)     │      │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
 │         │                 │                 │               │
 │  ┌──────┴─────────────────┴─────────────────┴───────┐      │
@@ -123,99 +195,48 @@ All servers run on **Cloudflare Argo Tunnel** as Linux services.
 └─────────┼───────────────────┼─────────────────┼────────────┘
           │                   │                 │
           ▼                   ▼                 ▼
-  test.nostrhero.quest   nostrhero.com   modded.nostrhero.com
-      (or similar)        (example)         (or similar)
+  test.pubkey.quest   codex.pubkey.quest   pubkey.quest
 ```
 
-### Deployment Triggers
+### Systemd Service Templates
 
-| Event                        | Test Server              | Official Server       | Modded Server         |
-| ---------------------------- | ------------------------ | --------------------- | --------------------- |
-| Git push to main/test branch | ✅ Auto-deploy + restart | ❌ No change          | ❌ No change          |
-| Versioned release (git tag)  | ✅ Deploy new version    | ✅ Deploy new version | ✅ Deploy new version |
-| Manual trigger               | ✅ Allowed               | ✅ Allowed            | ✅ Allowed            |
+Located in this directory:
 
----
+| Template | Service | Directory |
+|----------|---------|-----------|
+| `pubkey-quest-test.service.template` | Test server | `/home/pubkey-test/` |
+| `codex.service.template` | Codex (dev tools) | `/home/pubkey-test/` |
+| `pubkey-quest.service.template` | Production server | `/home/pubkey-quest/` |
 
-## Versioning Strategy
+### Self-Hosted Runner
 
-### Semantic Versioning
-
-Nostr Hero follows **semantic versioning** (semver):
-
-- **Alpha**: `v0.1.0-alpha`, `v0.2.0-alpha`, etc.
-- **Beta**: `v0.1.0-beta`, `v0.2.0-beta`, etc.
-- **Release**: `v1.0.0`, `v1.1.0`, `v2.0.0`, etc.
-
-### Version Compatibility
-
-**Official Server**:
-
-- Tracks save file version compatibility
-- May refuse to load saves from incompatible versions
-- Event metadata includes game version
-
-**Modded Server**:
-
-- Best-effort compatibility with all versions
-- Allows loading any save regardless of version
+The `deploy-test.yml` workflow runs on a self-hosted GitHub Actions runner installed on the server. See `setup-runner.md` for installation instructions.
 
 ---
 
-## Build Automation
+## Server Directory Layout
 
-### Auto-Deployment Options
+### `/home/pubkey-test/` (test + codex)
 
-**Test Server** has two options for auto-deployment (see `SETUP-AUTO-DEPLOY.md`):
+Full git checkout. The self-hosted runner checks out code here:
 
-**Option 1: GitHub Webhook + Server Listener** (Recommended)
+```
+/home/pubkey-test/
+├── config.yml              # Test server config (port, debug_mode: true)
+├── codex-config.yml        # Codex config
+├── pubkey-quest            # Built server binary
+├── codex                   # Built codex binary
+├── www/
+│   ├── game.db             # Migrated database
+│   └── dist/               # Built frontend
+├── game-data/              # JSON source data
+├── data/saves/             # Test save files
+└── ... (full repo)
+```
 
-- Server listens for GitHub webhook events
-- On push → automatically pulls and restarts
-- **Privacy**: No server credentials in GitHub repo
-- **Implementation**: `webhook-listener-advanced.sh` + `webhook-hooks.json`
+### `/home/pubkey-quest/` (production, deferred)
 
-**Option 2: Self-Hosted GitHub Actions Runner**
-
-- GitHub runner software on server
-- Workflow triggers on push (`.github/workflows/deploy-test.yml`)
-- **Privacy**: No server credentials in GitHub repo
-- **Implementation**: Runner authenticates directly with GitHub
-
-### CI/CD Pipeline
-
-**On Git Push (Test Server)**:
-
-1. ~~Run tests (if available)~~ (Optional, add later)
-2. ~~Build test binary~~ (Air handles this in dev mode)
-3. **Pull latest code** from GitHub
-4. **Restart test service** (systemd)
-5. ~~Post Nostr note as Dungeon Master npub with commit details~~ (TODO)
-
-**On Versioned Release** (git tag) - TODO:
-
-1. Run full test suite
-2. Build production binaries (official + modded)
-3. Generate release notes
-4. Deploy to official server
-5. Deploy to modded server (if beta+)
-6. Restart services
-7. Post Nostr note as Dungeon Master npub with release announcement
-
-### Nostr Integration
-
-**Dungeon Master npub**: `npub1...` (TBD)
-
-**Note Types**:
-
-- **Code pushes**: Short changelog note with commit hash
-- **Versioned releases**: Detailed release notes with features/fixes
-- **Server status**: Maintenance notifications, downtime alerts
-
-**Relay Publishing**:
-
-- Notes published to official Nostr relays
-- Tagged appropriately for filtering (e.g., `#NostrHero`, `#DevUpdate`)
+Same layout, different config (no debug_mode, different port).
 
 ---
 
@@ -235,183 +256,39 @@ Nostr Hero follows **semantic versioning** (semver):
 - Check npub on login
 - Reject non-whitelisted users
 
-### Beta Phase
-
-**Official Server**: Open to public
-
-**Modded Server**: HappyTavern members only (same verification as alpha)
-
-### Post-Beta (v1.0+)
-
-**Official Server**: Fully public
-
-**Modded Server**: HappyTavern members only (premium feature)
-
----
-
-## Save System Implementation Details
-
-### Official Server Save Flow
-
-```
-Player saves game
-    ↓
-Frontend creates save object
-    ↓
-POST to /api/saves/{npub}
-    ↓
-Backend saves to disk + publishes Nostr event
-    ↓
-Event includes:
-    - Save data (encrypted or public)
-    - Event ID (for tracking)
-    - Game version tag
-    - Timestamp
-    ↓
-Event published to official relays
-    ↓
-On load: Fetch events from relays by npub
-    ↓
-Filter by official version compatibility
-    ↓
-Load most recent compatible save
-```
-
-### Modded Server Save Flow
-
-```
-Player requests save list
-    ↓
-Fetch ALL save events from Nostr (any relay)
-    ↓
-Filter by npub (or allow cross-npub if desired)
-    ↓
-Present all saves (no version filtering)
-    ↓
-Player selects save
-    ↓
-Load save (best-effort compatibility)
-```
-
-### Test Server Save Flow
-
-```
-Player saves game
-    ↓
-POST to /api/saves/{npub}
-    ↓
-Save to disk only
-    ↓
-No Nostr relay interaction
-    ↓
-On load: Read from disk
-```
-
----
-
-## Timeline & Milestones
-
-| Phase             | Test Server                      | Official Server              | Modded Server                |
-| ----------------- | -------------------------------- | ---------------------------- | ---------------------------- |
-| **Now**           | ✅ Active (disk saves, dev mode) | ❌ Not live                  | ❌ Not live                  |
-| **Alpha Release** | ✅ Continues (whitelist)         | ✅ Launch (HappyTavern only) | ❌ Not live                  |
-| **Beta Release**  | ✅ Continues (whitelist)         | ✅ Public access             | ✅ Launch (HappyTavern only) |
-| **v1.0 Release**  | ✅ Continues (whitelist)         | ✅ Public access             | ✅ HappyTavern only          |
-
 ---
 
 ## Implementation Checklist
 
-### Phase 1: Test Server (Current)
+### Phase 1: Test Server CI/CD (Current)
 
 - [x] Basic server running
-- [ ] Auto-deploy script on git push
-- [ ] Service restart automation
+- [x] CI workflow (ci.yml) — build + test on every push/PR
+- [x] Deploy-test workflow — auto-deploy on push to main
+- [x] Self-hosted runner setup guide
+- [x] Systemd service templates
+- [x] Versioning system (git-based + ldflags)
+- [x] Codex `-validate` flag for CI
+- [ ] Self-hosted runner installed on server
+- [ ] Services created and enabled
 - [ ] Pubkey whitelist enforcement
 - [ ] Disk-based save system
 
 ### Phase 2: Alpha Prep (Official Server)
 
+- [ ] Deploy-production workflow fleshed out
 - [ ] Nostr relay integration for saves
-- [ ] Event ID tracking system
 - [ ] HappyTavern member verification
-- [ ] Production build pipeline
-- [ ] Cloudflare Argo Tunnel setup (official domain)
-- [ ] Dungeon Master npub creation
-- [ ] Nostr note publishing on releases
+- [ ] Production service setup
+- [ ] Version tagging automation
 
-### Phase 3: Beta Prep (Modded Server)
+### Phase 3: Beta & Beyond
 
-- [ ] Modded server codebase (forked or config-based)
-- [ ] "Fetch any save event" logic
-- [ ] Cloudflare Argo Tunnel setup (modded domain)
-- [ ] HappyTavern member verification (modded)
-- [ ] Cross-version save loading (best-effort)
-
-### Phase 4: Build Automation
-
-- [ ] CI/CD pipeline (GitHub Actions or custom)
-- [ ] Automated testing suite
-- [ ] Release note generation
-- [ ] Binary builds for Linux
-- [ ] Deploy scripts (rsync, scp, or API-based)
-- [ ] Service management scripts (systemd)
-- [ ] Nostr note publishing automation
+- [ ] Modded server
+- [ ] Release notes generation
+- [ ] Nostr announcement posting (Dungeon Master npub)
 
 ---
 
-## Technical TODOs
-
-### Nostr Save Event Schema
-
-**Kind**: TBD (likely `kind: 30000+` for parameterized replaceable event)
-
-**Tags**:
-
-- `["d", "{npub}_{timestamp}"]` - Unique identifier
-- `["game", "nostr-hero"]` - Game identifier
-- `["version", "v0.1.0-alpha"]` - Game version
-- `["server", "official"]` or `["server", "modded"]`
-
-**Content**: JSON save data (possibly encrypted)
-
-### Relay List
-
-**Official Relays** (for official server):
-
-- TBD (curated list of reliable relays)
-
-**Community Relays** (for modded server):
-
-- Fetch from all known public relays
-
-### Service Management
-
-**Systemd Service Files**:
-
-- `nostr-hero-test.service`
-- `nostr-hero-official.service`
-- `nostr-hero-modded.service`
-
-**Deployment Scripts**:
-
-- `deploy-test.sh` - Git pull, build (Air), restart service
-- `deploy-official.sh` - Download release binary, restart service
-- `deploy-modded.sh` - Download release binary, restart service
-
----
-
-## Questions to Resolve
-
-1. **Dungeon Master npub**: Generate new keypair or use existing?
-2. **HappyTavern verification**: Which method (whitelist, badge, token)?
-3. **Save encryption**: Should Nostr save events be encrypted (NIP-04/NIP-44)?
-4. **Modded server rules**: Will modded server allow game rule modifications, or just unrestricted save loading?
-5. **Domain names**: Final domain names for official and modded servers?
-6. **Relay selection**: Which relays for official save publishing?
-7. **CI/CD platform**: GitHub Actions, GitLab CI, or custom scripts?
-
----
-
-**Last Updated**: 2025-12-07
-**Status**: Planning & Documentation Phase
+**Last Updated**: 2026-02-06
+**Status**: CI/CD pipeline implemented, awaiting runner setup on server
