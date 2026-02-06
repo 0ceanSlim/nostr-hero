@@ -27,8 +27,9 @@ jobs:
 
       - name: Verify codex binary
         run: |
-          test -f ./codex || { echo "::error::codex binary not found"; exit 1; }
-          echo "codex: $(./codex -version)"
+          test -f ./codex || { echo "::error::codex binary not found after build"; exit 1; }
+          echo "Built codex: $(./codex -version)"
+          echo "Binary: $(ls -la ./codex)"
 
       - name: Run database migration
         run: ./codex -migrate
@@ -46,8 +47,9 @@ jobs:
 
       - name: Verify server binary
         run: |
-          test -f ./pubkey-quest || { echo "::error::pubkey-quest binary not found"; exit 1; }
-          echo "server: $(./pubkey-quest -version)"
+          test -f ./pubkey-quest || { echo "::error::pubkey-quest binary not found after build"; exit 1; }
+          echo "Built server: $(./pubkey-quest -version)"
+          echo "Binary: $(ls -la ./pubkey-quest)"
 
       # ── Tests (run but don't block deployment) ──
 
@@ -63,6 +65,26 @@ jobs:
 
       # ── Deploy ──
 
+      - name: Install binaries to service directory
+        run: |
+          # Determine where services expect binaries
+          SERVICE_DIR=$(systemctl show codex -p WorkingDirectory --value)
+          WORKSPACE=$(pwd)
+          echo "Runner workspace: ${WORKSPACE}"
+          echo "Service directory: ${SERVICE_DIR}"
+
+          if [ "$WORKSPACE" != "$SERVICE_DIR" ]; then
+            echo "Workspace differs from service directory — copying binaries"
+            cp -v ./codex "${SERVICE_DIR}/codex"
+            cp -v ./pubkey-quest "${SERVICE_DIR}/pubkey-quest"
+          else
+            echo "Workspace matches service directory — binaries already in place"
+          fi
+
+          # Verify binaries at service path
+          echo "codex at service path: $(${SERVICE_DIR}/codex -version)"
+          echo "server at service path: $(${SERVICE_DIR}/pubkey-quest -version)"
+
       - name: Restart test server
         run: sudo systemctl restart pubkey-quest-test
 
@@ -75,7 +97,7 @@ jobs:
             journalctl -u pubkey-quest-test --no-pager -n 20 || true
             exit 1
           fi
-          echo "pubkey-quest-test is running"
+          echo "pubkey-quest-test: running (PID $(systemctl show pubkey-quest-test -p MainPID --value))"
 
       - name: Restart codex
         run: sudo systemctl restart codex
@@ -89,7 +111,7 @@ jobs:
             journalctl -u codex --no-pager -n 20 || true
             exit 1
           fi
-          echo "codex service is running"
+          echo "codex: running (PID $(systemctl show codex -p MainPID --value))"
 
       # ── Report ──
 
@@ -102,6 +124,12 @@ jobs:
           echo "**Version:** $(git describe --tags --always 2>/dev/null || git rev-parse --short HEAD)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
+          echo "### Paths" >> $GITHUB_STEP_SUMMARY
+          echo "- Workspace: \`$(pwd)\`" >> $GITHUB_STEP_SUMMARY
+          SERVICE_DIR=$(systemctl show codex -p WorkingDirectory --value 2>/dev/null || echo "unknown")
+          echo "- Service dir: \`${SERVICE_DIR}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           echo "### Build" >> $GITHUB_STEP_SUMMARY
           if [ -f ./pubkey-quest ] && [ -f ./codex ]; then
             echo "- server: \`$(./pubkey-quest -version 2>&1)\`" >> $GITHUB_STEP_SUMMARY
@@ -112,16 +140,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Services" >> $GITHUB_STEP_SUMMARY
-          if systemctl is-active --quiet pubkey-quest-test 2>/dev/null; then
-            echo "- pubkey-quest-test: running" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- pubkey-quest-test: **NOT RUNNING**" >> $GITHUB_STEP_SUMMARY
-          fi
-          if systemctl is-active --quiet codex 2>/dev/null; then
-            echo "- codex: running" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- codex: **NOT RUNNING**" >> $GITHUB_STEP_SUMMARY
-          fi
+          for svc in pubkey-quest-test codex; do
+            if systemctl is-active --quiet "$svc" 2>/dev/null; then
+              echo "- ${svc}: running (PID $(systemctl show $svc -p MainPID --value))" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ${svc}: **NOT RUNNING**" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### Tests" >> $GITHUB_STEP_SUMMARY
