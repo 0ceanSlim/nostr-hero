@@ -44,9 +44,9 @@ sudo ./svc.sh status
 
 The runner should appear as "Idle" in GitHub Settings > Actions > Runners.
 
-## 3. Sudoers for Service Restarts
+## 3. Sudoers for Service Management
 
-The deploy workflow needs to restart systemd services without a password prompt. Add these entries:
+The deploy workflow needs to stop/start systemd services without a password prompt. Add these entries:
 
 ```bash
 sudo visudo -f /etc/sudoers.d/pubkey-quest
@@ -55,6 +55,12 @@ sudo visudo -f /etc/sudoers.d/pubkey-quest
 Add:
 
 ```
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop pubkey-quest-test
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop pubkey-quest
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop codex
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl start pubkey-quest-test
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl start pubkey-quest
+USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl start codex
 USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart pubkey-quest-test
 USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart pubkey-quest
 USER ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart codex

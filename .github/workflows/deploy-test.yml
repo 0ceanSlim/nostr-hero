@@ -65,9 +65,14 @@ jobs:
 
       # ── Deploy ──
 
+      - name: Stop services
+        run: |
+          sudo systemctl stop pubkey-quest-test || true
+          sudo systemctl stop codex || true
+          echo "Services stopped"
+
       - name: Install binaries to service directory
         run: |
-          # Determine where services expect binaries
           SERVICE_DIR=$(systemctl show codex -p WorkingDirectory --value)
           WORKSPACE=$(pwd)
           echo "Runner workspace: ${WORKSPACE}"
@@ -81,37 +86,29 @@ jobs:
             echo "Workspace matches service directory — binaries already in place"
           fi
 
-          # Verify binaries at service path
           echo "codex at service path: $(${SERVICE_DIR}/codex -version)"
           echo "server at service path: $(${SERVICE_DIR}/pubkey-quest -version)"
 
-      - name: Restart test server
-        run: sudo systemctl restart pubkey-quest-test
+      - name: Start services
+        run: |
+          sudo systemctl start pubkey-quest-test
+          sudo systemctl start codex
 
-      - name: Verify test server is running
+      - name: Verify services are running
         run: |
           sleep 2
-          if ! systemctl is-active --quiet pubkey-quest-test; then
-            echo "::error::pubkey-quest-test failed to start"
-            systemctl status pubkey-quest-test --no-pager || true
-            journalctl -u pubkey-quest-test --no-pager -n 20 || true
-            exit 1
-          fi
-          echo "pubkey-quest-test: running (PID $(systemctl show pubkey-quest-test -p MainPID --value))"
-
-      - name: Restart codex
-        run: sudo systemctl restart codex
-
-      - name: Verify codex is running
-        run: |
-          sleep 2
-          if ! systemctl is-active --quiet codex; then
-            echo "::error::codex service failed to start"
-            systemctl status codex --no-pager || true
-            journalctl -u codex --no-pager -n 20 || true
-            exit 1
-          fi
-          echo "codex: running (PID $(systemctl show codex -p MainPID --value))"
+          FAILED=0
+          for svc in pubkey-quest-test codex; do
+            if systemctl is-active --quiet "$svc"; then
+              echo "${svc}: running (PID $(systemctl show $svc -p MainPID --value))"
+            else
+              echo "::error::${svc} failed to start"
+              systemctl status "$svc" --no-pager || true
+              journalctl -u "$svc" --no-pager -n 20 || true
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
 
       # ── Report ──
 
