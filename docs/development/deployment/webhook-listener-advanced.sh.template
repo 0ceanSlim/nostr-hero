@@ -118,13 +118,23 @@ update_github_status() {
 
     # Run CODEX database migration
     echo "🔄 Running CODEX database migration..."
-    ./codex --migrate
+    ./codex -migrate
     if [ $? -ne 0 ]; then
       echo "❌ CODEX migration failed!"
       update_github_status "failure" "CODEX migration failed"
       exit 1
     fi
     echo "✅ CODEX migration completed"
+
+    # Generate Swagger API docs
+    echo "📝 Generating Swagger API docs..."
+    swag init -g cmd/server/api/routes.go -o docs/api/swagger --parseDependency
+    if [ $? -ne 0 ]; then
+      echo "❌ Swagger generation failed!"
+      update_github_status "failure" "Swagger generation failed"
+      exit 1
+    fi
+    echo "✅ Swagger docs generated"
 
     # Build server binary
     echo "🔨 Building server binary..."

@@ -39,6 +39,7 @@ claude.md
 # Generated assets
 /www/res/img/items/_history
 /www/res/style/output.css
+/docs/api/*
 
 # Deployment secrets (server-specific, never commit)
 /docs/development/deployment/webhook-hooks.json

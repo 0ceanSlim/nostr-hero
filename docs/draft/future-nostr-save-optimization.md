@@ -1,3 +1,5 @@
+README NEEDS TO CHANGE, IT CAN BE WAY MORE OPTIMIZED, COMPRESSED AND ID BY INTEGER.
+
 # Future: Nostr Save File Optimization
 
 **Status:** Future consideration (not part of delta architecture rewrite)
@@ -74,20 +76,20 @@ Store only IDs and quantities, hydrate from game-data on load:
 
 ### Field Name Shortening
 
-| Full Name | Short | Type |
-|-----------|-------|------|
-| fatigue | f | int |
-| hunger | h | int |
-| gold | g | int |
-| location | loc | string |
-| district | dist | string |
-| building | bld | string |
-| inventory | inv | array |
-| equipment | eq | map |
-| spells | sp | array |
-| effects | eff | array |
-| time | t | int |
-| day | d | int |
+| Full Name | Short | Type   |
+| --------- | ----- | ------ |
+| fatigue   | f     | int    |
+| hunger    | h     | int    |
+| gold      | g     | int    |
+| location  | loc   | string |
+| district  | dist  | string |
+| building  | bld   | string |
+| inventory | inv   | array  |
+| equipment | eq    | map    |
+| spells    | sp    | array  |
+| effects   | eff   | array  |
+| time      | t     | int    |
+| day       | d     | int    |
 
 ---
 
@@ -130,13 +132,13 @@ type ActiveEffectMinimal struct {
 
 ## Estimated Sizes
 
-| Format | Size |
-|--------|------|
-| Current (full data) | 20-50KB |
-| Optimized (IDs only) | 5-10KB |
-| Compressed (gzip) | 2-5KB |
-| Encrypted (NIP-17) | 3-6KB |
-| **Nostr limit** | **64KB** |
+| Format               | Size     |
+| -------------------- | -------- |
+| Current (full data)  | 20-50KB  |
+| Optimized (IDs only) | 5-10KB   |
+| Compressed (gzip)    | 2-5KB    |
+| Encrypted (NIP-17)   | 3-6KB    |
+| **Nostr limit**      | **64KB** |
 
 All formats well within Nostr 64KB event limit.
 

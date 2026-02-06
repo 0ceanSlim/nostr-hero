@@ -29,9 +29,9 @@ import (
 	"pubkey-quest/cmd/server/api/game"
 	"pubkey-quest/cmd/server/auth"
 	"pubkey-quest/cmd/server/utils"
-	// Uncomment after running: swag init -g api/routes.go -o docs
-	// _ "pubkey-quest/cmd/server/docs"
-	// httpSwagger "github.com/swaggo/http-swagger"
+
+	_ "pubkey-quest/docs/api/swagger"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // RegisterRoutes registers all API routes on the given ServeMux.
@@ -60,8 +60,7 @@ func RegisterRoutes(mux *http.ServeMux) {
 		registerDebugRoutes(mux)
 	}
 
-	// Swagger UI - uncomment after running: swag init -g api/routes.go -o docs
-	// mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 }
 
 // ============================================================================
