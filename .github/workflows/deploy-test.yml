@@ -85,21 +85,13 @@ jobs:
           echo "Service directory: ${SERVICE_DIR}"
 
           if [ "$WORKSPACE" != "$SERVICE_DIR" ]; then
-            echo "Workspace differs from service directory — copying binaries and assets"
+            echo "Workspace differs from service directory — copying build artifacts"
             cp -v ./codex "${SERVICE_DIR}/codex"
             cp -v ./pubkey-quest "${SERVICE_DIR}/pubkey-quest"
 
-            # Copy www/ (HTML templates, built JS/CSS, static resources)
-            # Both servers read templates and assets from disk at runtime
-            rsync -av --delete ./www/ "${SERVICE_DIR}/www/" \
-              --exclude game.db
-
-            # Copy codex HTML templates (served from disk at runtime)
-            mkdir -p "${SERVICE_DIR}/cmd/codex/html"
-            rsync -av --delete ./cmd/codex/html/ "${SERVICE_DIR}/cmd/codex/html/"
-
-            # Copy game-data/ (needed by codex item editor and validation)
-            rsync -av --delete ./game-data/ "${SERVICE_DIR}/game-data/"
+            # Copy only the built JS/CSS bundles (output of vite build)
+            mkdir -p "${SERVICE_DIR}/www/dist"
+            cp -rv ./www/dist/* "${SERVICE_DIR}/www/dist/"
           else
             echo "Workspace matches service directory — binaries already in place"
           fi
