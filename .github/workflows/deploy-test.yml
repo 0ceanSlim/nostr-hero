@@ -20,6 +20,12 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Install codex frontend dependencies
+        run: cd cmd/codex && npm install
+
+      - name: Build codex frontend
+        run: cd cmd/codex && npm run build
+
       - name: Build codex
         run: |
           VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "$(git rev-parse --short HEAD)")
@@ -79,9 +85,13 @@ jobs:
           echo "Service directory: ${SERVICE_DIR}"
 
           if [ "$WORKSPACE" != "$SERVICE_DIR" ]; then
-            echo "Workspace differs from service directory — copying binaries"
+            echo "Workspace differs from service directory — copying binaries and assets"
             cp -v ./codex "${SERVICE_DIR}/codex"
             cp -v ./pubkey-quest "${SERVICE_DIR}/pubkey-quest"
+
+            # Copy built frontend assets
+            mkdir -p "${SERVICE_DIR}/www/dist"
+            cp -rv ./www/dist/* "${SERVICE_DIR}/www/dist/"
           else
             echo "Workspace matches service directory — binaries already in place"
           fi
