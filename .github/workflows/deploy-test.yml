@@ -77,23 +77,29 @@ jobs:
           sudo systemctl stop codex || true
           echo "Services stopped"
 
-      - name: Install binaries to service directory
+      - name: Deploy to service directory
         run: |
           SERVICE_DIR=$(systemctl show codex -p WorkingDirectory --value)
           WORKSPACE=$(pwd)
           echo "Runner workspace: ${WORKSPACE}"
           echo "Service directory: ${SERVICE_DIR}"
 
-          if [ "$WORKSPACE" != "$SERVICE_DIR" ]; then
-            echo "Workspace differs from service directory — copying build artifacts"
+          if [ "$WORKSPACE" = "$SERVICE_DIR" ]; then
+            echo "Workspace matches service directory — builds already in place"
+          else
+            echo "Workspace differs from service directory"
+
+            # Update the service repo to match this commit
+            COMMIT=$(git rev-parse HEAD)
+            echo "Pulling commit ${COMMIT} into service directory"
+            git -C "${SERVICE_DIR}" fetch origin
+            git -C "${SERVICE_DIR}" checkout "${COMMIT}"
+
+            # Overlay build artifacts (binaries + built JS/CSS)
             cp -v ./codex "${SERVICE_DIR}/codex"
             cp -v ./pubkey-quest "${SERVICE_DIR}/pubkey-quest"
-
-            # Copy only the built JS/CSS bundles (output of vite build)
             mkdir -p "${SERVICE_DIR}/www/dist"
             cp -rv ./www/dist/* "${SERVICE_DIR}/www/dist/"
-          else
-            echo "Workspace matches service directory — binaries already in place"
           fi
 
           echo "codex at service path: $(${SERVICE_DIR}/codex -version)"
