@@ -45,13 +45,6 @@ func ValidateAll() (*Result, error) {
 		result.Issues = append(result.Issues, itemIssues...)
 	}
 
-	// Validate spells
-	if spellIssues, err := ValidateSpells(); err != nil {
-		return nil, err
-	} else {
-		result.Issues = append(result.Issues, spellIssues...)
-	}
-
 	// Validate monsters
 	if monsterIssues, err := ValidateMonsters(); err != nil {
 		return nil, err
@@ -696,96 +689,6 @@ func ValidateOneItem(itemID string) ([]Issue, error) {
 
 	issues = validateItemFile(filePath, validItemIDs)
 	return issues, nil
-}
-
-// ValidateSpells validates all spell files
-func ValidateSpells() ([]Issue, error) {
-	issues := []Issue{}
-	spellsPath := "game-data/magic/spells"
-
-	err := filepath.WalkDir(spellsPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !d.IsDir() && strings.HasSuffix(path, ".json") {
-			spellIssues := validateSpellFile(path)
-			issues = append(issues, spellIssues...)
-		}
-		return nil
-	})
-
-	return issues, err
-}
-
-func validateSpellFile(filePath string) []Issue {
-	issues := []Issue{}
-	filename := filepath.Base(filePath)
-	idFromFilename := strings.TrimSuffix(filename, ".json")
-
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		issues = append(issues, Issue{
-			Type:     "error",
-			Category: "spells",
-			File:     filename,
-			Message:  fmt.Sprintf("Failed to read file: %v", err),
-		})
-		return issues
-	}
-
-	var spell map[string]interface{}
-	if err := json.Unmarshal(data, &spell); err != nil {
-		issues = append(issues, Issue{
-			Type:     "error",
-			Category: "spells",
-			File:     filename,
-			Message:  fmt.Sprintf("Invalid JSON: %v", err),
-		})
-		return issues
-	}
-
-	// Check required fields
-	requiredFields := []string{"id", "name", "level", "school"}
-	for _, field := range requiredFields {
-		if _, exists := spell[field]; !exists {
-			issues = append(issues, Issue{
-				Type:     "error",
-				Category: "spells",
-				File:     filename,
-				Field:    field,
-				Message:  fmt.Sprintf("Missing required field: %s", field),
-			})
-		}
-	}
-
-	// Check ID matches filename
-	if id, ok := spell["id"].(string); ok {
-		if id != idFromFilename {
-			issues = append(issues, Issue{
-				Type:     "error",
-				Category: "spells",
-				File:     filename,
-				Field:    "id",
-				Message:  fmt.Sprintf("ID '%s' doesn't match filename '%s'", id, idFromFilename),
-			})
-		}
-	}
-
-	// Check level is valid (0-9 for D&D 5e)
-	if level, ok := spell["level"].(float64); ok {
-		if level < 0 || level > 9 {
-			issues = append(issues, Issue{
-				Type:     "error",
-				Category: "spells",
-				File:     filename,
-				Field:    "level",
-				Message:  fmt.Sprintf("Invalid spell level: %v (must be 0-9)", level),
-			})
-		}
-	}
-
-	return issues
 }
 
 // ValidateMonsters validates all monster files
