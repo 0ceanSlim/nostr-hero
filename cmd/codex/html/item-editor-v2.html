@@ -14,30 +14,36 @@
             <button class="codex-btn pixel-clip-sm" onclick="window.location.href='/'">← BACK TO HOME</button>
         </div>
 
+        <!-- Staging Toggle Button -->
+        <button id="staging-toggle" class="staging-toggle hidden" onclick="toggleStagingPanel()">
+            STAGING
+            <span id="staging-badge" class="staging-change-badge">0</span>
+        </button>
+
         <!-- Staging Panel (shown only in staging mode) -->
-        <div id="staging-panel" class="staging-panel" style="display: none;">
+        <div id="staging-panel" class="staging-panel pixel-clip" style="display: none;">
+            <button class="staging-panel-close" onclick="closeStagingPanel()">×</button>
             <div class="staging-header">
-                <h3 style="color: var(--codex-cyan);">🚀 Staging Mode - Changes will create a GitHub PR</h3>
+                <h3 class="staging-title">📦 STAGING CHANGES</h3>
                 <span id="change-count" class="badge">0 changes</span>
             </div>
 
             <div class="staging-content">
                 <div class="form-group">
-                    <label style="color: var(--codex-text-secondary);">Your identifier (optional):</label>
+                    <label class="codex-label">Your identifier (optional):</label>
                     <input
                         type="text"
                         id="npub-input"
-                        placeholder="npub1... or username or anonymous"
-                        class="text-input"
-                        style="width: 100%; max-width: 500px;"
+                        placeholder="npub1... or username"
+                        class="codex-input"
                     />
                     <p class="field-hint">This will be included in the PR for attribution</p>
                 </div>
 
                 <div class="staging-actions">
-                    <button class="codex-btn pixel-clip-sm" onclick="viewStagedChanges()">📋 View Changes</button>
-                    <button class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;" onclick="submitPR()">✅ Submit PR</button>
-                    <button class="codex-btn pixel-clip-sm" style="background: #ff5555; color: #fff;" onclick="clearStaging()">🗑️ Clear</button>
+                    <button class="codex-btn pixel-clip-sm" onclick="viewStagedChanges()">📋 VIEW</button>
+                    <button class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;" onclick="submitPR()">✅ SUBMIT PR</button>
+                    <button class="codex-btn pixel-clip-sm" style="background: #ff5555; color: #fff;" onclick="clearStaging()">🗑️ CLEAR</button>
                 </div>
             </div>
         </div>

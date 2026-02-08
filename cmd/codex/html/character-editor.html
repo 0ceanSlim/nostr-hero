@@ -119,8 +119,15 @@
         </div>
     </div>
 
+    <!-- Staging Toggle Button -->
+    <button id="staging-toggle" class="staging-toggle hidden">
+        STAGING
+        <span id="staging-badge" class="staging-change-badge">0</span>
+    </button>
+
     <!-- Staging Panel -->
     <div id="staging-panel" class="staging-panel pixel-clip">
+        <button class="staging-panel-close" onclick="closeStagingPanel()">×</button>
         <h3 class="staging-title">📦 STAGING CHANGES</h3>
         <div class="change-count" id="change-count">0 changes</div>
         <div class="codex-btn-group">

@@ -1380,8 +1380,11 @@ async function initStaging() {
         stagingMode = modeData.mode;
 
         if (stagingMode === 'staging') {
-            // Show staging panel
-            document.getElementById('staging-panel').style.display = 'block';
+            // Show staging toggle button instead of panel
+            const stagingToggle = document.getElementById('staging-toggle');
+            if (stagingToggle) {
+                stagingToggle.classList.remove('hidden');
+            }
 
             // Create session
             const npub = localStorage.getItem('codex_npub') || 'anonymous';
@@ -1414,7 +1417,29 @@ function updateChangeCount(count) {
     if (countEl) {
         countEl.textContent = `${count} change${count !== 1 ? 's' : ''}`;
     }
+
+    // Update badge on toggle button
+    const badge = document.getElementById('staging-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
 }
+
+// Toggle staging panel
+window.toggleStagingPanel = function() {
+    const panel = document.getElementById('staging-panel');
+    panel.classList.toggle('visible');
+    if (panel.classList.contains('visible')) {
+        panel.style.display = 'block';
+    }
+};
+
+// Close staging panel
+window.closeStagingPanel = function() {
+    const panel = document.getElementById('staging-panel');
+    panel.classList.remove('visible');
+};
 
 // View staged changes
 async function viewStagedChanges() {

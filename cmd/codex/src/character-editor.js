@@ -449,7 +449,25 @@ function setupEventListeners() {
     document.getElementById('view-changes-btn').addEventListener('click', viewChanges);
     document.getElementById('submit-pr-btn').addEventListener('click', submitPR);
     document.getElementById('clear-staging-btn').addEventListener('click', clearStaging);
+
+    // Staging toggle
+    const stagingToggle = document.getElementById('staging-toggle');
+    if (stagingToggle) {
+        stagingToggle.addEventListener('click', toggleStagingPanel);
+    }
 }
+
+// Toggle staging panel
+function toggleStagingPanel() {
+    const panel = document.getElementById('staging-panel');
+    panel.classList.toggle('visible');
+}
+
+// Close staging panel
+window.closeStagingPanel = function() {
+    const panel = document.getElementById('staging-panel');
+    panel.classList.remove('visible');
+};
 
 // Save starting gear
 async function saveStartingGear() {
@@ -665,6 +683,19 @@ async function clearStaging() {
 
 function updateChangeCount(count) {
     document.getElementById('change-count').textContent = `${count} change${count !== 1 ? 's' : ''}`;
+
+    // Update badge on toggle button
+    const badge = document.getElementById('staging-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    // Show/hide toggle button
+    const toggle = document.getElementById('staging-toggle');
+    if (toggle && stagingMode === 'staging') {
+        toggle.classList.remove('hidden');
+    }
 }
 
 // Show status message
