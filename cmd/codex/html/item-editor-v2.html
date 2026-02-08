@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CODEX - Item Editor</title>
+    <link rel="icon" type="image/png" href="/www/res/img/codex.png" />
     <link rel="stylesheet" href="/dist/codex/styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📦 CODEX - Item Editor</h1>
-            <button class="btn" onclick="window.location.href='/'">← Back to Home</button>
+    <div class="codex-container">
+        <div class="codex-header">
+            <h1 class="codex-title">📦 ITEM EDITOR</h1>
+            <button class="codex-btn pixel-clip-sm" onclick="window.location.href='/'">← BACK TO HOME</button>
         </div>
 
         <!-- Staging Panel (shown only in staging mode) -->
@@ -34,16 +35,16 @@
                 </div>
 
                 <div class="staging-actions">
-                    <button class="btn" onclick="viewStagedChanges()">📋 View Changes</button>
-                    <button class="btn btn-success" onclick="submitPR()">✅ Submit PR</button>
-                    <button class="btn btn-danger" onclick="clearStaging()">🗑️ Clear</button>
+                    <button class="codex-btn pixel-clip-sm" onclick="viewStagedChanges()">📋 View Changes</button>
+                    <button class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;" onclick="submitPR()">✅ Submit PR</button>
+                    <button class="codex-btn pixel-clip-sm" style="background: #ff5555; color: #fff;" onclick="clearStaging()">🗑️ Clear</button>
                 </div>
             </div>
         </div>
 
-        <div class="main-content">
+        <div class="codex-layout">
             <!-- LEFT SIDEBAR: Item List -->
-            <div class="item-list">
+            <div class="codex-sidebar win95-inset pixel-clip">
                 <h2>Items (<span id="itemCount">0</span>)</h2>
 
                 <!-- Filter Controls -->
@@ -54,14 +55,14 @@
                         <option value="">All Types</option>
                     </select>
 
-                    <button class="btn btn-new" onclick="createNewItem()">+ New Item</button>
+                    <button class="codex-btn codex-btn-add pixel-clip-sm" onclick="createNewItem()">+ NEW ITEM</button>
                 </div>
 
                 <div id="itemListContainer"></div>
             </div>
 
             <!-- RIGHT PANEL: Editor -->
-            <div class="editor-panel">
+            <div class="codex-main win95-inset pixel-clip">
                 <div id="emptyState" class="empty-state">
                     <p>Select an item from the list to edit or create a new item</p>
                 </div>
@@ -72,10 +73,10 @@
                             <span id="editorMode">Edit</span>: <span id="itemName"></span>
                         </h2>
                         <div class="editor-actions">
-                            <button class="btn btn-primary" onclick="saveItem()">💾 Save</button>
-                            <button class="btn" onclick="validateItem()">✓ Validate</button>
-                            <button class="btn" onclick="cancelEdit()">Cancel</button>
-                            <button class="btn btn-danger" onclick="deleteItem()" id="deleteBtn">🗑️ Delete</button>
+                            <button class="codex-btn codex-btn-primary pixel-clip-sm" onclick="saveItem()">💾 Save</button>
+                            <button class="codex-btn pixel-clip-sm" onclick="validateItem()">✓ Validate</button>
+                            <button class="codex-btn pixel-clip-sm" onclick="cancelEdit()">Cancel</button>
+                            <button class="codex-btn pixel-clip-sm" style="background: #ff5555; color: #fff;" onclick="deleteItem()" id="deleteBtn">🗑️ Delete</button>
                         </div>
                     </div>
 
@@ -83,7 +84,7 @@
 
                     <!-- SECTION: Image & Basic Info (Side-by-side) -->
                     <div class="top-section">
-                        <div class="image-section">
+                        <div class="image-section win95-inset pixel-clip">
                             <h3>🖼️ Image</h3>
                             <div class="image-preview-large">
                                 <div id="imageContainer">
@@ -95,13 +96,13 @@
                                 <input type="text" id="itemImage" placeholder="/res/img/items/longsword.png" readonly style="opacity: 0.6;" />
                             </div>
                             <div class="actions">
-                                <button class="btn" onclick="openImageGenerator()">🎨 Generate Image</button>
-                                <button class="btn" onclick="checkImage()">🖼️ Check Image</button>
+                                <button class="codex-btn pixel-clip-sm" onclick="openImageGenerator()">🎨 Generate Image</button>
+                                <button class="codex-btn pixel-clip-sm" onclick="checkImage()">🖼️ Check Image</button>
                             </div>
                             <div id="balanceDisplay" style="margin-top: 8px; font-size: 12px; color: #6272a4;"></div>
                         </div>
 
-                        <div class="basic-info-section">
+                        <div class="basic-info-section win95-inset pixel-clip">
                             <h3>📋 Basic Information</h3>
 
                             <div class="form-group">
@@ -157,13 +158,13 @@
 
 
                     <!-- SECTION: Tags -->
-                    <div class="section">
+                    <div class="codex-section win95-inset pixel-clip">
                         <h3>🏷️ Tags</h3>
                         <div class="tag-editor">
                             <div class="tags-container" id="tagsContainer"></div>
                             <div class="tag-input-row">
                                 <input type="text" id="newTagInput" placeholder="Add tag (e.g., equipment, consumable, container)" list="commonTags" />
-                                <button class="btn btn-sm" onclick="addTag()">Add</button>
+                                <button class="codex-btn codex-btn-sm codex-btn-add pixel-clip-sm" onclick="addTag()">Add</button>
                             </div>
                             <datalist id="commonTags">
                                 <option value="equipment">
@@ -284,7 +285,7 @@
                                     <option value="">Select item to add...</option>
                                 </select>
                                 <input type="number" id="newPackItemQuantity" placeholder="Qty" min="1" value="1" style="flex: 0 0 80px;" />
-                                <button class="btn btn-sm" onclick="addPackItem()">Add Item</button>
+                                <button class="codex-btn codex-btn-sm codex-btn-add pixel-clip-sm" onclick="addPackItem()">Add Item</button>
                             </div>
                         </div>
                     </div>
@@ -347,7 +348,7 @@
                                     <input type="number" id="newEffectChanceInline" min="1" max="100" value="100" placeholder="100" />
                                 </div>
                                 <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
-                                    <button class="btn btn-sm" onclick="addInlineEffect()" style="margin-bottom: 2px;">Add</button>
+                                    <button class="codex-btn codex-btn-sm codex-btn-add pixel-clip-sm" onclick="addInlineEffect()" style="margin-bottom: 2px;">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -367,7 +368,7 @@
                                     <input type="number" id="newEffectChance" min="1" max="100" value="100" placeholder="100" />
                                 </div>
                                 <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: flex-end;">
-                                    <button class="btn btn-sm" onclick="addNamedEffect()" style="margin-bottom: 2px;">Add</button>
+                                    <button class="codex-btn codex-btn-sm codex-btn-add pixel-clip-sm" onclick="addNamedEffect()" style="margin-bottom: 2px;">Add</button>
                                 </div>
                             </div>
                             <div id="namedEffectPreview" style="display: none; padding: 8px; background: #1a1a2e; border: 1px solid #44475a; border-radius: 4px; font-size: 12px; color: #8be9fd;">
@@ -376,13 +377,13 @@
                     </div>
 
                     <!-- SECTION: Notes -->
-                    <div class="section">
+                    <div class="codex-section win95-inset pixel-clip">
                         <h3>📝 Notes</h3>
                         <div class="notes-editor">
                             <div class="notes-container" id="notesContainer"></div>
                             <div class="tag-input-row">
                                 <input type="text" id="newNoteInput" placeholder="Add note (e.g., Burns for 1 hour when lit)" />
-                                <button class="btn btn-sm" onclick="addNote()">Add</button>
+                                <button class="codex-btn codex-btn-sm codex-btn-add pixel-clip-sm" onclick="addNote()">Add</button>
                             </div>
                         </div>
                     </div>
@@ -406,8 +407,8 @@
             </div>
 
             <div class="modal-footer">
-                <button onclick="closeChangesModal()" class="btn">Close</button>
-                <button onclick="confirmSubmitPR()" class="btn btn-success">Submit PR</button>
+                <button onclick="closeChangesModal()" class="codex-btn pixel-clip-sm">Close</button>
+                <button onclick="confirmSubmitPR()" class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;">Submit PR</button>
             </div>
         </div>
     </div>
@@ -467,9 +468,9 @@
             </div>
 
             <div class="modal-footer">
-                <button onclick="closeImageGenModal()" class="btn">Cancel</button>
-                <button onclick="generateNewImage()" class="btn btn-primary" id="generateBtn">🎨 Generate ($0.03)</button>
-                <button onclick="acceptGeneratedImage()" class="btn btn-success" id="acceptBtn" style="display: none;">✅ Accept & Save</button>
+                <button onclick="closeImageGenModal()" class="codex-btn pixel-clip-sm">Cancel</button>
+                <button onclick="generateNewImage()" class="codex-btn codex-btn-primary pixel-clip-sm" id="generateBtn">🎨 Generate ($0.03)</button>
+                <button onclick="acceptGeneratedImage()" class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;" id="acceptBtn" style="display: none;">✅ Accept & Save</button>
             </div>
         </div>
     </div>

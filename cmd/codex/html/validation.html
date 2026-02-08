@@ -1,52 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Validation - CODEX</title>
+    <link rel="icon" type="image/png" href="/www/res/img/codex.png" />
     <link rel="stylesheet" href="/dist/codex/styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <a href="/" class="back-link">← Back to Home</a>
-            <div class="title">✅ Data Validation</div>
+    <div class="codex-container">
+        <div class="codex-header">
+            <h1 class="codex-title">✅ DATA VALIDATION</h1>
+            <button class="codex-btn pixel-clip-sm" onclick="window.location.href='/'">← BACK TO HOME</button>
         </div>
 
-        <div class="content">
-            <p style="margin-bottom: 20px; color: #6272a4;">
+        <div class="codex-section win95-inset pixel-clip">
+            <p class="text-muted mb-20">
                 Validate and clean up all game data files for consistency, required fields, and common errors.
             </p>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="button" onclick="runValidation()">
-                    🔍 Run Validation
+            <div class="codex-btn-group mb-20">
+                <button class="codex-btn codex-btn-primary pixel-clip-sm" onclick="runValidation()">
+                    🔍 RUN VALIDATION
                 </button>
-                <button class="button" style="background: #f1fa8c; color: #282a36;" onclick="runCleanup(true)">
-                    👁️ Preview Cleanup (Dry Run)
+                <button class="codex-btn pixel-clip-sm" style="background: #f1fa8c; color: #000;" onclick="runCleanup(true)">
+                    👁️ PREVIEW CLEANUP
                 </button>
-                <button class="button" style="background: #50fa7b; color: #282a36;" onclick="runCleanup(false)">
-                    🔧 Apply Cleanup
+                <button class="codex-btn pixel-clip-sm" style="background: #50fa7b; color: #000;" onclick="runCleanup(false)">
+                    🔧 APPLY CLEANUP
                 </button>
             </div>
 
-            <div class="results" id="results">
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalFiles">0</div>
-                        <div class="stat-label">Files Checked</div>
+            <div id="results" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="codex-section win95-inset pixel-clip" style="text-align: center; padding: 15px;">
+                        <div class="text-highlighted" style="font-size: 2rem; font-weight: bold;" id="totalFiles">0</div>
+                        <div class="text-muted" style="font-size: 0.9rem; margin-top: 5px;">Files Checked</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" style="color: #ff5555;" id="errors">0</div>
-                        <div class="stat-label">Errors</div>
+                    <div class="codex-section win95-inset pixel-clip" style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #ff5555;" id="errors">0</div>
+                        <div class="text-muted" style="font-size: 0.9rem; margin-top: 5px;">Errors</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" style="color: #f1fa8c;" id="warnings">0</div>
-                        <div class="stat-label">Warnings</div>
+                    <div class="codex-section win95-inset pixel-clip" style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #f1fa8c;" id="warnings">0</div>
+                        <div class="text-muted" style="font-size: 0.9rem; margin-top: 5px;">Warnings</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" style="color: #8be9fd;" id="info">0</div>
-                        <div class="stat-label">Info</div>
+                    <div class="codex-section win95-inset pixel-clip" style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #8be9fd;" id="info">0</div>
+                        <div class="text-muted" style="font-size: 0.9rem; margin-top: 5px;">Info</div>
                     </div>
                 </div>
 

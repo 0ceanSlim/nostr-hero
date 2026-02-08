@@ -5,9 +5,14 @@
 // Import styles
 import './styles.css';
 
+// Detect and apply theme
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+console.log(`🎯 CODEX Validation loaded (Theme: ${savedTheme})`);
+
 async function runValidation() {
     const results = document.getElementById('results');
-    results.classList.add('show');
+    results.style.display = 'block';
 
     // Clear cleanup results when running validation
     document.getElementById('cleanup-results').innerHTML = '';
@@ -25,14 +30,20 @@ async function runValidation() {
         issuesDiv.innerHTML = '';
 
         if (data.issues.length === 0) {
-            issuesDiv.innerHTML = '<div style="text-align: center; color: #50fa7b; padding: 20px;">✓ No issues found!</div>';
+            issuesDiv.innerHTML = '<div class="codex-section win95-inset pixel-clip" style="text-align: center; color: #50fa7b; padding: 20px;">✓ NO ISSUES FOUND!</div>';
         } else {
             data.issues.forEach(issue => {
                 const div = document.createElement('div');
-                div.className = 'issue ' + issue.type;
+                div.className = 'codex-section win95-inset pixel-clip mb-10';
+                div.style.padding = '12px';
+                div.style.borderLeft = '4px solid ' + (issue.type === 'error' ? '#ff5555' : issue.type === 'warning' ? '#f1fa8c' : '#8be9fd');
+
+                let icon = issue.type === 'error' ? '❌' : issue.type === 'warning' ? '⚠️' : 'ℹ️';
+                let color = issue.type === 'error' ? '#ff5555' : issue.type === 'warning' ? '#f1fa8c' : '#8be9fd';
+
                 div.innerHTML =
-                    '<div class="issue-type">[' + issue.category.toUpperCase() + '] ' + issue.message + '</div>' +
-                    '<div class="issue-file">' + issue.file + (issue.field ? ' → ' + issue.field : '') + '</div>';
+                    '<div style="font-weight: bold; margin-bottom: 5px; color: ' + color + ';">' + icon + ' [' + issue.category.toUpperCase() + '] ' + issue.message + '</div>' +
+                    '<div class="text-muted" style="font-size: 12px;">' + issue.file + (issue.field ? ' → ' + issue.field : '') + '</div>';
                 issuesDiv.appendChild(div);
             });
         }
@@ -43,7 +54,7 @@ async function runValidation() {
 
 async function runCleanup(dryRun) {
     const results = document.getElementById('results');
-    results.classList.add('show');
+    results.style.display = 'block';
 
     // Clear previous results
     document.getElementById('issues').innerHTML = '';
@@ -65,18 +76,20 @@ async function runCleanup(dryRun) {
 
         if (dryRun) {
             const header = document.createElement('div');
-            header.style = 'background: #f1fa8c; color: #282a36; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-weight: bold;';
+            header.className = 'codex-section win95-inset pixel-clip mb-10';
+            header.style = 'background: #f1fa8c; color: #000; padding: 12px; font-weight: bold;';
             header.textContent = '👁️ PREVIEW MODE - No files were modified';
             cleanupResultsDiv.appendChild(header);
         } else {
             const header = document.createElement('div');
-            header.style = 'background: #50fa7b; color: #282a36; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-weight: bold;';
-            header.textContent = `✅ Cleanup Complete - ${data.files_modified} files modified`;
+            header.className = 'codex-section win95-inset pixel-clip mb-10';
+            header.style = 'background: #50fa7b; color: #000; padding: 12px; font-weight: bold;';
+            header.textContent = `✅ CLEANUP COMPLETE - ${data.files_modified} files modified`;
             cleanupResultsDiv.appendChild(header);
         }
 
         if (data.changes.length === 0) {
-            cleanupResultsDiv.innerHTML += '<div style="text-align: center; color: #50fa7b; padding: 20px;">✓ No changes needed!</div>';
+            cleanupResultsDiv.innerHTML += '<div class="codex-section win95-inset pixel-clip" style="text-align: center; color: #50fa7b; padding: 20px;">✓ NO CHANGES NEEDED!</div>';
         } else {
             // Group changes by file
             const changesByFile = {};
@@ -90,10 +103,12 @@ async function runCleanup(dryRun) {
             // Display changes grouped by file
             Object.keys(changesByFile).forEach(file => {
                 const fileDiv = document.createElement('div');
-                fileDiv.style = 'background: #44475a; padding: 15px; margin-bottom: 10px; border-radius: 4px;';
+                fileDiv.className = 'codex-section win95-inset pixel-clip mb-10';
+                fileDiv.style.padding = '15px';
 
                 const fileHeader = document.createElement('div');
-                fileHeader.style = 'color: #8be9fd; font-weight: bold; margin-bottom: 8px;';
+                fileHeader.className = 'text-highlighted';
+                fileHeader.style = 'font-weight: bold; margin-bottom: 10px;';
                 fileHeader.textContent = file;
                 fileDiv.appendChild(fileHeader);
 

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Editor - CODEX</title>
+    <link rel="icon" type="image/png" href="/www/res/img/codex.png" />
+    <link rel="stylesheet" href="/dist/codex/styles.css">
+</head>
+<body>
+    <div class="codex-container">
+        <!-- Header -->
+        <div class="codex-header">
+            <h1 class="codex-title">⚔️ CHARACTER EDITOR</h1>
+            <a href="/" class="codex-btn">← BACK TO HOME</a>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="codex-layout">
+            <!-- Sidebar: Class List -->
+            <aside class="codex-sidebar win95-inset pixel-clip">
+                <h2 class="codex-sidebar-title">CLASSES</h2>
+                <ul class="codex-list" id="class-list">
+                    <!-- Populated by JavaScript -->
+                </ul>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="codex-main win95-inset pixel-clip">
+                <!-- Tabs -->
+                <div class="codex-tabs">
+                    <button class="codex-tab active pixel-clip-sm" data-tab="starting-gear">STARTING GEAR</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="base-hp">BASE HP</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="starting-gold">GOLD</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="generation-weights">WEIGHTS</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="introductions">INTROS</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="starting-locations">LOCATIONS</button>
+                    <button class="codex-tab pixel-clip-sm" data-tab="starting-spells">SPELLS</button>
+                </div>
+
+                <!-- Tab Content: Starting Gear -->
+                <div id="tab-starting-gear" class="tab-content active">
+                    <div id="gear-form">
+                        <p style="text-align: center; color: var(--color-textMuted);">Select a class from the sidebar</p>
+                    </div>
+                    <div class="codex-btn-group">
+                        <button id="save-gear-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE CHANGES</button>
+                        <button id="validate-gear-btn" class="codex-btn pixel-clip-sm">✓ VALIDATE</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Placeholder Tabs -->
+                <div id="tab-base-hp" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">BASE HP EDITOR</h3>
+                        <p class="text-muted mb-10">Edit base HP values per class</p>
+                        <textarea id="base-hp-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-base-hp-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-starting-gold" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">STARTING GOLD EDITOR</h3>
+                        <p class="text-muted mb-10">Edit starting gold by background</p>
+                        <textarea id="starting-gold-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-starting-gold-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-generation-weights" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">GENERATION WEIGHTS EDITOR</h3>
+                        <p class="text-muted mb-10">Edit character generation probability weights</p>
+                        <textarea id="generation-weights-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-generation-weights-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-introductions" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">INTRODUCTIONS EDITOR</h3>
+                        <p class="text-muted mb-10">Edit character backstory templates</p>
+                        <textarea id="introductions-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-introductions-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-starting-locations" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">STARTING LOCATIONS EDITOR</h3>
+                        <p class="text-muted mb-10">Edit racial starting locations</p>
+                        <textarea id="starting-locations-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-starting-locations-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-starting-spells" class="tab-content" style="display: none;">
+                    <div class="codex-section win95-inset pixel-clip">
+                        <h3 class="codex-section-title">STARTING SPELLS EDITOR</h3>
+                        <p class="text-muted mb-10">Edit starting spells by class</p>
+                        <textarea id="starting-spells-json" class="codex-textarea"></textarea>
+                        <div class="codex-btn-group">
+                            <button id="save-starting-spells-btn" class="codex-btn codex-btn-primary pixel-clip-sm">💾 SAVE</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Staging Panel -->
+    <div id="staging-panel" class="staging-panel pixel-clip">
+        <h3 class="staging-title">📦 STAGING CHANGES</h3>
+        <div class="change-count" id="change-count">0 changes</div>
+        <div class="codex-btn-group">
+            <button id="view-changes-btn" class="codex-btn codex-btn-sm pixel-clip-sm">VIEW</button>
+            <button id="submit-pr-btn" class="codex-btn codex-btn-sm pixel-clip-sm">SUBMIT PR</button>
+            <button id="clear-staging-btn" class="codex-btn codex-btn-sm pixel-clip-sm">CLEAR</button>
+        </div>
+    </div>
+
+    <!-- Item Datalist for Autocomplete -->
+    <datalist id="item-datalist">
+        <!-- Populated by JavaScript -->
+    </datalist>
+
+    <!-- Status Message Container -->
+    <div id="status-container"></div>
+
+    <script type="module" src="/dist/codex/character-editor.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="/www/res/img/codex.png" />
     <link rel="stylesheet" href="/dist/codex/styles.css">
 </head>
-<body class="min-h-screen p-8">
+<body style="min-height: 100vh; padding: 2rem;">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="mb-8 flex items-center justify-between">
@@ -41,7 +41,7 @@
         <!-- Tools Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Item Editor -->
-            <a href="/tools/item-editor" class="codex-panel hover:codex-panel-highlight transition-all block">
+            <a href="/tools/item-editor" class="codex-card win95-outset pixel-clip">
                 <div class="text-2xl mb-3">📦</div>
                 <h2 class="text-xl font-bold mb-2" style="color: var(--codex-purple);">Item Editor</h2>
                 <p style="color: var(--codex-text-secondary);">
@@ -52,9 +52,21 @@
                 </div>
             </a>
 
+            <!-- Character Editor -->
+            <a href="/tools/character-editor" class="codex-card win95-outset pixel-clip">
+                <div class="text-2xl mb-3">⚔️</div>
+                <h2 class="text-xl font-bold mb-2" style="color: var(--codex-green);">Character Editor</h2>
+                <p style="color: var(--codex-text-secondary);">
+                    Edit character generation data, starting gear, and progression
+                </p>
+                <div class="mt-4">
+                    <span class="codex-tag text-xs">Character Creation</span>
+                </div>
+            </a>
+
             {{if not .IsStaging}}
             <!-- Database Migration (Admin Only) -->
-            <a href="/tools/database-migration" class="codex-panel hover:codex-panel-highlight transition-all block">
+            <a href="/tools/database-migration" class="codex-card win95-outset pixel-clip">
                 <div class="text-2xl mb-3">🔄</div>
                 <h2 class="text-xl font-bold mb-2" style="color: var(--codex-cyan);">Database Migration</h2>
                 <p style="color: var(--codex-text-secondary);">
@@ -67,7 +79,7 @@
             </a>
 
             <!-- Validation Tool (Admin Only) -->
-            <a href="/tools/validation" class="codex-panel hover:codex-panel-highlight transition-all block">
+            <a href="/tools/validation" class="codex-card win95-outset pixel-clip">
                 <div class="text-2xl mb-3">✓</div>
                 <h2 class="text-xl font-bold mb-2" style="color: var(--codex-yellow);">Validation</h2>
                 <p style="color: var(--codex-text-secondary);">
@@ -87,18 +99,6 @@
                 🚧 Coming Soon
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Starting Gear & Gold Editor -->
-                <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
-                    <div class="text-2xl mb-3">⚔️</div>
-                    <h3 class="text-lg font-bold mb-2" style="color: var(--codex-text-secondary);">Starting Gear & Gold</h3>
-                    <p class="text-sm" style="color: var(--codex-text-muted);">
-                        Edit starting equipment and gold for each class and background
-                    </p>
-                    <div class="mt-4">
-                        <span class="codex-tag text-xs" style="opacity: 0.7;">Character Creation</span>
-                    </div>
-                </div>
-
                 <!-- NPC Editor -->
                 <div class="codex-panel-disabled opacity-60 cursor-not-allowed">
                     <div class="text-2xl mb-3">👥</div>
@@ -174,7 +174,7 @@
         </div>
 
         <!-- Info Section -->
-        <div class="codex-panel mt-8">
+        <div class="codex-section win95-inset pixel-clip" style="margin-top: 2rem;">
             <h3 class="text-lg font-bold mb-3" style="color: var(--codex-green);">About CODEX</h3>
             <p class="mb-2" style="color: var(--codex-text-secondary);">
                 CODEX is a specialized tool for managing Nostr Hero's game data. It provides:

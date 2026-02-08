@@ -23,6 +23,7 @@ export default defineConfig({
       input: {
         'home': resolve(__dirname, 'src/home.js'),
         'item-editor': resolve(__dirname, 'src/item-editor.js'),
+        'character-editor': resolve(__dirname, 'src/character-editor.js'),
         'database-migration': resolve(__dirname, 'src/database-migration.js'),
         'validation': resolve(__dirname, 'src/validation.js'),
       },

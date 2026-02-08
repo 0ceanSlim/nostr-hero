@@ -5,6 +5,10 @@
 // Import styles
 import './styles.css';
 
+// Detect and apply theme from main game
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
 // ===== STATE =====
 let allItems = {};
 let currentItem = null;

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"pubkey-quest/cmd/codex/charactereditor"
 	"pubkey-quest/cmd/codex/config"
 	"pubkey-quest/cmd/codex/itemeditor"
 	"pubkey-quest/cmd/codex/migration"
@@ -20,6 +21,7 @@ import (
 )
 
 var editor *itemeditor.Editor
+var charEditor *charactereditor.Editor
 var cfg *config.Config
 
 // Version is set at build time via ldflags
@@ -121,6 +123,14 @@ func main() {
 		log.Printf("✅ PixelLab client initialized")
 	}
 
+	// Initialize character editor
+	charEditor = charactereditor.NewEditor(cfg)
+	if err := charEditor.LoadAll(); err != nil {
+		log.Printf("⚠️ Warning: Failed to load character data: %v", err)
+	} else {
+		log.Printf("✅ Character editor initialized")
+	}
+
 	// Initialize staging system
 	staging.SetConfig(cfg)
 	staging.Manager.StartCleanupRoutine()
@@ -130,6 +140,24 @@ func main() {
 
 	// Home page
 	r.HandleFunc("/", handleHome).Methods("GET")
+
+	// Character editor routes
+	r.HandleFunc("/tools/character-editor", handleCharacterEditor).Methods("GET")
+	r.HandleFunc("/api/character-data", charEditor.HandleGetAllData).Methods("GET")
+	r.HandleFunc("/api/character-data/starting-gear", charEditor.HandleGetStartingGear).Methods("GET")
+	r.HandleFunc("/api/character-data/starting-gear", charEditor.HandleSaveStartingGear).Methods("PUT")
+	r.HandleFunc("/api/character-data/base-hp", charEditor.HandleGetOtherFile("base-hp")).Methods("GET")
+	r.HandleFunc("/api/character-data/base-hp", charEditor.HandleSaveOtherFile("base-hp")).Methods("PUT")
+	r.HandleFunc("/api/character-data/starting-gold", charEditor.HandleGetOtherFile("starting-gold")).Methods("GET")
+	r.HandleFunc("/api/character-data/starting-gold", charEditor.HandleSaveOtherFile("starting-gold")).Methods("PUT")
+	r.HandleFunc("/api/character-data/generation-weights", charEditor.HandleGetOtherFile("generation-weights")).Methods("GET")
+	r.HandleFunc("/api/character-data/generation-weights", charEditor.HandleSaveOtherFile("generation-weights")).Methods("PUT")
+	r.HandleFunc("/api/character-data/introductions", charEditor.HandleGetOtherFile("introductions")).Methods("GET")
+	r.HandleFunc("/api/character-data/introductions", charEditor.HandleSaveOtherFile("introductions")).Methods("PUT")
+	r.HandleFunc("/api/character-data/starting-locations", charEditor.HandleGetOtherFile("starting-locations")).Methods("GET")
+	r.HandleFunc("/api/character-data/starting-locations", charEditor.HandleSaveOtherFile("starting-locations")).Methods("PUT")
+	r.HandleFunc("/api/character-data/starting-spells", charEditor.HandleGetOtherFile("starting-spells")).Methods("GET")
+	r.HandleFunc("/api/character-data/starting-spells", charEditor.HandleSaveOtherFile("starting-spells")).Methods("PUT")
 
 	// Item editor routes
 	r.HandleFunc("/tools/item-editor", editor.HandleItemEditor).Methods("GET")
@@ -312,4 +340,9 @@ func handleCleanupRun(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+// Character editor handler
+func handleCharacterEditor(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "cmd/codex/html/character-editor.html")
 }
